@@ -15,3 +15,12 @@
 - Treat the user's requested information as the scope of the edit. Do not append related conclusions, operational advice, prerequisites, or next steps unless the user explicitly asks for them and they belong in the same document.
 - If useful content belongs in a different document, do not insert or relocate it automatically. Mention the appropriate destination to the user or wait for an explicit request.
 - Before completing a document edit, review the changed passage in context and remove any sentence that does not directly support the document's stated subject.
+
+## Time and Cost Estimates
+
+- Estimate project work for one person unless the user explicitly requests a team-based estimate.
+- Include only tasks that are explicitly required by the project documentation or the user's request.
+- Do not add agency roles, project-management overhead, contingency, optional services, new functionality, or deliverables that are not in scope.
+- Treat conditional work as excluded until the condition is confirmed. State such exclusions when they materially affect the estimate.
+- Calculate cost from the estimated labor hours using the hourly rate provided by the user. If no rate is provided, ask for one or clearly state the assumed rate.
+- Break estimates down by actual project tasks so that the total hours and cost can be checked directly.
