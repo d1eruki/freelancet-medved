@@ -1,0 +1,12 @@
+{
+  "name": "freelancet-medved",
+  "private": true,
+  "scripts": {
+    "build:tailwind": "tailwindcss -i design/assets/css/tailwind.css -o design/assets/css/tailwind.generated.css --minify",
+    "watch:tailwind": "tailwindcss -i design/assets/css/tailwind.css -o design/assets/css/tailwind.generated.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.3.0"
+  }
+}

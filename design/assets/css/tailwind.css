@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+@source "../../home-tailwind.html";
+
+@font-face {
+  font-family: "Involve";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/involve-variable.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Climate Crisis";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/climate-crisis-variable.ttf") format("truetype");
+}
+
+@theme {
+  --color-accent: #e16e48;
+  --color-accent-dark: #cb5935;
+  --color-ink: #101010;
+  --color-paper: #ffffff;
+  --color-card: #efefef;
+  --font-body: "Involve", Arial, sans-serif;
+  --font-display: "Climate Crisis", "Arial Black", sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@utility content-shell {
+  width: min(100% - 48px, 1480px);
+  margin-inline: auto;
+
+  @media (max-width: 560px) {
+    width: min(100% - 32px, 1480px);
+  }
+}
+
+@layer components {
+  .nav-link::after,
+  .footer-nav-link::after {
+    position: absolute;
+    right: 0;
+    bottom: 5px;
+    left: 0;
+    height: 2px;
+    content: "";
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 180ms ease;
+  }
+
+  .footer-nav-link::after {
+    bottom: 0;
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after,
+  .footer-nav-link:hover::after,
+  .footer-nav-link:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .menu-button span,
+  .menu-button::before,
+  .menu-button::after {
+    display: block;
+    width: 18px;
+    height: 2px;
+    margin: 4px auto;
+    content: "";
+    background: currentColor;
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+
+  .product-card::before {
+    position: absolute;
+    z-index: -1;
+    right: -90px;
+    bottom: -120px;
+    width: 360px;
+    height: 360px;
+    border: 1px solid rgb(225 110 72 / 0.22);
+    border-radius: 50%;
+    content: "";
+  }
+
+}
+
+@media (max-width: 860px) {
+  .main-nav.is-open {
+    display: block;
+  }
+}
+
+.custom-cursor {
+  --cursor-x: -100px;
+  --cursor-y: -100px;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(var(--cursor-x), var(--cursor-y), 0);
+  transition: opacity 160ms ease;
+}
+
+.custom-cursor.is-visible {
+  opacity: 1;
+}
+
+.custom-cursor__visual {
+  position: absolute;
+  top: -19px;
+  left: -19px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgb(16 16 16 / 0.12);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: 0 8px 24px rgb(16 16 16 / 0.16);
+  transform: rotate(-12deg) scale(1);
+  transition: width 180ms ease, height 180ms ease, top 180ms ease, left 180ms ease,
+    background-color 180ms ease, transform 120ms ease, box-shadow 180ms ease;
+  backdrop-filter: blur(5px);
+}
+
+.custom-cursor__paw {
+  display: block;
+  width: 22px;
+  height: 23px;
+  transition: filter 180ms ease, transform 180ms ease;
+}
+
+.custom-cursor__label {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 9px);
+  padding: 7px 10px 6px;
+  color: var(--color-paper);
+  border-radius: 999px;
+  background: var(--color-ink);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate3d(-5px, -50%, 0);
+  transition: opacity 150ms ease, transform 180ms ease;
+}
+
+.custom-cursor.has-label .custom-cursor__label {
+  opacity: 1;
+  transform: translate3d(0, -50%, 0);
+}
+
+.custom-cursor.is-flipped .custom-cursor__label {
+  right: calc(100% + 9px);
+  left: auto;
+  transform: translate3d(5px, -50%, 0);
+}
+
+.custom-cursor.is-flipped.has-label .custom-cursor__label {
+  transform: translate3d(0, -50%, 0);
+}
+
+.custom-cursor.is-action .custom-cursor__visual {
+  top: -23px;
+  left: -23px;
+  width: 46px;
+  height: 46px;
+  border-color: transparent;
+  background: var(--color-accent);
+  box-shadow: 0 10px 28px rgb(81 24 8 / 0.28);
+  transform: rotate(8deg) scale(1);
+}
+
+.custom-cursor.is-action .custom-cursor__paw {
+  filter: invert(1);
+  transform: scale(1.08);
+}
+
+.custom-cursor.is-pressed .custom-cursor__visual {
+  transform: rotate(0) scale(0.72);
+}
+
+.custom-cursor.is-hidden {
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor body,
+  html.has-custom-cursor a,
+  html.has-custom-cursor button {
+    cursor: none;
+  }
+
+  html.has-custom-cursor input,
+  html.has-custom-cursor textarea,
+  html.has-custom-cursor [contenteditable="true"] {
+    cursor: text;
+  }
+
+  html.has-custom-cursor select {
+    cursor: default;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
