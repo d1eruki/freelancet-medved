@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Involve";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/involve-variable.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Climate Crisis";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/climate-crisis-variable.ttf") format("truetype");
+}
+
+@theme {
+  --color-brand: #e16e48;
+  --color-brand-strong: #cb5935;
+  --color-foreground: #101010;
+  --color-surface: #ffffff;
+  --color-panel: #efefef;
+  --color-muted: #a7a7a7;
+  --color-subtle: #686868;
+  --font-body: "Involve", Arial, sans-serif;
+  --font-display: "Climate Crisis", "Arial Black", sans-serif;
+  --breakpoint-nav: 54rem;
+  --breakpoint-wide: 80rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    background: var(--color-surface);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@utility site-container {
+  width: 100%;
+  max-width: 1480px;
+  margin-inline: auto;
+  padding-inline: 16px;
+
+  @media (min-width: 40rem) {
+    padding-inline: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.1ms !important;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor body,
+  html.has-custom-cursor a,
+  html.has-custom-cursor button {
+    cursor: none;
+  }
+
+  html.has-custom-cursor input,
+  html.has-custom-cursor textarea,
+  html.has-custom-cursor [contenteditable="true"] {
+    cursor: text;
+  }
+
+  html.has-custom-cursor select {
+    cursor: default;
+  }
+}
