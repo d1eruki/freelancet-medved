@@ -26,7 +26,7 @@ import heroImageUrl from '../assets/hero-bear-antonovka.png'
             Смотреть продукцию
           </a>
 
-          <a class="border-b border-surface/80 py-3 text-label font-extrabold tracking-wide uppercase" href="/partnery/">
+          <a class="secondary-action py-3 text-label font-extrabold tracking-wide uppercase" href="/partnery/">
             Где купить
           </a>
         </div>

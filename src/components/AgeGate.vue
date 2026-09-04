@@ -38,16 +38,16 @@ onBeforeUnmount(() => {
 <template>
   <div v-typography class="fixed inset-0 z-100 grid place-items-center overflow-y-auto bg-foreground/75 p-4 backdrop-blur-sm sm:p-8">
     <section
-      class="w-full max-w-2xl rounded-4xl bg-surface p-7 text-center shadow-2xl sm:p-12"
+      class="w-full min-w-0 max-w-3xl rounded-4xl bg-surface p-7 text-center shadow-2xl sm:px-8 sm:py-12"
       role="dialog"
       aria-modal="true"
       aria-labelledby="age-gate-title"
       aria-describedby="age-gate-description"
     >
       <template v-if="!isDenied">
-        <h1 id="age-gate-title" class="font-display text-h3 uppercase">
+        <h2 id="age-gate-title" class="break-words font-display text-h3 hyphens-auto uppercase sm:hyphens-manual">
           Вам уже исполнилось 18 лет?
-        </h1>
+        </h2>
         <p id="age-gate-description" class="mx-auto mt-5 max-w-lg text-body text-subtle">
           На сайте представлена информация об алкогольной продукции.
         </p>
@@ -62,7 +62,7 @@ onBeforeUnmount(() => {
             Да, мне есть 18
           </button>
           <button
-            class="min-h-14 rounded-full border border-foreground/20 px-8 text-label font-extrabold tracking-wide uppercase transition duration-200 hover:border-foreground hover:bg-panel focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            class="secondary-action min-w-36 py-3 text-label font-extrabold tracking-wide text-brand uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
             type="button"
             @click="denyAge"
           >
@@ -73,9 +73,9 @@ onBeforeUnmount(() => {
 
       <template v-else>
         <p class="mb-4 text-caption font-extrabold tracking-widest text-brand uppercase">Ограничение по возрасту</p>
-        <h1 id="age-gate-title" class="font-display text-h3 uppercase">
+        <h2 id="age-gate-title" class="break-words font-display text-h3 hyphens-auto uppercase sm:hyphens-manual">
           Доступ ограничен
-        </h1>
+        </h2>
         <p id="age-gate-description" class="mx-auto mt-5 max-w-lg text-body text-subtle">
           Сайт предназначен только для посетителей старше 18 лет.
         </p>

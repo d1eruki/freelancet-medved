@@ -92,6 +92,31 @@
   }
 }
 
+@layer components {
+  .secondary-action {
+    position: relative;
+  }
+
+  .secondary-action::after {
+    position: absolute;
+    right: 0;
+    bottom: 6px;
+    left: 0;
+    height: 2px;
+    content: '';
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 180ms ease;
+  }
+
+  .secondary-action:hover::after,
+  .secondary-action:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

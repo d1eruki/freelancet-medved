@@ -164,6 +164,7 @@ onBeforeUnmount(() => {
 .custom-cursor {
   --cursor-x: -100px;
   --cursor-y: -100px;
+  --cursor-action-shadow: color-mix(in srgb, var(--color-brand) 70%, var(--color-foreground));
   position: fixed;
   z-index: 1000;
   top: 0;
@@ -243,7 +244,7 @@ onBeforeUnmount(() => {
   width: 46px;
   height: 46px;
   background: var(--color-brand);
-  box-shadow: 0 10px 28px rgb(81 24 8 / 28%);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--cursor-action-shadow) 36%, transparent);
   transform: rotate(8deg) scale(1);
 }
 
