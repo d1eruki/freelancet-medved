@@ -188,7 +188,6 @@ onBeforeUnmount(() => {
   width: 38px;
   height: 38px;
   place-items: center;
-  border: 1px solid rgb(16 16 16 / 12%);
   border-radius: 50%;
   background: rgb(255 255 255 / 94%);
   box-shadow: 0 8px 24px rgb(16 16 16 / 16%);
@@ -213,7 +212,7 @@ onBeforeUnmount(() => {
   color: var(--color-surface);
   border-radius: 999px;
   background: var(--color-foreground);
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.1em;
@@ -243,7 +242,6 @@ onBeforeUnmount(() => {
   left: -23px;
   width: 46px;
   height: 46px;
-  border-color: transparent;
   background: var(--color-brand);
   box-shadow: 0 10px 28px rgb(81 24 8 / 28%);
   transform: rotate(8deg) scale(1);

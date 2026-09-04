@@ -21,8 +21,16 @@ const cardLayout = computed(() => (
 
 const imageLayout = computed(() => (
   props.featured
-    ? 'h-96 w-56 sm:h-112 sm:w-64 wide:h-128 wide:w-72'
-    : 'h-80 w-48 sm:h-96 sm:w-56 wide:h-80 wide:w-48'
+    ? '-right-4 -bottom-4 size-80 sm:right-6 sm:size-96'
+    : props.product.image
+      ? 'right-0 -bottom-2 size-52 sm:size-56 wide:size-52'
+      : '-right-4 -bottom-20 h-80 w-48 sm:right-6 sm:h-96 sm:w-56 wide:h-80 wide:w-48'
+))
+
+const imageStyle = computed(() => (
+  props.product.image
+    ? 'object-contain'
+    : 'product-image border border-foreground/10 bg-surface object-cover shadow-xl'
 ))
 </script>
 
@@ -34,52 +42,38 @@ const imageLayout = computed(() => (
     :aria-label="product.name"
   >
     <div class="relative z-2 flex h-full max-w-md flex-col items-start">
-      <span class="mb-auto font-display text-xs tracking-widest text-subtle" aria-hidden="true">
-        {{ product.index }}
-      </span>
-
-      <h3 class="mt-8 font-display text-4xl leading-none text-brand uppercase sm:text-5xl wide:text-6xl">
+      <h3 class="mt-auto font-display text-h3 text-brand uppercase">
         {{ product.name }}
       </h3>
 
-      <p class="mt-4 max-w-sm text-base leading-relaxed">
+      <p class="mt-4 max-w-sm text-body">
         {{ product.tastes }}
       </p>
     </div>
 
     <span
-      class="absolute top-6 right-6 z-3 grid size-12 place-items-center rounded-full border border-foreground/20 text-xl transition duration-200 group-hover:rotate-45 group-hover:border-brand group-hover:bg-brand group-hover:text-surface group-focus-visible:rotate-45 group-focus-visible:border-brand group-focus-visible:bg-brand group-focus-visible:text-surface sm:top-8 sm:right-8"
+      class="absolute top-6 right-6 z-3 grid size-12 place-items-center rounded-full border border-foreground/20 text-body-large transition duration-200 group-hover:rotate-45 group-hover:border-brand group-hover:bg-brand group-hover:text-surface group-focus-visible:rotate-45 group-focus-visible:border-brand group-focus-visible:bg-brand group-focus-visible:text-surface sm:top-8 sm:right-8"
       aria-hidden="true"
     >
       ↗
     </span>
 
     <span
-      class="absolute -right-4 -bottom-20 z-1 rotate-6 transition duration-300 group-hover:-translate-y-3 group-hover:rotate-2 group-focus-visible:-translate-y-3 group-focus-visible:rotate-2 sm:right-6"
+      class="absolute z-1 rotate-6 transition duration-300 group-hover:-translate-y-3 group-hover:rotate-2 group-focus-visible:-translate-y-3 group-focus-visible:rotate-2"
       :class="imageLayout"
       aria-hidden="true"
     >
-      <img class="product-image size-full border border-foreground/10 bg-surface object-cover shadow-xl" :src="productImageUrl" alt="">
-      <span class="absolute inset-0 grid place-items-center text-xs font-extrabold tracking-widest text-muted uppercase">
-        Изображение
-      </span>
+      <img
+        class="size-full"
+        :class="imageStyle"
+        :src="product.image ?? productImageUrl"
+        alt=""
+      >
     </span>
   </a>
 </template>
 
 <style scoped>
-.product-card::before {
-  position: absolute;
-  z-index: -1;
-  right: -88px;
-  bottom: -120px;
-  width: 360px;
-  height: 360px;
-  border: 1px solid rgb(225 110 72 / 20%);
-  border-radius: 50%;
-  content: '';
-}
-
 .product-image {
   border-radius: 999px 999px 24px 24px;
 }

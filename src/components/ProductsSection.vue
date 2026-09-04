@@ -1,41 +1,44 @@
 <script setup>
 import ProductCard from './ProductCard.vue'
+import meadImageUrl from '../assets/mead-glass-cutout.png'
+import ciderImageUrl from '../assets/cider-glass-cutout.png'
+import perryImageUrl from '../assets/perry-glass-cutout.png'
 
 const products = [
   {
-    index: '01',
     name: 'Медовуха',
     tastes: 'Светлая, тёмная, имбирная, вишнёвая, сливовая, клюквенная, чёрная смородина',
     href: '/katalog/medovuha/',
+    image: meadImageUrl,
     featured: true,
   },
   {
-    index: '02',
     name: 'Сидр',
     tastes: 'Сухой, полусухой, сладкий, полусладкий',
     href: '/katalog/sidr/',
+    image: ciderImageUrl,
     featured: false,
   },
   {
-    index: '03',
     name: 'Пуаре',
     tastes: 'Сладкий',
     href: '/katalog/puare/',
+    image: perryImageUrl,
     featured: false,
   },
 ]
 </script>
 
 <template>
-  <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-40" aria-labelledby="products-title">
+  <section class="min-h-svh bg-surface py-20 text-foreground sm:py-24 wide:py-40" aria-labelledby="products-title">
     <div class="site-container">
-      <div class="mb-12 grid items-end gap-6 nav:grid-cols-2 wide:mb-20 wide:grid-cols-5 wide:gap-12">
-        <h2 id="products-title" class="font-display text-4xl leading-none text-brand uppercase sm:text-6xl wide:col-span-3 wide:text-8xl">
+      <div class="mb-12 grid items-end gap-6 wide:mb-20 wide:grid-cols-3 wide:gap-12">
+        <h2 id="products-title" class="min-w-0 font-display text-h2 text-brand uppercase wide:col-span-2">
           Продукция
         </h2>
 
-        <p class="max-w-lg text-lg leading-relaxed font-medium sm:text-xl wide:col-span-2">
-          Производим русские хмельные напитки с 2006 года
+        <p class="max-w-lg text-body-large font-medium wide:col-span-1 wide:max-w-none">
+          Производим русские<br class="hidden wide:block"> хмельные напитки с 2006 года
         </p>
       </div>
 

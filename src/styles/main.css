@@ -17,17 +17,44 @@
 }
 
 @theme {
-  --color-brand: #e16e48;
+  --color-brand: #3d5a45;
   --color-brand-strong: #cb5935;
   --color-foreground: #101010;
   --color-surface: #ffffff;
   --color-panel: #efefef;
-  --color-muted: #a7a7a7;
   --color-subtle: #686868;
   --font-body: "Involve", Arial, sans-serif;
   --font-display: "Climate Crisis", "Arial Black", sans-serif;
+  --text-h1: var(--text-5xl);
+  --text-h1--line-height: 1;
+  --text-h2: var(--text-5xl);
+  --text-h2--line-height: 1;
+  --text-h3: var(--text-4xl);
+  --text-h3--line-height: 1;
+  --text-body-large: var(--text-lg);
+  --text-body-large--line-height: var(--leading-relaxed);
+  --text-body: var(--text-base);
+  --text-body--line-height: var(--leading-relaxed);
+  --text-label: var(--text-sm);
+  --text-label--line-height: var(--text-sm--line-height);
+  --text-caption: var(--text-xs);
+  --text-caption--line-height: var(--text-xs--line-height);
   --breakpoint-nav: 54rem;
   --breakpoint-wide: 80rem;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --text-body-large: var(--text-xl);
+  }
+}
+
+@media (min-width: 80rem) {
+  :root {
+    --text-h1: var(--text-8xl);
+    --text-h2: var(--text-8xl);
+    --text-h3: var(--text-6xl);
+  }
 }
 
 @layer base {
