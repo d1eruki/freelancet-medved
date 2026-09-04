@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import logoUrl from '../../materials/customer-design/brand-logo.svg'
+import logoUrl from '../assets/brand-logo.svg'
 import { navigation } from '../data/navigation'
 
 const isMenuOpen = ref(false)

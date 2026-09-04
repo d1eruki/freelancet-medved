@@ -1,5 +1,5 @@
 <script setup>
-import logoUrl from '../../materials/customer-design/brand-logo.svg'
+import logoUrl from '../assets/brand-logo.svg'
 import { navigation } from '../data/navigation'
 </script>
 
