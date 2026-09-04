@@ -12,6 +12,10 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  motionDirection: {
+    type: String,
+    default: '',
+  },
 })
 </script>
 
@@ -20,6 +24,8 @@ defineProps({
     class="product-card relative isolate block overflow-hidden bg-transparent"
     :class="{
       'is-text-hidden': textHidden,
+      'is-moving-forward': motionDirection === 'forward',
+      'is-moving-backward': motionDirection === 'backward',
     }"
     :aria-label="product.name"
   >
@@ -79,6 +85,18 @@ defineProps({
   opacity: 0;
 }
 
+.product-visual {
+  transform-origin: 50% 90%;
+}
+
+.is-moving-forward .product-visual {
+  animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.is-moving-backward .product-visual {
+  animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-visual {
   rotate: 3deg;
 }
@@ -86,5 +104,49 @@ defineProps({
 .product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-detail-icon {
   rotate: -45deg;
   background-color: var(--color-foreground);
+}
+
+@keyframes product-inertia-forward {
+  0% {
+    rotate: 0deg;
+  }
+
+  18%, 72% {
+    rotate: 4deg;
+  }
+
+  85% {
+    rotate: -2deg;
+  }
+
+  93% {
+    rotate: 1deg;
+  }
+
+  100% {
+    rotate: 0deg;
+  }
+}
+
+@keyframes product-inertia-backward {
+  0% {
+    rotate: 0deg;
+  }
+
+  18%, 72% {
+    rotate: -4deg;
+  }
+
+  85% {
+    rotate: 2deg;
+  }
+
+  93% {
+    rotate: -1deg;
+  }
+
+  100% {
+    rotate: 0deg;
+  }
 }
 </style>

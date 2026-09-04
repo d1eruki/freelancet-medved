@@ -35,9 +35,10 @@ const products = [
 const activeIndex = ref(0)
 const isTransitioning = ref(false)
 const isTextHidden = ref(false)
+const motionDirection = ref('')
 
 const textFadeDuration = 360
-const slideDuration = 700
+const imageMotionDuration = 820
 let slideTimer
 let revealTimer
 let unlockTimer
@@ -62,15 +63,17 @@ function showProduct(index) {
   isTextHidden.value = true
 
   slideTimer = window.setTimeout(() => {
+    motionDirection.value = index > activeIndex.value ? 'forward' : 'backward'
     activeIndex.value = index
 
     revealTimer = window.setTimeout(() => {
+      motionDirection.value = ''
       isTextHidden.value = false
 
       unlockTimer = window.setTimeout(() => {
         isTransitioning.value = false
       }, textFadeDuration)
-    }, slideDuration)
+    }, imageMotionDuration)
   }, textFadeDuration)
 }
 
@@ -114,6 +117,7 @@ onBeforeUnmount(clearTransitionTimers)
             :product="product"
             :active="index === activeIndex"
             :text-hidden="isTextHidden"
+            :motion-direction="motionDirection"
             :aria-hidden="index !== activeIndex"
           />
         </div>
