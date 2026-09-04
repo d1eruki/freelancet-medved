@@ -4,7 +4,7 @@ import { navigation } from '../data/navigation'
 </script>
 
 <template>
-  <footer class="bg-brand pt-20 pb-6 text-surface wide:pt-28">
+  <footer class="bg-brand pt-20 pb-6 text-surface sm:pt-24 wide:pt-28">
     <div class="site-container">
       <div class="grid gap-12 border-b border-surface/40 pb-12 nav:grid-cols-2 wide:gap-24 wide:pb-20">
         <a class="inline-flex w-max" href="/" aria-label="МЁДВЕДЬ — на главную">

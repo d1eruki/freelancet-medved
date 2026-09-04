@@ -6,7 +6,7 @@ import heroImageUrl from '../assets/hero-bear-antonovka.png'
   <section class="min-h-svh bg-brand text-surface" aria-labelledby="hero-title">
     <div class="site-container grid min-h-svh items-center gap-12 pt-32 pb-8 nav:grid-cols-2 nav:gap-16 nav:pt-40 nav:pb-12 wide:gap-24 wide:pt-44 wide:pb-16">
       <div class="z-1 min-w-0 max-w-3xl">
-        <p class="mb-5 text-caption font-bold tracking-widest uppercase sm:mb-7">
+        <p class="mb-4 text-caption font-bold tracking-widest uppercase sm:mb-5">
           Товарищество пиво-медоваренного завода «МЁДВЕДЬ»
         </p>
 

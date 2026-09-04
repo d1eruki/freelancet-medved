@@ -36,21 +36,23 @@ const activeIndex = ref(0)
 const isTransitioning = ref(false)
 const isTextHidden = ref(false)
 const motionDirection = ref('')
+const dragOffset = ref(0)
+const isDragging = ref(false)
+let gesture = null
+let suppressClick = false
 
 const textFadeDuration = 360
 const imageMotionDuration = 820
 let slideTimer
 let revealTimer
-let unlockTimer
 
 function clearTransitionTimers() {
   window.clearTimeout(slideTimer)
   window.clearTimeout(revealTimer)
-  window.clearTimeout(unlockTimer)
 }
 
 function showProduct(index) {
-  if (index === activeIndex.value || isTransitioning.value) {
+  if (index === activeIndex.value || isTransitioning.value || gesture) {
     return
   }
 
@@ -63,18 +65,88 @@ function showProduct(index) {
   isTextHidden.value = true
 
   slideTimer = window.setTimeout(() => {
-    motionDirection.value = index > activeIndex.value ? 'forward' : 'backward'
-    activeIndex.value = index
-
-    revealTimer = window.setTimeout(() => {
-      motionDirection.value = ''
-      isTextHidden.value = false
-
-      unlockTimer = window.setTimeout(() => {
-        isTransitioning.value = false
-      }, textFadeDuration)
-    }, imageMotionDuration)
+    settleProduct(index)
   }, textFadeDuration)
+}
+
+function settleProduct(index) {
+  const direction = index === activeIndex.value
+    ? (dragOffset.value < 0 ? 'backward' : 'forward')
+    : (index > activeIndex.value ? 'forward' : 'backward')
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  motionDirection.value = reducedMotion ? '' : direction
+  activeIndex.value = index
+  dragOffset.value = 0
+  isDragging.value = false
+  isTransitioning.value = true
+  revealTimer = window.setTimeout(() => {
+    motionDirection.value = ''
+    isTextHidden.value = false
+
+    isTransitioning.value = false
+  }, reducedMotion ? 0 : imageMotionDuration)
+}
+
+function startDrag(event) {
+  if (!event.isPrimary || event.button !== 0 || isTransitioning.value || gesture) return
+  suppressClick = false
+  gesture = {
+    id: event.pointerId, x: event.clientX, y: event.clientY,
+    width: event.currentTarget.clientWidth,
+    lastX: event.clientX, lastTime: event.timeStamp, velocity: 0,
+  }
+}
+
+function moveDrag(event) {
+  if (!gesture || gesture.id !== event.pointerId) return
+  const dx = event.clientX - gesture.x
+  const dy = event.clientY - gesture.y
+  if (!isDragging.value) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 4) return
+    if (event.pointerType === 'touch' && Math.abs(dy) > Math.abs(dx) * 1.4) {
+      gesture = null
+      return
+    }
+    if (Math.abs(dx) < 4) return
+    isDragging.value = true
+    isTextHidden.value = true
+    suppressClick = true
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const elapsed = event.timeStamp - gesture.lastTime
+  if (elapsed > 0) gesture.velocity = (event.clientX - gesture.lastX) / elapsed
+  gesture.lastX = event.clientX
+  gesture.lastTime = event.timeStamp
+  const beyondEdge = (activeIndex.value === 0 && dx > 0) || (activeIndex.value === products.length - 1 && dx < 0)
+  dragOffset.value = Math.max(-gesture.width, Math.min(gesture.width, dx * (beyondEdge ? 0.2 : 1)))
+}
+
+function endDrag(event) {
+  if (!gesture || gesture.id !== event.pointerId) return
+  const width = gesture.width
+  const velocity = event.timeStamp - gesture.lastTime < 100 ? gesture.velocity : 0
+  gesture = null
+  if (!isDragging.value) return
+  const distance = Math.abs(dragOffset.value)
+  const flick = distance > 16 && Math.abs(velocity) > 0.35
+    && Math.sign(velocity) === Math.sign(dragOffset.value)
+  const shouldSwitch = event.type !== 'pointercancel'
+    && (distance > Math.min(40, width * 0.08) || flick)
+  const index = Math.max(0, Math.min(products.length - 1,
+    activeIndex.value + (shouldSwitch ? (dragOffset.value < 0 ? 1 : -1) : 0)))
+  settleProduct(index)
+}
+
+function cancelDrag(event) {
+  if (gesture && !isDragging.value) gesture = null
+  else if (gesture) endDrag(event)
+}
+
+function preventDragClick(event) {
+  if (!suppressClick) return
+  event.preventDefault()
+  event.stopPropagation()
+  suppressClick = false
 }
 
 function showPrevious() {
@@ -105,10 +177,20 @@ onBeforeUnmount(clearTransitionTimers)
     </div>
 
     <div class="relative flex min-h-0 flex-1 flex-col">
-      <div class="relative z-1 min-h-144 flex-1 overflow-hidden sm:min-h-160 nav:min-h-0">
+      <div class="relative z-1 min-h-144 flex-1 touch-pan-y select-none overflow-hidden sm:min-h-160 nav:min-h-0"
+        @pointerdown="startDrag"
+        @pointermove="moveDrag"
+        @pointerup="endDrag"
+        @pointercancel="endDrag"
+        @pointerleave="cancelDrag"
+        @lostpointercapture="endDrag"
+        @dragstart.prevent
+        @click.capture="preventDragClick"
+      >
         <div
           class="product-track flex h-full"
-          :style="{ transform: `translate3d(-${activeIndex * 100}%, 0, 0)` }"
+          :class="{ 'is-dragging': isDragging }"
+          :style="{ transform: `translate3d(calc(-${activeIndex * 100}% + ${dragOffset}px), 0, 0)`, '--drag-angle': `${dragOffset < 0 ? 3 : -3}deg` }"
         >
           <ProductCard
             v-for="(product, index) in products"
@@ -178,5 +260,13 @@ onBeforeUnmount(clearTransitionTimers)
 .product-track {
   transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
+}
+
+.product-track.is-dragging {
+  transition: none;
+}
+
+.is-dragging :deep(.product-visual) {
+  rotate: var(--drag-angle);
 }
 </style>

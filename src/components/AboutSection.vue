@@ -8,7 +8,7 @@ const awards = [
 </script>
 
 <template>
-  <section class="min-h-svh overflow-hidden bg-foreground py-20 text-surface sm:py-24 wide:py-40" aria-labelledby="about-title">
+  <section class="min-h-svh overflow-hidden bg-foreground py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="about-title">
     <div class="site-container">
       <h2 id="about-title" class="max-w-6xl font-display text-h2 uppercase">
         Слово о производителе

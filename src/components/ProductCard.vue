@@ -1,4 +1,13 @@
 <script setup>
+import { ref } from 'vue'
+
+const hoverAngle = ref(3)
+
+function updateHoverAngle(event) {
+  const bounds = event.currentTarget.getBoundingClientRect()
+  hoverAngle.value = event.clientX < bounds.left + bounds.width / 2 ? 3 : -3
+}
+
 defineProps({
   product: {
     type: Object,
@@ -28,6 +37,7 @@ defineProps({
       'is-moving-backward': motionDirection === 'backward',
     }"
     :aria-label="product.name"
+    :style="{ '--hover-angle': `${hoverAngle}deg` }"
   >
     <div class="site-container relative grid h-full min-h-144 py-12 sm:min-h-160 nav:min-h-0 nav:grid-cols-12 nav:grid-rows-2">
       <div class="product-copy relative z-2 nav:col-span-4 nav:row-span-2 nav:self-center">
@@ -42,7 +52,7 @@ defineProps({
         </p>
       </div>
 
-      <div class="product-copy relative z-2 mt-8 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:self-center">
+      <div class="product-copy relative z-2 mt-10 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:self-center">
         <p class="text-label font-bold tracking-wider uppercase">Вкусы</p>
 
         <p class="mt-4 max-w-sm text-body font-medium">
@@ -66,11 +76,14 @@ defineProps({
 
       <a
         class="product-interactive product-visual absolute bottom-0 left-1/2 z-1 size-96 -translate-x-1/2 rotate-0 transition duration-500 focus-visible:outline-4 focus-visible:outline-brand sm:size-112 nav:bottom-3 nav:size-auto nav:h-11/12 nav:max-h-144 nav:aspect-square"
+        draggable="false"
+        @pointermove="updateHoverAngle"
+        @pointerleave="hoverAngle = 3"
         :href="product.href"
         :tabindex="active ? 0 : -1"
         :aria-label="`Подробнее о напитке «${product.name}»`"
       >
-        <img class="size-full object-contain" :src="product.image" alt="">
+        <img class="size-full object-contain" :src="product.image" alt="" draggable="false">
       </a>
     </div>
   </article>
@@ -98,7 +111,7 @@ defineProps({
 }
 
 .product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-visual {
-  rotate: 3deg;
+  rotate: var(--hover-angle, 3deg);
 }
 
 .product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-detail-icon {
