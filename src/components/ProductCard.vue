@@ -1,80 +1,90 @@
 <script setup>
-import { computed } from 'vue'
-import productImageUrl from '../assets/hero-image-placeholder.png'
-
-const props = defineProps({
+defineProps({
   product: {
     type: Object,
     required: true,
   },
-  featured: {
+  active: {
+    type: Boolean,
+    default: false,
+  },
+  textHidden: {
     type: Boolean,
     default: false,
   },
 })
-
-const cardLayout = computed(() => (
-  props.featured
-    ? 'nav:col-span-2 nav:min-h-144 wide:col-span-7 wide:row-span-2 wide:min-h-0'
-    : 'nav:col-span-1 nav:min-h-112 wide:col-span-5 wide:min-h-0'
-))
-
-const imageLayout = computed(() => (
-  props.featured
-    ? '-right-4 -bottom-4 size-80 sm:right-6 sm:size-96'
-    : props.product.image
-      ? 'right-0 -bottom-2 size-52 sm:size-56 wide:size-52'
-      : '-right-4 -bottom-20 h-80 w-48 sm:right-6 sm:h-96 sm:w-56 wide:h-80 wide:w-48'
-))
-
-const imageStyle = computed(() => (
-  props.product.image
-    ? 'object-contain'
-    : 'product-image border border-foreground/10 bg-surface object-cover shadow-xl'
-))
 </script>
 
 <template>
-  <a
-    class="product-card group relative isolate min-h-112 overflow-hidden rounded-4xl border border-foreground/5 bg-panel p-7 transition duration-200 hover:-translate-y-1 hover:bg-surface hover:shadow-2xl focus-visible:-translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand sm:p-10"
-    :class="cardLayout"
-    :href="product.href"
+  <article
+    class="product-card relative isolate block overflow-hidden bg-transparent"
+    :class="{
+      'is-text-hidden': textHidden,
+    }"
     :aria-label="product.name"
   >
-    <div class="relative z-2 flex h-full max-w-md flex-col items-start">
-      <h3 class="mt-auto font-display text-h3 text-brand uppercase">
-        {{ product.name }}
-      </h3>
+    <div class="site-container relative grid h-full min-h-144 py-12 sm:min-h-160 nav:min-h-0 nav:grid-cols-12 nav:grid-rows-2">
+      <div class="product-copy relative z-2 nav:col-span-4 nav:row-span-2 nav:self-center">
+        <p class="text-label font-bold tracking-wider uppercase">{{ product.label }}</p>
 
-      <p class="mt-4 max-w-sm text-body">
-        {{ product.tastes }}
-      </p>
-    </div>
+        <h3 class="mt-4 font-display text-h3 text-brand uppercase">
+          {{ product.name }}
+        </h3>
 
-    <span
-      class="absolute top-6 right-6 z-3 grid size-12 place-items-center rounded-full border border-foreground/20 text-body-large transition duration-200 group-hover:rotate-45 group-hover:border-brand group-hover:bg-brand group-hover:text-surface group-focus-visible:rotate-45 group-focus-visible:border-brand group-focus-visible:bg-brand group-focus-visible:text-surface sm:top-8 sm:right-8"
-      aria-hidden="true"
-    >
-      ↗
-    </span>
+        <p class="mt-6 max-w-sm text-body font-medium">
+          {{ product.description }}
+        </p>
+      </div>
 
-    <span
-      class="absolute z-1 rotate-6 transition duration-300 group-hover:-translate-y-3 group-hover:rotate-2 group-focus-visible:-translate-y-3 group-focus-visible:rotate-2"
-      :class="imageLayout"
-      aria-hidden="true"
-    >
-      <img
-        class="size-full"
-        :class="imageStyle"
-        :src="product.image ?? productImageUrl"
-        alt=""
+      <div class="product-copy relative z-2 mt-8 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:self-center">
+        <p class="text-label font-bold tracking-wider uppercase">Вкусы</p>
+
+        <p class="mt-4 max-w-sm text-body font-medium">
+          {{ product.tastes }}
+        </p>
+
+        <a
+          class="product-interactive mt-8 inline-flex items-center gap-3 text-label font-bold uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          :href="product.href"
+          :tabindex="active ? 0 : -1"
+        >
+          <span
+            class="product-detail-icon grid size-10 place-items-center rounded-full bg-brand text-surface transition duration-200"
+            aria-hidden="true"
+          >
+            →
+          </span>
+          Подробнее
+        </a>
+      </div>
+
+      <a
+        class="product-interactive product-visual absolute bottom-0 left-1/2 z-1 size-96 -translate-x-1/2 rotate-0 transition duration-500 focus-visible:outline-4 focus-visible:outline-brand sm:size-112 nav:bottom-3 nav:size-auto nav:h-11/12 nav:max-h-144 nav:aspect-square"
+        :href="product.href"
+        :tabindex="active ? 0 : -1"
+        :aria-label="`Подробнее о напитке «${product.name}»`"
       >
-    </span>
-  </a>
+        <img class="size-full object-contain" :src="product.image" alt="">
+      </a>
+    </div>
+  </article>
 </template>
 
 <style scoped>
-.product-image {
-  border-radius: 999px 999px 24px 24px;
+.product-copy {
+  transition: opacity 360ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.is-text-hidden .product-copy {
+  opacity: 0;
+}
+
+.product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-visual {
+  rotate: 3deg;
+}
+
+.product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-detail-icon {
+  rotate: -45deg;
+  background-color: var(--color-foreground);
 }
 </style>
