@@ -78,7 +78,7 @@ onBeforeUnmount(() => {
         <ul class="flex flex-col gap-1 nav:flex-row nav:items-center nav:gap-6 wide:gap-10">
           <li v-for="item in navigation" :key="item.href">
             <a
-              class="nav-link block py-3 text-label font-bold tracking-wide uppercase"
+              class="secondary-action block py-3 text-label font-extrabold tracking-wide uppercase"
               :href="item.href"
               @click="closeMenu"
             >
@@ -106,29 +106,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.nav-link {
-  position: relative;
-}
-
-.nav-link::after {
-  position: absolute;
-  right: 0;
-  bottom: 6px;
-  left: 0;
-  height: 2px;
-  content: '';
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 180ms ease;
-}
-
-.nav-link:hover::after,
-.nav-link:focus-visible::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
 .menu-icon,
 .menu-icon::before,
 .menu-icon::after {
