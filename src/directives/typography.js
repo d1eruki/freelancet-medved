@@ -1,9 +1,17 @@
 import Typograf from 'typograf'
 
+Typograf.addRule({
+  name: 'common/nbsp/nonBreakingHyphenatedWord',
+  handler(text) {
+    return text.replace(/([0-9A-Za-zА-Яа-яЁё])-(?=[0-9A-Za-zА-Яа-яЁё])/g, '$1‑')
+  },
+})
+
 const typograf = new Typograf({ locale: ['ru'] })
 
 typograf.disableRule('*')
 typograf.enableRule('common/nbsp/afterShortWordByList')
+typograf.enableRule('common/nbsp/nonBreakingHyphenatedWord')
 
 export function preventHangingPrepositions(text) {
   return typograf.execute(text)
