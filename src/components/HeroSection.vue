@@ -4,8 +4,30 @@ import HeroSteam from './HeroSteam.vue'
 import heroLayerForegroundUrl from '../assets/hero-layer-foreground.png'
 import heroLayerBackgroundUrl from '../assets/hero-layer-background.png'
 import heroLayerMiddleUrl from '../assets/hero-layer-middle.png'
+import heroLayerMiddleBlinkUrl from '../assets/hero-layer-middle-blink.png'
 
 const bearImage = ref(null)
+const isBlinking = ref(false)
+let blinkTimer
+let blinkMedia
+let blinkReady = false
+let isUnmounted = false
+
+function stopBlinking() {
+  window.clearTimeout(blinkTimer)
+  isBlinking.value = false
+}
+
+function scheduleBlink() {
+  stopBlinking()
+  if (isUnmounted || !blinkReady || !blinkMedia?.matches || document.hidden) return
+
+  blinkTimer = window.setTimeout(() => {
+    isBlinking.value = true
+    blinkTimer = window.setTimeout(scheduleBlink, 150)
+  }, 4000 + Math.random() * 3000)
+}
+
 const parallaxOffset = ref({ x: 0, y: 0 })
 let parallaxMedia
 
@@ -27,12 +49,28 @@ function updateParallax(event) {
 }
 
 onMounted(() => {
+  blinkMedia = window.matchMedia('(prefers-reduced-motion: no-preference)')
+  blinkMedia.addEventListener('change', scheduleBlink)
+  document.addEventListener('visibilitychange', scheduleBlink)
+  const blinkImage = new Image()
+  blinkImage.src = heroLayerMiddleBlinkUrl
+  blinkImage.decode().then(() => {
+    if (isUnmounted) return
+    blinkReady = true
+    scheduleBlink()
+  }).catch(() => {
+    // Keep the original image if the blink frame cannot be loaded.
+  })
   parallaxMedia = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)')
   parallaxMedia.addEventListener('change', resetParallax)
   window.addEventListener('blur', resetParallax)
 })
 
 onBeforeUnmount(() => {
+  isUnmounted = true
+  stopBlinking()
+  blinkMedia?.removeEventListener('change', scheduleBlink)
+  document.removeEventListener('visibilitychange', scheduleBlink)
   parallaxMedia?.removeEventListener('change', resetParallax)
   window.removeEventListener('blur', resetParallax)
 })
@@ -86,7 +124,7 @@ onBeforeUnmount(() => {
       ref="bearImage"
       class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
       :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
-      :src="heroLayerMiddleUrl"
+      :src="isBlinking ? heroLayerMiddleBlinkUrl : heroLayerMiddleUrl"
       alt=""
       aria-hidden="true"
     >
