@@ -171,9 +171,6 @@ onBeforeUnmount(clearTransitionTimers)
           Продукция
         </h2>
 
-        <p class="max-w-lg text-body-large font-medium wide:col-span-1 wide:max-w-none">
-          Производим русские<br class="hidden wide:block"> хмельные напитки с 2006 года
-        </p>
       </div>
     </div>
 
