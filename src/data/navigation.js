@@ -1,7 +1,9 @@
+import { sitePath } from '../utils/site-path'
+
 export const navigation = [
-  { label: 'Продукция', href: '/katalog/' },
-  { label: 'Производство', href: '/proizvodstvo/' },
-  { label: 'О компании', href: '/o-kompanii/' },
-  { label: 'Где купить', href: '/partnery/' },
-  { label: 'Контакты', href: '/kontakty/' },
+  { label: 'Продукция', href: sitePath('/katalog/') },
+  { label: 'Производство', href: sitePath('/proizvodstvo/') },
+  { label: 'О компании', href: sitePath('/o-kompanii/') },
+  { label: 'Где купить', href: sitePath('/partnery/') },
+  { label: 'Контакты', href: sitePath('/kontakty/') },
 ]

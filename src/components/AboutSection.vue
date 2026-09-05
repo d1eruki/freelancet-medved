@@ -1,4 +1,5 @@
 <script setup>
+import { sitePath } from '../utils/site-path'
 import productionImageUrl from '../assets/hero-image-placeholder.png'
 
 const awards = [
@@ -45,7 +46,7 @@ const awards = [
             </div>
           </div>
 
-          <a class="mt-9 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-surface px-7 text-label font-extrabold tracking-wide text-foreground uppercase transition duration-200 hover:-translate-y-1 hover:bg-brand hover:text-surface focus-visible:-translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:w-max" href="/proizvodstvo/">
+          <a class="mt-9 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-surface px-7 text-label font-extrabold tracking-wide text-foreground uppercase transition duration-200 hover:-translate-y-1 hover:bg-brand hover:text-surface focus-visible:-translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:w-max" :href="sitePath('/proizvodstvo/')">
             Заглянуть на производство
           </a>
         </div>

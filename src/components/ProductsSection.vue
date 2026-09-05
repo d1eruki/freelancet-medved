@@ -1,4 +1,5 @@
 <script setup>
+import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, ref } from 'vue'
 import ProductCard from './ProductCard.vue'
 import meadImageUrl from '../assets/mead-glass-cutout.png'
@@ -11,7 +12,7 @@ const products = [
     label: 'Мёд, ягоды и пряности',
     description: 'Мягкий хмельной напиток с медовой основой и выразительным ароматом натуральных добавок.',
     tastes: 'Светлая, тёмная, имбирная, вишнёвая, сливовая, клюквенная, чёрная смородина',
-    href: '/katalog/medovuha/',
+    href: sitePath('/katalog/medovuha/'),
     image: meadImageUrl,
   },
   {
@@ -19,7 +20,7 @@ const products = [
     label: 'Свежесть спелых яблок',
     description: 'Лёгкий яблочный напиток с чистым фруктовым вкусом и деликатной игрой пузырьков.',
     tastes: 'Сухой, полусухой, сладкий, полусладкий',
-    href: '/katalog/sidr/',
+    href: sitePath('/katalog/sidr/'),
     image: ciderImageUrl,
   },
   {
@@ -27,7 +28,7 @@ const products = [
     label: 'Тонкий вкус груши',
     description: 'Ароматный грушевый напиток с мягкой сладостью и свежим фруктовым послевкусием.',
     tastes: 'Сладкий',
-    href: '/katalog/puare/',
+    href: sitePath('/katalog/puare/'),
     image: perryImageUrl,
   },
 ]

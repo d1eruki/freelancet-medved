@@ -1,4 +1,5 @@
 <script setup>
+import { sitePath } from '../utils/site-path'
 import logoUrl from '../assets/brand-logo.svg'
 import { navigation } from '../data/navigation'
 </script>
@@ -7,7 +8,7 @@ import { navigation } from '../data/navigation'
   <footer class="bg-brand pt-20 pb-6 text-surface sm:pt-24 wide:pt-28">
     <div class="site-container">
       <div class="grid gap-12 border-b border-surface/40 pb-12 nav:grid-cols-2 wide:gap-24 wide:pb-20">
-        <a class="inline-flex w-max" href="/" aria-label="МЁДВЕДЬ — на главную">
+        <a class="inline-flex w-max" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
           <img class="h-auto w-48 object-contain brightness-0 invert sm:w-64" :src="logoUrl" alt="МЁДВЕДЬ">
         </a>
 
@@ -48,7 +49,7 @@ import { navigation } from '../data/navigation'
       <div class="border-t border-surface/40 pt-6 text-label">
         <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-8">
           <p>© 2017 ООО «ФАРТ СПБ».</p>
-          <a class="hover:underline hover:underline-offset-4" href="/disclaimer/">
+          <a class="hover:underline hover:underline-offset-4" :href="sitePath('/disclaimer/')">
             Ограничение ответственности
           </a>
         </div>

@@ -1,4 +1,5 @@
 <script setup>
+import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import logoUrl from '../assets/brand-logo.svg'
 import { navigation } from '../data/navigation'
@@ -61,7 +62,7 @@ onBeforeUnmount(() => {
     :inert="!isHeaderVisible || undefined"
   >
     <div class="site-container flex h-16 items-center justify-between border-b border-surface/40 sm:h-20">
-      <a class="inline-flex shrink-0" href="/" aria-label="МЁДВЕДЬ — на главную">
+      <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
           class="h-12 w-24 object-contain brightness-0 invert sm:h-14 sm:w-32"
           :src="logoUrl"
