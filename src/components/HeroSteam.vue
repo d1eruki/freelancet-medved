@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
+const props = defineProps({ source: { type: Object, default: null } })
 const host = ref(null)
 let dispose = () => {}
 let unmounted = false
@@ -26,7 +27,12 @@ onMounted(async () => {
   const material = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    uniforms: { time: { value: 0 } },
+    uniforms: {
+      time: { value: 0 },
+      resolution: { value: new THREE.Vector2(1, 1) },
+      mouth: { value: new THREE.Vector2() },
+      breathScale: { value: 1 },
+    },
     vertexShader: `
       varying vec2 vUv;
       void main() {
@@ -37,6 +43,9 @@ onMounted(async () => {
     fragmentShader: `
       varying vec2 vUv;
       uniform float time;
+      uniform vec2 resolution;
+      uniform vec2 mouth;
+      uniform float breathScale;
       float hash(vec2 p) {
         return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
       }
@@ -56,15 +65,24 @@ onMounted(async () => {
         return value;
       }
       void main() {
-        vec2 p = vUv;
-        vec2 flow = vec2(p.x * 5.0, p.y * 4.0 - time * 0.12);
-        float curl = fbm(flow + vec2(0.0, time * 0.025));
-        float cloud = fbm(flow * 2.0 + curl * 2.8);
-        float center = 0.5 + sin(p.y * 6.0 - time * 0.18) * 0.07;
-        float width = mix(0.08, 0.34, p.y);
-        float plume = 1.0 - smoothstep(width * 0.25, width, abs(p.x - center + (curl - 0.5) * 0.22));
-        float fade = smoothstep(0.0, 0.16, p.y) * (1.0 - smoothstep(0.5, 1.0, p.y));
-        float alpha = smoothstep(0.23, 0.72, cloud) * plume * fade * 0.32;
+        // A short exhale starts as the bear settles after its inhale.
+        float phase = mod(time + 4.0, 8.0);
+        vec2 p = (vUv * resolution - mouth) / breathScale;
+        float alpha = 0.0;
+        for (int i = 0; i < 5; i++) {
+          float seed = float(i);
+          float age = phase - seed * 0.12;
+          float life = clamp(age / 2.4, 0.0, 1.0);
+          vec2 center = vec2(-age * 48.0, age * 14.0 + age * age * 6.0);
+          center += vec2(sin(seed * 2.4) * 10.0, cos(seed * 1.7) * 8.0) * life;
+          vec2 radius = vec2(20.0 + life * 110.0, 12.0 + life * 65.0);
+          vec2 q = (p - center) / radius;
+          float turbulence = fbm(q * 3.0 + vec2(seed, -age * 0.4));
+          float cloud = 1.0 - smoothstep(0.12, 0.9, length(q) + (turbulence - 0.5) * 0.72);
+          float envelope = smoothstep(0.0, 0.18, age) * (1.0 - smoothstep(0.65, 2.4, age));
+          alpha += cloud * envelope * 0.055;
+        }
+        alpha = min(alpha, 0.2);
         gl_FragColor = vec4(vec3(1.0), alpha);
       }
     `,
@@ -73,23 +91,36 @@ onMounted(async () => {
 
   let visible = false
   let frame = 0
-  let lastTime = 0
-  const render = (now) => {
-    material.uniforms.time.value += Math.min((now - lastTime) / 1000, 0.05)
-    lastTime = now
-    renderer.render(scene, camera)
+  const render = () => {
+    const source = props.source
+    if (source?.naturalWidth) {
+      const bounds = source.getBoundingClientRect()
+      const container = host.value.parentElement.getBoundingClientRect()
+      // object-contain + object-bottom: map the mouth from image coordinates.
+      const imageScale = Math.min(bounds.width / source.naturalWidth, bounds.height / source.naturalHeight)
+      const width = source.naturalWidth * imageScale
+      const height = source.naturalHeight * imageScale
+      const scale = width / 700
+      const x = bounds.left - container.left + (bounds.width - width) / 2 + width * 0.615
+      const y = bounds.bottom - container.top - height + height * 0.445
+      host.value.style.transform = `translate(${x - 250 * scale}px, ${y - 160 * scale}px) scale(${scale})`
+      material.uniforms.mouth.value.set(250, 80)
+      const breathing = source.getAnimations().find(animation => animation.animationName?.startsWith('hero-layer-float'))
+      material.uniforms.time.value = Number(breathing?.currentTime ?? 0) / 1000
+      renderer.render(scene, camera)
+    }
     frame = requestAnimationFrame(render)
   }
   const sync = () => {
     cancelAnimationFrame(frame)
     host.value.hidden = motion.matches
     if (visible && !document.hidden && !motion.matches) {
-      lastTime = performance.now()
       frame = requestAnimationFrame(render)
     }
   }
   const resize = new ResizeObserver(([entry]) => {
     const { width, height } = entry.contentRect
+    material.uniforms.resolution.value.set(Math.max(1, width), Math.max(1, height))
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.setSize(Math.max(1, width), Math.max(1, height))
   })
@@ -129,7 +160,11 @@ onBeforeUnmount(() => {
 <style scoped>
 .hero-steam {
   position: absolute;
-  inset: 12% 0 0;
+  top: 0;
+  left: 0;
+  width: 360px;
+  height: 240px;
+  transform-origin: top left;
   pointer-events: none;
 }
 

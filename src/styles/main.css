@@ -16,6 +16,14 @@
   src: url("../assets/fonts/climate-crisis-variable.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "Tsvik SP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/tsvik-sp-demo.otf") format("opentype");
+}
+
 @theme {
   --color-brand: #3d5a45;
   --color-brand-strong: #cb5935;
@@ -25,6 +33,7 @@
   --color-subtle: #686868;
   --font-body: "Involve", Arial, sans-serif;
   --font-display: "Climate Crisis", "Arial Black", sans-serif;
+  --font-handwriting: "Tsvik SP", cursive;
   --text-h1: clamp(2rem, 8vw, 7rem);
   --text-h1--line-height: 1;
   --text-h2: var(--text-5xl);
