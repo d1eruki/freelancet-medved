@@ -56,7 +56,7 @@ onBeforeUnmount(() => {
 
 <template>
   <header
-    class="fixed inset-x-0 top-0 z-50 bg-brand text-surface transition-transform duration-300 ease-out"
+    class="fixed inset-x-0 top-0 z-50 text-surface backdrop-blur-md transition-transform duration-300 ease-out"
     :class="isHeaderVisible ? 'translate-y-0' : '-translate-y-full'"
     :inert="!isHeaderVisible || undefined"
   >
