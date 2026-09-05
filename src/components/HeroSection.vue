@@ -93,11 +93,8 @@ onBeforeUnmount(() => {
 
       <div class="relative z-1 grid flex-1 items-end gap-8 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
         <div class="max-w-sm nav:mb-12 wide:mb-16">
-          <p class="mb-3 text-body-large">
-            Пиво-медоваренный завод «Медведь»
-          </p>
           <p class="text-body-large">
-            Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
+            Пиво-медоваренный завод «Медведь». Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
           </p>
         </div>
 
