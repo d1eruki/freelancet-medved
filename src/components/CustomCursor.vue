@@ -25,12 +25,15 @@ function setCursorState(event) {
   }
 
   const interactive = target.closest('a, button')
+  const storyItem = target.closest('.story-item')
   const productInteractive = target.closest('.product-interactive')
   const formControl = target.closest('input, textarea, select, [contenteditable="true"]')
   let state = ''
   let label = ''
 
-  if (formControl) {
+  if (storyItem) {
+    state = 'is-action'
+  } else if (formControl) {
     state = 'is-hidden'
   } else if (productInteractive) {
     state = 'is-action'

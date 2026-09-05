@@ -80,6 +80,7 @@ onBeforeUnmount(() => {
 <template>
   <section
     class="relative isolate min-h-svh bg-brand text-surface"
+    data-header-theme="light"
     aria-labelledby="hero-title"
     @pointermove="updateParallax"
     @pointerleave="resetParallax"

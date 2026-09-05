@@ -6,12 +6,26 @@ import { navigation } from '../data/navigation'
 
 const isMenuOpen = ref(false)
 const isHeaderVisible = ref(true)
+const isDarkHeader = ref(false)
+const headerElement = ref(null)
 
 let lastScrollPosition = 0
 let scrollFrame = 0
 
+function updateHeaderTheme() {
+  const headerHeight = headerElement.value?.offsetHeight ?? 0
+  const sections = [...document.querySelectorAll('[data-header-theme]')]
+  const currentSection = sections
+    .filter((section) => section.getBoundingClientRect().top <= headerHeight)
+    .at(-1)
+
+  isDarkHeader.value = currentSection?.dataset.headerTheme === 'dark'
+}
+
 function updateHeaderVisibility() {
   const currentScrollPosition = Math.max(window.scrollY, 0)
+
+  updateHeaderTheme()
 
   if (isMenuOpen.value || currentScrollPosition <= 16) {
     isHeaderVisible.value = true
@@ -43,11 +57,14 @@ function closeMenu() {
 
 onMounted(() => {
   lastScrollPosition = Math.max(window.scrollY, 0)
+  updateHeaderTheme()
   window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('resize', updateHeaderTheme)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', updateHeaderTheme)
 
   if (scrollFrame) {
     window.cancelAnimationFrame(scrollFrame)
@@ -57,14 +74,16 @@ onBeforeUnmount(() => {
 
 <template>
   <header
-    class="fixed inset-x-0 top-0 z-50 text-surface backdrop-blur-md transition-transform duration-300 ease-out"
-    :class="isHeaderVisible ? 'translate-y-0' : '-translate-y-full'"
+    ref="headerElement"
+    class="fixed inset-x-0 top-0 z-50 backdrop-blur-md transition-[color,translate] duration-300 ease-out"
+    :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-full', isDarkHeader ? 'text-foreground' : 'text-surface']"
     :inert="!isHeaderVisible || undefined"
   >
-    <div class="site-container flex h-16 items-center justify-between border-b border-surface/40 sm:h-20">
+    <div class="site-container flex h-16 items-center justify-between border-b border-current/40 sm:h-20">
       <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
-          class="h-12 w-24 object-contain brightness-0 invert sm:h-14 sm:w-32"
+          class="h-12 w-24 object-contain sm:h-14 sm:w-32"
+          :class="isDarkHeader ? '' : 'brightness-0 invert'"
           :src="logoUrl"
           alt="МЁДВЕДЬ"
         >
@@ -72,8 +91,8 @@ onBeforeUnmount(() => {
 
       <nav
         id="main-navigation"
-        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl nav:static nav:ml-auto nav:block nav:bg-transparent nav:p-0 nav:text-surface nav:shadow-none"
-        :class="isMenuOpen ? 'block' : 'hidden'"
+        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out nav:static nav:ml-auto nav:block nav:bg-transparent nav:p-0 nav:shadow-none"
+        :class="[isMenuOpen ? 'block' : 'hidden', isDarkHeader ? 'nav:text-foreground' : 'nav:text-surface']"
         aria-label="Основная навигация"
       >
         <ul class="flex flex-col gap-1 nav:flex-row nav:items-center nav:gap-6 wide:gap-10">
@@ -91,7 +110,7 @@ onBeforeUnmount(() => {
 
       <div class="flex shrink-0 items-center gap-4">
         <button
-          class="menu-button grid size-12 place-items-center rounded-full border border-surface/60 nav:hidden"
+          class="menu-button grid size-12 place-items-center rounded-full border border-current/60 nav:hidden"
           type="button"
           aria-controls="main-navigation"
           :aria-expanded="isMenuOpen"

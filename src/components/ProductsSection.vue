@@ -162,7 +162,7 @@ onBeforeUnmount(clearTransitionTimers)
 </script>
 
 <template>
-  <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" aria-labelledby="products-title">
+  <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" data-header-theme="dark" aria-labelledby="products-title">
     <span class="absolute inset-x-0 bottom-0 z-0 h-[50svh] bg-brand/10" aria-hidden="true" />
 
     <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-28">
