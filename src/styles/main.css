@@ -25,7 +25,7 @@
   --color-subtle: #686868;
   --font-body: "Involve", Arial, sans-serif;
   --font-display: "Climate Crisis", "Arial Black", sans-serif;
-  --text-h1: clamp(1.75rem, 7vw, 6rem);
+  --text-h1: clamp(2rem, 8vw, 7rem);
   --text-h1--line-height: 1;
   --text-h2: var(--text-5xl);
   --text-h2--line-height: 1;

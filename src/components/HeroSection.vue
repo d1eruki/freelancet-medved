@@ -1,23 +1,25 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import heroImageUrl from '../assets/hero-bear-medved.png'
-import heroBackgroundUrl from '../assets/hero-background.png'
+import HeroSteam from './HeroSteam.vue'
+import heroLayerForegroundUrl from '../assets/hero-layer-foreground.png'
+import heroLayerBackgroundUrl from '../assets/hero-layer-background.png'
+import heroLayerMiddleUrl from '../assets/hero-layer-middle.png'
 
-const bearOffset = ref({ x: 0, y: 0 })
+const parallaxOffset = ref({ x: 0, y: 0 })
 let parallaxMedia
 
 function resetParallax() {
-  bearOffset.value = { x: 0, y: 0 }
+  parallaxOffset.value = { x: 0, y: 0 }
 }
 
-function moveBear(event) {
+function updateParallax(event) {
   if (!parallaxMedia?.matches || event.pointerType === 'touch') return
 
   const bounds = event.currentTarget.getBoundingClientRect()
   if (!bounds.width || !bounds.height) return
 
   const normalize = (position, size) => Math.max(-1, Math.min(1, position / size * 2 - 1))
-  bearOffset.value = {
+  parallaxOffset.value = {
     x: normalize(event.clientX - bounds.left, bounds.width) * 24,
     y: normalize(event.clientY - bounds.top, bounds.height) * 16,
   }
@@ -39,7 +41,7 @@ onBeforeUnmount(() => {
   <section
     class="relative isolate min-h-svh bg-brand text-surface"
     aria-labelledby="hero-title"
-    @pointermove="moveBear"
+    @pointermove="updateParallax"
     @pointerleave="resetParallax"
     @pointercancel="resetParallax"
   >
@@ -69,16 +71,50 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <img
-      class="pointer-events-none absolute left-210 h-96 w-full top-110 -translate-x-1/2 scale-400 object-contain object-bottom nav:h-[65svh] nav:w-[42%]"
-      :src="heroBackgroundUrl"
+      class="pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
+      :src="heroLayerBackgroundUrl"
       alt=""
       aria-hidden="true"
     >
     <img
-      class="pointer-events-none absolute left-210 h-96 w-full top-100 -translate-x-1/2 scale-400 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
-      :style="{ translate: `calc(-50% + ${bearOffset.x}px) ${bearOffset.y}px` }"
-      :src="heroImageUrl"
+      class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-140 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
+      :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
+      :src="heroLayerMiddleUrl"
+      alt=""
+      aria-hidden="true"
+    >
+    <HeroSteam />
+    <img
+      class="hero-layer-foreground pointer-events-none absolute left-140 h-96 w-full top-110 -translate-x-1/2 scale-200 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
+      :style="{ translate: `calc(-50% + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
+      :src="heroLayerForegroundUrl"
       alt="Медведь с бутылкой напитка «Медведь»"
     >
   </section>
 </template>
+
+<style scoped>
+@media (prefers-reduced-motion: no-preference) {
+  .hero-layer-middle {
+    --float-distance: -3px;
+    animation: hero-layer-float 8s ease-in-out infinite;
+  }
+
+  .hero-layer-foreground {
+    --float-distance: -4px;
+    animation: hero-layer-float 6s ease-in-out infinite;
+  }
+}
+
+/* Animate transform separately from the cursor-driven translate property. */
+@keyframes hero-layer-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(var(--float-distance));
+  }
+}
+</style>
