@@ -69,21 +69,21 @@ onMounted(async () => {
         float phase = mod(time + 4.0, 8.0);
         vec2 p = (vUv * resolution - mouth) / breathScale;
         float alpha = 0.0;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
           float seed = float(i);
-          float age = phase - seed * 0.12;
-          float life = clamp(age / 2.4, 0.0, 1.0);
-          vec2 center = vec2(-age * 48.0, age * 14.0 + age * age * 6.0);
-          center += vec2(sin(seed * 2.4) * 10.0, cos(seed * 1.7) * 8.0) * life;
-          vec2 radius = vec2(20.0 + life * 110.0, 12.0 + life * 65.0);
+          float age = phase - seed * 0.085;
+          float life = clamp(age / 2.15, 0.0, 1.0);
+          vec2 center = vec2(-age * 105.0, age * 12.0 + age * age * 6.0);
+          center += vec2(sin(seed * 2.4) * 12.0, cos(seed * 1.7) * 8.0) * life;
+          vec2 radius = vec2(38.0 + life * 255.0, 24.0 + life * 155.0);
           vec2 q = (p - center) / radius;
-          float turbulence = fbm(q * 3.0 + vec2(seed, -age * 0.4));
-          float cloud = 1.0 - smoothstep(0.12, 0.9, length(q) + (turbulence - 0.5) * 0.72);
-          float envelope = smoothstep(0.0, 0.18, age) * (1.0 - smoothstep(0.65, 2.4, age));
-          alpha += cloud * envelope * 0.055;
+          float variation = mix(0.82, 1.0, fbm(q * 1.35 + vec2(seed, -age * 0.18)));
+          float mist = exp(-dot(q, q) * 1.65) * variation;
+          float envelope = smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.7, 2.15, age));
+          alpha += mist * envelope * 0.04;
         }
-        alpha = min(alpha, 0.2);
-        gl_FragColor = vec4(vec3(1.0), alpha);
+        alpha = min(alpha, 0.16);
+        gl_FragColor = vec4(0.92, 0.97, 1.0, alpha);
       }
     `,
   })
@@ -101,10 +101,10 @@ onMounted(async () => {
       const width = source.naturalWidth * imageScale
       const height = source.naturalHeight * imageScale
       const scale = width / 700
-      const x = bounds.left - container.left + (bounds.width - width) / 2 + width * 0.615
+      const x = bounds.left - container.left + (bounds.width - width) / 2 + width * 0.66
       const y = bounds.bottom - container.top - height + height * 0.445
-      host.value.style.transform = `translate(${x - 250 * scale}px, ${y - 160 * scale}px) scale(${scale})`
-      material.uniforms.mouth.value.set(250, 80)
+      host.value.style.transform = `translate(${x - 520 * scale}px, ${y - 280 * scale}px) scale(${scale})`
+      material.uniforms.mouth.value.set(520, 140)
       const breathing = source.getAnimations().find(animation => animation.animationName?.startsWith('hero-layer-float'))
       material.uniforms.time.value = Number(breathing?.currentTime ?? 0) / 1000
       renderer.render(scene, camera)
@@ -162,8 +162,8 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 360px;
-  height: 240px;
+  width: 700px;
+  height: 420px;
   transform-origin: top left;
   pointer-events: none;
 }

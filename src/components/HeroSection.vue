@@ -48,14 +48,19 @@ onBeforeUnmount(() => {
   >
     <div class="site-container flex min-h-svh flex-col gap-10 pt-28 pb-104 sm:pt-32 nav:pb-0 wide:pt-36">
       <h1 id="hero-title" class="absolute top-1/2 left-0 z-2 w-full -translate-y-1/2 px-4 text-center font-display text-h1 uppercase sm:px-6">
-        <span class="font-handwriting font-normal">Варим</span><br>
-        пиво и медовуху
+        <span class="font-handwriting font-normal">Лапу приложили</span><br>
+        к хорошим напиткам
       </h1>
 
       <div class="relative z-1 grid flex-1 items-end gap-8 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
-        <p class="max-w-sm text-body-large nav:mb-12 wide:mb-16">
-          Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
-        </p>
+        <div class="max-w-sm nav:mb-12 wide:mb-16">
+          <p class="mb-3 text-body-large">
+            Пиво-медоваренный завод «Медведь»
+          </p>
+          <p class="text-body-large">
+            Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
+          </p>
+        </div>
 
         <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
           <a
@@ -79,7 +84,7 @@ onBeforeUnmount(() => {
     >
     <img
       ref="bearImage"
-      class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-140 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
+      class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
       :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
       :src="heroLayerMiddleUrl"
       alt=""
