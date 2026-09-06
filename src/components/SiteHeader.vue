@@ -83,7 +83,7 @@ onBeforeUnmount(() => {
       <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
           class="h-12 w-24 object-contain sm:h-14 sm:w-32"
-          :class="isDarkHeader ? '' : 'brightness-0 invert'"
+          :class="isDarkHeader ? 'brightness-0' : 'brightness-0 invert'"
           :src="logoUrl"
           alt="МЁДВЕДЬ"
         >

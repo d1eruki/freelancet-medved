@@ -106,7 +106,9 @@
   }
 
   .secondary-action:hover::after,
-  .secondary-action:focus-visible::after {
+  .secondary-action:focus-visible::after,
+  .group:hover .secondary-action::after,
+  .group:focus-visible .secondary-action::after {
     transform: scaleX(1);
     transform-origin: left;
   }

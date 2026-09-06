@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import CircleArrow from './CircleArrow.vue'
 
 const hoverAngle = ref(3)
 
@@ -8,7 +9,7 @@ function updateHoverAngle(event) {
   hoverAngle.value = event.clientX < bounds.left + bounds.width / 2 ? 3 : -3
 }
 
-defineProps({
+const props = defineProps({
   product: {
     type: Object,
     required: true,
@@ -25,7 +26,18 @@ defineProps({
     type: String,
     default: '',
   },
+  dragging: {
+    type: Boolean,
+    default: false,
+  },
+  dragAngle: {
+    type: Number,
+    default: 0,
+  },
 })
+
+const hoverAngleCss = computed(() => `${hoverAngle.value}deg`)
+const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 </script>
 
 <template>
@@ -35,9 +47,9 @@ defineProps({
       'is-text-hidden': textHidden,
       'is-moving-forward': motionDirection === 'forward',
       'is-moving-backward': motionDirection === 'backward',
+      'is-dragging': dragging,
     }"
     :aria-label="product.name"
-    :style="{ '--hover-angle': `${hoverAngle}deg` }"
   >
     <div class="site-container relative grid h-full min-h-144 py-12 sm:min-h-160 nav:min-h-0 nav:grid-cols-12 nav:grid-rows-2">
       <div class="product-copy relative z-2 nav:col-span-4 nav:row-span-2 nav:self-center">
@@ -60,17 +72,12 @@ defineProps({
         </p>
 
         <a
-          class="product-interactive mt-8 inline-flex items-center gap-3 text-label font-bold uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          class="product-interactive group mt-8 inline-flex items-center gap-3 text-label font-bold uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
           :href="product.href"
           :tabindex="active ? 0 : -1"
         >
-          <span
-            class="product-detail-icon grid size-10 place-items-center rounded-full bg-brand text-surface transition duration-200"
-            aria-hidden="true"
-          >
-            →
-          </span>
-          Подробнее
+          <span class="secondary-action py-3">Подробнее</span>
+          <CircleArrow hover="detail" />
         </a>
       </div>
 
@@ -110,13 +117,12 @@ defineProps({
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-visual {
-  rotate: var(--hover-angle, 3deg);
+.product-card:has(a:is(:hover, :focus-visible)) .product-visual {
+  rotate: v-bind(hoverAngleCss);
 }
 
-.product-card:has(.product-interactive:is(:hover, :focus-visible)) .product-detail-icon {
-  rotate: -45deg;
-  background-color: var(--color-foreground);
+.is-dragging .product-visual {
+  rotate: v-bind(dragAngleCss);
 }
 
 @keyframes product-inertia-forward {

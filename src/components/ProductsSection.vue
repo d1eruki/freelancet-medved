@@ -1,6 +1,7 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, ref } from 'vue'
+import CircleArrow from './CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import meadImageUrl from '../assets/mead-glass-cutout.png'
 import ciderImageUrl from '../assets/cider-glass-cutout.png'
@@ -188,7 +189,7 @@ onBeforeUnmount(clearTransitionTimers)
         <div
           class="product-track flex h-full"
           :class="{ 'is-dragging': isDragging }"
-          :style="{ transform: `translate3d(calc(-${activeIndex * 100}% + ${dragOffset}px), 0, 0)`, '--drag-angle': `${dragOffset < 0 ? 3 : -3}deg` }"
+          :style="{ transform: `translate3d(calc(-${activeIndex * 100}% + ${dragOffset}px), 0, 0)` }"
         >
           <ProductCard
             v-for="(product, index) in products"
@@ -198,6 +199,8 @@ onBeforeUnmount(clearTransitionTimers)
             :active="index === activeIndex"
             :text-hidden="isTextHidden"
             :motion-direction="motionDirection"
+            :dragging="isDragging"
+            :drag-angle="dragOffset < 0 ? 3 : -3"
             :aria-hidden="index !== activeIndex"
           />
         </div>
@@ -208,12 +211,12 @@ onBeforeUnmount(clearTransitionTimers)
       <div class="site-container relative z-2 shrink-0 pb-8">
         <div class="flex flex-wrap items-center justify-center gap-3 pt-6">
           <button
-            class="grid size-12 place-items-center rounded-full bg-surface text-body-large transition hover:bg-brand hover:text-surface focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
             type="button"
             aria-label="Предыдущий напиток"
             @click="showPrevious"
           >
-            ←
+            <CircleArrow direction="left" hover="brand" tone="surface" />
           </button>
 
           <div
@@ -241,12 +244,12 @@ onBeforeUnmount(clearTransitionTimers)
           </div>
 
           <button
-            class="grid size-12 place-items-center rounded-full bg-surface text-body-large transition hover:bg-brand hover:text-surface focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
             type="button"
             aria-label="Следующий напиток"
             @click="showNext"
           >
-            →
+            <CircleArrow hover="brand" tone="surface" />
           </button>
         </div>
       </div>
@@ -264,7 +267,4 @@ onBeforeUnmount(clearTransitionTimers)
   transition: none;
 }
 
-.is-dragging :deep(.product-visual) {
-  rotate: var(--drag-angle);
-}
 </style>
