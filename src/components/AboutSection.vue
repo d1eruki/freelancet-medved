@@ -92,8 +92,7 @@ const awards = [
   overflow: hidden;
   background: #242424;
   color: var(--color-surface);
-  opacity: 0.86;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .story-tile::after {
@@ -106,7 +105,6 @@ const awards = [
 }
 
 .story-item:hover .story-tile {
-  opacity: 1;
   transform: translateY(-0.35rem);
 }
 

@@ -34,22 +34,19 @@
   --font-body: "Involve", Arial, sans-serif;
   --font-display: "Climate Crisis", "Arial Black", sans-serif;
   --font-handwriting: "Tsvik SP", cursive;
+  --leading-none: 1;
   --text-h1: clamp(2rem, 8vw, 7rem);
-  --text-h1--line-height: 1;
+  --text-h1--line-height: var(--leading-none);
   --text-h2: clamp(3rem, 5vw, 4.5rem);
-  --text-h2--line-height: 1;
+  --text-h2--line-height: var(--leading-none);
   --text-h3: clamp(1.875rem, 4vw, 3.75rem);
-  --text-h3--line-height: 1;
+  --text-h3--line-height: var(--leading-none);
   --text-h4: clamp(1.5rem, 2vw, 2.25rem);
-  --text-h4--line-height: 1;
+  --text-h4--line-height: var(--leading-none);
   --text-body-large: clamp(1.125rem, 0.75rem + 1vw, 1.25rem);
-  --text-body-large--line-height: var(--leading-relaxed);
   --text-body: clamp(1rem, 0.75rem + 0.5vw, 1.125rem);
-  --text-body--line-height: var(--leading-relaxed);
   --text-label: clamp(0.875rem, 0.75rem + 0.25vw, 1rem);
-  --text-label--line-height: var(--text-sm--line-height);
   --text-caption: clamp(0.75rem, 0.625rem + 0.25vw, 0.875rem);
-  --text-caption--line-height: var(--text-xs--line-height);
   --breakpoint-nav: 54rem;
   --breakpoint-wide: 80rem;
 }
