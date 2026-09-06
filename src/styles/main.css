@@ -60,7 +60,7 @@
     min-width: 320px;
     background: var(--color-surface);
     color: var(--color-foreground);
-    font-family: var(--font-body);
+    font-family: var(--font-body), serif;
     font-size: var(--text-body);
     text-rendering: optimizeLegibility;
   }
