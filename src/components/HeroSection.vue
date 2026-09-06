@@ -86,20 +86,20 @@ onBeforeUnmount(() => {
     @pointerleave="resetParallax"
     @pointercancel="resetParallax"
   >
-    <div class="site-container flex min-h-svh flex-col gap-10 pt-28 pb-104 max-sm:pt-24 max-sm:pb-8 sm:pt-32 nav:pb-0 wide:pt-36">
-      <h1 id="hero-title" class="absolute top-1/2 left-0 z-2 w-full -translate-y-1/2 px-4 text-center font-display text-h1 uppercase max-sm:top-28 max-sm:translate-y-0 sm:px-6">
+    <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-104 nav:pb-0 wide:pt-36">
+      <h1 id="hero-title" class="absolute top-28 left-0 z-2 w-full translate-y-0 px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6">
         <span class="font-handwriting font-normal">Лапу приложили</span><br>
         к хорошим напиткам
       </h1>
 
-      <div class="relative z-1 grid flex-1 items-end gap-8 max-sm:items-start max-sm:pt-44 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
+      <div class="relative z-1 grid flex-1 items-start gap-8 pt-44 sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
         <div class="max-w-sm nav:mb-12 wide:mb-16">
-          <p class="text-body-large max-sm:text-center">
+          <p class="text-center text-body-large sm:text-left">
             Пиво-медоваренный завод «Медведь». Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
           </p>
         </div>
 
-        <div class="flex flex-col items-start gap-4 max-sm:w-full sm:flex-row sm:items-center nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
+        <div class="flex w-full flex-col items-start gap-4 sm:w-auto sm:flex-row sm:items-center nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
           <a
             class="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-surface px-7 text-label font-extrabold tracking-wide text-foreground uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:-translate-y-1 focus-visible:shadow-xl sm:w-auto"
             :href="sitePath('/katalog/')"
@@ -107,7 +107,7 @@ onBeforeUnmount(() => {
             Смотреть продукцию
           </a>
 
-          <a class="secondary-action py-3 text-center text-label font-extrabold tracking-wide uppercase max-sm:w-full" :href="sitePath('/partnery/')">
+          <a class="secondary-action w-full py-3 text-center text-label font-extrabold tracking-wide uppercase sm:w-auto" :href="sitePath('/partnery/')">
             Где купить
           </a>
         </div>
@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
       aria-hidden="true"
     >
     <img
-      class="hero-layer-foreground pointer-events-none absolute left-140 h-96 w-full top-110 -translate-x-1/2 scale-200 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none max-sm:left-80 max-sm:top-60 max-sm:scale-150 nav:h-[65svh] nav:w-[42%]"
+      class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full -translate-x-1/2 scale-125 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 sm:scale-200 nav:h-[65svh] nav:w-[42%]"
       :style="{ translate: `calc(-50% + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
       :src="heroLayerForegroundUrl"
       alt="Медведь с бутылкой напитка «Медведь»"

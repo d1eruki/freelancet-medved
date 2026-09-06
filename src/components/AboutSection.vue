@@ -82,13 +82,13 @@ const awards = [
 <style scoped>
 .story-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
 }
 
 .story-tile {
   position: relative;
-  aspect-ratio: 0.92;
+  aspect-ratio: 1.4;
   overflow: hidden;
   background: #242424;
   color: var(--color-surface);
@@ -119,7 +119,6 @@ const awards = [
   z-index: 2;
   inset: 50% 1rem auto;
   color: var(--color-surface);
-  font-size: 1.5em;
   text-align: center;
   text-transform: uppercase;
   transform: translateY(-50%);
@@ -146,14 +145,14 @@ const awards = [
   color: var(--color-surface);
 }
 
-@media (max-width: 767px) {
+@media (min-width: 48rem) {
   .story-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
   }
 
   .story-tile {
-    aspect-ratio: 1.4;
+    aspect-ratio: 0.92;
   }
 }
 </style>
