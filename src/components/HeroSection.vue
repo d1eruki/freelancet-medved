@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section
-    class="relative isolate min-h-svh bg-brand text-surface"
+    class="relative isolate min-h-svh bg-foreground text-surface"
     data-header-theme="light"
     aria-labelledby="hero-title"
     @pointermove="updateParallax"
@@ -87,8 +87,8 @@ onBeforeUnmount(() => {
     @pointercancel="resetParallax"
   >
     <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-104 nav:pb-0 wide:pt-36">
-      <h1 id="hero-title" class="absolute top-28 left-0 z-2 w-full translate-y-0 px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6">
-        <span class="font-handwriting font-normal">Лапу приложили</span><br>
+      <h1 id="hero-title" class="absolute top-28 left-0 z-2 w-full translate-y-0 px-4 text-center font-display text-h1 text-brand-strong uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6">
+        <span class="font-handwriting font-normal text-surface">Лапу приложили</span><br>
         к хорошим напиткам
       </h1>
 
