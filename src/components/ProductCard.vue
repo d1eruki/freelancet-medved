@@ -65,10 +65,10 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
       </div>
 
       <div class="product-copy relative z-2 mt-10 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:self-center">
-        <p class="text-label font-bold tracking-wider uppercase">Вкусы</p>
+        <p class="text-label font-bold tracking-wider uppercase">Сорта</p>
 
-        <p class="mt-4 max-w-sm text-body font-medium">
-          {{ product.tastes }}
+        <p class="mt-4 max-w-md text-body font-medium">
+          {{ product.varieties }}
         </p>
 
         <a

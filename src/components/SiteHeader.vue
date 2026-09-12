@@ -55,6 +55,13 @@ function closeMenu() {
   isMenuOpen.value = false
 }
 
+function isCurrentPage(href) {
+  const currentPath = window.location.pathname.replace(/\/+$/, '')
+  const targetPath = new URL(href, window.location.origin).pathname.replace(/\/+$/, '')
+
+  return currentPath === targetPath
+}
+
 onMounted(() => {
   lastScrollPosition = Math.max(window.scrollY, 0)
   updateHeaderTheme()
@@ -99,7 +106,9 @@ onBeforeUnmount(() => {
           <li v-for="item in navigation" :key="item.href">
             <a
               class="secondary-action block py-3 text-label font-extrabold tracking-wide uppercase"
+              :class="{ 'nav-link--current': isCurrentPage(item.href) }"
               :href="item.href"
+              :aria-current="isCurrentPage(item.href) ? 'page' : undefined"
               @click="closeMenu"
             >
               {{ item.label }}
@@ -155,5 +164,9 @@ onBeforeUnmount(() => {
 
 .menu-icon--open::after {
   transform: translateY(-2px) rotate(-45deg);
+}
+
+.nav-link--current::after {
+  transform: scaleX(1);
 }
 </style>

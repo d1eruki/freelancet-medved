@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
             class="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-surface px-7 text-label font-extrabold tracking-wide text-foreground uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:-translate-y-1 focus-visible:shadow-xl sm:w-auto"
             :href="sitePath('/katalog/')"
           >
-            Смотреть продукцию
+            Смотреть каталог
           </a>
 
           <a class="secondary-action w-full py-3 text-center text-label font-extrabold tracking-wide uppercase sm:w-auto" :href="sitePath('/partnery/')">
