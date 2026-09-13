@@ -1,7 +1,5 @@
 <script setup>
-import { sitePath } from '../utils/site-path'
 import productionImageUrl from '../assets/production-meadery.png'
-import CircleArrow from './CircleArrow.vue'
 </script>
 
 <template>
@@ -49,16 +47,6 @@ import CircleArrow from './CircleArrow.vue'
           <p class="mt-auto max-w-lg text-body-large font-medium text-surface/75">
             В 2016 году завод отметил первый десятилетний юбилей. Всё это время мы развиваем производство, увеличиваем ассортимент и экспериментируем с новыми вкусами.
           </p>
-
-          <a
-            class="group mt-8 flex w-full items-end justify-between gap-5 text-label font-extrabold tracking-wide uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface"
-            :href="sitePath('/proizvodstvo/')"
-          >
-            <span class="inline-flex min-h-14 items-center rounded-full bg-surface px-6 text-foreground transition duration-200 group-hover:-translate-y-1 group-hover:shadow-xl">
-              Заглянуть на производство
-            </span>
-            <CircleArrow hover="detail" size="action" tone="surface" />
-          </a>
         </article>
 
         <article class="about-assortment rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:p-10">

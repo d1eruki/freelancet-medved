@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import AboutPage from './components/AboutPage.vue'
 import AboutSection from './components/AboutSection.vue'
 import AgeGate from './components/AgeGate.vue'
 import CustomCursor from './components/CustomCursor.vue'
@@ -14,6 +15,7 @@ const ageConfirmationKey = 'medved-age-confirmed'
 const isAgeConfirmed = ref(false)
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '')
 const currentPath = window.location.pathname.slice(basePath.length).replace(/\/+$/, '') || '/'
+const isAboutPage = currentPath === '/o-kompanii'
 const isProductionPage = currentPath === '/proizvodstvo'
 
 try {
@@ -44,6 +46,7 @@ function confirmAge() {
 
     <main>
       <ProductionPage v-if="isProductionPage" />
+      <AboutPage v-else-if="isAboutPage" />
 
       <template v-else>
         <HeroSection />
