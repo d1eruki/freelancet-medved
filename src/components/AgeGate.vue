@@ -72,7 +72,6 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else>
-        <p class="mb-4 text-caption font-extrabold tracking-widest text-brand uppercase">Ограничение по возрасту</p>
         <h2 id="age-gate-title" class="break-words font-display text-h3 hyphens-auto uppercase sm:hyphens-manual">
           Доступ ограничен
         </h2>

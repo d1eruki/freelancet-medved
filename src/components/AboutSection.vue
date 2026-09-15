@@ -63,7 +63,7 @@ import productionImageUrl from '../assets/production-meadery.png'
         </article>
 
         <article class="about-delivery flex flex-col justify-between rounded-3xl border border-surface/20 bg-foreground p-6 sm:p-8 wide:p-10">
-          <p class="font-display text-h4 text-brand uppercase">СПб → регионы</p>
+          <p class="font-display text-h4 text-surface uppercase">СПб → регионы</p>
           <p class="mt-10 text-body font-medium text-surface/60">
             Доставляем оптовые заказы по Санкт-Петербургу и Ленобласти собственным транспортом, работаем с региональными дистрибьюторами.
           </p>

@@ -5,6 +5,7 @@ import AboutSection from './components/AboutSection.vue'
 import AgeGate from './components/AgeGate.vue'
 import CustomCursor from './components/CustomCursor.vue'
 import HeroSection from './components/HeroSection.vue'
+import PartnersPage from './components/PartnersPage.vue'
 import ProductionPage from './components/ProductionPage.vue'
 import ProductsSection from './components/ProductsSection.vue'
 import SiteHeader from './components/SiteHeader.vue'
@@ -16,6 +17,7 @@ const isAgeConfirmed = ref(false)
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '')
 const currentPath = window.location.pathname.slice(basePath.length).replace(/\/+$/, '') || '/'
 const isAboutPage = currentPath === '/o-kompanii'
+const isPartnersPage = currentPath === '/partnery'
 const isProductionPage = currentPath === '/proizvodstvo'
 
 try {
@@ -46,6 +48,7 @@ function confirmAge() {
 
     <main>
       <ProductionPage v-if="isProductionPage" />
+      <PartnersPage v-else-if="isPartnersPage" />
       <AboutPage v-else-if="isAboutPage" />
 
       <template v-else>

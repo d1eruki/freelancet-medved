@@ -70,31 +70,25 @@ onMounted(() => {
       data-header-theme="light"
       aria-labelledby="production-page-title"
     >
-      <div class="site-container grid min-h-svh items-end gap-10 pt-28 pb-8 sm:pt-36 sm:pb-12 nav:grid-cols-12 nav:items-center nav:gap-6">
-        <div class="relative z-2 nav:col-span-7 nav:pt-16">
-          <p class="mb-6 text-label font-extrabold tracking-widest text-brand-strong uppercase">
-            Санкт-Петербург · Курляндская, 28Г
-          </p>
-          <h1 id="production-page-title" class="max-w-5xl font-display text-h1 uppercase">
-            Варим<br>с характером
-          </h1>
-          <p class="mt-8 max-w-xl text-body-large font-medium text-surface/70 sm:mt-10">
-            Воссоздаём рецептуры русских напитков в исторической солодовне, соединяя натуральное сырьё и современное оборудование.
-          </p>
-        </div>
+      <figure class="absolute inset-0 -z-1">
+        <img
+          class="size-full object-cover object-center"
+          :src="productionImageUrl"
+          alt="Медоваренное производство с медным варочным оборудованием"
+        >
+        <span class="absolute inset-0 bg-foreground/60" aria-hidden="true" />
+        <span class="absolute inset-0 bg-linear-to-t from-foreground/85 via-transparent to-foreground/20" aria-hidden="true" />
+        <span class="absolute inset-0 hidden bg-linear-to-r from-foreground/75 via-foreground/15 to-transparent nav:block" aria-hidden="true" />
+      </figure>
 
-        <figure class="relative z-1 min-h-104 overflow-hidden rounded-3xl sm:min-h-136 nav:col-span-5 nav:min-h-160">
-          <img
-            class="absolute inset-0 size-full object-cover"
-            :src="productionImageUrl"
-            alt="Медоваренное производство с медным варочным оборудованием"
-          >
-          <span class="absolute inset-0 bg-linear-to-t from-foreground/80 via-transparent to-transparent" aria-hidden="true" />
-          <figcaption class="absolute right-6 bottom-6 left-6 flex items-end justify-between gap-5 sm:right-8 sm:bottom-8 sm:left-8">
-            <span class="max-w-64 text-label font-bold tracking-wide uppercase">Современное производство в здании солодовни Дурдина</span>
-            <span class="font-display text-h4 text-brand-strong">СПБ</span>
-          </figcaption>
-        </figure>
+      <div class="site-container relative z-2 grid min-h-svh grid-rows-[1fr_auto] pt-28 pb-8 sm:pt-32 sm:pb-12">
+        <h1 id="production-page-title" class="max-w-6xl self-center font-display text-h1 uppercase">
+          Варим<br>с характером
+        </h1>
+
+        <p class="max-w-xl text-body-large font-medium text-surface/80 nav:max-w-md">
+          Воссоздаём рецептуры русских напитков в исторической солодовне, соединяя натуральное сырьё и современное оборудование.
+        </p>
       </div>
     </section>
 
@@ -102,22 +96,17 @@ onMounted(() => {
       <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
         <div class="nav:col-span-4">
           <p class="font-display text-h1 text-brand">1874</p>
-          <p class="mt-3 font-display text-h4 text-brand-strong">1880</p>
+          <p class="mt-3 font-display text-h4 text-brand">1880</p>
           <p class="mt-4 text-label font-extrabold tracking-widest uppercase">Годы строительства</p>
         </div>
 
         <div class="nav:col-span-8">
           <h2 id="production-history-title" class="max-w-5xl font-display text-h2 uppercase">
-            В стенах солодовни Дурдина
+            Исторический адрес производства
           </h2>
-          <div class="mt-10 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
-            <p>
-              Производство находится в уникальном здании солодовни завода Ивана Дурдина — одного из заметных предприятий дореволюционной пиво-медоваренной индустрии России.
-            </p>
-            <p>
-              На восьмигранных трубах из красного кирпича сохранились медные инициалы «И. Д.» и даты строительства. Здесь и сегодня пахнет мёдом, солодом и спелыми яблоками.
-            </p>
-          </div>
+          <p class="mt-10 max-w-4xl text-body-large font-medium text-subtle">
+            Производство расположено в бывшей солодовне завода Ивана Дурдина. На её восьмигранных трубах из красного кирпича сохранились медные инициалы «И. Д.» и даты строительства.
+          </p>
         </div>
       </div>
     </section>
@@ -141,7 +130,7 @@ onMounted(() => {
             :key="ingredient.number"
             class="flex min-h-80 flex-col rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:min-h-96 wide:p-10"
           >
-            <span class="text-label font-extrabold tracking-widest text-brand-strong">{{ ingredient.number }}</span>
+            <span class="text-label font-extrabold tracking-widest text-brand">{{ ingredient.number }}</span>
             <h3 class="mt-auto font-display text-h4 text-brand uppercase">{{ ingredient.title }}</h3>
             <p class="mt-5 max-w-sm text-body font-medium text-subtle">{{ ingredient.text }}</p>
           </li>
@@ -152,7 +141,6 @@ onMounted(() => {
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="production-process-title">
       <div class="site-container">
         <div class="grid gap-8 nav:grid-cols-12">
-          <p class="text-label font-extrabold tracking-widest text-brand-strong uppercase nav:col-span-4">От котла до розлива</p>
           <h2 id="production-process-title" class="font-display text-h2 uppercase nav:col-span-8">
             Четыре этапа производства
           </h2>
@@ -164,7 +152,7 @@ onMounted(() => {
             :key="step.number"
             class="group flex min-h-80 flex-col rounded-3xl bg-surface p-6 transition-colors duration-300 hover:bg-brand hover:text-surface sm:p-8 wide:min-h-96"
           >
-            <span class="text-label font-extrabold tracking-widest text-brand-strong">{{ step.number }}</span>
+            <span class="text-label font-extrabold tracking-widest text-brand transition-colors group-hover:text-surface">{{ step.number }}</span>
             <h3 class="mt-auto font-display text-h4 text-brand uppercase transition-colors group-hover:text-surface">{{ step.title }}</h3>
             <p class="mt-5 text-body font-medium text-subtle transition-colors group-hover:text-surface/75">{{ step.text }}</p>
           </li>
@@ -175,8 +163,7 @@ onMounted(() => {
     <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="production-quality-title">
       <div class="site-container grid gap-14 nav:grid-cols-12 nav:gap-6">
         <div class="nav:col-span-7">
-          <p class="text-label font-extrabold tracking-widest text-brand-strong uppercase">Качество на каждом этапе</p>
-          <h2 id="production-quality-title" class="mt-8 max-w-4xl font-display text-h2 uppercase">
+          <h2 id="production-quality-title" class="max-w-4xl font-display text-h2 uppercase">
             За вкус отвечаем сами
           </h2>
           <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/65">
@@ -186,7 +173,7 @@ onMounted(() => {
 
         <ul class="border-t border-surface/30 nav:col-span-5 nav:self-end">
           <li v-for="point in qualityPoints" :key="point" class="flex items-center gap-4 border-b border-surface/30 py-5 text-body font-bold">
-            <span class="size-2 shrink-0 rounded-full bg-brand-strong" aria-hidden="true" />
+            <span class="size-2 shrink-0 rounded-full bg-surface" aria-hidden="true" />
             {{ point }}
           </li>
         </ul>
@@ -201,7 +188,7 @@ onMounted(() => {
           </span>
         </a>
         <a class="group flex min-h-64 flex-col rounded-3xl bg-surface p-6 text-foreground focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/kontakty/')">
-          <span class="text-label font-extrabold tracking-widest text-brand-strong uppercase">Вопросы и сотрудничество</span>
+          <span class="text-label font-extrabold tracking-widest text-brand uppercase">Вопросы и сотрудничество</span>
           <span class="mt-auto flex items-end justify-between gap-8">
             <span class="font-display text-h3 uppercase">Связаться</span>
             <CircleArrow hover="brand" size="action" />

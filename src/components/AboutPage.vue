@@ -10,12 +10,6 @@ import awardMedovukhaFest2017ParticipantUrl from '../assets/award-medovukha-fest
 import awardMedovukhaFest2017TastingUrl from '../assets/award-medovukha-fest-2017-tasting.jpg'
 import CircleArrow from './CircleArrow.vue'
 
-const ingredients = [
-  'Гречишный и цветочный мёд',
-  'Яблочный и ягодные соки',
-  'Имбирный корень и пряности',
-]
-
 const productGroups = [
   {
     title: 'Медовуха',
@@ -70,7 +64,7 @@ onMounted(() => {
   const description = document.querySelector('meta[name="description"]')
   description?.setAttribute(
     'content',
-    'История пиво-медоваренного завода «МЁДВЕДЬ»: традиции Ивана Дурдина, современное производство, ассортимент и награды.',
+    'История пиво-медоваренного завода «МЁДВЕДЬ»: традиции Ивана Дурдина, развитие компании, ассортимент и награды.',
   )
 })
 </script>
@@ -84,14 +78,11 @@ onMounted(() => {
     >
       <div class="site-container grid min-h-svh items-end gap-10 pt-28 pb-8 sm:pt-36 sm:pb-12 nav:grid-cols-12 nav:items-center nav:gap-6">
         <div class="relative z-2 nav:col-span-7 nav:pt-16">
-          <p class="mb-6 text-label font-extrabold tracking-widest text-brand-strong uppercase">
-            Санкт-Петербург · с 2006 года
-          </p>
           <h1 id="about-page-title" class="max-w-5xl font-display text-h1 uppercase">
             Традиция<br>живёт здесь
           </h1>
           <p class="mt-8 max-w-xl text-body-large font-medium text-surface/70 sm:mt-10">
-            Продолжаем петербургскую историю медоварения в стенах бывшей солодовни завода Ивана Дурдина.
+            Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.
           </p>
         </div>
 
@@ -104,7 +95,7 @@ onMounted(() => {
           <span class="absolute inset-0 bg-linear-to-t from-foreground/80 via-transparent to-transparent" aria-hidden="true" />
           <figcaption class="absolute right-6 bottom-6 left-6 flex items-end justify-between gap-5 sm:right-8 sm:bottom-8 sm:left-8">
             <span class="max-w-64 text-label font-bold tracking-wide uppercase">Товарищество пиво-медоваренного завода «МЁДВЕДЬ»</span>
-            <span class="font-display text-h4 text-brand-strong">2006</span>
+            <span class="font-display text-h4 text-surface">2006</span>
           </figcaption>
         </figure>
       </div>
@@ -139,7 +130,7 @@ onMounted(() => {
       <div class="site-container relative">
         <div class="grid gap-12 nav:grid-cols-12 nav:gap-6">
           <div class="nav:col-span-5">
-            <p class="font-display text-h1 text-brand-strong">1874</p>
+            <p class="font-display text-h1 text-surface">1874</p>
             <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
           </div>
 
@@ -153,11 +144,11 @@ onMounted(() => {
 
             <div class="mt-12 grid gap-4 sm:grid-cols-2">
               <article class="rounded-3xl bg-surface p-6 text-foreground sm:p-8">
-                <p class="font-display text-h4 text-brand-strong uppercase">Имперский герб</p>
+                <p class="font-display text-h4 text-brand uppercase">Имперский герб</p>
                 <p class="mt-5 text-body font-medium text-subtle">Завод получил право изображать герб Российской империи на этикетках.</p>
               </article>
               <article class="rounded-3xl border border-surface/30 p-6 sm:p-8">
-                <p class="font-display text-h4 text-brand-strong uppercase">100 лошадей</p>
+                <p class="font-display text-h4 text-surface uppercase">100 лошадей</p>
                 <p class="mt-5 text-body font-medium text-surface/70">Собственная служба доставки развозила продукцию по городу на грузовых подводах.</p>
               </article>
             </div>
@@ -181,51 +172,24 @@ onMounted(() => {
         </figure>
 
         <article class="flex min-h-120 flex-col rounded-3xl bg-surface p-6 sm:p-8 nav:col-span-7 nav:min-h-160 wide:p-12">
-          <p class="text-label font-extrabold tracking-widest text-brand-strong uppercase">Традиция продолжается</p>
-          <h2 id="today-title" class="mt-8 max-w-4xl font-display text-h2 uppercase">
+          <h2 id="today-title" class="max-w-4xl font-display text-h2 uppercase">
             Сегодня здесь варит «МЁДВЕДЬ»
           </h2>
           <div class="mt-auto grid gap-6 pt-12 text-body-large font-medium text-subtle sm:grid-cols-2">
             <p>
-              Наше производство расположено в здании бывшей солодовни Дурдина. В память о традициях предшественников мы продолжаем варить напитки на основе мёда.
+              Товарищество пиво-медоваренного завода «МЁДВЕДЬ» начало работу в 2006 году и продолжило петербургскую традицию медоварения под собственной маркой.
             </p>
             <p>
-              С 2006 года развиваем ассортимент и экспериментируем со вкусами, соединяя историческую основу с предпочтениями современных покупателей.
+              Сегодня развиваем ассортимент и экспериментируем со вкусами, соединяя историческую основу с предпочтениями современных покупателей.
             </p>
           </div>
         </article>
       </div>
     </section>
 
-    <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="ingredients-title">
-      <div class="site-container">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
-          <h2 id="ingredients-title" class="font-display text-h2 uppercase nav:col-span-8">
-            Знакомый состав.<br>Свой характер.
-          </h2>
-          <p class="max-w-md text-body-large font-medium text-surface/65 nav:col-span-4">
-            В основе рецептур — натуральные ингредиенты. Брожение происходит без добавления спирта.
-          </p>
-        </div>
-
-        <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <li
-            v-for="(ingredient, index) in ingredients"
-            :key="ingredient"
-            class="flex min-h-64 flex-col rounded-3xl border border-surface/20 p-6 sm:p-8"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand-strong">0{{ index + 1 }}</span>
-            <p class="mt-auto font-display text-h4 uppercase">{{ ingredient }}</p>
-          </li>
-        </ul>
-
-      </div>
-    </section>
-
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="products-title">
       <div class="site-container">
         <div class="grid gap-8 nav:grid-cols-12">
-          <p class="text-label font-extrabold tracking-widest text-brand-strong uppercase nav:col-span-4">Что производим</p>
           <h2 id="products-title" class="font-display text-h2 uppercase nav:col-span-8">Три направления</h2>
         </div>
 
@@ -235,7 +199,7 @@ onMounted(() => {
             :key="group.title"
             class="group flex min-h-80 flex-col rounded-3xl bg-panel p-6 transition-colors duration-300 hover:bg-brand hover:text-surface sm:p-8 wide:min-h-96 wide:p-10"
           >
-            <span class="text-label font-extrabold tracking-widest text-brand-strong">0{{ index + 1 }}</span>
+            <span class="text-label font-extrabold tracking-widest text-brand transition-colors group-hover:text-surface">0{{ index + 1 }}</span>
             <h3 class="mt-auto font-display text-h4 text-brand uppercase transition-colors group-hover:text-surface">{{ group.title }}</h3>
             <p class="mt-5 text-body font-medium text-subtle transition-colors group-hover:text-surface/70">{{ group.text }}</p>
           </article>
@@ -248,7 +212,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="overflow-hidden bg-brand-strong py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="awards-title">
+    <section class="overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="awards-title">
       <div class="site-container">
         <div class="grid items-end gap-8 nav:grid-cols-12">
           <h2 id="awards-title" class="font-display text-h2 uppercase nav:col-span-8">Дело говорит<br>за себя</h2>
@@ -279,7 +243,7 @@ onMounted(() => {
                     <span class="block font-display text-h4 text-brand uppercase">{{ award.title }}</span>
                     <span class="mt-4 block text-body font-medium text-subtle">{{ award.text }}</span>
                   </span>
-                  <span class="font-display text-h4 text-brand-strong">{{ award.year }}</span>
+                  <span class="font-display text-h4 text-brand">{{ award.year }}</span>
                 </figcaption>
               </figure>
             </a>
@@ -292,27 +256,19 @@ onMounted(() => {
       <div class="site-container">
         <div class="grid gap-12 nav:grid-cols-12 nav:gap-6">
           <div class="nav:col-span-7">
-            <p class="text-label font-extrabold tracking-widest text-brand-strong uppercase">Из Петербурга — в регионы</p>
-            <h2 id="partnership-title" class="mt-8 max-w-5xl font-display text-h2 uppercase">Работаем с теми, кто знает толк</h2>
+            <h2 id="partnership-title" class="max-w-5xl font-display text-h2 uppercase">Работаем с теми, кто знает толк</h2>
           </div>
           <p class="max-w-xl text-body-large font-medium text-surface/65 nav:col-span-5 nav:self-end">
             Поставляем напитки оптом в многооборотных кегах и одноразовой ПЭТ-таре. Доставляем по Санкт-Петербургу и Ленинградской области, работаем с региональными дистрибьюторами.
           </p>
         </div>
 
-        <div class="mt-16 grid gap-4 nav:grid-cols-2">
-          <a class="group flex min-h-64 flex-col rounded-3xl bg-brand p-6 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/partnery/')">
-            <span class="text-label font-extrabold tracking-widest uppercase">Найти продукцию</span>
-            <span class="mt-auto flex items-end justify-between gap-8">
-              <span class="font-display text-h3 uppercase">Где купить</span>
-              <CircleArrow hover="detail" size="action" tone="surface" />
-            </span>
-          </a>
-          <a class="group flex min-h-64 flex-col rounded-3xl bg-surface p-6 text-foreground focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/kontakty/')">
-            <span class="text-label font-extrabold tracking-widest text-brand-strong uppercase">Обсудить сотрудничество</span>
+        <div class="mt-16">
+          <a class="group flex min-h-64 flex-col rounded-3xl bg-brand p-6 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/kontakty/')">
+            <span class="text-label font-extrabold tracking-widest uppercase">Начать сотрудничество</span>
             <span class="mt-auto flex items-end justify-between gap-8">
               <span class="font-display text-h3 uppercase">Связаться</span>
-              <CircleArrow hover="brand" size="action" />
+              <CircleArrow hover="detail" size="action" tone="surface" />
             </span>
           </a>
         </div>
