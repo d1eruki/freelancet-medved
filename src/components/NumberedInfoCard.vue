@@ -21,6 +21,7 @@ defineProps({
     }"
   >
     <span
+      v-if="variant !== 'distribution'"
       class="text-label font-extrabold tracking-widest text-brand"
       :class="{ 'transition-colors group-hover:text-surface': variant === 'group' || variant === 'process' }"
     >{{ number }}</span>

@@ -3,36 +3,16 @@ import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, ref } from 'vue'
 import CircleArrow from './CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
-import meadImageUrl from '../assets/mead-glass-cutout.png'
-import ciderImageUrl from '../assets/cider-glass-cutout.png'
-import perryImageUrl from '../assets/perry-glass-cutout.png'
+import { catalogCategories } from '../data/catalog'
 
-const products = [
-  {
-    name: 'Медовуха',
-    label: 'Мёд, ягоды и пряности',
-    description: 'Мягкий хмельной напиток с медовой основой и выразительным ароматом натуральных добавок.',
-    varieties: 'От медовой классики до ярких ягод: светлая, тёмная, имбирная, вишнёвая, сливовая, клюквенная и чёрная смородина.',
-    href: sitePath('/katalog/medovuha/'),
-    image: meadImageUrl,
-  },
-  {
-    name: 'Сидр',
-    label: 'Свежесть спелых яблок',
-    description: 'Лёгкий яблочный напиток с чистым фруктовым вкусом и деликатной игрой пузырьков.',
-    varieties: 'От освежающего сухого до мягкого сладкого: сухой, полусухой, полусладкий и сладкий.',
-    href: sitePath('/katalog/sidr/'),
-    image: ciderImageUrl,
-  },
-  {
-    name: 'Пуаре',
-    label: 'Тонкий вкус груши',
-    description: 'Ароматный грушевый напиток с мягкой сладостью и свежим фруктовым послевкусием.',
-    varieties: 'Сладкий сорт с ароматом спелой груши и нежным фруктовым послевкусием.',
-    href: sitePath('/katalog/puare/'),
-    image: perryImageUrl,
-  },
-]
+const products = catalogCategories.map((category) => ({
+  name: category.name,
+  label: category.tagline,
+  description: category.description,
+  varieties: category.introduction,
+  href: sitePath(`/katalog/${category.slug}/`),
+  image: category.image,
+}))
 
 const activeIndex = ref(0)
 const isTransitioning = ref(false)

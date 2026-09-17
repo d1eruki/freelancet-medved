@@ -5,6 +5,7 @@ import ActionTile from './ActionTile.vue'
 import HeroCircles from './HeroCircles.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
 import PartnerCard from './PartnerCard.vue'
+import { catalogCategories } from '../data/catalog'
 import { partnerCities, partners } from '../data/partners'
 import { vFitty } from '../directives/fitty'
 import { sitePath } from '../utils/site-path'
@@ -12,23 +13,11 @@ import { sitePath } from '../utils/site-path'
 const allCitiesLabel = 'Все города'
 const selectedCity = ref(allCitiesLabel)
 
-const distributionProducts = [
-  {
-    number: '01',
-    title: 'Медовуха',
-    text: 'Семь сортов медовухи «МЁДВЕДЬ».',
-  },
-  {
-    number: '02',
-    title: 'Сидр',
-    text: '«ДЖИНДЖЕР ХОРС», «КОРК СПИРИТ» и «МЭРИОН».',
-  },
-  {
-    number: '03',
-    title: 'Пуаре',
-    text: 'Грушевый напиток «ВАЛЕНТАЙН».',
-  },
-]
+const distributionProducts = catalogCategories.map((category, index) => ({
+  number: String(index + 1).padStart(2, '0'),
+  title: category.name,
+  text: category.description,
+}))
 
 const visiblePartners = computed(() => {
   if (selectedCity.value === allCitiesLabel) {
@@ -136,125 +125,24 @@ onMounted(() => {
     </section>
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="regional-title">
-      <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
-        <div class="nav:col-span-4">
+      <div class="site-container">
+        <h2 id="regional-title" class="font-display text-h2 break-words hyphens-auto uppercase">
+          Петербургский характер в разных городах
+        </h2>
+
+        <div class="mt-12">
           <p class="font-display text-h1 text-brand uppercase">Рядом</p>
           <p class="mt-3 text-label font-extrabold tracking-widest uppercase">От Калининграда до Сыктывкара</p>
         </div>
 
-        <div class="nav:col-span-8">
-          <h2 id="regional-title" class="max-w-5xl font-display text-h2 uppercase">
-            Петербургский характер в разных городах
-          </h2>
-          <div class="mt-10 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
-            <p>
-              Благодаря региональным партнёрам напитки производства Товарищества пиво-медоваренного завода «МЁДВЕДЬ» разливают в пабах и ресторанах за пределами Петербурга.
-            </p>
-            <p>
-              Медовуху и фирменные сидры можно найти в отделах крафтового пива и специализированных магазинах — в бутылках и в розлив.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="relative overflow-hidden bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="distribution-title">
-      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
-        <span v-fitty class="partners-watermark inline-block whitespace-nowrap font-display uppercase">Вместе</span>
-      </div>
-
-      <div class="site-container relative">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
-          <div class="nav:col-span-8">
-            <h2 id="distribution-title" class="font-display text-h2 uppercase">Стать дистрибьютором</h2>
-          </div>
-          <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
-            Открыты новым контактам и готовы обсудить поставки, оптовые цены и дегустационные образцы.
+        <div class="mt-10 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
+          <p>
+            Благодаря региональным партнёрам напитки производства Товарищества пиво-медоваренного завода «МЁДВЕДЬ» разливают в пабах и ресторанах за пределами Петербурга.
+          </p>
+          <p>
+            Медовуху и фирменные сидры можно найти в отделах крафтового пива и специализированных магазинах — в бутылках и в розлив.
           </p>
         </div>
-
-        <article class="mt-16 sm:mt-20">
-          <p class="text-label font-extrabold tracking-widest text-surface uppercase">Начало сотрудничества</p>
-          <h3 class="mt-8 max-w-6xl font-display text-h3 uppercase">
-            Тестовые <span class="text-brand">ПЭТ</span> образцы
-          </h3>
-          <p class="mt-8 max-w-3xl text-body-large font-medium text-surface/75">
-            Перед первой поставкой можно заказать тестовые образцы интересующих напитков. Подготовим выбранные сорта медовухи, сидра и пуаре в ПЭТ-бутылках для дегустации.
-          </p>
-        </article>
-
-        <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <NumberedInfoCard
-            v-for="product in distributionProducts"
-            :key="product.number"
-            :number="product.number"
-            :title="product.title"
-            :text="product.text"
-            variant="distribution"
-          />
-        </ul>
-
-        <div class="mt-12 grid gap-8 border-t border-surface/40 pt-10 nav:grid-cols-12">
-          <p class="max-w-3xl text-body font-medium text-surface/75 nav:col-span-7">
-            Компания не предлагает и не продаёт алкоголь лицам младше 18 лет. ООО «ФАРТ СПБ» оставляет за собой право отказать в сотрудничестве, если оно нарушает действующие договоры с дистрибьюторами.
-          </p>
-          <a class="group flex items-center justify-between gap-6 nav:col-span-5 nav:justify-self-stretch" :href="sitePath('/kontakty/')">
-            <span class="secondary-action py-3 font-display text-h4 uppercase">Запросить образцы</span>
-            <CircleArrow hover="detail" size="action" tone="surface" />
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section
-      class="relative overflow-hidden border-t border-surface/20 bg-foreground py-20 text-surface sm:py-24 wide:py-28"
-      data-header-theme="light"
-      aria-labelledby="distribution-example-title"
-    >
-      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
-        <span v-fitty class="partners-watermark inline-block whitespace-nowrap font-display uppercase">Вместе</span>
-      </div>
-
-      <div class="site-container relative">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
-          <div class="nav:col-span-8">
-            <h2 id="distribution-example-title" class="font-display text-h2 uppercase">Стать дистрибьютором</h2>
-          </div>
-          <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
-            Открыты новым контактам и готовы обсудить поставки и оптовые цены.
-          </p>
-        </div>
-
-        <article class="mt-16 grid gap-10 border-y border-surface/30 py-10 sm:mt-20 sm:py-12 nav:grid-cols-12 nav:items-end">
-          <div class="nav:col-span-8">
-            <h3 class="max-w-6xl font-display text-h3 uppercase">
-              Тестовые <span class="text-brand">ПЭТ</span> образцы
-            </h3>
-            <p class="mt-7 max-w-3xl text-body-large font-medium text-surface/75">
-              Перед первой поставкой можно заказать выбранные сорта медовухи, сидра и пуаре в ПЭТ-бутылках для дегустации.
-            </p>
-          </div>
-          <a class="group flex items-center justify-between gap-6 nav:col-span-4 nav:justify-self-stretch" :href="sitePath('/kontakty/')">
-            <span class="secondary-action py-3 font-display text-h4 uppercase">Запросить образцы</span>
-            <CircleArrow hover="detail" size="action" tone="surface" />
-          </a>
-        </article>
-
-        <ul class="mt-8 grid gap-4 nav:grid-cols-3">
-          <NumberedInfoCard
-            v-for="product in distributionProducts"
-            :key="`example-${product.number}`"
-            :number="product.number"
-            :title="product.title"
-            :text="product.text"
-            variant="distribution"
-            compact
-          />
-        </ul>
-
-        <p class="mt-10 max-w-5xl text-label font-medium text-surface/60">
-          Компания не предлагает и не продаёт алкоголь лицам младше 18 лет. ООО «ФАРТ СПБ» оставляет за собой право отказать в сотрудничестве, если оно нарушает действующие договоры с дистрибьюторами.
-        </p>
       </div>
     </section>
 
@@ -268,19 +156,19 @@ onMounted(() => {
       </div>
 
       <div class="site-container relative">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
-          <h2 id="distribution-third-title" class="font-display text-h2 uppercase nav:col-span-8">Стать дистрибьютором</h2>
-          <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
+        <div class="grid gap-8">
+          <h2 id="distribution-third-title" class="font-display text-h2 break-words hyphens-auto uppercase">Стать дистрибьютором</h2>
+          <p class="text-body-large font-medium text-surface/75">
             Открыты новым контактам и готовы обсудить поставки и оптовые цены.
           </p>
         </div>
 
         <div class="mt-14 grid gap-5 border-t border-surface/30 pt-8 sm:mt-16 sm:pt-10 nav:grid-cols-12">
           <p class="text-body-large font-extrabold tracking-wide uppercase nav:col-span-4">
-            Тестовые <span class="text-brand">ПЭТ</span>-образцы
+            Дегустация перед поставкой
           </p>
           <p class="max-w-3xl text-body-large font-medium text-surface/75 nav:col-span-8">
-            Перед первой поставкой можно заказать выбранные сорта медовухи, сидра и пуаре в ПЭТ-бутылках для дегустации.
+            Выберите напитки для дегустации — подготовим образцы медовухи, сидра и пуаре в ПЭТ-бутылках.
           </p>
         </div>
 

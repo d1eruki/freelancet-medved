@@ -13,21 +13,12 @@ import CircleArrow from './CircleArrow.vue'
 import ActionTile from './ActionTile.vue'
 import AwardCard from './AwardCard.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
+import { catalogCategories } from '../data/catalog'
 
-const productGroups = [
-  {
-    title: 'Медовуха',
-    text: 'Светлые, тёмные, ягодные и пряные сорта под маркой «МЁДВЕДЬ».',
-  },
-  {
-    title: 'Сидр',
-    text: '«ДЖИНДЖЕР ХОРС», «КОРК СПИРИТ» и «МЭРИОН».',
-  },
-  {
-    title: 'Пуаре',
-    text: 'Грушевый напиток «ВАЛЕНТАЙН».',
-  },
-]
+const productGroups = catalogCategories.map((category) => ({
+  title: category.name,
+  text: category.description,
+}))
 
 const awards = [
   {

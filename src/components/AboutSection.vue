@@ -1,5 +1,6 @@
 <script setup>
 import productionImageUrl from '../assets/production-meadery.png'
+import { catalogCategories } from '../data/catalog'
 import { vFitty } from '../directives/fitty'
 </script>
 
@@ -50,12 +51,12 @@ import { vFitty } from '../directives/fitty'
         <article class="about-assortment rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:p-10">
           <div class="grid gap-8 sm:grid-cols-3 sm:items-end">
             <div>
-              <p class="font-display text-h1 text-brand">7</p>
+              <p class="font-display text-h1 text-brand">{{ catalogCategories[0].items.length }}</p>
               <p class="mt-2 text-label font-extrabold tracking-wider uppercase">сортов медовухи</p>
             </div>
 
             <p class="text-body font-medium text-subtle sm:col-span-2">
-              В базовом ассортименте — медовуха «Мёдведь», сидры «Джинджер Хорс», «Корк Спирит» и «Мэрион», а также пуаре «Валентайн». Поставляем напитки оптом в кегах и ПЭТ-таре.
+              В каталоге — медовуха «Мэрион», шесть сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
             </p>
           </div>
         </article>

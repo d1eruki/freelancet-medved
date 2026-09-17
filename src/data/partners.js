@@ -10,7 +10,6 @@ export const partnerCities = [
 
 export const partners = [
   {
-    legalForm: 'ООО',
     name: '«Балтсервис»',
     city: 'Мурманск',
     address: 'ул. Промышленная, д. 19',
@@ -18,13 +17,11 @@ export const partners = [
     phoneHref: 'tel:+78152211000',
   },
   {
-    legalForm: 'ООО',
     name: '«Гудвилл»',
     city: 'Калининград',
     address: 'ул. К. Назаровой, д. 16, литер А1',
   },
   {
-    legalForm: 'ООО',
     name: '«НСК Групп»',
     city: 'Санкт-Петербург',
     address: 'пр. Стачек, д. 32, пом. 14Н',
@@ -37,7 +34,6 @@ export const partners = [
     ],
   },
   {
-    legalForm: 'ООО',
     name: '«Пивная компания»',
     city: 'Петрозаводск',
     address: 'Шуйское шоссе, д. 8б',
@@ -45,7 +41,6 @@ export const partners = [
     phoneHref: 'tel:+78142705555',
   },
   {
-    legalForm: 'ООО',
     name: '«Пинта»',
     city: 'Псков',
     address: 'ул. Яна Райниса, д. 37А',
@@ -53,7 +48,6 @@ export const partners = [
     phoneHref: 'tel:+78112747505',
   },
   {
-    legalForm: 'ООО',
     name: '«Обиртон»',
     city: 'Москва',
     address: 'ул. Речников, д. 21',
@@ -68,7 +62,6 @@ export const partners = [
     ],
   },
   {
-    legalForm: 'ООО',
     name: '«УТ Северо-Запад»',
     city: 'Сыктывкар',
     address: 'ул. Первомайская, д. 5',
@@ -76,7 +69,6 @@ export const partners = [
     phoneHref: 'tel:+79068793715',
   },
   {
-    legalForm: 'ООО',
     name: '«УТ Северо-Запад»',
     city: 'Санкт-Петербург',
     address: 'ул. Софийская, д. 91, литера М',
@@ -96,7 +88,6 @@ export const partners = [
     ],
   },
   {
-    legalForm: 'ООО',
     name: '«Торг Групп»',
     city: 'Санкт-Петербург',
     address: 'ул. Бумажная, д. 3, литер А',

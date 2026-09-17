@@ -16,10 +16,7 @@ const routeUrl = computed(() => {
   <li>
     <article class="flex h-full min-h-80 flex-col rounded-3xl bg-surface p-6 sm:p-8 wide:min-h-88">
       <p class="text-caption font-extrabold tracking-widest text-brand uppercase">{{ partner.city }}</p>
-      <h3 class="mt-6 font-display text-h4 uppercase">
-        <span class="mr-2 font-body text-body font-extrabold text-subtle">{{ partner.legalForm }}</span>
-        {{ partner.name }}
-      </h3>
+      <h5 class="mt-6 font-display text-h5 uppercase">{{ partner.name }}</h5>
 
       <div class="mt-auto pt-10">
         <address class="text-body font-medium text-subtle not-italic">{{ partner.address }}</address>
@@ -45,7 +42,7 @@ const routeUrl = computed(() => {
           :href="routeUrl"
           target="_blank"
           rel="noopener noreferrer"
-          :aria-label="`Построить маршрут до ${partner.legalForm} ${partner.name}`"
+          :aria-label="`Построить маршрут до ${partner.name}`"
         >
           <span class="secondary-action py-3">Построить маршрут</span>
           <CircleArrow hover="brand" />
