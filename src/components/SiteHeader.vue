@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
     <div class="site-container flex h-16 items-center justify-between border-b border-current/40 sm:h-20">
       <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
-          class="h-12 w-24 object-contain sm:h-14 sm:w-32"
+          class="h-12 w-30 object-contain sm:h-14 sm:w-40"
           :class="isDarkHeader ? 'brightness-0' : 'brightness-0 invert'"
           :src="logoUrl"
           alt="МЁДВЕДЬ"

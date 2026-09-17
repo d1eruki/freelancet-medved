@@ -168,15 +168,15 @@ onBeforeUnmount(clearTransitionTimers)
 
     <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-28">
       <div class="grid items-end gap-6 pb-8 wide:grid-cols-3 wide:gap-12 wide:pb-10">
-        <h2 id="products-title" class="min-w-0 font-display text-h2 text-brand uppercase wide:col-span-2">
+        <h2 id="products-title" class="min-w-0 font-display text-h2 text-center text-brand uppercase nav:text-left wide:col-span-2">
           Продукция
         </h2>
 
       </div>
     </div>
 
-    <div class="relative flex min-h-0 flex-1 flex-col">
-      <div class="relative z-1 min-h-144 flex-1 touch-pan-y select-none overflow-hidden sm:min-h-160 nav:min-h-0"
+    <div class="relative flex flex-col nav:min-h-0 nav:flex-1">
+      <div class="relative z-1 touch-pan-y select-none overflow-hidden nav:min-h-0 nav:flex-1"
         @pointerdown="startDrag"
         @pointermove="moveDrag"
         @pointerup="endDrag"
@@ -187,14 +187,14 @@ onBeforeUnmount(clearTransitionTimers)
         @click.capture="preventDragClick"
       >
         <div
-          class="product-track flex h-full"
+          class="product-track flex nav:h-full"
           :class="{ 'is-dragging': isDragging }"
           :style="{ transform: `translate3d(calc(-${activeIndex * 100}% + ${dragOffset}px), 0, 0)` }"
         >
           <ProductCard
             v-for="(product, index) in products"
             :key="product.href"
-            class="h-full w-full shrink-0"
+            class="w-full shrink-0 nav:h-full"
             :product="product"
             :active="index === activeIndex"
             :text-hidden="isTextHidden"
@@ -202,13 +202,15 @@ onBeforeUnmount(clearTransitionTimers)
             :dragging="isDragging"
             :drag-angle="dragOffset < 0 ? 3 : -3"
             :aria-hidden="index !== activeIndex"
+            @previous="showPrevious"
+            @next="showNext"
           />
         </div>
       </div>
 
       <span class="sr-only" aria-live="polite">Выбран напиток: {{ products[activeIndex].name }}</span>
 
-      <div class="site-container relative z-2 shrink-0 pb-8">
+      <div class="site-container relative z-2 hidden shrink-0 pb-8 nav:block">
         <div class="flex flex-wrap items-center justify-center gap-3 pt-6">
           <button
             class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
@@ -216,11 +218,11 @@ onBeforeUnmount(clearTransitionTimers)
             aria-label="Предыдущий напиток"
             @click="showPrevious"
           >
-            <CircleArrow direction="left" hover="brand" tone="surface" />
+            <CircleArrow direction="left" hover="control" tone="surface" />
           </button>
 
           <div
-            class="flex flex-wrap items-center justify-center gap-3"
+            class="hidden flex-wrap items-center justify-center gap-3 nav:flex"
             role="tablist"
             aria-label="Выбор напитка"
             @keydown.left.prevent="showPrevious"
@@ -249,7 +251,7 @@ onBeforeUnmount(clearTransitionTimers)
             aria-label="Следующий напиток"
             @click="showNext"
           >
-            <CircleArrow hover="brand" tone="surface" />
+            <CircleArrow hover="control" tone="surface" />
           </button>
         </div>
       </div>

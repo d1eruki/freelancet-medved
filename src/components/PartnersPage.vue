@@ -1,7 +1,12 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import CircleArrow from './CircleArrow.vue'
+import ActionTile from './ActionTile.vue'
+import HeroCircles from './HeroCircles.vue'
+import NumberedInfoCard from './NumberedInfoCard.vue'
+import PartnerCard from './PartnerCard.vue'
 import { partnerCities, partners } from '../data/partners'
+import { vFitty } from '../directives/fitty'
 import { sitePath } from '../utils/site-path'
 
 const allCitiesLabel = 'Все города'
@@ -32,12 +37,6 @@ const visiblePartners = computed(() => {
 
   return partners.filter((partner) => partner.city === selectedCity.value)
 })
-
-function getRouteUrl(partner) {
-  const destination = `Россия, г. ${partner.city}, ${partner.address}`
-
-  return `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponent(destination)}&rtt=auto`
-}
 
 const pointCountLabel = computed(() => {
   const count = visiblePartners.value.length
@@ -81,15 +80,7 @@ onMounted(() => {
           </p>
         </div>
 
-        <div class="relative hidden min-h-112 nav:col-span-4 nav:block" aria-hidden="true">
-          <span class="absolute top-4 right-0 grid size-64 place-items-center rounded-full border border-surface/40 font-display text-h3 uppercase wide:size-80">
-            Где
-          </span>
-          <span class="absolute right-24 bottom-0 grid size-56 place-items-center rounded-full bg-brand font-display text-h3 uppercase wide:size-64">
-            Купить
-          </span>
-          <span class="absolute right-2 bottom-16 size-5 rounded-full bg-surface" />
-        </div>
+        <HeroCircles top-label="Где" bottom-label="Купить" />
       </div>
     </section>
 
@@ -128,50 +119,7 @@ onMounted(() => {
         </p>
 
         <ul v-if="visiblePartners.length" class="mt-5 grid gap-4 sm:grid-cols-2 nav:grid-cols-3">
-          <li v-for="partner in visiblePartners" :key="`${partner.city}-${partner.name}`">
-            <article class="flex h-full min-h-80 flex-col rounded-3xl bg-surface p-6 sm:p-8 wide:min-h-88">
-              <p class="text-caption font-extrabold tracking-widest text-brand uppercase">{{ partner.city }}</p>
-              <h3 class="mt-6 font-display text-h4 uppercase">
-                <span class="mr-2 font-body text-body font-extrabold text-subtle">{{ partner.legalForm }}</span>
-                {{ partner.name }}
-              </h3>
-
-              <div class="mt-auto pt-10">
-                <address class="text-body font-medium text-subtle not-italic">{{ partner.address }}</address>
-
-                <a
-                  v-if="partner.phone"
-                  class="secondary-action mt-5 inline-flex py-2 text-body font-extrabold text-brand"
-                  :href="partner.phoneHref"
-                >
-                  {{ partner.phone }}
-                </a>
-
-                <ul v-if="partner.metro" class="mt-5 flex flex-wrap gap-x-5 gap-y-2">
-                  <li
-                    v-for="station in partner.metro"
-                    :key="station.name"
-                    class="flex items-center gap-2 text-label font-semibold text-subtle"
-                    :aria-label="`${station.name}, ${station.line}`"
-                  >
-                    <span class="size-2 rounded-full" :style="{ backgroundColor: station.color }" aria-hidden="true" />
-                    <span aria-hidden="true">{{ station.name }}</span>
-                  </li>
-                </ul>
-
-                <a
-                  class="group mt-8 flex items-center justify-between gap-5 border-t border-foreground/15 pt-6 text-label font-extrabold tracking-wide uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  :href="getRouteUrl(partner)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  :aria-label="`Построить маршрут до ${partner.legalForm} ${partner.name}`"
-                >
-                  <span class="secondary-action py-3">Построить маршрут</span>
-                  <CircleArrow hover="brand" />
-                </a>
-              </div>
-            </article>
-          </li>
+          <PartnerCard v-for="partner in visiblePartners" :key="`${partner.city}-${partner.name}`" :partner="partner" />
         </ul>
 
         <div v-else class="mt-5 rounded-3xl bg-surface p-8 sm:p-12">
@@ -211,7 +159,9 @@ onMounted(() => {
     </section>
 
     <section class="relative overflow-hidden bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="distribution-title">
-      <span class="partners-watermark pointer-events-none absolute -right-8 bottom-0 font-display uppercase" aria-hidden="true">Вместе</span>
+      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
+        <span v-fitty class="partners-watermark inline-block whitespace-nowrap font-display uppercase">Вместе</span>
+      </div>
 
       <div class="site-container relative">
         <div class="grid items-end gap-8 nav:grid-cols-12">
@@ -234,15 +184,14 @@ onMounted(() => {
         </article>
 
         <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <li
+          <NumberedInfoCard
             v-for="product in distributionProducts"
             :key="product.number"
-            class="flex min-h-72 flex-col rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:min-h-80"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand">{{ product.number }}</span>
-            <h3 class="mt-auto font-display text-h4 text-brand uppercase">{{ product.title }}</h3>
-            <p class="mt-5 text-body font-medium text-subtle">{{ product.text }}</p>
-          </li>
+            :number="product.number"
+            :title="product.title"
+            :text="product.text"
+            variant="distribution"
+          />
         </ul>
 
         <div class="mt-12 grid gap-8 border-t border-surface/40 pt-10 nav:grid-cols-12">
@@ -262,7 +211,9 @@ onMounted(() => {
       data-header-theme="light"
       aria-labelledby="distribution-example-title"
     >
-      <span class="partners-watermark pointer-events-none absolute -right-8 bottom-0 font-display uppercase" aria-hidden="true">Вместе</span>
+      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
+        <span v-fitty class="partners-watermark inline-block whitespace-nowrap font-display uppercase">Вместе</span>
+      </div>
 
       <div class="site-container relative">
         <div class="grid items-end gap-8 nav:grid-cols-12">
@@ -290,15 +241,15 @@ onMounted(() => {
         </article>
 
         <ul class="mt-8 grid gap-4 nav:grid-cols-3">
-          <li
+          <NumberedInfoCard
             v-for="product in distributionProducts"
             :key="`example-${product.number}`"
-            class="flex min-h-56 flex-col rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:min-h-64"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand">{{ product.number }}</span>
-            <h3 class="mt-auto font-display text-h4 text-brand uppercase">{{ product.title }}</h3>
-            <p class="mt-5 text-body font-medium text-subtle">{{ product.text }}</p>
-          </li>
+            :number="product.number"
+            :title="product.title"
+            :text="product.text"
+            variant="distribution"
+            compact
+          />
         </ul>
 
         <p class="mt-10 max-w-5xl text-label font-medium text-surface/60">
@@ -312,7 +263,9 @@ onMounted(() => {
       data-header-theme="light"
       aria-labelledby="distribution-third-title"
     >
-      <span class="partners-watermark pointer-events-none absolute -right-8 bottom-0 font-display uppercase" aria-hidden="true">Вместе</span>
+      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
+        <span v-fitty class="partners-watermark inline-block whitespace-nowrap font-display uppercase">Вместе</span>
+      </div>
 
       <div class="site-container relative">
         <div class="grid items-end gap-8 nav:grid-cols-12">
@@ -332,27 +285,24 @@ onMounted(() => {
         </div>
 
         <ul class="mt-10 grid gap-4 nav:grid-cols-3">
-          <li
+          <NumberedInfoCard
             v-for="product in distributionProducts"
             :key="`third-${product.number}`"
-            class="flex min-h-56 flex-col rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:min-h-64"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand">{{ product.number }}</span>
-            <h3 class="mt-auto font-display text-h4 text-brand uppercase">{{ product.title }}</h3>
-            <p class="mt-5 text-body font-medium text-subtle">{{ product.text }}</p>
-          </li>
+            :number="product.number"
+            :title="product.title"
+            :text="product.text"
+            variant="distribution"
+            compact
+          />
         </ul>
 
-        <a
-          class="group mt-4 flex min-h-44 flex-col rounded-3xl bg-brand p-6 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-8 nav:min-h-52 wide:p-10"
+        <ActionTile
+          class="mt-4"
           :href="sitePath('/kontakty/')"
-        >
-          <span class="text-label font-extrabold tracking-widest uppercase">Первый шаг к сотрудничеству</span>
-          <span class="mt-auto flex items-end justify-between gap-8">
-            <span class="font-display text-h3 uppercase">Заказать образцы</span>
-            <CircleArrow hover="detail" size="action" tone="surface" />
-          </span>
-        </a>
+          label="Первый шаг к сотрудничеству"
+          title="Заказать образцы"
+          compact
+        />
 
         <p class="mt-8 max-w-5xl text-label font-medium text-surface/60">
           Компания не предлагает и не продаёт алкоголь лицам младше 18 лет. ООО «ФАРТ СПБ» оставляет за собой право отказать в сотрудничестве, если оно нарушает действующие договоры с дистрибьюторами.

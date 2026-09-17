@@ -11,7 +11,8 @@ const sizeClasses = {
 
 const hoverClasses = {
   none: '',
-  brand: 'group-hover:bg-brand group-hover:text-surface group-focus-visible:bg-brand group-focus-visible:text-surface',
+  control: 'group-hover:bg-brand group-hover:text-surface group-focus-visible:bg-brand group-focus-visible:text-surface',
+  brand: 'group-hover:-rotate-45 group-hover:bg-brand group-hover:text-surface group-focus-visible:-rotate-45 group-focus-visible:bg-brand group-focus-visible:text-surface',
   detail: 'group-hover:-rotate-45 group-hover:bg-foreground group-hover:text-surface group-focus-visible:-rotate-45 group-focus-visible:bg-foreground group-focus-visible:text-surface',
 }
 
@@ -39,7 +40,7 @@ const props = defineProps({
   hover: {
     type: String,
     default: 'none',
-    validator: (value) => ['none', 'brand', 'detail'].includes(value),
+    validator: (value) => ['none', 'control', 'brand', 'detail'].includes(value),
   },
 })
 </script>

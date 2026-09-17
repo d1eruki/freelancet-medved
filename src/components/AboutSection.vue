@@ -1,5 +1,6 @@
 <script setup>
 import productionImageUrl from '../assets/production-meadery.png'
+import { vFitty } from '../directives/fitty'
 </script>
 
 <template>
@@ -8,16 +9,13 @@ import productionImageUrl from '../assets/production-meadery.png'
     data-header-theme="light"
     aria-labelledby="about-title"
   >
-    <span
-      class="about-watermark pointer-events-none absolute -right-12 -z-1 font-display uppercase"
-      aria-hidden="true"
-    >
-      Мёдведь
-    </span>
+    <div class="pointer-events-none absolute right-[-3rem] bottom-0 left-0 -z-1" aria-hidden="true">
+      <span v-fitty class="about-watermark inline-block whitespace-nowrap font-display uppercase">Мёдведь</span>
+    </div>
 
     <div class="site-container">
       <h2 id="about-title" class="font-display text-h2 uppercase">
-        О производителе
+        О компании
       </h2>
 
       <div class="about-grid mt-12 grid gap-4 wide:mt-20">
@@ -75,10 +73,10 @@ import productionImageUrl from '../assets/production-meadery.png'
 
 <style scoped>
 .about-watermark {
-  bottom: -0.18em;
   color: rgb(255 255 255 / 3%);
   font-size: clamp(7rem, 16vw, 15rem);
   line-height: 0.8;
+  translate: 0 0.18em;
 }
 
 @media (min-width: 54rem) {

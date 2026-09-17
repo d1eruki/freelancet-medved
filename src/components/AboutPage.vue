@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+import { vFitty } from '../directives/fitty'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about-company.jpg'
 import productionImageUrl from '../assets/production-meadery.png'
@@ -9,6 +10,9 @@ import awardNewProduct2007Url from '../assets/award-new-product-2007.jpg'
 import awardMedovukhaFest2017ParticipantUrl from '../assets/award-medovukha-fest-2017-participant.jpg'
 import awardMedovukhaFest2017TastingUrl from '../assets/award-medovukha-fest-2017-tasting.jpg'
 import CircleArrow from './CircleArrow.vue'
+import ActionTile from './ActionTile.vue'
+import AwardCard from './AwardCard.vue'
+import NumberedInfoCard from './NumberedInfoCard.vue'
 
 const productGroups = [
   {
@@ -125,7 +129,9 @@ onMounted(() => {
     </section>
 
     <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="durdin-title">
-      <span class="about-watermark pointer-events-none absolute -right-8 bottom-0 font-display uppercase" aria-hidden="true">Дурдин</span>
+      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
+        <span v-fitty class="about-watermark inline-block whitespace-nowrap font-display uppercase">Дурдин</span>
+      </div>
 
       <div class="site-container relative">
         <div class="grid gap-12 nav:grid-cols-12 nav:gap-6">
@@ -147,7 +153,7 @@ onMounted(() => {
                 <p class="font-display text-h4 text-brand uppercase">Имперский герб</p>
                 <p class="mt-5 text-body font-medium text-subtle">Завод получил право изображать герб Российской империи на этикетках.</p>
               </article>
-              <article class="rounded-3xl border border-surface/30 p-6 sm:p-8">
+              <article class="rounded-3xl border border-surface/30 bg-brand p-6 sm:p-8">
                 <p class="font-display text-h4 text-surface uppercase">100 лошадей</p>
                 <p class="mt-5 text-body font-medium text-surface/70">Собственная служба доставки развозила продукцию по городу на грузовых подводах.</p>
               </article>
@@ -194,15 +200,14 @@ onMounted(() => {
         </div>
 
         <div class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <article
+          <NumberedInfoCard
             v-for="(group, index) in productGroups"
             :key="group.title"
-            class="group flex min-h-80 flex-col rounded-3xl bg-panel p-6 transition-colors duration-300 hover:bg-brand hover:text-surface sm:p-8 wide:min-h-96 wide:p-10"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand transition-colors group-hover:text-surface">0{{ index + 1 }}</span>
-            <h3 class="mt-auto font-display text-h4 text-brand uppercase transition-colors group-hover:text-surface">{{ group.title }}</h3>
-            <p class="mt-5 text-body font-medium text-subtle transition-colors group-hover:text-surface/70">{{ group.text }}</p>
-          </article>
+            :number="`0${index + 1}`"
+            :title="group.title"
+            :text="group.text"
+            variant="group"
+          />
         </div>
 
         <a class="group mt-10 inline-flex items-center gap-5 text-label font-extrabold tracking-wide uppercase" :href="sitePath('/katalog/')">
@@ -222,32 +227,12 @@ onMounted(() => {
         </div>
 
         <ul class="mt-12 grid gap-4 sm:mt-16 sm:grid-cols-2 nav:grid-cols-12">
-          <li
+          <AwardCard
             v-for="(award, index) in awards"
             :key="`${award.year}-${award.title}`"
-            class="group overflow-hidden rounded-3xl bg-surface text-foreground nav:col-span-4"
-            :class="{ 'nav:col-span-6': index > 2 }"
-          >
-            <a class="block h-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" :href="award.image" target="_blank" rel="noopener">
-              <figure class="flex h-full min-h-120 flex-col">
-                <div class="h-72 overflow-hidden bg-panel p-5 sm:h-80 sm:p-7">
-                  <img
-                    class="size-full object-contain transition duration-500 group-hover:scale-105"
-                    :src="award.image"
-                    :alt="`Диплом: ${award.title}, ${award.year} год`"
-                    loading="lazy"
-                  >
-                </div>
-                <figcaption class="flex flex-1 items-start justify-between gap-6 p-6 sm:p-8">
-                  <span>
-                    <span class="block font-display text-h4 text-brand uppercase">{{ award.title }}</span>
-                    <span class="mt-4 block text-body font-medium text-subtle">{{ award.text }}</span>
-                  </span>
-                  <span class="font-display text-h4 text-brand">{{ award.year }}</span>
-                </figcaption>
-              </figure>
-            </a>
-          </li>
+            :award="award"
+            :wide="index > 2"
+          />
         </ul>
       </div>
     </section>
@@ -264,13 +249,7 @@ onMounted(() => {
         </div>
 
         <div class="mt-16">
-          <a class="group flex min-h-64 flex-col rounded-3xl bg-brand p-6 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/kontakty/')">
-            <span class="text-label font-extrabold tracking-widest uppercase">Начать сотрудничество</span>
-            <span class="mt-auto flex items-end justify-between gap-8">
-              <span class="font-display text-h3 uppercase">Связаться</span>
-              <CircleArrow hover="detail" size="action" tone="surface" />
-            </span>
-          </a>
+          <ActionTile :href="sitePath('/kontakty/')" label="Начать сотрудничество" title="Связаться" />
         </div>
       </div>
     </section>

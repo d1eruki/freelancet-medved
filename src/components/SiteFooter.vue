@@ -3,6 +3,8 @@ import { sitePath } from '../utils/site-path'
 import logoUrl from '../assets/brand-logo.svg'
 import { navigation } from '../data/navigation'
 
+const showSocialLinks = false
+
 const socialLinks = [
   {
     label: 'Telegram',
@@ -27,7 +29,7 @@ const socialLinks = [
     <div class="site-container">
       <div class="grid gap-12 border-b border-surface/40 pb-12 nav:grid-cols-2 wide:gap-24 wide:pb-20">
         <a class="inline-flex w-max" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
-          <img class="h-auto w-48 object-contain brightness-0 invert sm:w-64" :src="logoUrl" alt="МЁДВЕДЬ">
+          <img class="h-auto w-64 object-contain brightness-0 invert sm:w-80" :src="logoUrl" alt="МЁДВЕДЬ">
         </a>
 
         <nav aria-label="Навигация в подвале">
@@ -43,7 +45,7 @@ const socialLinks = [
 
       <div class="grid gap-8 py-12 nav:grid-cols-3 wide:gap-20 wide:py-16">
         <div>
-          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Наш адрес</span>
+          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Адрес</span>
           <address class="max-w-xl text-body-large font-semibold not-italic">
             г. Санкт-Петербург, Курляндская улица, д. 28Г, пом. 75
           </address>
@@ -57,11 +59,11 @@ const socialLinks = [
         </div>
 
         <div>
-          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Пишите нам</span>
+          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Почта</span>
           <a class="border-b border-surface/60 text-body-large font-semibold" href="mailto:info@medved.beer">
             info@medved.beer
           </a>
-          <ul class="mt-6 flex items-center gap-3" aria-label="Социальные сети">
+          <ul v-if="showSocialLinks" class="mt-6 flex items-center gap-3" aria-label="Социальные сети">
             <li v-for="social in socialLinks" :key="social.label">
               <a
                 class="grid size-11 place-items-center transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
@@ -84,6 +86,12 @@ const socialLinks = [
           <p>© 2017 ООО «ФАРТ СПБ».</p>
           <a class="hover:underline hover:underline-offset-4" :href="sitePath('/disclaimer/')">
             Ограничение ответственности
+          </a>
+          <a class="hover:underline hover:underline-offset-4" :href="sitePath('/politika-konfidencialnosti/')">
+            Политика конфиденциальности
+          </a>
+          <a class="hover:underline hover:underline-offset-4" href="https://medved.beer/files/requisites_ooo_fart_spb_jan2018.pdf" target="_blank" rel="noopener noreferrer">
+            Реквизиты ООО «ФАРТ СПБ»
           </a>
         </div>
       </div>

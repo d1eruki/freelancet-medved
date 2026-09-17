@@ -1,8 +1,10 @@
 <script setup>
 import { onMounted } from 'vue'
+import { vFitty } from '../directives/fitty'
 import { sitePath } from '../utils/site-path'
 import productionImageUrl from '../assets/production-meadery.png'
-import CircleArrow from './CircleArrow.vue'
+import ActionTile from './ActionTile.vue'
+import NumberedInfoCard from './NumberedInfoCard.vue'
 
 const ingredients = [
   {
@@ -112,7 +114,9 @@ onMounted(() => {
     </section>
 
     <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="production-ingredients-title">
-      <span class="production-watermark pointer-events-none absolute -right-8 bottom-0 font-display uppercase" aria-hidden="true">Натурально</span>
+      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
+        <span v-fitty class="production-watermark inline-block whitespace-nowrap font-display uppercase">Натурально</span>
+      </div>
 
       <div class="site-container relative">
         <div class="grid items-end gap-8 nav:grid-cols-12">
@@ -125,15 +129,14 @@ onMounted(() => {
         </div>
 
         <ol class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <li
+          <NumberedInfoCard
             v-for="ingredient in ingredients"
             :key="ingredient.number"
-            class="flex min-h-80 flex-col rounded-3xl bg-surface p-6 text-foreground sm:p-8 wide:min-h-96 wide:p-10"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand">{{ ingredient.number }}</span>
-            <h3 class="mt-auto font-display text-h4 text-brand uppercase">{{ ingredient.title }}</h3>
-            <p class="mt-5 max-w-sm text-body font-medium text-subtle">{{ ingredient.text }}</p>
-          </li>
+            :number="ingredient.number"
+            :title="ingredient.title"
+            :text="ingredient.text"
+            variant="ingredient"
+          />
         </ol>
       </div>
     </section>
@@ -147,15 +150,14 @@ onMounted(() => {
         </div>
 
         <ol class="mt-12 grid gap-4 sm:mt-16 sm:grid-cols-2 nav:grid-cols-4">
-          <li
+          <NumberedInfoCard
             v-for="step in processSteps"
             :key="step.number"
-            class="group flex min-h-80 flex-col rounded-3xl bg-surface p-6 transition-colors duration-300 hover:bg-brand hover:text-surface sm:p-8 wide:min-h-96"
-          >
-            <span class="text-label font-extrabold tracking-widest text-brand transition-colors group-hover:text-surface">{{ step.number }}</span>
-            <h3 class="mt-auto font-display text-h4 text-brand uppercase transition-colors group-hover:text-surface">{{ step.title }}</h3>
-            <p class="mt-5 text-body font-medium text-subtle transition-colors group-hover:text-surface/75">{{ step.text }}</p>
-          </li>
+            :number="step.number"
+            :title="step.title"
+            :text="step.text"
+            variant="process"
+          />
         </ol>
       </div>
     </section>
@@ -180,20 +182,8 @@ onMounted(() => {
       </div>
 
       <div class="site-container mt-16 grid gap-4 sm:mt-20 nav:grid-cols-2">
-        <a class="group flex min-h-64 flex-col rounded-3xl bg-brand p-6 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/katalog/')">
-          <span class="text-label font-extrabold tracking-widest uppercase">Попробовать результат</span>
-          <span class="mt-auto flex items-end justify-between gap-8">
-            <span class="font-display text-h3 uppercase">В каталог</span>
-            <CircleArrow hover="detail" size="action" tone="surface" />
-          </span>
-        </a>
-        <a class="group flex min-h-64 flex-col rounded-3xl bg-surface p-6 text-foreground focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:p-10" :href="sitePath('/kontakty/')">
-          <span class="text-label font-extrabold tracking-widest text-brand uppercase">Вопросы и сотрудничество</span>
-          <span class="mt-auto flex items-end justify-between gap-8">
-            <span class="font-display text-h3 uppercase">Связаться</span>
-            <CircleArrow hover="brand" size="action" />
-          </span>
-        </a>
+        <ActionTile :href="sitePath('/katalog/')" label="Попробовать результат" title="В каталог" />
+        <ActionTile :href="sitePath('/kontakty/')" label="Вопросы и сотрудничество" title="Связаться" tone="surface" />
       </div>
     </section>
   </div>

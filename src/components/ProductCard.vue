@@ -35,6 +35,7 @@ const props = defineProps({
     default: 0,
   },
 })
+const emit = defineEmits(['previous', 'next'])
 
 const hoverAngleCss = computed(() => `${hoverAngle.value}deg`)
 const dragAngleCss = computed(() => `${props.dragAngle}deg`)
@@ -51,23 +52,23 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
     }"
     :aria-label="product.name"
   >
-    <div class="site-container relative grid h-full min-h-144 py-12 sm:min-h-160 nav:min-h-0 nav:grid-cols-12 nav:grid-rows-2">
-      <div class="product-copy relative z-2 nav:col-span-4 nav:row-span-2 nav:self-center">
+    <div class="site-container relative flex flex-col items-center py-8 text-center sm:py-12 nav:grid nav:h-full nav:min-h-0 nav:grid-cols-12 nav:grid-rows-2 nav:text-left">
+      <div class="product-copy relative z-2 w-full max-w-md nav:col-span-4 nav:row-span-2 nav:max-w-none nav:self-center">
         <p class="text-label font-bold tracking-wider uppercase">{{ product.label }}</p>
 
         <h3 class="mt-4 font-display text-h3 text-brand uppercase">
           {{ product.name }}
         </h3>
 
-        <p class="mt-6 max-w-sm text-body font-medium">
+        <p class="mx-auto mt-6 max-w-sm text-body font-medium nav:mx-0">
           {{ product.description }}
         </p>
       </div>
 
-      <div class="product-copy relative z-2 mt-10 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:self-center">
+      <div class="product-copy relative z-2 order-3 mt-8 w-full max-w-md nav:order-none nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:max-w-none nav:self-center">
         <p class="text-label font-bold tracking-wider uppercase">Сорта</p>
 
-        <p class="mt-4 max-w-md text-body font-medium">
+        <p class="mx-auto mt-4 max-w-md text-body font-medium nav:mx-0">
           {{ product.varieties }}
         </p>
 
@@ -81,17 +82,39 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
         </a>
       </div>
 
-      <a
-        class="product-interactive product-visual absolute bottom-0 left-1/2 z-1 size-96 -translate-x-1/2 rotate-0 transition duration-500 focus-visible:outline-4 focus-visible:outline-brand sm:size-112 nav:bottom-3 nav:size-auto nav:h-11/12 nav:max-h-144 nav:aspect-square"
-        draggable="false"
-        @pointermove="updateHoverAngle"
-        @pointerleave="hoverAngle = 3"
-        :href="product.href"
-        :tabindex="active ? 0 : -1"
-        :aria-label="`Подробнее о напитке «${product.name}»`"
-      >
-        <img class="size-full object-contain" :src="product.image" alt="" draggable="false">
-      </a>
+      <div class="order-2 mt-8 flex w-full items-center justify-center gap-2 nav:contents">
+        <button
+          class="group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
+          type="button"
+          aria-label="Предыдущий напиток"
+          :tabindex="active ? 0 : -1"
+          @click="emit('previous')"
+        >
+          <CircleArrow direction="left" hover="control" tone="surface" />
+        </button>
+
+        <a
+          class="product-interactive product-visual relative z-1 min-w-0 max-w-64 flex-1 aspect-square rotate-0 transition duration-500 focus-visible:outline-4 focus-visible:outline-brand sm:max-w-72 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
+          draggable="false"
+          @pointermove="updateHoverAngle"
+          @pointerleave="hoverAngle = 3"
+          :href="product.href"
+          :tabindex="active ? 0 : -1"
+          :aria-label="`Подробнее о напитке «${product.name}»`"
+        >
+          <img class="size-full object-contain" :src="product.image" alt="" draggable="false">
+        </a>
+
+        <button
+          class="group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
+          type="button"
+          aria-label="Следующий напиток"
+          :tabindex="active ? 0 : -1"
+          @click="emit('next')"
+        >
+          <CircleArrow hover="control" tone="surface" />
+        </button>
+      </div>
     </div>
   </article>
 </template>

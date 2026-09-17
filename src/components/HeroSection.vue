@@ -92,14 +92,14 @@ onBeforeUnmount(() => {
         к хорошим напиткам
       </h1>
 
-      <div class="relative z-1 grid flex-1 items-start gap-8 pt-44 sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
+      <div class="relative z-1 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-rows-none sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
         <div class="max-w-sm nav:mb-12 wide:mb-16">
           <p class="text-center text-body-large sm:text-left">
             Пиво-медоваренный завод «Медведь». Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
           </p>
         </div>
 
-        <div class="flex w-full flex-col items-start gap-4 sm:w-auto sm:flex-row sm:items-center nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
+        <div class="flex w-full flex-col items-start self-end gap-4 sm:w-auto sm:flex-row sm:items-center sm:self-auto nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
           <a
             class="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-surface px-7 text-label font-extrabold tracking-wide text-foreground uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:-translate-y-1 focus-visible:shadow-xl sm:w-auto"
             :href="sitePath('/katalog/')"
@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <img
-      class="pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
+      class="hero-layer-background pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
       :src="heroLayerBackgroundUrl"
       alt=""
       aria-hidden="true"
@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
     >
     <img
       class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full -translate-x-1/2 scale-125 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 sm:scale-200 nav:h-[65svh] nav:w-[42%]"
-      :style="{ translate: `calc(-50% + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
+      :style="{ translate: `calc(var(--hero-foreground-offset-x, -50%) + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
       :src="heroLayerForegroundUrl"
       alt="Медведь с бутылкой напитка «Медведь»"
     >
@@ -138,6 +138,38 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+@media (max-width: 39.999rem) {
+  .hero-layer-background {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    scale: 1;
+    translate: 0;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+
+  .hero-layer-middle {
+    top: auto;
+    bottom: 0;
+    left: 60%;
+    width: min(115vw, 32rem);
+    height: auto;
+    scale: 1;
+  }
+
+  .hero-layer-foreground {
+    --hero-foreground-offset-x: 0px;
+    top: auto;
+    right: 40vw;
+    bottom: 8svh;
+    left: auto;
+    width: auto;
+    height: 55svh;
+    scale: 2;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .hero-layer-middle {
     --float-distance: -3px;

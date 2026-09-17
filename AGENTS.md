@@ -1,10 +1,24 @@
 # Agent Instructions
 
+## Change Approval and Visual Work
+
+- Before every file change, present a concrete plan and wait for the user's explicit approval. If the scope changes, update the plan and get approval again before editing.
+- Do not place eyebrow or overline labels above `h1` or `h2` headings.
+- Do not reduce a heading's font size to make it fit. Change the layout, column widths, or wrapping instead.
+- Do not change font sizes with local overrides on individual components or pages. Change shared typography variables instead. Resolve isolated text overflow through layout or wrapping.
+- The user controls visual design and performs visual review. Implement only the exact visual changes the user requests and approves; do not add adjustments based on your own visual judgment.
+- After a visual change, do not open a browser, capture screenshots, inspect the rendered layout, or claim visual approval unless the user explicitly requests that verification. Run nonvisual checks and hand the result to the user for visual review.
+
 ## File Naming
 
 - Write all file and directory names in English.
 - Use lowercase kebab-case for new file and directory names unless the technology or an established convention requires another format.
 - Keep document contents in the language appropriate for the project and its audience. The English-only rule applies to file and directory names, not necessarily to their contents.
+
+## Vue Components
+
+- When a card, action block, or other page element is repeated or is designed to be repeated with different data, make it a Vue component from its first implementation. Pass content and meaningful variants through props or slots instead of copying its markup into page templates.
+- Reuse an existing component when it fits the same element. Keep unique page content in its page component.
 
 ## Document Content
 
