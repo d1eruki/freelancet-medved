@@ -89,6 +89,34 @@
 }
 
 @layer components {
+  section.bg-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  section.bg-panel::before {
+    position: absolute;
+    right: -512px;
+    bottom: -128px;
+    z-index: 0;
+    width: min(85vw, 60rem);
+    aspect-ratio: 162 / 133;
+    background: url("../assets/section-bear-mark.svg") right bottom / contain no-repeat;
+    content: '';
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  section.bg-panel > .site-container {
+    position: relative;
+    z-index: 1;
+  }
+
+  section.bg-panel .rounded-3xl {
+    @apply shadow-2xl/10;
+  }
+
   .secondary-action {
     position: relative;
   }

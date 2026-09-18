@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
 
   .hero-layer-middle {
     top: auto;
-    bottom: 0;
+    bottom: -3svh;
     left: 60%;
     width: min(115vw, 32rem);
     height: auto;
