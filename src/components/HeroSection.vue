@@ -5,20 +5,36 @@ import HeroSteam from './HeroSteam.vue'
 import heroLayerForegroundUrl from '../assets/hero-layer-foreground.png'
 import heroLayerForeground960Url from '../assets/hero-layer-foreground.png?width=960'
 import heroLayerForeground1440Url from '../assets/hero-layer-foreground.png?width=1440'
+import heroLayerForegroundAvifUrl from '../assets/hero-layer-foreground.png?format=avif'
+import heroLayerForegroundAvif960Url from '../assets/hero-layer-foreground.png?format=avif&width=960'
+import heroLayerForegroundAvif1440Url from '../assets/hero-layer-foreground.png?format=avif&width=1440'
 import heroLayerBackgroundUrl from '../assets/hero-layer-background.png'
 import heroLayerBackground960Url from '../assets/hero-layer-background.png?width=960'
 import heroLayerBackground1440Url from '../assets/hero-layer-background.png?width=1440'
+import heroLayerBackgroundAvifUrl from '../assets/hero-layer-background.png?format=avif'
+import heroLayerBackgroundAvif960Url from '../assets/hero-layer-background.png?format=avif&width=960'
+import heroLayerBackgroundAvif1440Url from '../assets/hero-layer-background.png?format=avif&width=1440'
 import heroLayerMiddleUrl from '../assets/hero-layer-middle.png'
 import heroLayerMiddle960Url from '../assets/hero-layer-middle.png?width=960'
 import heroLayerMiddle1440Url from '../assets/hero-layer-middle.png?width=1440'
+import heroLayerMiddleAvifUrl from '../assets/hero-layer-middle.png?format=avif'
+import heroLayerMiddleAvif960Url from '../assets/hero-layer-middle.png?format=avif&width=960'
+import heroLayerMiddleAvif1440Url from '../assets/hero-layer-middle.png?format=avif&width=1440'
 import heroLayerMiddleBlinkUrl from '../assets/hero-layer-middle-blink.png'
 import heroLayerMiddleBlink960Url from '../assets/hero-layer-middle-blink.png?width=960'
 import heroLayerMiddleBlink1440Url from '../assets/hero-layer-middle-blink.png?width=1440'
+import heroLayerMiddleBlinkAvifUrl from '../assets/hero-layer-middle-blink.png?format=avif'
+import heroLayerMiddleBlinkAvif960Url from '../assets/hero-layer-middle-blink.png?format=avif&width=960'
+import heroLayerMiddleBlinkAvif1440Url from '../assets/hero-layer-middle-blink.png?format=avif&width=1440'
 
 const heroLayerBackgroundSrcset = `${heroLayerBackground960Url} 960w, ${heroLayerBackground1440Url} 1440w, ${heroLayerBackgroundUrl} 2048w`
 const heroLayerMiddleSrcset = `${heroLayerMiddle960Url} 960w, ${heroLayerMiddle1440Url} 1440w, ${heroLayerMiddleUrl} 2508w`
 const heroLayerMiddleBlinkSrcset = `${heroLayerMiddleBlink960Url} 960w, ${heroLayerMiddleBlink1440Url} 1440w, ${heroLayerMiddleBlinkUrl} 2508w`
 const heroLayerForegroundSrcset = `${heroLayerForeground960Url} 960w, ${heroLayerForeground1440Url} 1440w, ${heroLayerForegroundUrl} 2048w`
+const heroLayerBackgroundAvifSrcset = `${heroLayerBackgroundAvif960Url} 960w, ${heroLayerBackgroundAvif1440Url} 1440w, ${heroLayerBackgroundAvifUrl} 2048w`
+const heroLayerMiddleAvifSrcset = `${heroLayerMiddleAvif960Url} 960w, ${heroLayerMiddleAvif1440Url} 1440w, ${heroLayerMiddleAvifUrl} 2508w`
+const heroLayerMiddleBlinkAvifSrcset = `${heroLayerMiddleBlinkAvif960Url} 960w, ${heroLayerMiddleBlinkAvif1440Url} 1440w, ${heroLayerMiddleBlinkAvifUrl} 2508w`
+const heroLayerForegroundAvifSrcset = `${heroLayerForegroundAvif960Url} 960w, ${heroLayerForegroundAvif1440Url} 1440w, ${heroLayerForegroundAvifUrl} 2048w`
 
 const heroLayerBackgroundSizes = '(min-width: 54rem) 118vw, (min-width: 40rem) 280vw, 100vw'
 const heroLayerMiddleSizes = '(min-width: 54rem) 84vw, (min-width: 40rem) 200vw, 115vw'
@@ -70,17 +86,22 @@ onMounted(() => {
   blinkMedia = window.matchMedia('(prefers-reduced-motion: no-preference)')
   blinkMedia.addEventListener('change', scheduleBlink)
   document.addEventListener('visibilitychange', scheduleBlink)
-  const blinkImage = new Image()
-  blinkImage.sizes = heroLayerMiddleSizes
-  blinkImage.srcset = heroLayerMiddleBlinkSrcset
-  blinkImage.src = heroLayerMiddleBlinkUrl
-  blinkImage.decode().then(() => {
-    if (isUnmounted) return
-    blinkReady = true
-    scheduleBlink()
-  }).catch(() => {
-    // Keep the original image if the blink frame cannot be loaded.
-  })
+  const preloadBlink = (srcset, src) => {
+    const image = new Image()
+    image.sizes = heroLayerMiddleSizes
+    image.srcset = srcset
+    image.src = src
+    return image.decode()
+  }
+  preloadBlink(heroLayerMiddleBlinkAvifSrcset, heroLayerMiddleBlinkAvifUrl)
+    .catch(() => preloadBlink(heroLayerMiddleBlinkSrcset, heroLayerMiddleBlinkUrl))
+    .then(() => {
+      if (isUnmounted) return
+      blinkReady = true
+      scheduleBlink()
+    }).catch(() => {
+      // Keep the original image if the blink frame cannot be loaded.
+    })
   parallaxMedia = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)')
   parallaxMedia.addEventListener('change', resetParallax)
   window.addEventListener('blur', resetParallax)
@@ -132,33 +153,42 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <img
-      class="hero-layer-background pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
-      :sizes="heroLayerBackgroundSizes"
-      :srcset="heroLayerBackgroundSrcset"
-      :src="heroLayerBackgroundUrl"
-      alt=""
-      aria-hidden="true"
-    >
-    <img
-      ref="bearImage"
-      class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
-      :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
-      :sizes="heroLayerMiddleSizes"
-      :srcset="isBlinking ? heroLayerMiddleBlinkSrcset : heroLayerMiddleSrcset"
-      :src="isBlinking ? heroLayerMiddleBlinkUrl : heroLayerMiddleUrl"
-      alt=""
-      aria-hidden="true"
-    >
-    <img
-      class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full -translate-x-1/2 scale-125 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 sm:scale-200 nav:h-[65svh] nav:w-[42%]"
-      :style="{ translate: `calc(var(--hero-foreground-offset-x, -50%) + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
-      :sizes="heroLayerForegroundSizes"
-      :srcset="heroLayerForegroundSrcset"
-      :src="heroLayerForegroundUrl"
-      fetchpriority="high"
-      alt="Медведь с бутылкой напитка «Медведь»"
-    >
+    <picture>
+      <source type="image/avif" :sizes="heroLayerBackgroundSizes" :srcset="heroLayerBackgroundAvifSrcset">
+      <img
+        class="hero-layer-background pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
+        :sizes="heroLayerBackgroundSizes"
+        :srcset="heroLayerBackgroundSrcset"
+        :src="heroLayerBackgroundUrl"
+        alt=""
+        aria-hidden="true"
+      >
+    </picture>
+    <picture>
+      <source type="image/avif" :sizes="heroLayerMiddleSizes" :srcset="isBlinking ? heroLayerMiddleBlinkAvifSrcset : heroLayerMiddleAvifSrcset">
+      <img
+        ref="bearImage"
+        class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
+        :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
+        :sizes="heroLayerMiddleSizes"
+        :srcset="isBlinking ? heroLayerMiddleBlinkSrcset : heroLayerMiddleSrcset"
+        :src="isBlinking ? heroLayerMiddleBlinkUrl : heroLayerMiddleUrl"
+        alt=""
+        aria-hidden="true"
+      >
+    </picture>
+    <picture>
+      <source type="image/avif" :sizes="heroLayerForegroundSizes" :srcset="heroLayerForegroundAvifSrcset">
+      <img
+        class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full -translate-x-1/2 scale-125 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 sm:scale-200 nav:h-[65svh] nav:w-[42%]"
+        :style="{ translate: `calc(var(--hero-foreground-offset-x, -50%) + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
+        :sizes="heroLayerForegroundSizes"
+        :srcset="heroLayerForegroundSrcset"
+        :src="heroLayerForegroundUrl"
+        fetchpriority="high"
+        alt="Медведь с бутылкой напитка «Медведь»"
+      >
+    </picture>
     <HeroSteam :source="bearImage" />
   </section>
 </template>

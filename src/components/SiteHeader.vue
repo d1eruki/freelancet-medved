@@ -11,6 +11,7 @@ const headerElement = ref(null)
 
 let lastScrollPosition = 0
 let scrollFrame = 0
+let initialThemeFrame = 0
 
 function updateHeaderTheme() {
   const headerHeight = headerElement.value?.offsetHeight ?? 0
@@ -64,7 +65,12 @@ function isCurrentPage(href) {
 
 onMounted(() => {
   lastScrollPosition = Math.max(window.scrollY, 0)
-  updateHeaderTheme()
+  initialThemeFrame = window.requestAnimationFrame(() => {
+    initialThemeFrame = window.requestAnimationFrame(() => {
+      initialThemeFrame = 0
+      updateHeaderTheme()
+    })
+  })
   window.addEventListener('scroll', handleScroll, { passive: true })
   window.addEventListener('resize', updateHeaderTheme)
 })
@@ -76,6 +82,9 @@ onBeforeUnmount(() => {
   if (scrollFrame) {
     window.cancelAnimationFrame(scrollFrame)
   }
+  if (initialThemeFrame) {
+    window.cancelAnimationFrame(initialThemeFrame)
+  }
 })
 </script>
 
@@ -86,7 +95,7 @@ onBeforeUnmount(() => {
     :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-full', isDarkHeader ? 'text-foreground' : 'text-surface']"
     :inert="!isHeaderVisible || undefined"
   >
-    <div class="site-container flex h-16 items-center justify-between border-b border-current/40 sm:h-20">
+    <div class="site-container flex h-16 items-center justify-between sm:h-20">
       <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
           class="h-12 w-30 object-contain sm:h-14 sm:w-40"

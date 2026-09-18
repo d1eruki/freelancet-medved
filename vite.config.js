@@ -6,4 +6,7 @@ import { optimizeImagesPlugin } from './scripts/vite/optimize-images-plugin.mjs'
 export default defineConfig({
   base: process.env.SITE_BASE || '/freelancet-medved/',
   plugins: [optimizeImagesPlugin(), vue(), tailwindcss()],
+  build: {
+    sourcemap: true,
+  },
 })

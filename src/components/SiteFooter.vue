@@ -29,7 +29,7 @@ const socialLinks = [
     <div class="site-container">
       <div class="grid gap-12 border-b border-surface/40 pb-12 nav:grid-cols-2 wide:gap-24 wide:pb-20">
         <a class="inline-flex w-max" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
-          <img class="h-auto w-64 object-contain brightness-0 invert sm:w-80" :src="logoUrl" alt="МЁДВЕДЬ">
+          <img class="h-auto w-64 object-contain brightness-0 invert sm:w-80" :src="logoUrl" alt="МЁДВЕДЬ" width="511" height="133">
         </a>
 
         <nav aria-label="Навигация в подвале">
