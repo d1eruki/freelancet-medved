@@ -43,7 +43,7 @@ const patternPositions = [
     </div>
     <div class="site-container relative z-1 flex min-h-svh flex-col items-center justify-center pt-28 pb-40 text-center sm:pt-36 sm:pb-48">
       <h1 :id="`${category.slug}-title`" class="font-display text-h1 break-words hyphens-auto uppercase">{{ category.name }}</h1>
-      <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/80">{{ category.description }}</p>
+      <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/80">{{ category.heroDescription }}</p>
     </div>
     <img class="absolute top-[66%] left-1/2 w-[125vw] max-w-none -translate-x-1/2 sm:top-[62%] sm:w-[90vw] nav:top-[60%] nav:w-[75vw]" :src="category.image" :alt="category.imageAlt">
   </section>
