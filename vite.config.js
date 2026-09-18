@@ -3,6 +3,6 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: '/freelancet-medved/',
+  base: process.env.SITE_BASE || '/freelancet-medved/',
   plugins: [vue(), tailwindcss()],
 })

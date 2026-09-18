@@ -1,0 +1,59 @@
+name: Deploy to Timeweb
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: timeweb
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.TIMEWEB_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build for domain root
+        run: npm run build
+        env:
+          SITE_BASE: /
+      - name: Configure SSH
+        env:
+          TIMEWEB_SSH_KEY: ${{ secrets.TIMEWEB_SSH_KEY }}
+          TIMEWEB_KNOWN_HOSTS: ${{ secrets.TIMEWEB_KNOWN_HOSTS }}
+        run: |
+          test -n "$TIMEWEB_SSH_KEY" || { echo 'Missing TIMEWEB_SSH_KEY secret'; exit 1; }
+          test -n "$TIMEWEB_KNOWN_HOSTS" || { echo 'Missing TIMEWEB_KNOWN_HOSTS secret'; exit 1; }
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$TIMEWEB_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$TIMEWEB_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Upload site
+        env:
+          TIMEWEB_HOST: ${{ vars.TIMEWEB_HOST }}
+          TIMEWEB_USER: ${{ vars.TIMEWEB_USER }}
+          TIMEWEB_PATH: ${{ vars.TIMEWEB_PATH }}
+        run: |
+          test -n "$TIMEWEB_HOST" || { echo 'Missing TIMEWEB_HOST variable'; exit 1; }
+          test -n "$TIMEWEB_USER" || { echo 'Missing TIMEWEB_USER variable'; exit 1; }
+          case "$TIMEWEB_PATH" in
+            */public_html) ;;
+            *) echo 'TIMEWEB_PATH must point to the site public_html directory'; exit 1 ;;
+          esac
+          rsync -az --delay-updates \
+            -e "ssh -i $HOME/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
+            dist/ "$TIMEWEB_USER@$TIMEWEB_HOST:$TIMEWEB_PATH/"
