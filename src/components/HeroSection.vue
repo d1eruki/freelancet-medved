@@ -3,9 +3,26 @@ import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import HeroSteam from './HeroSteam.vue'
 import heroLayerForegroundUrl from '../assets/hero-layer-foreground.png'
+import heroLayerForeground960Url from '../assets/hero-layer-foreground.png?width=960'
+import heroLayerForeground1440Url from '../assets/hero-layer-foreground.png?width=1440'
 import heroLayerBackgroundUrl from '../assets/hero-layer-background.png'
+import heroLayerBackground960Url from '../assets/hero-layer-background.png?width=960'
+import heroLayerBackground1440Url from '../assets/hero-layer-background.png?width=1440'
 import heroLayerMiddleUrl from '../assets/hero-layer-middle.png'
+import heroLayerMiddle960Url from '../assets/hero-layer-middle.png?width=960'
+import heroLayerMiddle1440Url from '../assets/hero-layer-middle.png?width=1440'
 import heroLayerMiddleBlinkUrl from '../assets/hero-layer-middle-blink.png'
+import heroLayerMiddleBlink960Url from '../assets/hero-layer-middle-blink.png?width=960'
+import heroLayerMiddleBlink1440Url from '../assets/hero-layer-middle-blink.png?width=1440'
+
+const heroLayerBackgroundSrcset = `${heroLayerBackground960Url} 960w, ${heroLayerBackground1440Url} 1440w, ${heroLayerBackgroundUrl} 2048w`
+const heroLayerMiddleSrcset = `${heroLayerMiddle960Url} 960w, ${heroLayerMiddle1440Url} 1440w, ${heroLayerMiddleUrl} 2508w`
+const heroLayerMiddleBlinkSrcset = `${heroLayerMiddleBlink960Url} 960w, ${heroLayerMiddleBlink1440Url} 1440w, ${heroLayerMiddleBlinkUrl} 2508w`
+const heroLayerForegroundSrcset = `${heroLayerForeground960Url} 960w, ${heroLayerForeground1440Url} 1440w, ${heroLayerForegroundUrl} 2048w`
+
+const heroLayerBackgroundSizes = '(min-width: 54rem) 118vw, (min-width: 40rem) 280vw, 100vw'
+const heroLayerMiddleSizes = '(min-width: 54rem) 84vw, (min-width: 40rem) 200vw, 115vw'
+const heroLayerForegroundSizes = '(min-width: 54rem) 84vw, (min-width: 40rem) 200vw, 75svh'
 
 const bearImage = ref(null)
 const isBlinking = ref(false)
@@ -54,6 +71,8 @@ onMounted(() => {
   blinkMedia.addEventListener('change', scheduleBlink)
   document.addEventListener('visibilitychange', scheduleBlink)
   const blinkImage = new Image()
+  blinkImage.sizes = heroLayerMiddleSizes
+  blinkImage.srcset = heroLayerMiddleBlinkSrcset
   blinkImage.src = heroLayerMiddleBlinkUrl
   blinkImage.decode().then(() => {
     if (isUnmounted) return
@@ -115,6 +134,8 @@ onBeforeUnmount(() => {
     </div>
     <img
       class="hero-layer-background pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
+      :sizes="heroLayerBackgroundSizes"
+      :srcset="heroLayerBackgroundSrcset"
       :src="heroLayerBackgroundUrl"
       alt=""
       aria-hidden="true"
@@ -123,6 +144,8 @@ onBeforeUnmount(() => {
       ref="bearImage"
       class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
       :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
+      :sizes="heroLayerMiddleSizes"
+      :srcset="isBlinking ? heroLayerMiddleBlinkSrcset : heroLayerMiddleSrcset"
       :src="isBlinking ? heroLayerMiddleBlinkUrl : heroLayerMiddleUrl"
       alt=""
       aria-hidden="true"
@@ -130,7 +153,10 @@ onBeforeUnmount(() => {
     <img
       class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full -translate-x-1/2 scale-125 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 sm:scale-200 nav:h-[65svh] nav:w-[42%]"
       :style="{ translate: `calc(var(--hero-foreground-offset-x, -50%) + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
+      :sizes="heroLayerForegroundSizes"
+      :srcset="heroLayerForegroundSrcset"
       :src="heroLayerForegroundUrl"
+      fetchpriority="high"
       alt="Медведь с бутылкой напитка «Медведь»"
     >
     <HeroSteam :source="bearImage" />
