@@ -2,7 +2,12 @@ import meadImageUrl from '../assets/mead-glass-cutout.png'
 import ciderImageUrl from '../assets/cider-glass-cutout.png'
 import perryImageUrl from '../assets/perry-glass-cutout.png'
 import pearPerryLiterImageUrl from '../assets/sorts/image 1.png'
+import cranberryMeadLiterImageUrl from '../assets/sorts/image 2.png'
 import mangoMeadLiterImageUrl from '../assets/sorts/image 3.png'
+import forestBerryMeadLiterImageUrl from '../assets/sorts/image 4.png'
+import seaBuckthornMeadLiterImageUrl from '../assets/sorts/image 5.png'
+import plumMeadLiterImageUrl from '../assets/sorts/image 6.png'
+import blackcurrantMeadLiterImageUrl from '../assets/sorts/image 7.png'
 import cherryCiderBottleImageUrl from '../assets/sorts/image 8.png'
 import antonovkaCiderBottleImageUrl from '../assets/sorts/image 9.png'
 import pearPerryBottleImageUrl from '../assets/sorts/image 10.png'
@@ -30,9 +35,9 @@ export const catalogCategories = [
     slug: 'medovuha',
     name: 'Медовуха',
     tagline: 'Мёд, ягоды и пряности',
-    description: 'Два сорта медовухи «Мэрион»: манго и ягодный купаж.',
+    description: 'Семь сортов медовухи с фруктами, ягодами и пряностями.',
     heroDescription: 'Мягкий вкус мёда дополняют сочные фруктовые ноты и яркий аромат.',
-    introduction: 'В линейке — манго и купаж соков граната, черники, малины и яблок.',
+    introduction: 'В линейке — клюква, манго, лесные ягоды, облепиха, слива, чёрная смородина и ягодный купаж «Помэгрэнет энд берри».',
     image: meadImageUrl,
     imageAlt: 'Бокал медовухи',
     items: [
@@ -53,6 +58,46 @@ export const catalogCategories = [
           { volume: '0,33 л', image: mangoMeadSmallImageUrl },
           { volume: '0,45 л', image: mangoMeadImageUrl },
           { volume: '1 л', image: mangoMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мёдведь» Клюквенная',
+        details: 'нефильтрованная, неосветлённая',
+        description: 'Виртуозный баланс мягкого мёда и бодрящей клюквенной кислинки. Напиток с достоинством, который освежает мысли быстрее, чем новости, и идеально подходит на роль аперитива.',
+        variants: [
+          { volume: '1 л', image: cranberryMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мёдведь» с лесными ягодами',
+        details: 'нефильтрованная, неосветлённая',
+        description: 'Гармоничный союз медовой сладости и лесной кислинки. Лечит от скуки эффективнее психотерапевта и безупречно сочетается с сырной тарелкой или хорошей компанией.',
+        variants: [
+          { volume: '1 л', image: forestBerryMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мёдведь» Облепиховая',
+        details: 'нефильтрованная, неосветлённая',
+        description: 'Самобытный напиток со вкусом спелой облепихи и мягким медовым акцентом. Солнце в бокале с аристократическим выдержанным характером.',
+        variants: [
+          { volume: '1 л', image: seaBuckthornMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мёдведь» Сливовая',
+        details: 'нефильтрованная, неосветлённая',
+        description: 'Мягкий округлый вкус садовых слив с приятной кислинкой и благородным финишем. Солидный выбор для тех, кто понимает толк в десертах и хорошем отдыхе.',
+        variants: [
+          { volume: '1 л', image: plumMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мёдведь» Черносмородиновая',
+        details: 'нефильтрованная, неосветлённая',
+        description: 'Натуральный мёд, сок чёрной смородины и секретные пряные травы. Насыщенный букет с мягкой терпкостью, способный создать атмосферу уединённого загородного поместья.',
+        variants: [
+          { volume: '1 л', image: blackcurrantMeadLiterImageUrl },
         ],
       },
     ],

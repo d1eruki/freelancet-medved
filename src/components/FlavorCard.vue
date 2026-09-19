@@ -38,7 +38,7 @@ const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Мед�
       </button>
     </div>
     <div class="mt-auto pt-8">
-      <h3 class="font-display text-h4 uppercase">{{ displayName }}</h3>
+      <h3 class="break-words font-display text-h4 hyphens-auto uppercase">{{ displayName }}</h3>
       <p class="mt-5 text-body font-medium text-subtle">{{ item.description }}</p>
       <p class="mt-7 border-t border-foreground/15 pt-5 text-label font-extrabold tracking-wide text-brand uppercase" aria-live="polite">{{ activeVariant.details ?? item.details }}</p>
     </div>
