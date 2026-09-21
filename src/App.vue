@@ -8,6 +8,7 @@ import CategoryPage from './components/CategoryPage.vue'
 import ContactsPage from './components/ContactsPage.vue'
 import CustomCursor from './components/CustomCursor.vue'
 import HeroSection from './components/HeroSection.vue'
+import HomeContactSection from './components/HomeContactSection.vue'
 import LegalPage from './components/LegalPage.vue'
 import PartnersPage from './components/PartnersPage.vue'
 import ProductionPage from './components/ProductionPage.vue'
@@ -49,6 +50,7 @@ function confirmAge() {
     // The visitor can continue even when browser storage is unavailable.
   }
 }
+
 </script>
 
 <template>
@@ -73,6 +75,7 @@ function confirmAge() {
         <HeroSection />
         <ProductsSection />
         <AboutSection />
+        <HomeContactSection />
       </template>
     </main>
 
