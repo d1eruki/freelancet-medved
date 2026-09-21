@@ -35,6 +35,53 @@ const legalPage = currentPath === '/politika-konfidencialnosti'
     : null
 const category = catalogCategories.find((item) => currentPath === `/katalog/${item.slug}`)
 
+
+const defaultSeo = {
+  title: '«МЁДВЕДЬ» Производитель русской медовухи, сидра, пуаре Санкт-Петербург',
+  description: 'Слабоалкогольные напитки оптом от производителя в СПБ',
+}
+const seoByPath = {
+  '/katalog': {
+    title: 'Каталог медовухи, сидра и пуаре «МЁДВЕДЬ»',
+    description: 'Медовуха «МЁДВЕДЬ», яблочный сидр и грушевое пуаре от петербургского производителя. Выберите категорию и познакомьтесь с ассортиментом.',
+  },
+  '/proizvodstvo': {
+    title: 'Производство «МЁДВЕДЬ» — традиционные рецептуры и современное оборудование',
+    description: 'Как производят медовуху и сидр «МЁДВЕДЬ»: натуральное сырьё, брожение без добавления спирта и контроль качества на каждом этапе.',
+  },
+  '/o-kompanii': {
+    title: 'О компании «МЁДВЕДЬ» — петербургская традиция медоварения',
+    description: 'История пиво-медоваренного завода «МЁДВЕДЬ»: традиции Ивана Дурдина, развитие компании, ассортимент и награды.',
+  },
+  '/partnery': {
+    title: 'Где купить медовуху и сидр «МЁДВЕДЬ»',
+    description: 'Где купить напитки «МЁДВЕДЬ» в Санкт-Петербурге и регионах: адреса и телефоны точек продаж и дистрибьюторов.',
+  },
+  '/kontakty': {
+    title: 'Контакты пиво-медоваренного завода «МЁДВЕДЬ»',
+    description: 'Адрес и контакты пиво-медоваренного завода «МЁДВЕДЬ» в Санкт-Петербурге. Телефон и почта отдела оптовых продаж.',
+  },
+}
+const seo = category
+  ? {
+      title: `${category.name} «МЁДВЕДЬ» — ассортимент`,
+      description: category.description,
+    }
+  : legalPage
+    ? { title: legalPage.title, description: '' }
+    : seoByPath[currentPath] || defaultSeo
+const canonicalPath = currentPath === '/' ? '/' : `${currentPath}/`
+const canonicalUrl = new URL(canonicalPath, 'https://medved.beer').href
+
+document.title = seo.title
+document.querySelector('meta[name="description"]')?.setAttribute('content', seo.description)
+document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonicalUrl)
+document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.title)
+document.querySelector('meta[property="og:description"]')?.setAttribute('content', seo.description)
+document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonicalUrl)
+document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', seo.title)
+document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', seo.description)
+
 try {
   isAgeConfirmed.value = window.localStorage.getItem(ageConfirmationKey) === 'true'
 } catch {

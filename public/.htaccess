@@ -1,4 +1,28 @@
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.html [L]
+
+# Use one canonical host.
+RewriteCond %{HTTP_HOST} ^www\.medved\.beer$ [NC]
+RewriteRule ^ https://medved.beer%{REQUEST_URI} [R=301,L,NE]
+
+# Preserve accumulated relevance from legacy product pages.
+RewriteRule ^katalog/medovuha/medovuha-(?:mdved|medved)-[^/]+/?$ /katalog/medovuha/ [R=301,L,NE]
+RewriteRule ^katalog/sidr/sidr-[^/]+/?$ /katalog/sidr/ [R=301,L,NE]
+RewriteRule ^katalog/puare/puare-[^/]+/?$ /katalog/puare/ [R=301,L,NE]
+RewriteRule ^proizvodstvo/etap-[1-4]/?$ /proizvodstvo/ [R=301,L,NE]
+RewriteRule ^novosti-pivovareniya(?:/[^/]+)?/?$ /o-kompanii/ [R=301,L,NE]
+
+# Keep a single trailing-slash URL for every public page.
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(katalog(?:/(?:medovuha|sidr|puare))?|proizvodstvo|o-kompanii|partnery|kontakty|politika-konfidencialnosti|disclaimer)$ /$1/ [R=301,L,NE]
+
+# Let Apache serve real assets and API files directly.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Serve the Vue application only for routes that actually exist.
+RewriteRule ^$ index.html [L]
+RewriteRule ^(?:katalog(?:/(?:medovuha|sidr|puare))?|proizvodstvo|o-kompanii|partnery|kontakty|politika-konfidencialnosti|disclaimer)/?$ index.html [L]
+
+# Unknown URLs must not masquerade as the home page.
+RewriteRule ^ - [R=404,L]
