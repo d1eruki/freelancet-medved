@@ -1,0 +1,652 @@
+{
+  "source": "https://medved.beer/",
+  "pinned_ip": "45.130.41.117",
+  "files": {
+    "https://medved.beer/": {
+      "path": "index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 14887
+    },
+    "https://medved.beer/robots.txt": {
+      "path": "robots.txt",
+      "type": "text/plain; charset=utf-8",
+      "size": 914
+    },
+    "https://medved.beer/sitemap.xml": {
+      "path": "sitemap.xml",
+      "type": "text/xml; charset=utf-8",
+      "size": 4082
+    },
+    "https://medved.beer/katalog/": {
+      "path": "katalog/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 9695
+    },
+    "https://medved.beer/proizvodstvo/": {
+      "path": "proizvodstvo/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 12612
+    },
+    "https://medved.beer/o-kompanii/": {
+      "path": "o-kompanii/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 13635
+    },
+    "https://medved.beer/partnery/": {
+      "path": "partnery/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 14456
+    },
+    "https://medved.beer/kontakty/": {
+      "path": "kontakty/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10714
+    },
+    "https://medved.beer/novosti-pivovareniya/": {
+      "path": "novosti-pivovareniya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 8682
+    },
+    "https://medved.beer/katalog/medovuha/": {
+      "path": "katalog/medovuha/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 21158
+    },
+    "https://medved.beer/katalog/sidr/": {
+      "path": "katalog/sidr/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 17600
+    },
+    "https://medved.beer/katalog/puare/": {
+      "path": "katalog/puare/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 11919
+    },
+    "https://medved.beer/proizvodstvo/etap-1/": {
+      "path": "proizvodstvo/etap-1/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 7401
+    },
+    "https://medved.beer/proizvodstvo/etap-2/": {
+      "path": "proizvodstvo/etap-2/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 7401
+    },
+    "https://medved.beer/proizvodstvo/etap-3/": {
+      "path": "proizvodstvo/etap-3/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 7401
+    },
+    "https://medved.beer/proizvodstvo/etap-4/": {
+      "path": "proizvodstvo/etap-4/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 7401
+    },
+    "https://medved.beer/novosti-pivovareniya/medovuhafest-2017-v-suzdale-pojmaj-svoyo-medovoe-nastroenie/": {
+      "path": "novosti-pivovareniya/medovuhafest-2017-v-suzdale-pojmaj-svoyo-medovoe-nastroenie/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 12028
+    },
+    "https://medved.beer/novosti-pivovareniya/priglashaem-na-craft-depot-fest-2017-v-moskve/": {
+      "path": "novosti-pivovareniya/priglashaem-na-craft-depot-fest-2017-v-moskve/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 11685
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-medved-svetlaya/": {
+      "path": "katalog/medovuha/medovuha-medved-svetlaya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10467
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-medved-imbirnaya/": {
+      "path": "katalog/medovuha/medovuha-medved-imbirnaya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10417
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-medved-temnaya/": {
+      "path": "katalog/medovuha/medovuha-medved-temnaya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10459
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-medved-vishnvaya/": {
+      "path": "katalog/medovuha/medovuha-medved-vishnvaya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 11816
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-mdved-klyukvennaya/": {
+      "path": "katalog/medovuha/medovuha-mdved-klyukvennaya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10445
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-mdved-slivovaya/": {
+      "path": "katalog/medovuha/medovuha-mdved-slivovaya/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10461
+    },
+    "https://medved.beer/katalog/medovuha/medovuha-mdved-chrnaya-smorodina/": {
+      "path": "katalog/medovuha/medovuha-mdved-chrnaya-smorodina/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10526
+    },
+    "https://medved.beer/katalog/sidr/sidr-yablochnyj-dzhindzher-hors-ejpl-polusladkij/": {
+      "path": "katalog/sidr/sidr-yablochnyj-dzhindzher-hors-ejpl-polusladkij/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10388
+    },
+    "https://medved.beer/katalog/sidr/sidr-yablochnyj-dzhindzher-hors-ejpl-polusuhoj/": {
+      "path": "katalog/sidr/sidr-yablochnyj-dzhindzher-hors-ejpl-polusuhoj/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10376
+    },
+    "https://medved.beer/katalog/sidr/sidr-yablochnyj-dzhindzher-hors-sladkij/": {
+      "path": "katalog/sidr/sidr-yablochnyj-dzhindzher-hors-sladkij/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10369
+    },
+    "https://medved.beer/katalog/sidr/sidr-yablochnyj-kork-spirit-suhoj/": {
+      "path": "katalog/sidr/sidr-yablochnyj-kork-spirit-suhoj/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 10322
+    },
+    "https://medved.beer/katalog/puare/puare-valentine-sladkij/": {
+      "path": "katalog/puare/puare-valentine-sladkij/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 8476
+    },
+    "https://medved.beer/favicon.ico": {
+      "path": "favicon.ico",
+      "type": "image/x-icon",
+      "size": 1150
+    },
+    "https://medved.beer/templates/medved/production/main.css": {
+      "path": "templates/medved/production/main.css",
+      "type": "text/css",
+      "size": 109207
+    },
+    "https://medved.beer/templates/medved/production/main.js": {
+      "path": "templates/medved/production/main.js",
+      "type": "application/x-javascript",
+      "size": 240634
+    },
+    "https://medved.beer/images/logo.png": {
+      "path": "images/logo.png",
+      "type": "image/png",
+      "size": 9834
+    },
+    "https://medved.beer/images/cms/thumbs/ac19a6abf924bb6beee2e95683a3c1330704e7b4/product_medovuha_above_view_350_350_png_5_80.png": {
+      "path": "images/cms/thumbs/ac19a6abf924bb6beee2e95683a3c1330704e7b4/product_medovuha_above_view_350_350_png_5_80.png",
+      "type": "image/png",
+      "size": 251947
+    },
+    "https://medved.beer/images/cms/thumbs/ac19a6abf924bb6beee2e95683a3c1330704e7b4/product_cider_above_view_350_350_png_5_80.png": {
+      "path": "images/cms/thumbs/ac19a6abf924bb6beee2e95683a3c1330704e7b4/product_cider_above_view_350_350_png_5_80.png",
+      "type": "image/png",
+      "size": 265808
+    },
+    "https://medved.beer/images/cms/thumbs/ac19a6abf924bb6beee2e95683a3c1330704e7b4/puare_view_from_above_350_350_png_5_80.png": {
+      "path": "images/cms/thumbs/ac19a6abf924bb6beee2e95683a3c1330704e7b4/puare_view_from_above_350_350_png_5_80.png",
+      "type": "image/png",
+      "size": 269315
+    },
+    "https://medved.beer/images/awards/diplom_interfood2007_ooovit.jpg": {
+      "path": "images/awards/diplom_interfood2007_ooovit.jpg",
+      "type": "image/jpeg",
+      "size": 429699
+    },
+    "https://medved.beer/images/awards/diplom_medovukhafest_2017_public_tasting_ooofartspb.jpg": {
+      "path": "images/awards/diplom_medovukhafest_2017_public_tasting_ooofartspb.jpg",
+      "type": "image/jpeg",
+      "size": 320745
+    },
+    "https://medved.beer/images/o_kompanii/o_kompanii_medovukha_cider_pints.jpg": {
+      "path": "images/o_kompanii/o_kompanii_medovukha_cider_pints.jpg",
+      "type": "image/jpeg",
+      "size": 546369
+    },
+    "https://medved.beer/images/example/zavod.jpg": {
+      "path": "images/example/zavod.jpg",
+      "type": "image/jpeg",
+      "size": 1242944
+    },
+    "https://medved.beer/images/example/medved_kegs_1.jpg": {
+      "path": "images/example/medved_kegs_1.jpg",
+      "type": "image/jpeg",
+      "size": 1292782
+    },
+    "https://medved.beer/images/cms/thumbs/07e525fbad35fd155bca67fc040e006567db7f21/2017_08_medovuha_fest_anons_400_250_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/07e525fbad35fd155bca67fc040e006567db7f21/2017_08_medovuha_fest_anons_400_250_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 15943
+    },
+    "https://medved.beer/images/cms/thumbs/07e525fbad35fd155bca67fc040e006567db7f21/2017_08_kraftdepot_fest_anons_400_250_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/07e525fbad35fd155bca67fc040e006567db7f21/2017_08_kraftdepot_fest_anons_400_250_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 25440
+    },
+    "https://medved.beer/disclaimer/": {
+      "path": "disclaimer/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 11319
+    },
+    "https://medved.beer/content/send/": {
+      "path": "content/send/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 6960
+    },
+    "https://medved.beer/images/cms/thumbs/8be55ed78eb44e214f91ebb43a956143a3c6331f/o_kompanii_medovukha_cider_pints_in_the_bar_470_auto_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/8be55ed78eb44e214f91ebb43a956143a3c6331f/o_kompanii_medovukha_cider_pints_in_the_bar_470_auto_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 51848
+    },
+    "https://medved.beer/images/awards/diplom_medovukhafest2016_ooofartspb.jpg": {
+      "path": "images/awards/diplom_medovukhafest2016_ooofartspb.jpg",
+      "type": "image/jpeg",
+      "size": 373375
+    },
+    "https://medved.beer/images/awards/certificate_newproductspb_2007_ooovit.jpg": {
+      "path": "images/awards/certificate_newproductspb_2007_ooovit.jpg",
+      "type": "image/jpeg",
+      "size": 347497
+    },
+    "https://medved.beer/images/awards/diplom_medovukhafest_2017_active_participant_ooofartspb.jpg": {
+      "path": "images/awards/diplom_medovukhafest_2017_active_participant_ooofartspb.jpg",
+      "type": "image/jpeg",
+      "size": 364018
+    },
+    "https://medved.beer/files/requisites_ooo_fart_spb_jan2018.pdf": {
+      "path": "files/requisites_ooo_fart_spb_jan2018.pdf",
+      "type": "application/pdf",
+      "size": 394390
+    },
+    "https://medved.beer/politika-konfidencialnosti/": {
+      "path": "politika-konfidencialnosti/index.html",
+      "type": "text/html; charset=utf-8",
+      "size": 33116
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_light1_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_light1_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 105344
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_ginger_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_ginger_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 31133
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_temnaya_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_temnaya_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 116232
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_with_cherry_juice_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_with_cherry_juice_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 106843
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_cranberry_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_cranberry_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 106066
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_plums_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_plums_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 101499
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_black_currant_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_black_currant_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 99315
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusladkii_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusladkii_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 94769
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusuhoi_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusuhoi_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 90087
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_sladkii_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_sladkii_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 90734
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_kork_spirit_suhoi_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_kork_spirit_suhoi_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 98621
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/puare_sladkii_grusha_200_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/puare_sladkii_grusha_200_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 86561
+    },
+    "https://medved.beer/images/cms/thumbs/562ea2fb1e6442bc25a636c4af9437d225fcf9eb/2017_08_medovuha_fest_news_600_auto_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/562ea2fb1e6442bc25a636c4af9437d225fcf9eb/2017_08_medovuha_fest_news_600_auto_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 42748
+    },
+    "https://medved.beer/images/cms/thumbs/562ea2fb1e6442bc25a636c4af9437d225fcf9eb/likemad_craftdepot_fest_welcome_posterhr_600_auto_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/562ea2fb1e6442bc25a636c4af9437d225fcf9eb/likemad_craftdepot_fest_welcome_posterhr_600_auto_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 56492
+    },
+    "https://medved.beer/images/bee.png": {
+      "path": "images/bee.png",
+      "type": "image/png",
+      "size": 621
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_light1_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_light1_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 59201
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_black_currant_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_black_currant_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 35778
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_cranberry_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_cranberry_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 38205
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_plums_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_plums_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 34848
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_ginger_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_ginger_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 37805
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_ginger_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_ginger_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 57977
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_light1_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_light1_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 38336
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_temnaya_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_temnaya_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 40560
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_with_cherry_juice_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_with_cherry_juice_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 38307
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_temnaya_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_temnaya_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 64506
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_with_cherry_juice_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_with_cherry_juice_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 60109
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_cranberry_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_cranberry_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 59597
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_plums_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_plums_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 55473
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_black_currant_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/medovuha_black_currant_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 55846
+    },
+    "https://medved.beer/images/aple.png": {
+      "path": "images/aple.png",
+      "type": "image/png",
+      "size": 681
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusladkii_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusladkii_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 54093
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_kork_spirit_suhoi_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_kork_spirit_suhoi_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 36512
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_sladkii_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_sladkii_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 34510
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusuhoi_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusuhoi_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 33400
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusuhoi_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusuhoi_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 51561
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusladkii_120_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_polusladkii_120_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 35100
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_sladkii_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_ginger_hors_sladkii_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 52359
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_kork_spirit_suhoi_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/sidr_yablochny_kork_spirit_suhoi_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 56368
+    },
+    "https://medved.beer/images/pear.png": {
+      "path": "images/pear.png",
+      "type": "image/png",
+      "size": 522
+    },
+    "https://medved.beer/images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/puare_sladkii_grusha_150_auto_png_5_80.png": {
+      "path": "images/cms/thumbs/3ef4676849371dcf2e5a6636440f8f726bf49c45/puare_sladkii_grusha_150_auto_png_5_80.png",
+      "type": "image/png",
+      "size": 49722
+    },
+    "https://medved.beer/templates/medved/images/bx_loader.gif": {
+      "path": "templates/medved/images/bx_loader.gif",
+      "type": "image/gif",
+      "size": 8581
+    },
+    "https://medved.beer/templates/medved/images/controls.png": {
+      "path": "templates/medved/images/controls.png",
+      "type": "image/png",
+      "size": 1022
+    },
+    "https://medved.beer/templates/medved/css/fonts/fontawesome-webfont.eot?v=4.7.0": {
+      "path": "templates/medved/css/fonts/fontawesome-webfont__q_dc19594184.eot",
+      "type": "application/vnd.ms-fontobject",
+      "size": 165742
+    },
+    "https://medved.beer/templates/medved/css/fonts/fontawesome-webfont.eot": {
+      "path": "templates/medved/css/fonts/fontawesome-webfont.eot",
+      "type": "application/vnd.ms-fontobject",
+      "size": 165742
+    },
+    "https://medved.beer/templates/medved/css/fonts/fontawesome-webfont.woff2?v=4.7.0": {
+      "path": "templates/medved/css/fonts/fontawesome-webfont__q_dc19594184.woff2",
+      "type": "application/font-woff2",
+      "size": 77160
+    },
+    "https://medved.beer/templates/medved/css/fonts/fontawesome-webfont.woff?v=4.7.0": {
+      "path": "templates/medved/css/fonts/fontawesome-webfont__q_dc19594184.woff",
+      "type": "application/font-woff",
+      "size": 98024
+    },
+    "https://medved.beer/templates/medved/css/fonts/fontawesome-webfont.ttf?v=4.7.0": {
+      "path": "templates/medved/css/fonts/fontawesome-webfont__q_dc19594184.ttf",
+      "type": "application/octet-stream",
+      "size": 165548
+    },
+    "https://medved.beer/templates/medved/css/fonts/fontawesome-webfont.svg?v=4.7.0": {
+      "path": "templates/medved/css/fonts/fontawesome-webfont__q_dc19594184.svg",
+      "type": "image/svg+xml",
+      "size": 444379
+    },
+    "https://medved.beer/templates/medved/images/icons/select_arrow_grey.png": {
+      "path": "templates/medved/images/icons/select_arrow_grey.png",
+      "type": "image/png",
+      "size": 202
+    },
+    "https://medved.beer/templates/medved/images/icons/section_caption.png": {
+      "path": "templates/medved/images/icons/section_caption.png",
+      "type": "image/png",
+      "size": 985
+    },
+    "https://medved.beer/templates/medved/images/menu_bg.jpg": {
+      "path": "templates/medved/images/menu_bg.jpg",
+      "type": "image/jpeg",
+      "size": 50393
+    },
+    "https://medved.beer/templates/medved/images/modal_adults_bg.jpg": {
+      "path": "templates/medved/images/modal_adults_bg.jpg",
+      "type": "image/jpeg",
+      "size": 418739
+    },
+    "https://medved.beer/templates/medved/images/icons/left_arrow.png": {
+      "path": "templates/medved/images/icons/left_arrow.png",
+      "type": "image/png",
+      "size": 162
+    },
+    "https://medved.beer/templates/medved/images/icons/right_arrow.png": {
+      "path": "templates/medved/images/icons/right_arrow.png",
+      "type": "image/png",
+      "size": 159
+    },
+    "https://medved.beer/templates/medved/images/certificate.png": {
+      "path": "templates/medved/images/certificate.png",
+      "type": "image/png",
+      "size": 833
+    },
+    "https://medved.beer/templates/medved/images/icons/select_arrow_white.png": {
+      "path": "templates/medved/images/icons/select_arrow_white.png",
+      "type": "image/png",
+      "size": 210
+    },
+    "https://medved.beer/templates/medved/images/footer_bg.jpg": {
+      "path": "templates/medved/images/footer_bg.jpg",
+      "type": "image/jpeg",
+      "size": 150591
+    },
+    "https://medved.beer/templates/medved/images/icons/point_white.png": {
+      "path": "templates/medved/images/icons/point_white.png",
+      "type": "image/png",
+      "size": 747
+    },
+    "https://medved.beer/templates/medved/images/icons/phone_white.png": {
+      "path": "templates/medved/images/icons/phone_white.png",
+      "type": "image/png",
+      "size": 262
+    },
+    "https://medved.beer/templates/medved/images/icons/feedback_white.png": {
+      "path": "templates/medved/images/icons/feedback_white.png",
+      "type": "image/png",
+      "size": 552
+    },
+    "https://medved.beer/templates/medved/images/icons/close.png": {
+      "path": "templates/medved/images/icons/close.png",
+      "type": "image/png",
+      "size": 180
+    },
+    "https://medved.beer/images/about_bg.jpg": {
+      "path": "images/about_bg.jpg",
+      "type": "image/jpeg",
+      "size": 36052
+    },
+    "https://medved.beer/images/catalog/CONFIRMED/product_1_medovuha_honey_jar.jpg": {
+      "path": "images/catalog/CONFIRMED/product_1_medovuha_honey_jar.jpg",
+      "type": "image/jpeg",
+      "size": 105953
+    },
+    "https://medved.beer/images/catalog/CONFIRMED/product_2_cider-apple.jpg": {
+      "path": "images/catalog/CONFIRMED/product_2_cider-apple.jpg",
+      "type": "image/jpeg",
+      "size": 90906
+    },
+    "https://medved.beer/images/catalog/CONFIRMED/product_header_pint_glass_plastic_bottle3.jpg": {
+      "path": "images/catalog/CONFIRMED/product_header_pint_glass_plastic_bottle3.jpg",
+      "type": "image/jpeg",
+      "size": 108717
+    },
+    "https://medved.beer/images/catalog/CONFIRMED/product_puare_fresh_pear.jpg": {
+      "path": "images/catalog/CONFIRMED/product_puare_fresh_pear.jpg",
+      "type": "image/jpeg",
+      "size": 91751
+    },
+    "https://medved.beer/images/cms/thumbs/7740628dc30e286a05fb45f6c1bfde56f0d14e11/medved_kegs_1_auto_600_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/7740628dc30e286a05fb45f6c1bfde56f0d14e11/medved_kegs_1_auto_600_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 133552
+    },
+    "https://medved.beer/images/cms/thumbs/7740628dc30e286a05fb45f6c1bfde56f0d14e11/zavod_auto_600_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/7740628dc30e286a05fb45f6c1bfde56f0d14e11/zavod_auto_600_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 78055
+    },
+    "https://medved.beer/images/cms/thumbs/8be55ed78eb44e214f91ebb43a956143a3c6331f/o_kompanii_medovukha_cider_pints_auto_600_jpg_5_80.jpg": {
+      "path": "images/cms/thumbs/8be55ed78eb44e214f91ebb43a956143a3c6331f/o_kompanii_medovukha_cider_pints_auto_600_jpg_5_80.jpg",
+      "type": "image/jpeg",
+      "size": 58443
+    },
+    "https://medved.beer/images/example/medovarenny_zavod.jpg": {
+      "path": "images/example/medovarenny_zavod.jpg",
+      "type": "image/jpeg",
+      "size": 72062
+    },
+    "https://medved.beer/images/manufactures/banner.jpg": {
+      "path": "images/manufactures/banner.jpg",
+      "type": "image/jpeg",
+      "size": 89944
+    },
+    "https://medved.beer/images/manufactures/beer_barrels_in_the_back_yard.jpg": {
+      "path": "images/manufactures/beer_barrels_in_the_back_yard.jpg",
+      "type": "image/jpeg",
+      "size": 707200
+    },
+    "https://medved.beer/images/manufactures/brevery_pivovar.jpg": {
+      "path": "images/manufactures/brevery_pivovar.jpg",
+      "type": "image/jpeg",
+      "size": 1178765
+    },
+    "https://medved.beer/images/manufactures/brewery_tanks.jpg": {
+      "path": "images/manufactures/brewery_tanks.jpg",
+      "type": "image/jpeg",
+      "size": 631943
+    },
+    "https://medved.beer/images/o_kompanii/o_kompanii_header_image1.jpg": {
+      "path": "images/o_kompanii/o_kompanii_header_image1.jpg",
+      "type": "image/jpeg",
+      "size": 202623
+    },
+    "https://medved.beer/images/slider/slider_bg.jpg": {
+      "path": "images/slider/slider_bg.jpg",
+      "type": "image/jpeg",
+      "size": 389654
+    },
+    "https://medved.beer/templates/medved/images/slider_bg.jpg": {
+      "path": "templates/medved/images/slider_bg.jpg",
+      "type": "image/jpeg",
+      "size": 389654
+    }
+  },
+  "errors": []
+}

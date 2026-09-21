@@ -1,0 +1,42 @@
+User-Agent: Googlebot
+Disallow: /?
+Disallow: /disclaimer/
+Disallow: /politika-konfidencialnosti/
+Disallow: /admin
+Disallow: /index.php
+Disallow: /emarket/addToCompare
+Disallow: /emarket/basket
+Disallow: /go-out.php
+Disallow: /cron.php
+Disallow: /filemonitor.php
+Disallow: /search
+
+User-Agent: Yandex
+Disallow: /?
+Disallow: /disclaimer/
+Disallow: /politika-konfidencialnosti/
+Disallow: /admin
+Disallow: /index.php
+Disallow: /emarket/addToCompare
+Disallow: /emarket/basket
+Disallow: /go-out.php
+Disallow: /cron.php
+Disallow: /filemonitor.php
+Disallow: /search
+Host: https://medved.beer
+Crawl-delay: 3
+
+User-Agent: *
+Disallow: /?
+Disallow: /disclaimer/
+Disallow: /politika-konfidencialnosti/
+Disallow: /admin
+Disallow: /index.php
+Disallow: /emarket/addToCompare
+Disallow: /emarket/basket
+Disallow: /go-out.php
+Disallow: /cron.php
+Disallow: /filemonitor.php
+Disallow: /search
+
+Sitemap: https://medved.beer/sitemap.xml
