@@ -26,6 +26,8 @@ const fields = reactive({
 })
 const status = ref('idle')
 const feedback = ref('')
+const phoneError = ref('')
+const phoneInput = ref(null)
 
 const isDark = computed(() => props.tone === 'dark')
 const labelClass = computed(() => isDark.value ? 'text-surface' : 'text-foreground')
@@ -46,26 +48,44 @@ function resetFields() {
 async function submitForm() {
   if (status.value === 'sending') return
 
-  status.value = 'sending'
+  status.value = 'idle'
   feedback.value = ''
+  const phoneDigits = fields.phone.replace(/\D/g, '')
+  if (!/^\+?[\d\s()-]+$/.test(fields.phone) || phoneDigits.length !== 11) {
+    phoneError.value = 'Введите номер из 11 цифр.'
+    phoneInput.value?.focus()
+    return
+  }
+
+  phoneError.value = ''
+  status.value = 'sending'
 
   try {
-    const response = await fetch(sitePath('/api/contact.php'), {
+    const formData = new URLSearchParams()
+    formData.set('fid', 'feedback')
+    formData.set('data[trap]', fields.website)
+    formData.set('data[name]', fields.name)
+    formData.set('data[message]', `Телефон: ${phoneDigits}${fields.message ? `\n\n${fields.message}` : ''}`)
+    if (fields.email) formData.set('data[email]', fields.email)
+
+    const response = await fetch('/udata://content/send/.json', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(fields),
+      body: formData,
     })
     const result = await response.json().catch(() => ({}))
+    const serverMessage = typeof result.message === 'string' ? result.message.trim() : ''
 
-    if (!response.ok) {
-      throw new Error(result.message || 'Не удалось отправить сообщение. Попробуйте ещё раз.')
+    if (!response.ok || ![true, 1, '1'].includes(result.success)) {
+      status.value = 'error'
+      feedback.value = serverMessage || 'Не удалось отправить сообщение. Попробуйте ещё раз.'
+      return
     }
 
     status.value = 'success'
-    feedback.value = 'Спасибо! Сообщение отправлено.'
+    feedback.value = serverMessage || 'Спасибо! Сообщение отправлено.'
     resetFields()
     emit('success')
   } catch (error) {
@@ -85,7 +105,8 @@ async function submitForm() {
     </div>
     <div>
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-phone`">Телефон *</label>
-      <input :id="`${idPrefix}-phone`" v-model.trim="fields.phone" class="min-h-14 w-full rounded-xl border px-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="phone" type="tel" autocomplete="tel" maxlength="60" required>
+      <input :id="`${idPrefix}-phone`" ref="phoneInput" v-model.trim="fields.phone" class="min-h-14 w-full rounded-xl border px-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="phone" type="tel" autocomplete="tel" maxlength="60" required :aria-invalid="Boolean(phoneError)" :aria-describedby="phoneError ? `${idPrefix}-phone-error` : undefined" @input="phoneError = ''">
+      <p v-if="phoneError" :id="`${idPrefix}-phone-error`" class="mt-2 text-body font-semibold" :class="isDark ? 'text-red-300' : 'text-red-700'" role="alert">{{ phoneError }}</p>
     </div>
     <div class="nav:col-span-2">
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-email`">Электронная почта</label>
