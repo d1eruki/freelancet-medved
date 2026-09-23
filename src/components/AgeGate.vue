@@ -48,11 +48,11 @@ onBeforeUnmount(() => {
         <h2 id="age-gate-title" class="break-words font-display text-h3 hyphens-auto uppercase sm:hyphens-manual">
           Вам уже исполнилось 18 лет?
         </h2>
-        <p id="age-gate-description" class="mx-auto mt-5 max-w-lg text-body text-subtle">
+        <p id="age-gate-description" class="mx-auto mt-6 max-w-lg text-body text-subtle">
           На сайте представлена информация об алкогольной продукции.
         </p>
 
-        <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
           <button
             ref="confirmButton"
             class="min-h-14 rounded-full bg-brand px-8 text-label font-extrabold tracking-wide text-surface uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
@@ -75,12 +75,12 @@ onBeforeUnmount(() => {
         <h2 id="age-gate-title" class="break-words font-display text-h3 hyphens-auto uppercase sm:hyphens-manual">
           Доступ ограничен
         </h2>
-        <p id="age-gate-description" class="mx-auto mt-5 max-w-lg text-body text-subtle">
+        <p id="age-gate-description" class="mx-auto mt-6 max-w-lg text-body text-subtle">
           Сайт предназначен только для посетителей старше 18 лет.
         </p>
         <button
           ref="confirmButton"
-          class="mt-8 min-h-14 w-full rounded-full border border-foreground/20 px-8 text-label font-extrabold tracking-wide uppercase transition duration-200 hover:border-foreground hover:bg-panel focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand sm:w-auto"
+          class="mt-10 min-h-14 w-full rounded-full border border-foreground/20 px-8 text-label font-extrabold tracking-wide uppercase transition duration-200 hover:border-foreground hover:bg-panel focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand sm:w-auto"
           type="button"
           @click="resetAnswer"
         >

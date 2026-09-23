@@ -24,7 +24,7 @@ onMounted(() => {
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
       <div class="site-container">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
+        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
           <h2 id="catalog-categories-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Три истории вкуса</h2>
           <p class="max-w-md text-body-large font-medium text-subtle nav:col-span-4">У каждой категории — свой состав, аромат и настроение.</p>
         </div>
@@ -41,6 +41,7 @@ onMounted(() => {
       description="Свяжитесь с отделом оптовых продаж, чтобы обсудить ассортимент и условия сотрудничества."
       :href="sitePath('/kontakty/')"
       label="Контакты"
+      :background="'foreground'"
     />
   </div>
 </template>

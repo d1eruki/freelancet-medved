@@ -151,9 +151,6 @@ onBeforeUnmount(() => {
             Где купить
           </a>
 
-          <a class="secondary-action w-full py-3 text-center text-label font-extrabold tracking-wide uppercase sm:w-auto" :href="'#contact-form'">
-            Связаться с нами
-          </a>
         </div>
       </div>
     </div>

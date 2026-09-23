@@ -21,11 +21,11 @@ const routeUrl = computed(() => {
       <div class="mt-auto pt-10">
         <address class="text-body font-medium text-subtle not-italic">{{ partner.address }}</address>
 
-        <a v-if="partner.phone" class="secondary-action mt-5 inline-flex py-2 text-body font-extrabold text-brand" :href="partner.phoneHref">
+        <a v-if="partner.phone" class="secondary-action mt-6 inline-flex py-2 text-body font-extrabold text-brand" :href="partner.phoneHref">
           {{ partner.phone }}
         </a>
 
-        <ul v-if="partner.metro" class="mt-5 flex flex-wrap gap-x-5 gap-y-2">
+        <ul v-if="partner.metro" class="mt-6 flex flex-wrap gap-x-5 gap-y-2">
           <li
             v-for="station in partner.metro"
             :key="station.name"
@@ -38,7 +38,7 @@ const routeUrl = computed(() => {
         </ul>
 
         <a
-          class="group mt-8 flex items-center justify-between gap-5 border-t border-foreground/15 pt-6 text-label font-extrabold tracking-wide uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          class="group mt-10 flex items-center justify-between gap-5 border-t border-foreground/15 pt-6 text-label font-extrabold tracking-wide uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
           :href="routeUrl"
           target="_blank"
           rel="noopener noreferrer"

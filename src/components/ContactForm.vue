@@ -98,7 +98,7 @@ async function submitForm() {
 </script>
 
 <template>
-  <form class="grid min-w-0 gap-5 nav:grid-cols-2" @submit.prevent="submitForm">
+  <form class="grid min-w-0 gap-6 nav:grid-cols-2" @submit.prevent="submitForm">
     <div>
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-name`">Ваше имя *</label>
       <input :id="`${idPrefix}-name`" v-model.trim="fields.name" class="min-h-14 w-full rounded-xl border px-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="name" type="text" autocomplete="name" maxlength="120" required>

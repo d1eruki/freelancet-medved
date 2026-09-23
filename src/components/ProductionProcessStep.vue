@@ -14,7 +14,7 @@ const emit = defineEmits(['select'])
     <h3>
       <button
         type="button"
-        class="flex w-full items-center gap-5 text-left transition-colors duration-700 ease-in-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+        class="group flex w-full items-center gap-5 text-left transition-colors duration-700 ease-in-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
         :class="active ? 'text-brand' : 'text-subtle hover:text-foreground'"
         :aria-expanded="active"
         :aria-controls="`production-step-description-${number}`"
@@ -22,7 +22,7 @@ const emit = defineEmits(['select'])
       >
         <span
           class="flex size-10 shrink-0 items-center justify-center rounded-full text-label font-extrabold text-surface transition-colors duration-700 ease-in-out motion-reduce:transition-none"
-          :class="active ? 'bg-brand' : 'bg-subtle'"
+          :class="active ? 'bg-brand' : 'bg-subtle group-hover:bg-foreground'"
         >{{ number }}</span>
         <span class="font-display text-h4 uppercase">{{ title }}</span>
       </button>
@@ -34,7 +34,7 @@ const emit = defineEmits(['select'])
       :aria-hidden="!active"
     >
       <div class="min-h-0 overflow-hidden">
-        <p class="mt-3 max-w-lg pl-15 text-body font-medium text-subtle">{{ text }}</p>
+        <p class="mt-6 max-w-lg pl-15 text-body font-medium text-subtle">{{ text }}</p>
       </div>
     </div>
   </li>

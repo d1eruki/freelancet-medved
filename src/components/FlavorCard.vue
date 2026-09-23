@@ -19,8 +19,13 @@ function selectVariant(index) {
 
 <template>
   <li class="flex min-h-80 flex-col overflow-hidden rounded-3xl bg-surface p-6 sm:p-8">
-    <div class="relative h-64 w-full" :class="{ backward: transitionDirection === 'backward' }">
-      <Transition name="packaging">
+    <div class="relative h-64 w-full">
+      <Transition
+        enter-active-class="transition-[translate] duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
+        leave-active-class="transition-[translate] duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
+        :enter-from-class="transitionDirection === 'backward' ? '-translate-x-[150%]' : 'translate-x-[150%]'"
+        :leave-to-class="transitionDirection === 'backward' ? 'translate-x-[150%]' : '-translate-x-[150%]'"
+      >
         <img
           :key="activeVariant.volume"
           class="absolute inset-0 h-full w-full object-contain"
@@ -45,26 +50,9 @@ function selectVariant(index) {
       </button>
     </div>
     <div class="mt-auto pt-8">
-      <h3 class="break-words font-display text-h4 hyphens-auto uppercase">{{ displayName }}</h3>
-      <p class="mt-5 text-body font-medium text-subtle">{{ item.description }}</p>
-      <p class="mt-7 border-t border-foreground/15 pt-5 text-label font-extrabold tracking-wide text-brand uppercase" aria-live="polite">{{ activeVariant.details ?? item.details }}</p>
+      <h3 class="wrap-break-word font-display text-h4 hyphens-auto uppercase">{{ displayName }}</h3>
+      <p class="mt-6 text-body font-medium text-subtle">{{ item.description }}</p>
+      <p class="mt-10 border-t border-foreground/15 pt-6 text-label font-extrabold tracking-wide text-brand uppercase" aria-live="polite">{{ activeVariant.details ?? item.details }}</p>
     </div>
   </li>
 </template>
-
-<style scoped>
-.packaging-enter-active,
-.packaging-leave-active {
-  transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-.packaging-enter-from,
-.backward .packaging-leave-to {
-  transform: translateX(150%);
-}
-
-.packaging-leave-to,
-.backward .packaging-enter-from {
-  transform: translateX(-150%);
-}
-</style>

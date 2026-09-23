@@ -42,7 +42,7 @@ defineProps({
       :class="{ 'transition-colors group-hover:text-surface': variant === 'group' || variant === 'process' }"
     >{{ title }}</h3>
     <p
-      class="mt-5 text-body font-medium text-subtle"
+      class="mt-6 text-body font-medium text-subtle"
       :class="{
         'transition-colors group-hover:text-surface/70': variant === 'group',
         'max-w-sm': variant === 'ingredient',

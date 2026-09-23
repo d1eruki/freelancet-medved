@@ -1,26 +1,32 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import logoUrl from '../assets/brand-logo.svg'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import logoUrl from '../assets/brand-logo-wordmark.svg'
 import { navigation } from '../data/navigation'
+
+const props = defineProps({
+  lenis: { type: Object, default: null },
+})
 
 const isMenuOpen = ref(false)
 const isHeaderVisible = ref(true)
 const isDarkHeader = ref(false)
-const headerElement = ref(null)
+const headerBackground = ref('')
 
 let lastScrollPosition = 0
 let scrollFrame = 0
 let initialThemeFrame = 0
 
 function updateHeaderTheme() {
-  const headerHeight = headerElement.value?.offsetHeight ?? 0
-  const sections = [...document.querySelectorAll('[data-header-theme]')]
+  const sections = [...document.querySelectorAll('main [data-header-theme], footer')]
   const currentSection = sections
-    .filter((section) => section.getBoundingClientRect().top <= headerHeight)
+    .filter((section) => section.getBoundingClientRect().top <= 0)
     .at(-1)
 
   isDarkHeader.value = currentSection?.dataset.headerTheme === 'dark'
+  headerBackground.value = currentSection && currentSection !== sections[0]
+    ? window.getComputedStyle(currentSection).backgroundColor
+    : ''
 }
 
 function updateHeaderVisibility() {
@@ -42,10 +48,26 @@ function updateHeaderVisibility() {
 }
 
 function handleScroll() {
-  if (!scrollFrame) {
+  if (!props.lenis && !scrollFrame) {
     scrollFrame = window.requestAnimationFrame(updateHeaderVisibility)
   }
 }
+
+watch(() => props.lenis, (lenis, _previous, onCleanup) => {
+  if (!lenis) return
+
+  const stopListening = lenis.on('scroll', (instance) => {
+    if (instance.userData?.initiator === 'snap') {
+      lastScrollPosition = Math.max(window.scrollY, 0)
+      updateHeaderTheme()
+      return
+    }
+
+    updateHeaderVisibility()
+  })
+
+  onCleanup(stopListening)
+}, { immediate: true })
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
@@ -65,6 +87,7 @@ function isCurrentPage(href) {
 
 onMounted(() => {
   lastScrollPosition = Math.max(window.scrollY, 0)
+  updateHeaderTheme()
   initialThemeFrame = window.requestAnimationFrame(() => {
     initialThemeFrame = window.requestAnimationFrame(() => {
       initialThemeFrame = 0
@@ -90,15 +113,15 @@ onBeforeUnmount(() => {
 
 <template>
   <header
-    ref="headerElement"
-    class="fixed inset-x-0 top-0 z-50 backdrop-blur-md transition-[color,translate] duration-300 ease-out"
-    :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-full', isDarkHeader ? 'text-foreground' : 'text-surface']"
+    class="fixed inset-x-0 top-3 z-50 mx-auto w-full max-w-[1440px] rounded-3xl transition-[color,background-color,translate] duration-300 ease-out"
+    :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-[calc(100%+12px)]', isDarkHeader ? 'text-foreground' : 'text-surface']"
+    :style="{ backgroundColor: headerBackground }"
     :inert="!isHeaderVisible || undefined"
   >
     <div class="site-container flex h-16 items-center justify-between sm:h-20">
       <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
-          class="h-12 w-30 object-contain sm:h-14 sm:w-40"
+          class="h-12 w-30 -translate-y-0.5 object-contain sm:h-14 sm:w-40"
           :class="isDarkHeader ? 'brightness-0' : 'brightness-0 invert'"
           :src="logoUrl"
           alt="МЁДВЕДЬ"

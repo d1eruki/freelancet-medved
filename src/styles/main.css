@@ -53,10 +53,6 @@
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
     min-width: 320px;
     background: var(--color-surface);

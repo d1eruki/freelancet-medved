@@ -1,5 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import Lenis from 'lenis'
+import 'lenis/dist/lenis.css'
 import AboutPage from './components/AboutPage.vue'
 import AboutSection from './components/AboutSection.vue'
 import AgeGate from './components/AgeGate.vue'
@@ -21,6 +23,7 @@ import { legalContent } from './data/legal-content'
 
 const ageConfirmationKey = 'medved-age-confirmed'
 const isAgeConfirmed = ref(false)
+const lenis = shallowRef(null)
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '')
 const currentPath = window.location.pathname.slice(basePath.length).replace(/\/+$/, '') || '/'
 const isAboutPage = currentPath === '/o-kompanii'
@@ -98,19 +101,39 @@ function confirmAge() {
   }
 }
 
+onMounted(() => {
+  lenis.value = new Lenis({
+    autoRaf: true,
+    anchors: true,
+    respectReducedMotion: true,
+  })
+
+  if (!isAgeConfirmed.value) lenis.value.stop()
+})
+
+watch(isAgeConfirmed, (confirmed) => {
+  if (confirmed) lenis.value?.start()
+  else lenis.value?.stop()
+}, { flush: 'post' })
+
+onBeforeUnmount(() => {
+  lenis.value?.destroy()
+  lenis.value = null
+})
+
 </script>
 
 <template>
   <div
     v-typography
-    class="min-h-svh overflow-hidden bg-surface text-foreground"
+    class="min-h-svh overflow-x-clip bg-surface text-foreground"
     :inert="!isAgeConfirmed || undefined"
     :aria-hidden="!isAgeConfirmed || undefined"
   >
-    <SiteHeader />
+    <SiteHeader :lenis="lenis" />
 
     <main>
-      <ProductionPage v-if="isProductionPage" />
+      <ProductionPage v-if="isProductionPage" :lenis="lenis" />
       <PartnersPage v-else-if="isPartnersPage" />
       <AboutPage v-else-if="isAboutPage" />
       <CatalogPage v-else-if="isCatalogPage" />

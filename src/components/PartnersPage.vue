@@ -5,9 +5,9 @@ import ActionTile from './ActionTile.vue'
 import PageHero from './PageHero.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
 import PartnerCard from './PartnerCard.vue'
+import SectionWatermark from './SectionWatermark.vue'
 import { catalogCategories } from '../data/catalog'
 import { partnerCities, partners } from '../data/partners'
-import { vFitty } from '../directives/fitty'
 import { sitePath } from '../utils/site-path'
 
 const allCitiesLabel = 'Все города'
@@ -60,7 +60,7 @@ onMounted(() => {
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="partners-list-title">
       <div class="site-container">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
+        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
           <div class="nav:col-span-8">
             <h2 id="partners-list-title" class="font-display text-h2 uppercase">Выберите город</h2>
           </div>
@@ -69,7 +69,7 @@ onMounted(() => {
           </p>
         </div>
 
-        <fieldset class="mt-10 sm:mt-14">
+        <fieldset class="mt-12 sm:mt-16">
           <legend class="sr-only">Фильтр точек продаж по городу</legend>
           <div class="flex flex-wrap gap-2 sm:gap-3">
             <button
@@ -92,17 +92,17 @@ onMounted(() => {
           {{ pointCountLabel }}
         </p>
 
-        <ul v-if="visiblePartners.length" class="mt-5 grid gap-4 sm:grid-cols-2 nav:grid-cols-3">
+        <ul v-if="visiblePartners.length" class="mt-6 grid gap-4 sm:grid-cols-2 nav:grid-cols-3">
           <PartnerCard v-for="partner in visiblePartners" :key="`${partner.city}-${partner.name}`" :partner="partner" />
         </ul>
 
-        <div v-else class="mt-5 rounded-3xl bg-surface p-8 sm:p-12">
+        <div v-else class="mt-6 rounded-3xl bg-surface p-8 sm:p-12">
           <p class="font-display text-h4 uppercase">В этом городе пока нет указанных точек продаж</p>
-          <p class="mt-5 max-w-2xl text-body-large font-medium text-subtle">
+          <p class="mt-6 max-w-2xl text-body-large font-medium text-subtle">
             Свяжитесь с отделом продаж — подскажем ближайшую точку или условия поставки.
           </p>
-          <a class="group mt-8 inline-flex items-center gap-5 text-label font-extrabold tracking-wide uppercase" :href="sitePath('/kontakty/')">
-            <span class="secondary-action py-3">Связаться</span>
+          <a class="group mt-10 inline-flex items-center gap-5 text-label font-extrabold tracking-wide uppercase" :href="sitePath('/kontakty/')">
+            <span class="secondary-action py-3">Открыть контакты</span>
             <CircleArrow hover="brand" size="action" />
           </a>
         </div>
@@ -115,18 +115,20 @@ onMounted(() => {
           Петербургский характер в разных городах
         </h2>
 
-        <div class="mt-12">
-          <p class="font-display text-h1 text-brand uppercase">Рядом</p>
-          <p class="mt-3 text-label font-extrabold tracking-widest uppercase">От Калининграда до Сыктывкара</p>
-        </div>
+        <div class="mt-12 grid gap-10 nav:grid-cols-2 nav:gap-6">
+          <div>
+            <p class="font-display text-h1 text-brand uppercase">Рядом</p>
+            <p class="mt-3 text-label font-extrabold tracking-widest uppercase">От Калининграда до Сыктывкара</p>
+          </div>
 
-        <div class="mt-10 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
-          <p>
-            Благодаря региональным партнёрам напитки производства Товарищества пиво-медоваренного завода «МЁДВЕДЬ» разливают в пабах и ресторанах за пределами Петербурга.
-          </p>
-          <p>
-            Медовуху и фирменные сидры можно найти в отделах крафтового пива и специализированных магазинах — в бутылках и в розлив.
-          </p>
+          <div class="grid gap-6 text-body-large font-medium text-subtle">
+            <p>
+              Благодаря региональным партнёрам напитки производства Товарищества пиво-медоваренного завода «МЁДВЕДЬ» разливают в пабах и ресторанах за пределами Петербурга.
+            </p>
+            <p>
+              Медовуху и фирменные сидры можно найти в отделах крафтового пива и специализированных магазинах — в бутылках и в розлив.
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -136,19 +138,17 @@ onMounted(() => {
       data-header-theme="light"
       aria-labelledby="distribution-third-title"
     >
-      <div class="pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true">
-        <span v-fitty class="partners-watermark inline-block whitespace-nowrap font-display uppercase">Вместе</span>
-      </div>
+      <SectionWatermark text="Вместе" />
 
-      <div class="site-container relative">
-        <div class="grid gap-8">
+      <div class="site-container relative z-10">
+        <div class="grid gap-6">
           <h2 id="distribution-third-title" class="font-display text-h2 break-words hyphens-auto uppercase">Стать дистрибьютором</h2>
           <p class="text-body-large font-medium text-surface/75">
             Открыты новым контактам и готовы обсудить поставки и оптовые цены.
           </p>
         </div>
 
-        <div class="mt-14 grid gap-5 border-t border-surface/30 pt-8 sm:mt-16 sm:pt-10 nav:grid-cols-12">
+        <div class="mt-12 grid gap-6 border-t border-surface/30 pt-10 sm:mt-16 nav:grid-cols-12">
           <p class="text-body-large font-extrabold tracking-wide uppercase nav:col-span-4">
             Дегустация перед поставкой
           </p>
@@ -157,7 +157,7 @@ onMounted(() => {
           </p>
         </div>
 
-        <ul class="mt-10 grid gap-4 nav:grid-cols-3">
+        <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
           <NumberedInfoCard
             v-for="product in distributionProducts"
             :key="product.title"
@@ -171,23 +171,15 @@ onMounted(() => {
         <ActionTile
           class="mt-4"
           :href="sitePath('/kontakty/')"
-          label="Первый шаг к сотрудничеству"
-          title="Заказать образцы"
+          label="Образцы для дегустации"
+          title="Связаться с отделом продаж"
           compact
         />
 
-        <p class="mt-8 max-w-5xl text-label font-medium text-surface/60">
+        <p class="mt-10 max-w-5xl text-label font-medium text-surface/60">
           Компания не предлагает и не продаёт алкоголь лицам младше 18 лет. ООО «ФАРТ СПБ» оставляет за собой право отказать в сотрудничестве, если оно нарушает действующие договоры с дистрибьюторами.
         </p>
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-.partners-watermark {
-  color: rgb(255 255 255 / 4%);
-  font-size: clamp(7rem, 19vw, 18rem);
-  line-height: 0.75;
-}
-</style>

@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { vFitty } from '../directives/fitty'
+import { onMounted, ref, watch } from 'vue'
+import Snap from 'lenis/snap'
 import { sitePath } from '../utils/site-path'
 import brewingImageUrl from '../assets/production-brewing.png'
 import fermentationImageUrl from '../assets/production-fermentation.png'
@@ -10,6 +10,7 @@ import ActionTile from './ActionTile.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
 import PageHero from './PageHero.vue'
 import ProductionProcessStep from './ProductionProcessStep.vue'
+import SectionWatermark from './SectionWatermark.vue'
 
 const ingredients = [
   {
@@ -57,28 +58,35 @@ const processSteps = [
 ]
 
 const activeStepIndex = ref(0)
-let lastSlideAt = 0
+const processScrollSection = ref(null)
 let touchStartY = null
+const desktopProcess = window.matchMedia('(min-width: 54rem)')
 
-function selectStep(index) {
-  if (index < 0 || index >= processSteps.length || index === activeStepIndex.value) return
-  activeStepIndex.value = index
-  lastSlideAt = Date.now()
+const props = defineProps({
+  lenis: { type: Object, default: null },
+})
+
+function getProcessStart() {
+  const section = processScrollSection.value
+  return section ? section.getBoundingClientRect().top + window.scrollY : 0
 }
 
-function handleProcessWheel(event) {
-  if (!window.matchMedia('(min-width: 54rem)').matches || event.deltaY === 0) return
+function getStepDistance() {
+  const section = processScrollSection.value
+  return section ? Math.max(0, section.offsetHeight - window.innerHeight) / processSteps.length : 0
+}
 
-  const direction = Math.sign(event.deltaY)
-  const nextIndex = activeStepIndex.value + direction
-  if (nextIndex < 0 || nextIndex >= processSteps.length) {
-    if (Date.now() - lastSlideAt < 750) event.preventDefault()
-    return
+function getStepPosition(index) {
+  return getProcessStart() + getStepDistance() * index
+}
+
+function selectStep(index) {
+  if (index < 0 || index >= processSteps.length) return
+  if (desktopProcess.matches && props.lenis) {
+    props.lenis.scrollTo(getStepPosition(index))
+  } else {
+    activeStepIndex.value = index
   }
-
-  event.preventDefault()
-  if (Date.now() - lastSlideAt < 750) return
-  selectStep(nextIndex)
 }
 
 function handleProcessTouchStart(event) {
@@ -99,6 +107,54 @@ function handleProcessKeydown(event) {
   event.preventDefault()
   selectStep(nextIndex)
 }
+
+watch(() => props.lenis, (lenis, _previous, onCleanup) => {
+  if (!lenis) return
+
+  const snap = new Snap(lenis, {
+    type: 'proximity',
+    distanceThreshold: '35%',
+    debounce: 180,
+  })
+  let removeSnapPoints = []
+
+  function updateActiveStep() {
+    if (!desktopProcess.matches) return
+    const stepDistance = getStepDistance()
+    if (!stepDistance) return
+    const progress = (lenis.scroll - getProcessStart()) / stepDistance
+    activeStepIndex.value = Math.max(0, Math.min(processSteps.length - 1, Math.floor(progress + 0.05)))
+  }
+
+  function refreshSnapPoints() {
+    removeSnapPoints.forEach((remove) => remove())
+    removeSnapPoints = []
+
+    if (desktopProcess.matches && getStepDistance()) {
+      removeSnapPoints = processSteps.map((_step, index) => snap.add(getStepPosition(index)))
+      snap.start()
+      updateActiveStep()
+    } else {
+      snap.stop()
+    }
+  }
+
+  const stopListening = lenis.on('scroll', updateActiveStep)
+  const resizeObserver = new ResizeObserver(refreshSnapPoints)
+  resizeObserver.observe(document.body)
+  desktopProcess.addEventListener('change', refreshSnapPoints)
+  window.addEventListener('resize', refreshSnapPoints)
+  refreshSnapPoints()
+
+  onCleanup(() => {
+    stopListening()
+    resizeObserver.disconnect()
+    desktopProcess.removeEventListener('change', refreshSnapPoints)
+    window.removeEventListener('resize', refreshSnapPoints)
+    removeSnapPoints.forEach((remove) => remove())
+    snap.destroy()
+  })
+}, { immediate: true })
 
 const qualityPoints = [
   'Натуральное сырьё без добавления спирта',
@@ -137,7 +193,7 @@ onMounted(() => {
           <h2 id="production-history-title" class="max-w-5xl font-display text-h2 uppercase">
             Завод с историей
           </h2>
-          <p class="mt-10 max-w-4xl text-body-large font-medium text-subtle">
+          <p class="mt-6 max-w-4xl text-body-large font-medium text-subtle">
             Производство расположено в бывшей солодовне завода Ивана Дурдина. На её восьмигранных трубах из красного кирпича сохранились медные инициалы «И. Д.» и даты строительства.
           </p>
         </div>
@@ -145,14 +201,12 @@ onMounted(() => {
     </section>
 
     <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="production-ingredients-title">
-      <div class="pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true">
-        <span v-fitty class="production-watermark inline-block whitespace-nowrap font-display uppercase">Натурально</span>
-      </div>
+      <SectionWatermark text="Натурально" />
 
-      <div class="site-container relative">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
+      <div class="site-container relative z-10">
+        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
           <h2 id="production-ingredients-title" class="font-display text-h2 uppercase nav:col-span-8">
-            Честный состав.
+            Честный состав
           </h2>
           <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
             Медовуха и сидр проходят естественное брожение без добавления спирта.
@@ -172,58 +226,61 @@ onMounted(() => {
       </div>
     </section>
 
-    <section
-      class="bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-svh nav:py-8"
-      data-header-theme="dark"
-      aria-labelledby="production-process-title"
-      @wheel="handleProcessWheel"
-      @keydown="handleProcessKeydown"
-    >
-      <div class="site-container nav:grid nav:h-full nav:grid-cols-2 nav:gap-10">
-        <div class="flex flex-col nav:justify-center">
-          <h2 id="production-process-title" class="font-display text-h2 uppercase">
-            Четыре этапа
-          </h2>
-
-          <ol class="mt-8 flex flex-col gap-6 nav:gap-8">
-            <ProductionProcessStep
-              v-for="(step, index) in processSteps"
-              :key="step.number"
-              :number="step.number"
-              :title="step.title"
-              :text="step.text"
-              :active="index === activeStepIndex"
-              @select="selectStep(index)"
-            />
-          </ol>
-        </div>
-
-        <div
-          class="relative mt-12 h-96 overflow-hidden sm:mt-16 nav:mt-0 nav:h-full"
-          @touchstart.passive="handleProcessTouchStart"
-          @touchend.passive="handleProcessTouchEnd"
+    <div ref="processScrollSection" class="nav:h-[400svh]">
+      <div class="nav:sticky nav:top-0 nav:h-svh">
+        <section
+          class="bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:py-8"
+          data-header-theme="dark"
+          aria-labelledby="production-process-title"
+          @keydown="handleProcessKeydown"
         >
-          <img
-            v-for="(step, index) in processSteps"
-            :key="step.number"
-            class="absolute inset-x-0 h-[70%] w-full object-cover transition-[top,opacity] duration-700 ease-in-out motion-reduce:transition-none"
-            :class="Math.abs(index - activeStepIndex) > 1 ? 'opacity-0' : index === activeStepIndex ? 'opacity-100' : 'opacity-35'"
-            :style="{ top: `${50 + (index - activeStepIndex) * 77}%`, transform: 'translateY(-50%)' }"
-            :src="step.image"
-            :alt="index === activeStepIndex ? `Иллюстрация этапа «${step.title}»` : ''"
-            :loading="index === 0 ? 'eager' : 'lazy'"
-          >
-        </div>
+          <div class="site-container nav:grid nav:h-full nav:grid-cols-2 nav:gap-10">
+            <div class="flex flex-col nav:justify-center">
+              <h2 id="production-process-title" class="font-display text-h2 uppercase">
+                Четыре этапа
+              </h2>
+
+              <ol class="mt-12 flex flex-col gap-6 nav:mt-8 nav:gap-8">
+                <ProductionProcessStep
+                  v-for="(step, index) in processSteps"
+                  :key="step.number"
+                  :number="step.number"
+                  :title="step.title"
+                  :text="step.text"
+                  :active="index === activeStepIndex"
+                  @select="selectStep(index)"
+                />
+              </ol>
+            </div>
+
+            <div
+              class="relative mt-12 h-96 overflow-hidden sm:mt-16 nav:mt-0 nav:h-full"
+              @touchstart.passive="handleProcessTouchStart"
+              @touchend.passive="handleProcessTouchEnd"
+            >
+              <img
+                v-for="(step, index) in processSteps"
+                :key="step.number"
+                class="absolute inset-x-0 h-[70%] w-full object-cover transition-[top,opacity] duration-700 ease-in-out motion-reduce:transition-none"
+                :class="Math.abs(index - activeStepIndex) > 1 ? 'opacity-0' : index === activeStepIndex ? 'opacity-100' : 'opacity-35'"
+                :style="{ top: `${50 + (index - activeStepIndex) * 77}%`, transform: 'translateY(-50%)' }"
+                :src="step.image"
+                :alt="index === activeStepIndex ? `Иллюстрация этапа «${step.title}»` : ''"
+                :loading="index === 0 ? 'eager' : 'lazy'"
+              >
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
 
     <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="production-quality-title">
-      <div class="site-container grid gap-14 nav:grid-cols-12 nav:gap-6">
+      <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
         <div class="nav:col-span-7">
           <h2 id="production-quality-title" class="max-w-4xl font-display text-h2 uppercase">
             За вкус отвечаем сами
           </h2>
-          <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/65">
+          <p class="mt-6 max-w-2xl text-body-large font-medium text-surface/65">
             Не экономим на ингредиентах и соблюдаем технологические режимы. Весь ассортимент производится в соответствии с действующими требованиями ТР ТС.
           </p>
         </div>
@@ -236,18 +293,10 @@ onMounted(() => {
         </ul>
       </div>
 
-      <div class="site-container mt-16 grid gap-4 sm:mt-20 nav:grid-cols-2">
+      <div class="site-container mt-12 grid gap-4 sm:mt-16 nav:grid-cols-2">
         <ActionTile :href="sitePath('/katalog/')" label="Попробовать результат" title="В каталог" />
         <ActionTile :href="sitePath('/kontakty/')" label="Вопросы и сотрудничество" title="Связаться" tone="surface" />
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-.production-watermark {
-  color: rgb(255 255 255 / 4%);
-  font-size: clamp(6rem, 16vw, 15rem);
-  line-height: 0.75;
-}
-</style>

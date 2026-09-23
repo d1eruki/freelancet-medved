@@ -19,9 +19,9 @@ defineProps({
     ]"
     :href="href"
   >
-    <span class="text-label font-extrabold tracking-widest uppercase" :class="{ 'text-brand': tone === 'surface' }">{{ label }}</span>
-    <span class="mt-auto flex flex-wrap items-end justify-between gap-8">
-      <span class="font-display text-h3 uppercase">{{ title }}</span>
+    <span class="mt-auto text-label font-extrabold tracking-widest uppercase" :class="{ 'text-brand': tone === 'surface' }">{{ label }}</span>
+    <span class="mt-6 flex items-end justify-between gap-8" :class="compact ? 'flex-nowrap' : 'flex-wrap'">
+      <span class="min-w-0 font-display text-h3 uppercase">{{ title }}</span>
       <CircleArrow :hover="tone === 'brand' ? 'detail' : 'brand'" size="action" :tone="tone === 'brand' ? 'surface' : 'brand'" />
     </span>
   </a>

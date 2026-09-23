@@ -17,7 +17,7 @@ defineProps({
     :class="tone === 'brand' ? 'bg-brand text-surface' : 'bg-surface'"
   >
     <p class="text-label font-extrabold tracking-widest uppercase" :class="{ 'text-brand': tone === 'surface' }">{{ label }}</p>
-    <h3 class="mt-7 font-display text-h4 uppercase">{{ title }}</h3>
+    <h3 class="mt-6 font-display text-h4 uppercase">{{ title }}</h3>
     <div class="mt-auto pt-10">
       <p class="text-body font-medium" :class="tone === 'brand' ? 'text-surface/85' : 'text-subtle'">{{ hours }}</p>
       <a

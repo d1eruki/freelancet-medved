@@ -24,7 +24,7 @@ onMounted(() => {
         <div class="flex flex-wrap items-end justify-between gap-6">
           <div>
             <h2 :id="`${category.slug}-range-title`" class="font-display text-h2 break-words hyphens-auto uppercase">Ассортимент</h2>
-            <p class="mt-5 text-body font-medium text-subtle">
+            <p class="mt-6 text-body font-medium text-subtle">
               <span class="font-extrabold text-brand uppercase">{{ category.items.length }} {{ category.items.length === 1 ? 'вкус' : category.items.length < 5 ? 'вкуса' : 'вкусов' }}</span>
               · крепость 4,9%
             </p>
@@ -43,7 +43,7 @@ onMounted(() => {
       description="По вопросам оптовых заказов и сотрудничества обращайтесь в отдел продаж."
       :href="sitePath('/kontakty/')"
       label="Контакты"
-      background="foreground"
+      :background="'foreground'"
     />
   </div>
 </template>

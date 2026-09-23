@@ -16,11 +16,11 @@ defineProps({
       <div class="relative grid min-h-20 place-items-center overflow-hidden rounded-2xl">
         <img class="h-64 w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105" :src="category.image" :alt="category.imageAlt">
       </div>
-      <div class="mt-8">
+      <div class="mt-10">
         <p class="text-label font-bold text-subtle transition-colors group-hover:text-surface/80">{{ category.tagline }}</p>
-        <h3 class="mt-3 font-display text-h4 uppercase">{{ category.name }}</h3>
-        <p class="mt-4 mb-8 text-body font-medium text-subtle transition-colors group-hover:text-surface/80">{{ category.description }}</p>
-        <span class="mt-auto flex items-center justify-between gap-4 border-t border-foreground/15 pt-5 text-label font-extrabold tracking-wide uppercase group-hover:border-surface/40">
+        <h3 class="mt-6 font-display text-h4 uppercase">{{ category.name }}</h3>
+        <p class="mt-6 mb-10 text-body font-medium text-subtle transition-colors group-hover:text-surface/80">{{ category.description }}</p>
+        <span class="mt-auto flex items-center justify-between gap-4 border-t border-foreground/15 pt-6 text-label font-extrabold tracking-wide uppercase group-hover:border-surface/40">
           <span>Смотреть ассортимент</span>
           <CircleArrow hover="detail" size="action" />
         </span>

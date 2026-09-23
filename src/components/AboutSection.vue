@@ -1,7 +1,7 @@
 <script setup>
 import productionImageUrl from '../assets/production-meadery.png'
 import { catalogCategories } from '../data/catalog'
-import { vFitty } from '../directives/fitty'
+import SectionWatermark from './SectionWatermark.vue'
 </script>
 
 <template>
@@ -10,16 +10,14 @@ import { vFitty } from '../directives/fitty'
     data-header-theme="light"
     aria-labelledby="about-title"
   >
-    <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-1" aria-hidden="true">
-      <span v-fitty class="about-watermark inline-block whitespace-nowrap font-display uppercase">Мёдведь</span>
-    </div>
+    <SectionWatermark text="Мёдведь" />
 
-    <div class="site-container">
+    <div class="site-container relative z-10">
       <h2 id="about-title" class="font-display text-h2 uppercase">
         О компании
       </h2>
 
-      <div class="about-grid mt-12 grid gap-4 wide:mt-20">
+      <div class="about-grid mt-12 grid gap-4 sm:mt-16">
         <figure class="about-feature group relative min-h-120 overflow-hidden rounded-3xl nav:min-h-160">
           <img
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
@@ -41,7 +39,7 @@ import { vFitty } from '../directives/fitty'
 
         <article class="about-tenure flex min-h-120 flex-col rounded-3xl bg-brand p-6 sm:p-8 nav:min-h-160 wide:p-10">
           <p class="text-label font-bold tracking-wider uppercase">Работаем</p>
-          <p class="mt-3 font-display text-h2 uppercase">с 2006</p>
+          <p class="mt-6 font-display text-h2 uppercase">с 2006</p>
 
           <p class="mt-auto max-w-lg text-body-large font-medium text-surface/75">
             В 2016 году завод отметил первый десятилетний юбилей. Всё это время мы развиваем производство, увеличиваем ассортимент и экспериментируем с новыми вкусами.
@@ -52,7 +50,7 @@ import { vFitty } from '../directives/fitty'
           <div class="grid gap-8 sm:grid-cols-3 sm:items-end">
             <div>
               <p class="font-display text-h1 text-brand">{{ catalogCategories[0].items.length }}</p>
-              <p class="mt-2 text-label font-extrabold tracking-wider uppercase">сортов медовухи</p>
+              <p class="mt-3 text-label font-extrabold tracking-wider uppercase">сортов медовухи</p>
             </div>
 
             <p class="text-body font-medium text-subtle sm:col-span-2">
@@ -73,13 +71,6 @@ import { vFitty } from '../directives/fitty'
 </template>
 
 <style scoped>
-.about-watermark {
-  color: rgb(255 255 255 / 3%);
-  font-size: clamp(7rem, 16vw, 15rem);
-  line-height: 0.8;
-  translate: 0 0.18em;
-}
-
 @media (min-width: 54rem) {
   .about-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));

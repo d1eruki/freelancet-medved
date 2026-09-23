@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import { vFitty } from '../directives/fitty'
+import SectionWatermark from './SectionWatermark.vue'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about-company.jpg'
 import awardInterfood2007Url from '../assets/award-interfood-2007.jpg'
@@ -82,7 +82,7 @@ onMounted(() => {
           <h2 id="tradition-title" class="font-display text-h2 uppercase">
             От княжеских дворов до заводов Питера
           </h2>
-          <div class="mt-10 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
+          <div class="mt-6 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
             <p>
               На Руси медовые напитки варили и в крестьянских избах, и на княжеских дворах. Ими встречали дружины и отмечали народные праздники.
             </p>
@@ -95,11 +95,9 @@ onMounted(() => {
     </section>
 
     <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="durdin-title">
-      <div class="pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true">
-        <span v-fitty class="about-watermark inline-block whitespace-nowrap font-display uppercase">Дурдин</span>
-      </div>
+      <SectionWatermark text="Дурдин" />
 
-      <div class="site-container relative">
+      <div class="site-container relative z-10">
         <div class="grid gap-12 nav:grid-cols-12 nav:gap-6">
           <div class="nav:col-span-5">
             <p class="font-display text-h1 text-surface">1874</p>
@@ -110,18 +108,18 @@ onMounted(() => {
             <h2 id="durdin-title" class="max-w-4xl font-display text-h2 uppercase">
               Наследие Ивана Дурдина
             </h2>
-            <p class="mt-10 max-w-3xl text-body-large font-medium text-surface/75">
+            <p class="mt-6 max-w-3xl text-body-large font-medium text-surface/75">
               Товарищество пиво-медоваренного завода Ивана Дурдина входило в число лидеров дореволюционной индустрии Петербурга. Предприятие выпускало сортовое пиво и несколько видов мёда, разливало их в фирменные бутылки и развозило собственными подводами.
             </p>
 
-            <div class="mt-12 grid gap-4 sm:grid-cols-2">
+            <div class="mt-10 grid gap-4 sm:grid-cols-2">
               <article class="rounded-3xl bg-surface p-6 text-foreground sm:p-8">
                 <p class="font-display text-h4 text-brand uppercase">Имперский герб</p>
-                <p class="mt-5 text-body font-medium text-subtle">Завод получил право изображать герб Российской империи на этикетках.</p>
+                <p class="mt-6 text-body font-medium text-subtle">Завод получил право изображать герб Российской империи на этикетках.</p>
               </article>
               <article class="rounded-3xl border border-surface/30 bg-brand p-6 sm:p-8">
                 <p class="font-display text-h4 text-surface uppercase">100 лошадей</p>
-                <p class="mt-5 text-body font-medium text-surface/70">Собственная служба доставки развозила продукцию по городу на грузовых подводах.</p>
+                <p class="mt-6 text-body font-medium text-surface/70">Собственная служба доставки развозила продукцию по городу на грузовых подводах.</p>
               </article>
             </div>
           </div>
@@ -144,10 +142,10 @@ onMounted(() => {
         </figure>
 
         <article class="flex min-h-120 flex-col rounded-3xl bg-surface p-6 sm:p-8 nav:col-span-7 nav:min-h-160 wide:p-12">
-          <h2 id="today-title" class="max-w-4xl font-display text-h2 uppercase">
+            <h2 id="today-title" class="max-w-4xl font-display text-h2 uppercase">
             Сегодня здесь варит «МЁДВЕДЬ»
           </h2>
-          <div class="mt-auto grid gap-6 pt-12 text-body-large font-medium text-subtle sm:grid-cols-2">
+          <div class="mt-6 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
             <p>
               Товарищество пиво-медоваренного завода «МЁДВЕДЬ» начало работу в 2006 году и продолжило петербургскую традицию медоварения под собственной маркой.
             </p>
@@ -184,7 +182,7 @@ onMounted(() => {
 
     <section class="overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="awards-title">
       <div class="site-container">
-        <div class="grid items-end gap-8 nav:grid-cols-12">
+        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
           <h2 id="awards-title" class="font-display text-h2 uppercase nav:col-span-8">Дело говорит<br>за себя</h2>
           <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
             Качество продукции отмечено дипломами выставок и фестивалей медовухи.
@@ -204,7 +202,7 @@ onMounted(() => {
 
     <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="partnership-title">
       <div class="site-container">
-        <div class="grid gap-12 nav:grid-cols-12 nav:gap-6">
+        <div class="grid gap-6 nav:grid-cols-12">
           <div class="nav:col-span-7">
             <h2 id="partnership-title" class="max-w-5xl font-display text-h2 uppercase">Работаем с теми, кто знает толк</h2>
           </div>
@@ -213,18 +211,10 @@ onMounted(() => {
           </p>
         </div>
 
-        <div class="mt-16">
+        <div class="mt-12 sm:mt-16">
           <ActionTile :href="sitePath('/kontakty/')" label="Начать сотрудничество" title="Связаться" />
         </div>
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-.about-watermark {
-  color: rgb(255 255 255 / 4%);
-  font-size: clamp(7rem, 19vw, 18rem);
-  line-height: 0.75;
-}
-</style>
