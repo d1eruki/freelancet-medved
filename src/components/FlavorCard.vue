@@ -5,14 +5,21 @@ const props = defineProps({
   item: { type: Object, required: true },
 })
 
-const activeVariantIndex = ref(Math.max(0, props.item.variants.findIndex((variant) => variant.volume === '0,45 л')))
+const activeVariantIndex = ref(0)
+const transitionDirection = ref('forward')
 const activeVariant = computed(() => props.item.variants[activeVariantIndex.value])
 const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
+
+function selectVariant(index) {
+  if (index === activeVariantIndex.value) return
+  transitionDirection.value = index > activeVariantIndex.value ? 'forward' : 'backward'
+  activeVariantIndex.value = index
+}
 </script>
 
 <template>
   <li class="flex min-h-80 flex-col overflow-hidden rounded-3xl bg-surface p-6 sm:p-8">
-    <div class="relative h-64 w-full">
+    <div class="relative h-64 w-full" :class="{ backward: transitionDirection === 'backward' }">
       <Transition name="packaging">
         <img
           :key="activeVariant.volume"
@@ -32,7 +39,7 @@ const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Мед�
         type="button"
         :aria-label="`Показать объём ${variant.volume}`"
         :aria-pressed="index === activeVariantIndex"
-        @click="activeVariantIndex = index"
+        @click="selectVariant(index)"
       >
         {{ variant.volume }}
       </button>
@@ -51,11 +58,13 @@ const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Мед�
   transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.packaging-enter-from {
+.packaging-enter-from,
+.backward .packaging-leave-to {
   transform: translateX(150%);
 }
 
-.packaging-leave-to {
+.packaging-leave-to,
+.backward .packaging-enter-from {
   transform: translateX(-150%);
 }
 </style>

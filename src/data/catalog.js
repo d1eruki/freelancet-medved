@@ -1,34 +1,48 @@
-import meadImageUrl from '../assets/mead-glass-cutout.png'
-import ciderImageUrl from '../assets/cider-glass-cutout.png'
-import perryImageUrl from '../assets/perry-glass-cutout.png'
-import pearPerryLiterImageUrl from '../assets/sorts/image 1.png'
-import cranberryMeadLiterImageUrl from '../assets/sorts/image 2.png'
-import mangoMeadLiterImageUrl from '../assets/sorts/image 3.png'
-import forestBerryMeadLiterImageUrl from '../assets/sorts/image 4.png'
-import seaBuckthornMeadLiterImageUrl from '../assets/sorts/image 5.png'
-import plumMeadLiterImageUrl from '../assets/sorts/image 6.png'
-import blackcurrantMeadLiterImageUrl from '../assets/sorts/image 7.png'
-import cherryCiderBottleImageUrl from '../assets/sorts/image 8.png'
-import antonovkaCiderBottleImageUrl from '../assets/sorts/image 9.png'
-import pearPerryBottleImageUrl from '../assets/sorts/image 10.png'
-import hopCiderSmallImageUrl from '../assets/sorts/image 11.png'
-import woodstockCiderSmallImageUrl from '../assets/sorts/image 12.png'
-import pearPerrySmallImageUrl from '../assets/sorts/image 13.png'
-import pomegranateMeadSmallImageUrl from '../assets/sorts/image 14.png'
-import mangoMeadSmallImageUrl from '../assets/sorts/image 15.png'
-import blackcurrantCiderSmallImageUrl from '../assets/sorts/image 16.png'
-import berryCiderSmallImageUrl from '../assets/sorts/image 17.png'
-import cherryCiderSmallImageUrl from '../assets/sorts/image 18.png'
-import antonovkaCiderSmallImageUrl from '../assets/sorts/image 19.png'
-import hopCiderImageUrl from '../assets/sorts/image 20.png'
-import woodstockCiderImageUrl from '../assets/sorts/image 21.png'
-import pearPerryImageUrl from '../assets/sorts/image 22.png'
-import pomegranateMeadImageUrl from '../assets/sorts/image 23.png'
-import mangoMeadImageUrl from '../assets/sorts/image 24.png'
-import blackcurrantCiderImageUrl from '../assets/sorts/image 25.png'
-import berryCiderImageUrl from '../assets/sorts/image 26.png'
-import cherryCiderImageUrl from '../assets/sorts/image 27.png'
-import antonovkaCiderImageUrl from '../assets/sorts/image 28.png'
+import meadImageUrl from '../assets/products/mead/mead-default-glass.png'
+import pomegranateBerryMeadGlassImageUrl from '../assets/products/mead/marion-pomegranate-berry-glass.png'
+import mangoMeadGlassImageUrl from '../assets/products/mead/marion-mango-glass.png'
+import cranberryMeadGlassImageUrl from '../assets/products/mead/medved-cranberry-glass.png'
+import forestBerriesMeadGlassImageUrl from '../assets/products/mead/medved-forest-berries-glass.png'
+import seaBuckthornMeadGlassImageUrl from '../assets/products/mead/medved-sea-buckthorn-glass.png'
+import plumMeadGlassImageUrl from '../assets/products/mead/medved-plum-glass.png'
+import blackcurrantMeadGlassImageUrl from '../assets/products/mead/medved-blackcurrant-glass.png'
+import ciderImageUrl from '../assets/products/cider/cider-default-glass.png'
+import hopCiderGlassImageUrl from '../assets/products/cider/khmelyar-glass.png'
+import woodstockCiderGlassImageUrl from '../assets/products/cider/woodstock-glass.png'
+import blackcurrantCiderGlassImageUrl from '../assets/products/cider/marion-blackcurrant-berry-glass.png'
+import berryCiderGlassImageUrl from '../assets/products/cider/marion-berry-glass.png'
+import cherryCiderGlassImageUrl from '../assets/products/cider/cherry-glass.png'
+import antonovkaCiderGlassImageUrl from '../assets/products/cider/antonovka-glass.png'
+import perryImageUrl from '../assets/products/perry/perry-default-glass.png'
+import pearPerryGlassImageUrl from '../assets/products/perry/mister-williams-glass.png'
+import pearPerryLiterImageUrl from '../assets/products/perry/mister-williams-1l.png'
+import cranberryMeadLiterImageUrl from '../assets/products/mead/medved-cranberry-1l.png'
+import mangoMeadLiterImageUrl from '../assets/products/mead/marion-mango-1l.png'
+import forestBerryMeadLiterImageUrl from '../assets/products/mead/medved-forest-berries-1l.png'
+import seaBuckthornMeadLiterImageUrl from '../assets/products/mead/medved-sea-buckthorn-1l.png'
+import plumMeadLiterImageUrl from '../assets/products/mead/medved-plum-1l.png'
+import blackcurrantMeadLiterImageUrl from '../assets/products/mead/medved-blackcurrant-1l.png'
+import cherryCiderBottleImageUrl from '../assets/products/cider/cherry-750ml.png'
+import antonovkaCiderBottleImageUrl from '../assets/products/cider/antonovka-750ml.png'
+import pearPerryBottleImageUrl from '../assets/products/perry/mister-williams-750ml.png'
+import hopCiderSmallImageUrl from '../assets/products/cider/khmelyar-330ml.png'
+import woodstockCiderSmallImageUrl from '../assets/products/cider/woodstock-330ml.png'
+import pearPerrySmallImageUrl from '../assets/products/perry/mister-williams-330ml.png'
+import pomegranateMeadSmallImageUrl from '../assets/products/mead/marion-pomegranate-berry-330ml.png'
+import mangoMeadSmallImageUrl from '../assets/products/mead/marion-mango-330ml.png'
+import blackcurrantCiderSmallImageUrl from '../assets/products/cider/marion-blackcurrant-berry-330ml.png'
+import berryCiderSmallImageUrl from '../assets/products/cider/marion-berry-330ml.png'
+import cherryCiderSmallImageUrl from '../assets/products/cider/cherry-330ml.png'
+import antonovkaCiderSmallImageUrl from '../assets/products/cider/antonovka-330ml.png'
+import hopCiderImageUrl from '../assets/products/cider/khmelyar-450ml.png'
+import woodstockCiderImageUrl from '../assets/products/cider/woodstock-450ml.png'
+import pearPerryImageUrl from '../assets/products/perry/mister-williams-450ml.png'
+import pomegranateMeadImageUrl from '../assets/products/mead/marion-pomegranate-berry-450ml.png'
+import mangoMeadImageUrl from '../assets/products/mead/marion-mango-450ml.png'
+import blackcurrantCiderImageUrl from '../assets/products/cider/marion-blackcurrant-berry-450ml.png'
+import berryCiderImageUrl from '../assets/products/cider/marion-berry-450ml.png'
+import cherryCiderImageUrl from '../assets/products/cider/cherry-450ml.png'
+import antonovkaCiderImageUrl from '../assets/products/cider/antonovka-450ml.png'
 
 export const catalogCategories = [
   {
@@ -46,6 +60,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Богатый купаж соков граната, черники, малины и яблок. Яркий и многогранный ягодный вкус, поднимающий самооценку с первого глотка.',
         variants: [
+          { volume: '30 л', image: pomegranateBerryMeadGlassImageUrl },
           { volume: '0,33 л', image: pomegranateMeadSmallImageUrl },
           { volume: '0,45 л', image: pomegranateMeadImageUrl },
         ],
@@ -55,6 +70,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Натуральное пюре сочного манго и фруктовые соки в бархатистом исполнении. Тропический побег от серых будней, оформленный с безупречным вкусом и светским изяществом.',
         variants: [
+          { volume: '30 л', image: mangoMeadGlassImageUrl },
           { volume: '0,33 л', image: mangoMeadSmallImageUrl },
           { volume: '0,45 л', image: mangoMeadImageUrl },
           { volume: '1 л', image: mangoMeadLiterImageUrl },
@@ -65,6 +81,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Виртуозный баланс мягкого мёда и бодрящей клюквенной кислинки. Напиток с достоинством, который освежает мысли быстрее, чем новости, и идеально подходит на роль аперитива.',
         variants: [
+          { volume: '30 л', image: cranberryMeadGlassImageUrl },
           { volume: '1 л', image: cranberryMeadLiterImageUrl },
         ],
       },
@@ -73,6 +90,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Гармоничный союз медовой сладости и лесной кислинки. Лечит от скуки эффективнее психотерапевта и безупречно сочетается с сырной тарелкой или хорошей компанией.',
         variants: [
+          { volume: '30 л', image: forestBerriesMeadGlassImageUrl },
           { volume: '1 л', image: forestBerryMeadLiterImageUrl },
         ],
       },
@@ -81,6 +99,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Самобытный напиток со вкусом спелой облепихи и мягким медовым акцентом. Солнце в бокале с аристократическим выдержанным характером.',
         variants: [
+          { volume: '30 л', image: seaBuckthornMeadGlassImageUrl },
           { volume: '1 л', image: seaBuckthornMeadLiterImageUrl },
         ],
       },
@@ -89,6 +108,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Мягкий округлый вкус садовых слив с приятной кислинкой и благородным финишем. Солидный выбор для тех, кто понимает толк в десертах и хорошем отдыхе.',
         variants: [
+          { volume: '30 л', image: plumMeadGlassImageUrl },
           { volume: '1 л', image: plumMeadLiterImageUrl },
         ],
       },
@@ -97,6 +117,7 @@ export const catalogCategories = [
         details: 'нефильтрованная, неосветлённая',
         description: 'Натуральный мёд, сок чёрной смородины и секретные пряные травы. Насыщенный букет с мягкой терпкостью, способный создать атмосферу уединённого загородного поместья.',
         variants: [
+          { volume: '30 л', image: blackcurrantMeadGlassImageUrl },
           { volume: '1 л', image: blackcurrantMeadLiterImageUrl },
         ],
       },
@@ -117,6 +138,7 @@ export const catalogCategories = [
         details: 'негазированный, нефильтрованный, полусладкий',
         description: 'Нефильтрованный сидр с тонкой хмелевой горчинкой. Сложный и глубокий букет для тех, кто любит с умным видом вести беседы об органолептике.',
         variants: [
+          { volume: '30 л', image: hopCiderGlassImageUrl },
           { volume: '0,33 л', image: hopCiderSmallImageUrl },
           { volume: '0,45 л', image: hopCiderImageUrl },
         ],
@@ -126,6 +148,7 @@ export const catalogCategories = [
         details: 'негазированный, нефильтрованный, сухой',
         description: 'Традиционный сухой непастеризованный сидр из сока прямого отжима. Бескомпромиссная честная сухая терпкость для истинных ценителей классики.',
         variants: [
+          { volume: '30 л', image: woodstockCiderGlassImageUrl },
           { volume: '0,33 л', image: woodstockCiderSmallImageUrl },
           { volume: '0,45 л', image: woodstockCiderImageUrl },
         ],
@@ -135,6 +158,7 @@ export const catalogCategories = [
         details: 'негазированный, полусладкий',
         description: 'Сок прямого отжима с черной смородиной, черникой и малиной. Бархатистый ягодный сидр, которому не стыдно признаться в любви в публичном месте.',
         variants: [
+          { volume: '30 л', image: blackcurrantCiderGlassImageUrl },
           { volume: '0,33 л', image: blackcurrantCiderSmallImageUrl },
           { volume: '0,45 л', image: blackcurrantCiderImageUrl },
         ],
@@ -144,6 +168,7 @@ export const catalogCategories = [
         details: 'негазированный, полусладкий',
         description: 'Ягодный сочный сидр с идеальным балансом умеренной сладости и кислинки. Способен украсить любой вечер, даже если из гостей только вы и ваш кот.',
         variants: [
+          { volume: '30 л', image: berryCiderGlassImageUrl },
           { volume: '0,33 л', image: berryCiderSmallImageUrl },
           { volume: '0,45 л', image: berryCiderImageUrl },
         ],
@@ -153,6 +178,7 @@ export const catalogCategories = [
         details: 'жемчужный, газированный, полусладкий',
         description: 'Яблочный сок прямого отжима и натуральная вишня с тонами благородной терпкости. Идеальная альтернатива сухим винам для тех, кто сегодня настроен чуть более игриво.',
         variants: [
+          { volume: '30 л', image: cherryCiderGlassImageUrl },
           { volume: '0,33 л', image: cherryCiderSmallImageUrl },
           { volume: '0,45 л', image: cherryCiderImageUrl },
           { volume: '0,75 л', image: cherryCiderBottleImageUrl, details: 'жемчужный, полусладкий' },
@@ -163,6 +189,7 @@ export const catalogCategories = [
         details: 'жемчужный, газированный, полусухой',
         description: 'Игристый полусухой сидр с легендарной яблочной кислинкой. Заряжает бодростью и аристократическим оптимизмом лучше любого утреннего кофе.',
         variants: [
+          { volume: '30 л', image: antonovkaCiderGlassImageUrl },
           { volume: '0,33 л', image: antonovkaCiderSmallImageUrl },
           { volume: '0,45 л', image: antonovkaCiderImageUrl },
           { volume: '0,75 л', image: antonovkaCiderBottleImageUrl, details: 'жемчужный, полусухой' },
@@ -185,6 +212,7 @@ export const catalogCategories = [
         details: 'традиционный, неосветлённый, нефильтрованный, полусухой',
         description: 'Изготовлен из сока прямого отжима спелых груш с легким реверансом в сторону лемонграсса. Настолько утонченный пуаре с благородными танинами, что рука сама тянется отставить мизинец при бокале.',
         variants: [
+          { volume: '30 л', image: pearPerryGlassImageUrl },
           { volume: '0,33 л', image: pearPerrySmallImageUrl },
           { volume: '0,45 л', image: pearPerryImageUrl },
           { volume: '0,75 л', image: pearPerryBottleImageUrl },
