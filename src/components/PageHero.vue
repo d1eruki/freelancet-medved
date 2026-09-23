@@ -1,8 +1,10 @@
 <script setup>
-import productionImageUrl from '../assets/production-meadery.png'
+import productionImageUrl from '../assets/production-hero-v2.png'
 
 defineProps({
   titleId: { type: String, required: true },
+  imageUrl: { type: String, default: productionImageUrl },
+  imageAlt: { type: String, default: 'Медоваренное производство с медным варочным оборудованием' },
 })
 </script>
 
@@ -15,8 +17,8 @@ defineProps({
     <figure class="absolute inset-0 -z-1">
       <img
         class="size-full object-cover object-center"
-        :src="productionImageUrl"
-        alt="Медоваренное производство с медным варочным оборудованием"
+        :src="imageUrl"
+        :alt="imageAlt"
       >
       <span class="absolute inset-0 bg-foreground/60" aria-hidden="true" />
       <span class="absolute inset-0 bg-linear-to-t from-foreground/85 via-transparent to-foreground/20" aria-hidden="true" />

@@ -3,20 +3,14 @@ import { computed, onMounted, ref } from 'vue'
 import CircleArrow from './CircleArrow.vue'
 import ActionTile from './ActionTile.vue'
 import PageHero from './PageHero.vue'
-import NumberedInfoCard from './NumberedInfoCard.vue'
 import PartnerCard from './PartnerCard.vue'
 import SectionWatermark from './SectionWatermark.vue'
-import { catalogCategories } from '../data/catalog'
 import { partnerCities, partners } from '../data/partners'
 import { sitePath } from '../utils/site-path'
+import partnersHeroUrl from '../assets/partners-hero.png'
 
 const allCitiesLabel = 'Все города'
 const selectedCity = ref(allCitiesLabel)
-
-const distributionProducts = catalogCategories.map((category) => ({
-  title: category.name,
-  text: category.description,
-}))
 
 const visiblePartners = computed(() => {
   if (selectedCity.value === allCitiesLabel) {
@@ -53,7 +47,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <PageHero title-id="partners-page-title">
+    <PageHero
+      title-id="partners-page-title"
+      :image-url="partnersHeroUrl"
+      image-alt="Напитки в бутылках и бокале на стойке магазина"
+    >
       <template #title>Где купить<br>«Мёдведь»</template>
       Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.
     </PageHero>
@@ -141,44 +139,32 @@ onMounted(() => {
       <SectionWatermark text="Вместе" />
 
       <div class="site-container relative z-10">
-        <div class="grid gap-6">
-          <h2 id="distribution-third-title" class="font-display text-h2 break-words hyphens-auto uppercase">Стать дистрибьютором</h2>
-          <p class="text-body-large font-medium text-surface/75">
-            Открыты новым контактам и готовы обсудить поставки и оптовые цены.
-          </p>
-        </div>
+        <h2 id="distribution-third-title" class="font-display text-h2 break-words hyphens-auto uppercase">Стать дистрибьютором</h2>
 
-        <div class="mt-12 grid gap-6 border-t border-surface/30 pt-10 sm:mt-16 nav:grid-cols-12">
-          <p class="text-body-large font-extrabold tracking-wide uppercase nav:col-span-4">
-            Дегустация перед поставкой
-          </p>
-          <p class="max-w-3xl text-body-large font-medium text-surface/75 nav:col-span-8">
-            Выберите напитки для дегустации — подготовим образцы медовухи, сидра и пуаре в ПЭТ-бутылках.
-          </p>
-        </div>
+        <div class="mt-12 grid gap-10 sm:mt-16 nav:grid-cols-12 nav:gap-6">
+          <div class="flex flex-col gap-10 nav:col-span-5">
+            <div class="grid gap-6">
+              <p class="text-body-large font-medium text-surface/75">
+                Открыты новым контактам и готовы обсудить поставки и оптовые цены.
+              </p>
+              <p class="text-body-large font-medium text-surface/75">
+                Для поставки доступны все сорта медовухи, сидра и пуаре. Перед поставкой подготовим выбранные напитки для дегустации в ПЭТ-бутылках.
+              </p>
+            </div>
 
-        <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <NumberedInfoCard
-            v-for="product in distributionProducts"
-            :key="product.title"
-            :title="product.title"
-            :text="product.text"
-            variant="distribution"
+            <p class="mt-auto text-label font-medium text-surface/60">
+              Компания не предлагает и не продаёт алкоголь лицам младше 18 лет. ООО «ФАРТ СПБ» оставляет за собой право отказать в сотрудничестве, если оно нарушает действующие договоры с дистрибьюторами.
+            </p>
+          </div>
+
+          <ActionTile
+            class="nav:col-span-7"
+            :href="sitePath('/kontakty/')"
+            label="Образцы для дегустации"
+            title="Связаться с отделом продаж"
             compact
           />
-        </ul>
-
-        <ActionTile
-          class="mt-4"
-          :href="sitePath('/kontakty/')"
-          label="Образцы для дегустации"
-          title="Связаться с отделом продаж"
-          compact
-        />
-
-        <p class="mt-10 max-w-5xl text-label font-medium text-surface/60">
-          Компания не предлагает и не продаёт алкоголь лицам младше 18 лет. ООО «ФАРТ СПБ» оставляет за собой право отказать в сотрудничестве, если оно нарушает действующие договоры с дистрибьюторами.
-        </p>
+        </div>
       </div>
     </section>
   </div>

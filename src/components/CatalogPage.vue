@@ -5,6 +5,7 @@ import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
 import { catalogCategories } from '../data/catalog'
 import { sitePath } from '../utils/site-path'
+import catalogHeroUrl from '../assets/catalog-hero-v2.png'
 
 onMounted(() => {
   document.title = 'Каталог медовухи, сидра и пуаре «МЁДВЕДЬ»'
@@ -17,7 +18,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <PageHero title-id="catalog-title">
+    <PageHero
+      title-id="catalog-title"
+      :image-url="catalogHeroUrl"
+      image-alt="Пинтовые бокалы с медовухой, сидром и пуаре"
+    >
       <template #title>Наши<br>напитки</template>
       Медовуха, сидр и пуаре собственного производства. Выберите напиток по настроению — от медовых и пряных до свежих фруктовых вкусов.
     </PageHero>

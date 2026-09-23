@@ -10,7 +10,7 @@ import CategoryPage from './components/CategoryPage.vue'
 import ContactsPage from './components/ContactsPage.vue'
 import CustomCursor from './components/CustomCursor.vue'
 import HeroSection from './components/HeroSection.vue'
-import HomeContactSection from './components/HomeContactSection.vue'
+import ContactSection from './components/ContactSection.vue'
 import LegalPage from './components/LegalPage.vue'
 import PartnersPage from './components/PartnersPage.vue'
 import ProductionPage from './components/ProductionPage.vue'
@@ -145,7 +145,14 @@ onBeforeUnmount(() => {
         <HeroSection />
         <ProductsSection />
         <AboutSection />
-        <HomeContactSection />
+        <ContactSection
+          id="contact-form"
+          class="scroll-mt-20"
+          title="Связаться с нами"
+          description="Оставьте контакты и расскажите о вашем вопросе."
+          heading-id="home-contact-title"
+          id-prefix="home-contact"
+        />
       </template>
     </main>
 

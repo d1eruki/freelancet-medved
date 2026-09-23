@@ -1,8 +1,9 @@
 <script setup>
 import { onMounted } from 'vue'
+import contactsHeroImageUrl from '../assets/contacts-hero.png'
 import CircleArrow from './CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
-import ContactForm from './ContactForm.vue'
+import ContactSection from './ContactSection.vue'
 import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
 import { sitePath } from '../utils/site-path'
@@ -21,7 +22,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <PageHero title-id="contacts-title">
+    <PageHero
+      title-id="contacts-title"
+      :image-url="contactsHeroImageUrl"
+      image-alt="Интерьер медоварни с медным производственным оборудованием"
+    >
       <template #title>Контакты</template>
       Товарищество пиво-медоваренного завода «МЁДВЕДЬ». Производим и поставляем медовуху, сидр и пуаре из Санкт-Петербурга.
     </PageHero>
@@ -57,16 +62,13 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="contacts-inquiry-title">
-      <div class="site-container">
-        <h2 id="contacts-inquiry-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase">Запрос на поставку</h2>
-        <div class="mt-6 grid gap-10 nav:grid-cols-12">
-          <p class="max-w-md text-body-large font-medium text-surface/80 nav:col-span-4">Расскажите о вашем вопросе.</p>
-
-          <ContactForm class="nav:col-span-8" id-prefix="inquiry" tone="dark" />
-        </div>
-      </div>
-    </section>
+    <ContactSection
+      title="Запрос на поставку"
+      description="Расскажите о вашем вопросе."
+      heading-id="contacts-inquiry-title"
+      id-prefix="inquiry"
+      tone="dark"
+    />
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="contacts-address-title">
       <div class="site-container">
