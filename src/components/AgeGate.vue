@@ -80,7 +80,7 @@ onBeforeUnmount(() => {
         </p>
         <button
           ref="confirmButton"
-          class="mt-8 min-h-14 rounded-full border border-foreground/20 px-8 text-label font-extrabold tracking-wide uppercase transition duration-200 hover:border-foreground hover:bg-panel focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          class="mt-8 min-h-14 w-full rounded-full border border-foreground/20 px-8 text-label font-extrabold tracking-wide uppercase transition duration-200 hover:border-foreground hover:bg-panel focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand sm:w-auto"
           type="button"
           @click="resetAnswer"
         >

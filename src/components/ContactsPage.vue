@@ -91,7 +91,7 @@ onMounted(() => {
               </label>
             </div>
             <div class="nav:col-span-2">
-              <button class="min-h-14 rounded-full bg-brand px-8 py-4 text-label font-extrabold tracking-wide uppercase" type="button" disabled>Отправить</button>
+              <button class="min-h-14 w-full rounded-full bg-brand px-8 py-4 text-label font-extrabold tracking-wide uppercase sm:w-auto" type="button" disabled>Отправить</button>
             </div>
           </div>
         </div>

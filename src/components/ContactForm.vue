@@ -129,7 +129,7 @@ async function submitForm() {
       </label>
     </div>
     <div class="flex flex-col items-start gap-4 nav:col-span-2 sm:flex-row sm:items-center">
-      <button class="min-h-14 rounded-full bg-brand px-8 py-4 text-label font-extrabold tracking-wide text-surface uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60 disabled:shadow-none" type="submit" :disabled="status === 'sending'">
+      <button class="min-h-14 w-full rounded-full bg-brand px-8 py-4 text-label font-extrabold tracking-wide text-surface uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60 disabled:shadow-none sm:w-auto" type="submit" :disabled="status === 'sending'">
         {{ status === 'sending' ? 'Отправляем…' : 'Отправить' }}
       </button>
       <p v-if="feedback" class="text-body font-semibold" :class="status === 'error' ? (isDark ? 'text-red-300' : 'text-red-700') : (isDark ? 'text-surface' : 'text-brand')" role="status" aria-live="polite">
