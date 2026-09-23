@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import CatalogCategoryCard from './CatalogCategoryCard.vue'
-import HeroCircles from './HeroCircles.vue'
+import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
 import { catalogCategories } from '../data/catalog'
 import { sitePath } from '../utils/site-path'
@@ -17,17 +17,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <section class="relative isolate overflow-hidden bg-foreground text-surface" data-header-theme="light" aria-labelledby="catalog-title">
-      <div class="site-container relative grid min-h-svh items-end gap-12 pt-28 pb-10 sm:pt-36 sm:pb-14 nav:grid-cols-12 nav:items-center">
-        <div class="relative z-2 nav:col-span-8 nav:pt-16">
-          <h1 id="catalog-title" class="font-display text-h1 uppercase">Наши<br>напитки</h1>
-          <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/80 sm:mt-10">
-            Медовуха, сидр и пуаре собственного производства. Выберите напиток по настроению — от медовых и пряных до свежих фруктовых вкусов.
-          </p>
-        </div>
-        <HeroCircles top-label="Мёд" bottom-label="Сидр" />
-      </div>
-    </section>
+    <PageHero title-id="catalog-title">
+      <template #title>Наши<br>напитки</template>
+      Медовуха, сидр и пуаре собственного производства. Выберите напиток по настроению — от медовых и пряных до свежих фруктовых вкусов.
+    </PageHero>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
       <div class="site-container">

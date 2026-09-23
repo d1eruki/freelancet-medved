@@ -6,7 +6,7 @@ import { vFitty } from '../directives/fitty'
 
 <template>
   <section
-    class="relative isolate overflow-hidden bg-foreground py-20 text-surface sm:py-24 wide:py-28"
+    class="relative isolate overflow-hidden bg-foreground py-20 text-surface sm:py-24 nav:min-h-svh wide:py-28"
     data-header-theme="light"
     aria-labelledby="about-title"
   >
@@ -34,7 +34,7 @@ import { vFitty } from '../directives/fitty'
 
           <figcaption class="absolute right-6 bottom-6 left-6 sm:right-8 sm:bottom-8 sm:left-8">
             <p class="font-display text-h3 uppercase">
-              Варим с характером
+              Варим с душой
             </p>
           </figcaption>
         </figure>
@@ -82,26 +82,26 @@ import { vFitty } from '../directives/fitty'
 
 @media (min-width: 54rem) {
   .about-grid {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
   .about-feature {
-    grid-column: 1;
+    grid-column: 1 / span 7;
     grid-row: 1;
   }
 
   .about-tenure {
-    grid-column: 2;
+    grid-column: 8 / span 5;
     grid-row: 1;
   }
 
   .about-assortment {
-    grid-column: 1;
+    grid-column: 1 / span 5;
     grid-row: 2;
   }
 
   .about-delivery {
-    grid-column: 2;
+    grid-column: 6 / span 7;
     grid-row: 2;
   }
 

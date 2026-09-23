@@ -18,7 +18,7 @@ onMounted(() => {
   <div>
     <section class="bg-foreground pt-32 pb-16 text-surface sm:pt-40 sm:pb-24" data-header-theme="light" aria-labelledby="legal-page-title">
       <div class="site-container">
-        <h1 id="legal-page-title" class="max-w-6xl font-display text-h1 break-words hyphens-auto uppercase">
+        <h1 id="legal-page-title" class="font-display text-h1 break-words uppercase">
           {{ page.title }}
         </h1>
       </div>
@@ -49,7 +49,7 @@ onMounted(() => {
 
 .legal-copy :deep(h2) {
   margin-top: 3rem;
-  font-family: var(--font-display);
+  font-family: var(--font-display), sans-serif;
   font-size: var(--text-h4);
   line-height: 1.2;
 }

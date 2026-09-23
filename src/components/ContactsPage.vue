@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import CircleArrow from './CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
-import HeroCircles from './HeroCircles.vue'
+import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
 import { sitePath } from '../utils/site-path'
 
@@ -20,20 +20,15 @@ onMounted(() => {
 
 <template>
   <div>
-    <section class="relative isolate overflow-hidden bg-foreground text-surface" data-header-theme="light" aria-labelledby="contacts-title">
-      <div class="site-container grid min-h-svh items-end gap-12 pt-28 pb-10 sm:pt-36 sm:pb-14 nav:grid-cols-12 nav:items-center">
-        <div class="relative z-2 nav:col-span-8 nav:pt-16">
-          <h1 id="contacts-title" class="font-display text-h1 uppercase">Контакты</h1>
-          <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/80 sm:mt-10">Товарищество пиво-медоваренного завода «МЁДВЕДЬ». Производим и поставляем медовуху, сидр и пуаре из Санкт-Петербурга.</p>
-        </div>
-        <HeroCircles top-label="СПБ" bottom-label="Связь" />
-      </div>
-    </section>
+    <PageHero title-id="contacts-title">
+      <template #title>Контакты</template>
+      Товарищество пиво-медоваренного завода «МЁДВЕДЬ». Производим и поставляем медовуху, сидр и пуаре из Санкт-Петербурга.
+    </PageHero>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="contacts-details-title">
       <div class="site-container">
         <div class="grid items-end gap-8 nav:grid-cols-12">
-          <h2 id="contacts-details-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Связаться</h2>
+          <h2 id="contacts-details-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase nav:col-span-8">Связаться</h2>
           <p class="max-w-md text-body-large font-medium text-subtle nav:col-span-4">Выберите контакт в зависимости от вашего вопроса.</p>
         </div>
 
@@ -63,7 +58,7 @@ onMounted(() => {
 
     <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="contacts-inquiry-title">
       <div class="site-container">
-        <h2 id="contacts-inquiry-title" class="font-display text-h2 break-words hyphens-auto uppercase">Запрос на поставку</h2>
+        <h2 id="contacts-inquiry-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase">Запрос на поставку</h2>
         <div class="mt-10 grid gap-10 nav:grid-cols-12">
           <p class="max-w-md text-body-large font-medium text-surface/80 nav:col-span-4">Расскажите о вашем вопросе.</p>
 
@@ -102,7 +97,7 @@ onMounted(() => {
       <div class="site-container">
         <div class="grid gap-10 nav:grid-cols-12">
           <div class="nav:col-span-5">
-            <h2 id="contacts-address-title" class="font-display text-h2 break-words hyphens-auto uppercase">Наш адрес</h2>
+            <h2 id="contacts-address-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase">Наш адрес</h2>
           </div>
           <div class="nav:col-span-7 nav:pt-12">
             <address class="max-w-3xl text-body-large font-bold not-italic">{{ address }}</address>
@@ -123,7 +118,7 @@ onMounted(() => {
       description="Познакомьтесь с ассортиментом медовухи, сидра и пуаре."
       :href="sitePath('/katalog/')"
       label="В каталог"
-      background="foreground"
+      :background="'foreground'"
     />
   </div>
 </template>

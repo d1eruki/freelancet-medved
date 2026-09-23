@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import CircleArrow from './CircleArrow.vue'
 import ActionTile from './ActionTile.vue'
-import HeroCircles from './HeroCircles.vue'
+import PageHero from './PageHero.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
 import PartnerCard from './PartnerCard.vue'
 import { catalogCategories } from '../data/catalog'
@@ -13,8 +13,7 @@ import { sitePath } from '../utils/site-path'
 const allCitiesLabel = 'Все города'
 const selectedCity = ref(allCitiesLabel)
 
-const distributionProducts = catalogCategories.map((category, index) => ({
-  number: String(index + 1).padStart(2, '0'),
+const distributionProducts = catalogCategories.map((category) => ({
   title: category.name,
   text: category.description,
 }))
@@ -54,24 +53,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <section
-      class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface"
-      data-header-theme="light"
-      aria-labelledby="partners-page-title"
-    >
-      <div class="site-container grid min-h-svh items-end gap-12 pt-28 pb-8 sm:pt-36 sm:pb-12 nav:grid-cols-12 nav:items-center nav:gap-6">
-        <div class="relative z-2 nav:col-span-8 nav:pt-16">
-          <h1 id="partners-page-title" class="max-w-6xl font-display text-h1 uppercase">
-            Где купить<br>«Мёдведь»
-          </h1>
-          <p class="mt-8 max-w-2xl text-body-large font-medium text-surface/70 sm:mt-10">
-            Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.
-          </p>
-        </div>
-
-        <HeroCircles top-label="Где" bottom-label="Купить" />
-      </div>
-    </section>
+    <PageHero title-id="partners-page-title">
+      <template #title>Где купить<br>«Мёдведь»</template>
+      Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.
+    </PageHero>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="partners-list-title">
       <div class="site-container">
@@ -175,8 +160,7 @@ onMounted(() => {
         <ul class="mt-10 grid gap-4 nav:grid-cols-3">
           <NumberedInfoCard
             v-for="product in distributionProducts"
-            :key="`third-${product.number}`"
-            :number="product.number"
+            :key="product.title"
             :title="product.title"
             :text="product.text"
             variant="distribution"

@@ -17,7 +17,7 @@ defineProps({
             loading="lazy"
           >
         </div>
-        <figcaption class="flex flex-1 items-start justify-between gap-6 p-6 sm:p-8">
+        <figcaption class="flex flex-1 flex-wrap items-start justify-between gap-6 p-6 sm:p-8">
           <span>
             <span class="block font-display text-h4 text-brand uppercase">{{ award.title }}</span>
             <span class="mt-4 block text-body font-medium text-subtle">{{ award.text }}</span>

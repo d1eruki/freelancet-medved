@@ -1,10 +1,19 @@
 <script setup>
+import { IconApple, IconHexagons, IconLeaf, IconWheat } from '@tabler/icons-vue'
+
+const ingredientIcons = {
+  hexagons: IconHexagons,
+  apple: IconApple,
+  wheat: IconWheat,
+  leaf: IconLeaf,
+}
+
 defineProps({
-  number: { type: String, required: true },
   title: { type: String, required: true },
   text: { type: String, required: true },
   variant: { type: String, required: true },
   compact: { type: Boolean, default: false },
+  icons: { type: Array, default: () => [] },
 })
 </script>
 
@@ -20,11 +29,14 @@ defineProps({
       'min-h-56 bg-surface text-foreground sm:p-8 wide:min-h-64': variant === 'distribution' && compact,
     }"
   >
-    <span
-      v-if="variant !== 'distribution'"
-      class="text-label font-extrabold tracking-widest text-brand"
-      :class="{ 'transition-colors group-hover:text-surface': variant === 'group' || variant === 'process' }"
-    >{{ number }}</span>
+    <div v-if="variant === 'ingredient'" class="flex gap-2 text-brand" aria-hidden="true">
+      <component
+        v-for="icon in icons"
+        :key="icon"
+        :is="ingredientIcons[icon]"
+        class="size-12 shrink-0"
+      />
+    </div>
     <h3
       class="mt-auto font-display text-h4 text-brand uppercase"
       :class="{ 'transition-colors group-hover:text-surface': variant === 'group' || variant === 'process' }"

@@ -33,7 +33,7 @@ const socialLinks = [
         </a>
 
         <nav aria-label="Навигация в подвале">
-          <ul class="grid gap-3 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-4">
+          <ul class="grid gap-3 wide:grid-cols-2 sm:gap-x-10 sm:gap-y-4">
             <li v-for="item in navigation" :key="item.href">
               <a class="footer-link relative inline-flex py-1 font-display text-body-large uppercase" :href="item.href">
                 {{ item.label }}

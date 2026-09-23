@@ -3,7 +3,6 @@ import { onMounted } from 'vue'
 import { vFitty } from '../directives/fitty'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about-company.jpg'
-import productionImageUrl from '../assets/production-meadery.png'
 import awardInterfood2007Url from '../assets/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../assets/award-medovukha-fest-2016.jpg'
 import awardNewProduct2007Url from '../assets/award-new-product-2007.jpg'
@@ -13,6 +12,7 @@ import CircleArrow from './CircleArrow.vue'
 import ActionTile from './ActionTile.vue'
 import AwardCard from './AwardCard.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
+import PageHero from './PageHero.vue'
 import { catalogCategories } from '../data/catalog'
 
 const productGroups = catalogCategories.map((category) => ({
@@ -66,35 +66,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <section
-      class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface"
-      data-header-theme="light"
-      aria-labelledby="about-page-title"
-    >
-      <div class="site-container grid min-h-svh items-end gap-10 pt-28 pb-8 sm:pt-36 sm:pb-12 nav:grid-cols-12 nav:items-center nav:gap-6">
-        <div class="relative z-2 nav:col-span-7 nav:pt-16">
-          <h1 id="about-page-title" class="max-w-5xl font-display text-h1 uppercase">
-            Традиция<br>живёт здесь
-          </h1>
-          <p class="mt-8 max-w-xl text-body-large font-medium text-surface/70 sm:mt-10">
-            Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.
-          </p>
-        </div>
-
-        <figure class="relative z-1 min-h-104 overflow-hidden rounded-3xl sm:min-h-136 nav:col-span-5 nav:min-h-160">
-          <img
-            class="absolute inset-0 size-full object-cover"
-            :src="productionImageUrl"
-            alt="Медоваренное производство с медным варочным оборудованием"
-          >
-          <span class="absolute inset-0 bg-linear-to-t from-foreground/80 via-transparent to-transparent" aria-hidden="true" />
-          <figcaption class="absolute right-6 bottom-6 left-6 flex items-end justify-between gap-5 sm:right-8 sm:bottom-8 sm:left-8">
-            <span class="max-w-64 text-label font-bold tracking-wide uppercase">Товарищество пиво-медоваренного завода «МЁДВЕДЬ»</span>
-            <span class="font-display text-h4 text-surface">2006</span>
-          </figcaption>
-        </figure>
-      </div>
-    </section>
+    <PageHero title-id="about-page-title">
+      <template #title>Традиция<br>живёт здесь</template>
+      Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.
+    </PageHero>
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="tradition-title">
       <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
@@ -104,8 +79,8 @@ onMounted(() => {
         </div>
 
         <div class="nav:col-span-8">
-          <h2 id="tradition-title" class="max-w-5xl font-display text-h2 uppercase">
-            От княжеских дворов до петербургских заводов
+          <h2 id="tradition-title" class="font-display text-h2 uppercase">
+            От княжеских дворов до заводов Питера
           </h2>
           <div class="mt-10 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
             <p>
@@ -187,14 +162,13 @@ onMounted(() => {
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="products-title">
       <div class="site-container">
         <div class="grid gap-8 nav:grid-cols-12">
-          <h2 id="products-title" class="font-display text-h2 uppercase nav:col-span-8">Три направления</h2>
+          <h2 id="products-title" class="font-display text-h2 uppercase nav:col-span-8">Три категории</h2>
         </div>
 
         <div class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
           <NumberedInfoCard
-            v-for="(group, index) in productGroups"
+            v-for="group in productGroups"
             :key="group.title"
-            :number="`0${index + 1}`"
             :title="group.title"
             :text="group.text"
             variant="group"

@@ -1,11 +1,13 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
-import { onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
+import CategoryPattern from './CategoryPattern.vue'
 import CircleArrow from './CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { catalogCategories } from '../data/catalog'
 
 const products = catalogCategories.map((category) => ({
+  slug: category.slug,
   name: category.name,
   label: category.tagline,
   description: category.description,
@@ -20,6 +22,7 @@ const isTextHidden = ref(false)
 const motionDirection = ref('')
 const dragOffset = ref(0)
 const isDragging = ref(false)
+const trackTransform = computed(() => `translate3d(calc(-${activeIndex.value * 100}% + ${dragOffset.value}px), 0, 0)`)
 let gesture = null
 let suppressClick = false
 
@@ -144,7 +147,18 @@ onBeforeUnmount(clearTransitionTimers)
 
 <template>
   <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" data-header-theme="dark" aria-labelledby="products-title">
-    <span class="absolute inset-x-0 bottom-0 z-0 h-[50svh] bg-brand/10" aria-hidden="true" />
+    <span class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] bg-brand/7" aria-hidden="true" />
+    <div class="pointer-events-none absolute inset-x-0 top-0 bottom-[30svh] z-1 overflow-hidden" aria-hidden="true">
+      <div class="product-track flex h-full" :class="{ 'is-dragging': isDragging }" :style="{ transform: trackTransform }">
+        <CategoryPattern
+          v-for="product in products"
+          :key="product.slug"
+          :slug="product.slug"
+          id-prefix="slider"
+          class="h-full w-full shrink-0 text-brand opacity-[0.07]"
+        />
+      </div>
+    </div>
 
     <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-28">
       <div class="grid items-end gap-6 pb-8 wide:grid-cols-3 wide:gap-12 wide:pb-10">
@@ -169,7 +183,7 @@ onBeforeUnmount(clearTransitionTimers)
         <div
           class="product-track flex nav:h-full"
           :class="{ 'is-dragging': isDragging }"
-          :style="{ transform: `translate3d(calc(-${activeIndex * 100}% + ${dragOffset}px), 0, 0)` }"
+          :style="{ transform: trackTransform }"
         >
           <ProductCard
             v-for="(product, index) in products"

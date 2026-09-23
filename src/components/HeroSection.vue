@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
     <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-104 nav:pb-0 wide:pt-36">
       <h1 id="hero-title" class="absolute top-28 left-0 z-2 w-full translate-y-0 px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6">
         <span class="font-handwriting font-normal">Лапу приложили</span><br>
-        к хорошим напиткам
+        к нашим напиткам
       </h1>
 
       <div class="relative z-1 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-rows-none sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
             Где купить
           </a>
 
-          <a class="secondary-action w-full py-3 text-center text-label font-extrabold tracking-wide uppercase sm:w-auto" href="#contact-form">
+          <a class="secondary-action w-full py-3 text-center text-label font-extrabold tracking-wide uppercase sm:w-auto" :href="'#contact-form'">
             Связаться с нами
           </a>
         </div>
