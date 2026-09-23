@@ -120,7 +120,7 @@ onMounted(() => {
     </section>
 
     <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="durdin-title">
-      <div class="pointer-events-none absolute -right-8 bottom-0 left-0" aria-hidden="true">
+      <div class="pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true">
         <span v-fitty class="about-watermark inline-block whitespace-nowrap font-display uppercase">Дурдин</span>
       </div>
 

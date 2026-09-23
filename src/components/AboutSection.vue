@@ -10,7 +10,7 @@ import { vFitty } from '../directives/fitty'
     data-header-theme="light"
     aria-labelledby="about-title"
   >
-    <div class="pointer-events-none absolute right-[-3rem] bottom-0 left-0 -z-1" aria-hidden="true">
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-1" aria-hidden="true">
       <span v-fitty class="about-watermark inline-block whitespace-nowrap font-display uppercase">Мёдведь</span>
     </div>
 
