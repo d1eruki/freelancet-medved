@@ -5,7 +5,7 @@ import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
 import { catalogCategories } from '../data/catalog'
 import { sitePath } from '../utils/site-path'
-import catalogHeroUrl from '../assets/catalog-hero-v2.png'
+import catalogHeroUrl from '../assets/catalog-hero.png'
 
 onMounted(() => {
   document.title = 'Каталог медовухи, сидра и пуаре «МЁДВЕДЬ»'

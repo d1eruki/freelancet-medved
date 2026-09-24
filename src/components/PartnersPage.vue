@@ -50,7 +50,7 @@ onMounted(() => {
     <PageHero
       title-id="partners-page-title"
       :image-url="partnersHeroUrl"
-      image-alt="Напитки в бутылках и бокале на стойке магазина"
+      image-alt="Бутылки медовухи и сидра на полках магазина"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
       Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.

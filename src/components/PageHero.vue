@@ -1,10 +1,10 @@
 <script setup>
-import productionImageUrl from '../assets/production-hero-v2.png'
+import productionImageUrl from '../assets/production-hero.png'
 
 defineProps({
   titleId: { type: String, required: true },
   imageUrl: { type: String, default: productionImageUrl },
-  imageAlt: { type: String, default: 'Медоваренное производство с медным варочным оборудованием' },
+  imageAlt: { type: String, default: 'Производственный цех с оборудованием из нержавеющей стали' },
 })
 </script>
 

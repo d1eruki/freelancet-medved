@@ -3,7 +3,7 @@ import { onMounted } from 'vue'
 import SectionWatermark from './SectionWatermark.vue'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about-company-enhanced.png'
-import aboutHeroImageUrl from '../assets/about-hero-meadery.png'
+import aboutHeroImageUrl from '../assets/about-hero.png'
 import awardInterfood2007Url from '../assets/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../assets/award-medovukha-fest-2016.jpg'
 import awardNewProduct2007Url from '../assets/award-new-product-2007.jpg'
@@ -67,7 +67,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <PageHero title-id="about-page-title" :image-url="aboutHeroImageUrl" image-alt="Медоваренное производство с медным варочным оборудованием">
+    <PageHero title-id="about-page-title" :image-url="aboutHeroImageUrl" image-alt="Руки мастера работают с медовыми сотами на деревянном столе">
       <template #title>Традиция<br>живёт здесь</template>
       Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.
     </PageHero>
