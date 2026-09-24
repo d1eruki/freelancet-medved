@@ -1,5 +1,5 @@
 <script setup>
-import productionImageUrl from '../assets/production-meadery.png'
+import productionImageUrl from '../assets/production-hero.png'
 import { catalogCategories } from '../data/catalog'
 import SectionWatermark from './SectionWatermark.vue'
 </script>
@@ -22,7 +22,7 @@ import SectionWatermark from './SectionWatermark.vue'
           <img
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
             :src="productionImageUrl"
-            alt="Производство напитков на пиво-медоваренном заводе «Мёдведь»"
+            alt="Производственный цех с оборудованием из нержавеющей стали"
           >
           <span class="absolute inset-0 bg-linear-to-t from-foreground via-foreground/5 to-transparent" aria-hidden="true" />
 
