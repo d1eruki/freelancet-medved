@@ -113,8 +113,8 @@ onBeforeUnmount(() => {
 
 <template>
   <header
-    class="fixed inset-x-0 top-3 z-50 mx-auto w-full max-w-[1440px] rounded-3xl transition-[color,background-color,translate] duration-300 ease-out"
-    :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-[calc(100%+12px)]', isDarkHeader ? 'text-foreground' : 'text-surface']"
+    class="fixed inset-x-0 top-3 z-50 mx-auto w-full max-w-[1440px] rounded-3xl border transition-[color,background-color,border-color,box-shadow,translate] duration-300 ease-out"
+    :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-[calc(100%+12px)]', isDarkHeader ? 'text-foreground' : 'text-surface', headerBackground ? 'shadow-xl/15' : 'shadow-none', headerBackground ? (isDarkHeader ? 'border-foreground/5' : 'border-surface/10') : 'border-transparent']"
     :style="{ backgroundColor: headerBackground }"
     :inert="!isHeaderVisible || undefined"
   >
