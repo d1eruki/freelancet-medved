@@ -29,13 +29,13 @@ onMounted(() => {
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
       <div class="site-container">
-        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
+        <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="catalog-categories-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Три истории вкуса</h2>
           <p class="max-w-md text-body-large font-medium text-subtle nav:col-span-4">У каждой категории — свой состав, аромат и настроение.</p>
         </div>
 
-        <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
-          <CatalogCategoryCard v-for="category in catalogCategories" :key="category.slug" :category="category" />
+        <ul class="mt-12 grid gap-4 sm:mt-16 site-grid">
+          <CatalogCategoryCard v-for="category in catalogCategories" :key="category.slug" class="nav:col-span-4" :category="category" />
         </ul>
       </div>
     </section>

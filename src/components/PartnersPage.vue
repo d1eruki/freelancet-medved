@@ -58,7 +58,7 @@ onMounted(() => {
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="partners-list-title">
       <div class="site-container">
-        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
+        <div class="grid items-end gap-6 site-grid nav:gap-8">
           <div class="nav:col-span-8">
             <h2 id="partners-list-title" class="font-display text-h2 uppercase">Выберите город</h2>
           </div>
@@ -90,8 +90,8 @@ onMounted(() => {
           {{ pointCountLabel }}
         </p>
 
-        <ul v-if="visiblePartners.length" class="mt-6 grid gap-4 sm:grid-cols-2 nav:grid-cols-3">
-          <PartnerCard v-for="partner in visiblePartners" :key="`${partner.city}-${partner.name}`" :partner="partner" />
+        <ul v-if="visiblePartners.length" class="mt-6 grid gap-4 sm:max-nav:grid-cols-2 site-grid">
+          <PartnerCard v-for="partner in visiblePartners" :key="`${partner.city}-${partner.name}`" class="nav:col-span-4" :partner="partner" />
         </ul>
 
         <div v-else class="mt-6 rounded-3xl bg-surface p-8 sm:p-12">
@@ -113,13 +113,13 @@ onMounted(() => {
           Петербургский характер в разных городах
         </h2>
 
-        <div class="mt-12 grid gap-10 nav:grid-cols-2 nav:gap-6">
-          <div>
+        <div class="mt-12 grid gap-10 site-grid nav:gap-6">
+          <div class="nav:col-span-6">
             <p class="font-display text-h1 text-brand uppercase">Рядом</p>
             <p class="mt-3 text-label font-extrabold tracking-widest uppercase">От Калининграда до Сыктывкара</p>
           </div>
 
-          <div class="grid gap-6 text-body-large font-medium text-subtle">
+          <div class="grid gap-6 text-body-large font-medium text-subtle nav:col-span-6">
             <p>
               Благодаря региональным партнёрам напитки производства Товарищества пиво-медоваренного завода «МЁДВЕДЬ» разливают в пабах и ресторанах за пределами Петербурга.
             </p>
@@ -141,7 +141,7 @@ onMounted(() => {
       <div class="site-container relative z-10">
         <h2 id="distribution-third-title" class="font-display text-h2 break-words hyphens-auto uppercase">Стать дистрибьютором</h2>
 
-        <div class="mt-12 grid gap-10 sm:mt-16 nav:grid-cols-12 nav:gap-6">
+        <div class="mt-12 grid gap-10 sm:mt-16 site-grid nav:gap-6">
           <div class="flex flex-col gap-10 nav:col-span-5">
             <div class="grid gap-6">
               <p class="text-body-large font-medium text-surface/75">

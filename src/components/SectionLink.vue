@@ -18,7 +18,7 @@ defineProps({
     data-header-theme="light"
     :aria-labelledby="headingId"
   >
-    <div class="site-container grid items-end gap-10 nav:grid-cols-12">
+    <div class="site-container grid items-end gap-10 site-grid">
       <div class="nav:col-span-8">
         <h2 :id="headingId" class="font-display text-h2 break-words hyphens-auto uppercase">{{ title }}</h2>
         <p class="mt-6 max-w-2xl text-body-large font-medium text-surface/85">{{ description }}</p>

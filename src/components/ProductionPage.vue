@@ -182,7 +182,7 @@ onMounted(() => {
     </PageHero>
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="production-history-title">
-      <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
+      <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="nav:col-span-4">
           <p class="font-display text-h1 text-brand">1874</p>
           <p class="mt-3 font-display text-h4 text-brand">1880</p>
@@ -204,7 +204,7 @@ onMounted(() => {
       <SectionWatermark text="Натурально" />
 
       <div class="site-container relative z-10">
-        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
+        <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="production-ingredients-title" class="font-display text-h2 uppercase nav:col-span-8">
             Честный состав
           </h2>
@@ -213,10 +213,11 @@ onMounted(() => {
           </p>
         </div>
 
-        <ul class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
+        <ul class="mt-12 grid gap-4 sm:mt-16 site-grid">
           <NumberedInfoCard
             v-for="ingredient in ingredients"
             :key="ingredient.title"
+            class="nav:col-span-4"
             :title="ingredient.title"
             :text="ingredient.text"
             :icons="ingredient.icons"
@@ -275,7 +276,7 @@ onMounted(() => {
     </div>
 
     <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="production-quality-title">
-      <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
+      <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="nav:col-span-7">
           <h2 id="production-quality-title" class="max-w-4xl font-display text-h2 uppercase">
             За вкус отвечаем сами
@@ -293,9 +294,9 @@ onMounted(() => {
         </ul>
       </div>
 
-      <div class="site-container mt-12 grid gap-4 sm:mt-16 nav:grid-cols-2">
-        <ActionTile :href="sitePath('/katalog/')" label="Попробовать результат" title="В каталог" />
-        <ActionTile :href="sitePath('/kontakty/')" label="Вопросы и сотрудничество" title="Связаться" tone="surface" />
+      <div class="site-container mt-12 grid gap-4 sm:mt-16 site-grid">
+        <ActionTile class="nav:col-span-6" :href="sitePath('/katalog/')" label="Попробовать результат" title="В каталог" />
+        <ActionTile class="nav:col-span-6" :href="sitePath('/kontakty/')" label="Вопросы и сотрудничество" title="Связаться" tone="surface" />
       </div>
     </section>
   </div>

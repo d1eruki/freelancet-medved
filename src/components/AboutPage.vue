@@ -73,7 +73,7 @@ onMounted(() => {
     </PageHero>
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="tradition-title">
-      <div class="site-container grid gap-12 nav:grid-cols-12 nav:gap-6">
+      <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="nav:col-span-4">
           <p class="font-display text-h1 text-brand uppercase">Мёд</p>
           <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Напиток с историей</p>
@@ -99,7 +99,7 @@ onMounted(() => {
       <SectionWatermark text="Дурдин" />
 
       <div class="site-container relative z-10">
-        <div class="grid gap-12 nav:grid-cols-12 nav:gap-6">
+        <div class="grid gap-12 site-grid nav:gap-6">
           <div class="nav:col-span-5">
             <p class="font-display text-h1 text-surface">1874</p>
             <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
@@ -129,7 +129,7 @@ onMounted(() => {
     </section>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="today-title">
-      <div class="site-container grid gap-4 nav:grid-cols-12">
+      <div class="site-container grid gap-4 site-grid">
         <figure class="relative min-h-120 overflow-hidden rounded-3xl nav:col-span-5 nav:min-h-160">
           <img
             class="absolute inset-0 size-full object-cover"
@@ -160,14 +160,15 @@ onMounted(() => {
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="products-title">
       <div class="site-container">
-        <div class="grid gap-8 nav:grid-cols-12">
+        <div class="grid gap-8 site-grid">
           <h2 id="products-title" class="font-display text-h2 uppercase nav:col-span-8">Три категории</h2>
         </div>
 
-        <div class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-3">
+        <div class="mt-12 grid gap-4 sm:mt-16 site-grid">
           <NumberedInfoCard
             v-for="group in productGroups"
             :key="group.title"
+            class="nav:col-span-4"
             :title="group.title"
             :text="group.text"
             variant="group"
@@ -183,14 +184,14 @@ onMounted(() => {
 
     <section class="overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="awards-title">
       <div class="site-container">
-        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
+        <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="awards-title" class="font-display text-h2 uppercase nav:col-span-8">Дело говорит<br>за себя</h2>
           <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
             Качество продукции отмечено дипломами выставок и фестивалей медовухи.
           </p>
         </div>
 
-        <ul class="mt-12 grid gap-4 sm:mt-16 sm:grid-cols-2 nav:grid-cols-12">
+        <ul class="mt-12 grid gap-4 sm:mt-16 sm:max-nav:grid-cols-2 site-grid">
           <AwardCard
             v-for="(award, index) in awards"
             :key="`${award.year}-${award.title}`"
@@ -203,7 +204,7 @@ onMounted(() => {
 
     <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="partnership-title">
       <div class="site-container">
-        <div class="grid gap-6 nav:grid-cols-12">
+        <div class="grid gap-6 site-grid">
           <div class="nav:col-span-7">
             <h2 id="partnership-title" class="max-w-5xl font-display text-h2 uppercase">Работаем с теми, кто знает толк</h2>
           </div>

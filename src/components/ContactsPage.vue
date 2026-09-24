@@ -33,13 +33,14 @@ onMounted(() => {
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="contacts-details-title">
       <div class="site-container">
-        <div class="grid items-end gap-6 nav:grid-cols-12 nav:gap-8">
+        <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="contacts-details-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase nav:col-span-8">Связаться</h2>
           <p class="max-w-md text-body-large font-medium text-subtle nav:col-span-4">Выберите контакт в зависимости от вашего вопроса.</p>
         </div>
 
-        <div class="mt-12 grid gap-4 sm:mt-16 nav:grid-cols-2">
+        <div class="mt-12 grid gap-4 sm:mt-16 site-grid">
           <ContactInfoCard
+            class="nav:col-span-6"
             label="Общие вопросы"
             title="Завод «МЁДВЕДЬ»"
             hours="Пн–пт, 9:30–18:00"
@@ -49,6 +50,7 @@ onMounted(() => {
             email-href="mailto:info@medved.beer"
           />
           <ContactInfoCard
+            class="nav:col-span-6"
             label="Сотрудничество и поставки"
             title="Оптовые продажи"
             hours="Пн–пт, 9:30–20:00"
@@ -72,7 +74,7 @@ onMounted(() => {
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="contacts-address-title">
       <div class="site-container">
-        <div class="grid gap-6 nav:grid-cols-12 nav:gap-10">
+        <div class="grid gap-6 site-grid nav:gap-10">
           <div class="nav:col-span-5">
             <h2 id="contacts-address-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase">Наш адрес</h2>
           </div>

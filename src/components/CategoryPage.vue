@@ -31,8 +31,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <ul class="mt-12 grid gap-4 sm:mt-16 sm:grid-cols-2 nav:grid-cols-3">
-          <FlavorCard v-for="item in category.items" :key="item.name" :item="item" />
+        <ul class="mt-12 grid gap-4 sm:mt-16 sm:max-nav:grid-cols-2 site-grid">
+          <FlavorCard v-for="item in category.items" :key="item.name" class="nav:col-span-4" :item="item" />
         </ul>
       </div>
     </section>

@@ -17,7 +17,7 @@ import SectionWatermark from './SectionWatermark.vue'
         О компании
       </h2>
 
-      <div class="about-grid mt-12 grid gap-4 sm:mt-16">
+      <div class="about-grid site-grid mt-12 grid gap-4 sm:mt-16">
         <figure class="about-feature group relative min-h-120 overflow-hidden rounded-3xl nav:min-h-160">
           <img
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
@@ -86,10 +86,6 @@ import SectionWatermark from './SectionWatermark.vue'
 
 <style scoped>
 @media (min-width: 54rem) {
-  .about-grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-
   .about-feature {
     grid-column: 1 / span 7;
     grid-row: 1;
