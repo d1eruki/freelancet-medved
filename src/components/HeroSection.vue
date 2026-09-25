@@ -2,43 +2,50 @@
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import HeroSteam from './HeroSteam.vue'
-import heroLayerForegroundUrl from '../assets/hero-layer-foreground.png'
-import heroLayerForeground960Url from '../assets/hero-layer-foreground.png?width=960'
-import heroLayerForeground1440Url from '../assets/hero-layer-foreground.png?width=1440'
-import heroLayerForegroundAvifUrl from '../assets/hero-layer-foreground.png?format=avif'
-import heroLayerForegroundAvif960Url from '../assets/hero-layer-foreground.png?format=avif&width=960'
-import heroLayerForegroundAvif1440Url from '../assets/hero-layer-foreground.png?format=avif&width=1440'
-import heroLayerBackgroundUrl from '../assets/hero-layer-background.png'
-import heroLayerBackground960Url from '../assets/hero-layer-background.png?width=960'
-import heroLayerBackground1440Url from '../assets/hero-layer-background.png?width=1440'
-import heroLayerBackgroundAvifUrl from '../assets/hero-layer-background.png?format=avif'
-import heroLayerBackgroundAvif960Url from '../assets/hero-layer-background.png?format=avif&width=960'
-import heroLayerBackgroundAvif1440Url from '../assets/hero-layer-background.png?format=avif&width=1440'
-import heroLayerMiddleUrl from '../assets/hero-layer-middle.png'
-import heroLayerMiddle960Url from '../assets/hero-layer-middle.png?width=960'
-import heroLayerMiddle1440Url from '../assets/hero-layer-middle.png?width=1440'
-import heroLayerMiddleAvifUrl from '../assets/hero-layer-middle.png?format=avif'
-import heroLayerMiddleAvif960Url from '../assets/hero-layer-middle.png?format=avif&width=960'
-import heroLayerMiddleAvif1440Url from '../assets/hero-layer-middle.png?format=avif&width=1440'
-import heroLayerMiddleBlinkUrl from '../assets/hero-layer-middle-blink.png'
-import heroLayerMiddleBlink960Url from '../assets/hero-layer-middle-blink.png?width=960'
-import heroLayerMiddleBlink1440Url from '../assets/hero-layer-middle-blink.png?width=1440'
-import heroLayerMiddleBlinkAvifUrl from '../assets/hero-layer-middle-blink.png?format=avif'
-import heroLayerMiddleBlinkAvif960Url from '../assets/hero-layer-middle-blink.png?format=avif&width=960'
-import heroLayerMiddleBlinkAvif1440Url from '../assets/hero-layer-middle-blink.png?format=avif&width=1440'
+import { heroLayerStyle } from '../utils/hero-layer-layout'
+import heroLayerForegroundUrl from '../assets/hero-engraved-bottle.png'
+import heroLayerForeground640Url from '../assets/hero-engraved-bottle.png?width=640'
+import heroLayerForeground960Url from '../assets/hero-engraved-bottle.png?width=960'
+import heroLayerForegroundAvifUrl from '../assets/hero-engraved-bottle.png?format=avif'
+import heroLayerForegroundAvif640Url from '../assets/hero-engraved-bottle.png?format=avif&width=640'
+import heroLayerForegroundAvif960Url from '../assets/hero-engraved-bottle.png?format=avif&width=960'
+import heroLayerBackgroundUrl from '../assets/hero-engraved-forest.png'
+import heroLayerBackground640Url from '../assets/hero-engraved-forest.png?width=640'
+import heroLayerBackground960Url from '../assets/hero-engraved-forest.png?width=960'
+import heroLayerBackgroundAvifUrl from '../assets/hero-engraved-forest.png?format=avif'
+import heroLayerBackgroundAvif640Url from '../assets/hero-engraved-forest.png?format=avif&width=640'
+import heroLayerBackgroundAvif960Url from '../assets/hero-engraved-forest.png?format=avif&width=960'
+import heroLayerMiddleUrl from '../assets/hero-engraved-bear.png'
+import heroLayerMiddle640Url from '../assets/hero-engraved-bear.png?width=640'
+import heroLayerMiddle960Url from '../assets/hero-engraved-bear.png?width=960'
+import heroLayerMiddleAvifUrl from '../assets/hero-engraved-bear.png?format=avif'
+import heroLayerMiddleAvif640Url from '../assets/hero-engraved-bear.png?format=avif&width=640'
+import heroLayerMiddleAvif960Url from '../assets/hero-engraved-bear.png?format=avif&width=960'
+import heroLayerMiddleBlinkUrl from '../assets/hero-engraved-bear-blink.png'
+import heroLayerMiddleBlink640Url from '../assets/hero-engraved-bear-blink.png?width=640'
+import heroLayerMiddleBlink960Url from '../assets/hero-engraved-bear-blink.png?width=960'
+import heroLayerMiddleBlinkAvifUrl from '../assets/hero-engraved-bear-blink.png?format=avif'
+import heroLayerMiddleBlinkAvif640Url from '../assets/hero-engraved-bear-blink.png?format=avif&width=640'
+import heroLayerMiddleBlinkAvif960Url from '../assets/hero-engraved-bear-blink.png?format=avif&width=960'
 
-const heroLayerBackgroundSrcset = `${heroLayerBackground960Url} 960w, ${heroLayerBackground1440Url} 1440w, ${heroLayerBackgroundUrl} 2048w`
-const heroLayerMiddleSrcset = `${heroLayerMiddle960Url} 960w, ${heroLayerMiddle1440Url} 1440w, ${heroLayerMiddleUrl} 2508w`
-const heroLayerMiddleBlinkSrcset = `${heroLayerMiddleBlink960Url} 960w, ${heroLayerMiddleBlink1440Url} 1440w, ${heroLayerMiddleBlinkUrl} 2508w`
-const heroLayerForegroundSrcset = `${heroLayerForeground960Url} 960w, ${heroLayerForeground1440Url} 1440w, ${heroLayerForegroundUrl} 2048w`
-const heroLayerBackgroundAvifSrcset = `${heroLayerBackgroundAvif960Url} 960w, ${heroLayerBackgroundAvif1440Url} 1440w, ${heroLayerBackgroundAvifUrl} 2048w`
-const heroLayerMiddleAvifSrcset = `${heroLayerMiddleAvif960Url} 960w, ${heroLayerMiddleAvif1440Url} 1440w, ${heroLayerMiddleAvifUrl} 2508w`
-const heroLayerMiddleBlinkAvifSrcset = `${heroLayerMiddleBlinkAvif960Url} 960w, ${heroLayerMiddleBlinkAvif1440Url} 1440w, ${heroLayerMiddleBlinkAvifUrl} 2508w`
-const heroLayerForegroundAvifSrcset = `${heroLayerForegroundAvif960Url} 960w, ${heroLayerForegroundAvif1440Url} 1440w, ${heroLayerForegroundAvifUrl} 2048w`
+const heroLayerBackgroundSrcset = `${heroLayerBackground640Url} 640w, ${heroLayerBackground960Url} 960w, ${heroLayerBackgroundUrl} 1254w`
+const heroLayerMiddleSrcset = `${heroLayerMiddle640Url} 640w, ${heroLayerMiddle960Url} 960w, ${heroLayerMiddleUrl} 1254w`
+const heroLayerMiddleBlinkSrcset = `${heroLayerMiddleBlink640Url} 640w, ${heroLayerMiddleBlink960Url} 960w, ${heroLayerMiddleBlinkUrl} 1254w`
+const heroLayerForegroundSrcset = `${heroLayerForeground640Url} 640w, ${heroLayerForeground960Url} 960w, ${heroLayerForegroundUrl} 1024w`
+const heroLayerBackgroundAvifSrcset = `${heroLayerBackgroundAvif640Url} 640w, ${heroLayerBackgroundAvif960Url} 960w, ${heroLayerBackgroundAvifUrl} 1254w`
+const heroLayerMiddleAvifSrcset = `${heroLayerMiddleAvif640Url} 640w, ${heroLayerMiddleAvif960Url} 960w, ${heroLayerMiddleAvifUrl} 1254w`
+const heroLayerMiddleBlinkAvifSrcset = `${heroLayerMiddleBlinkAvif640Url} 640w, ${heroLayerMiddleBlinkAvif960Url} 960w, ${heroLayerMiddleBlinkAvifUrl} 1254w`
+const heroLayerForegroundAvifSrcset = `${heroLayerForegroundAvif640Url} 640w, ${heroLayerForegroundAvif960Url} 960w, ${heroLayerForegroundAvifUrl} 1024w`
 
 const heroLayerBackgroundSizes = '(min-width: 54rem) 118vw, (min-width: 40rem) 280vw, 100vw'
 const heroLayerMiddleSizes = '(min-width: 54rem) 84vw, (min-width: 40rem) 200vw, 115vw'
 const heroLayerForegroundSizes = '(min-width: 54rem) 84vw, (min-width: 40rem) 200vw, 75svh'
+
+const heroLayerLayout = {
+  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 2.8, x: 0, y: 0 } },
+  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 2, x: 0, y: 0 } },
+  foreground: { mobile: { scale: 2, x: 0, y: 0 }, desktop: { scale: 2, x: 0, y: 0 } },
+}
 
 const bearImage = ref(null)
 const isBlinking = ref(false)
@@ -157,7 +164,8 @@ onBeforeUnmount(() => {
     <picture>
       <source type="image/avif" :sizes="heroLayerBackgroundSizes" :srcset="heroLayerBackgroundAvifSrcset">
       <img
-        class="hero-layer-background pointer-events-none absolute left-1/2 h-96 w-full top-0 -translate-x-1/2 scale-280 object-contain object-bottom grayscale mix-blend-luminosity opacity-60 nav:h-[65svh] nav:w-[42%] blur-[0.8px]"
+        class="hero-layer-background pointer-events-none absolute left-1/2 h-96 w-full top-0 object-contain object-bottom opacity-60 nav:h-[65svh] nav:w-[42%]"
+        :style="heroLayerStyle(heroLayerLayout.background)"
         :sizes="heroLayerBackgroundSizes"
         :srcset="heroLayerBackgroundSrcset"
         :src="heroLayerBackgroundUrl"
@@ -169,8 +177,8 @@ onBeforeUnmount(() => {
       <source type="image/avif" :sizes="heroLayerMiddleSizes" :srcset="isBlinking ? heroLayerMiddleBlinkAvifSrcset : heroLayerMiddleAvifSrcset">
       <img
         ref="bearImage"
-        class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 -translate-x-1/2 scale-200 object-contain object-bottom blur-[1px] transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
-        :style="{ translate: `calc(-50% + ${parallaxOffset.x / 3}px) ${parallaxOffset.y / 3}px` }"
+        class="hero-layer-middle pointer-events-none absolute left-220 h-96 w-full top-160 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]"
+        :style="heroLayerStyle(heroLayerLayout.middle, parallaxOffset.x / 3, parallaxOffset.y / 3)"
         :sizes="heroLayerMiddleSizes"
         :srcset="isBlinking ? heroLayerMiddleBlinkSrcset : heroLayerMiddleSrcset"
         :src="isBlinking ? heroLayerMiddleBlinkUrl : heroLayerMiddleUrl"
@@ -181,8 +189,8 @@ onBeforeUnmount(() => {
     <picture>
       <source type="image/avif" :sizes="heroLayerForegroundSizes" :srcset="heroLayerForegroundAvifSrcset">
       <img
-        class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full -translate-x-1/2 scale-125 object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 sm:scale-200 nav:h-[65svh] nav:w-[42%]"
-        :style="{ translate: `calc(var(--hero-foreground-offset-x, -50%) + ${parallaxOffset.x}px) ${parallaxOffset.y}px` }"
+        class="hero-layer-foreground pointer-events-none absolute left-80 top-60 h-96 w-full object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 nav:h-[65svh] nav:w-[42%]"
+        :style="heroLayerStyle(heroLayerLayout.foreground, parallaxOffset.x, parallaxOffset.y)"
         :sizes="heroLayerForegroundSizes"
         :srcset="heroLayerForegroundSrcset"
         :src="heroLayerForegroundUrl"
@@ -195,13 +203,18 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.hero-layer-background,
+.hero-layer-middle,
+.hero-layer-foreground {
+  scale: var(--hero-layer-desktop-scale);
+  translate: calc(-50% + var(--hero-layer-desktop-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-desktop-y) + var(--hero-layer-parallax-y));
+}
+
 @media (max-width: 39.999rem) {
   .hero-layer-background {
     inset: 0;
     width: 100%;
     height: 100%;
-    scale: 1;
-    translate: 0;
     object-fit: cover;
     object-position: center bottom;
   }
@@ -212,18 +225,26 @@ onBeforeUnmount(() => {
     left: 60%;
     width: min(115vw, 32rem);
     height: auto;
-    scale: 1;
   }
 
   .hero-layer-foreground {
-    --hero-foreground-offset-x: 0px;
     top: auto;
     right: 40vw;
     bottom: 8svh;
     left: auto;
     width: auto;
     height: 55svh;
-    scale: 2;
+  }
+
+  .hero-layer-background,
+  .hero-layer-foreground {
+    scale: var(--hero-layer-mobile-scale);
+    translate: calc(var(--hero-layer-mobile-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-mobile-y) + var(--hero-layer-parallax-y));
+  }
+
+  .hero-layer-middle {
+    scale: var(--hero-layer-mobile-scale);
+    translate: calc(-50% + var(--hero-layer-mobile-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-mobile-y) + var(--hero-layer-parallax-y));
   }
 }
 
