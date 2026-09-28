@@ -11,7 +11,7 @@ const props = defineProps({
   pointerParallax: { type: Boolean, default: false },
   layers: { type: Object, default: null },
   layerLayout: { type: Object, default: null },
-  parallaxRange: { type: Object, default: () => ({ x: 40, y: 28 }) },
+  motionProfile: { type: String, default: 'wide' },
   steam: { type: Object, default: null },
 })
 
@@ -71,7 +71,7 @@ onBeforeUnmount(() => {
         <span class="absolute inset-0 hidden bg-linear-to-r from-foreground/75 via-foreground/15 to-transparent nav:block" aria-hidden="true" />
       </template>
     </figure>
-    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :parallax-range="parallaxRange" :steam="steam" />
+    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :motion-profile="motionProfile" :steam="steam" />
     <figure v-if="layers && overlayVariant === 'catalog'" class="pointer-events-none absolute inset-0 -z-1">
       <span class="catalog-overlay-bottom absolute inset-0" aria-hidden="true" />
       <span class="catalog-overlay-center absolute inset-0" aria-hidden="true" />
@@ -82,7 +82,7 @@ onBeforeUnmount(() => {
         <slot name="title" />
       </h1>
 
-      <p class="relative z-4 col-start-1 row-start-1 self-end max-w-xl text-body-large font-medium text-surface/80 nav:max-w-md">
+      <p class="hero-description relative z-4 col-start-1 row-start-1 self-end max-w-xl text-surface/80 nav:max-w-md">
         <slot />
       </p>
     </div>

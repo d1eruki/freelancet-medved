@@ -55,17 +55,14 @@ const heroLayers = computed(() => ({
     sizes: heroLayerBackgroundSizes,
     className: 'hero-layer-background absolute left-1/2 top-0 h-96 w-full object-contain object-bottom opacity-60 nav:h-[65svh] nav:w-[42%]',
     baseX: { desktop: '-50%' },
-    parallaxFactor: 1 / 6,
   },
   middle: {
     src: isBlinking.value ? heroLayerMiddleBlinkUrl : heroLayerMiddleUrl,
     srcset: isBlinking.value ? heroLayerMiddleBlinkSrcset : heroLayerMiddleSrcset,
     avifSrcset: isBlinking.value ? heroLayerMiddleBlinkAvifSrcset : heroLayerMiddleAvifSrcset,
     sizes: heroLayerMiddleSizes,
-    className: 'hero-layer-middle absolute left-220 top-160 h-96 w-full object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none nav:h-[65svh] nav:w-[42%]',
+    className: 'hero-layer-middle absolute left-220 top-160 h-96 w-full object-contain object-bottom nav:h-[65svh] nav:w-[42%]',
     baseX: { mobile: '-50%', desktop: '-50%' },
-    parallaxFactor: 1 / 3,
-    float: true,
     alt: '',
   },
   foreground: {
@@ -73,15 +70,12 @@ const heroLayers = computed(() => ({
     srcset: heroLayerForegroundSrcset,
     avifSrcset: heroLayerForegroundAvifSrcset,
     sizes: heroLayerForegroundSizes,
-    className: 'hero-layer-foreground absolute left-80 top-60 h-96 w-full object-contain object-bottom transition-[translate] duration-500 ease-out motion-reduce:transition-none sm:left-140 sm:top-110 nav:h-[65svh] nav:w-[42%]',
+    className: 'hero-layer-foreground absolute left-80 top-60 h-96 w-full object-contain object-bottom sm:left-140 sm:top-110 nav:h-[65svh] nav:w-[42%]',
     baseX: { desktop: '-50%' },
-    parallaxFactor: 1,
-    float: true,
     alt: 'Медведь с бутылкой напитка «Медведь»',
     fetchpriority: 'high',
   },
 }))
-const heroParallaxRange = { x: 24, y: 16 }
 const heroSteam = {}
 let blinkTimer
 let blinkMedia
@@ -147,7 +141,7 @@ onBeforeUnmount(() => {
 
       <div class="relative z-1 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-rows-none sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
         <div class="max-w-sm nav:mb-12 wide:mb-16">
-          <p class="text-center text-body-large sm:text-left">
+          <p class="hero-description text-center sm:text-left">
             Пиво-медоваренный завод «Медведь». Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
           </p>
         </div>
@@ -167,7 +161,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" :parallax-range="heroParallaxRange" :steam="heroSteam" />
+    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" motion-profile="gentle" :steam="heroSteam" />
   </section>
 </template>
 
@@ -199,13 +193,4 @@ onBeforeUnmount(() => {
   }
 }
 
-:deep(.hero-layer-middle) {
-  --float-distance: -3px;
-  --float-duration: 8s;
-}
-
-:deep(.hero-layer-foreground) {
-  --float-distance: -4px;
-  --float-duration: 6s;
-}
 </style>

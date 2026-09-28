@@ -3,10 +3,21 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import HeroSteam from './HeroSteam.vue'
 import { heroLayerStyle } from '../utils/hero-layer-layout'
 
+const motionProfiles = {
+  gentle: { x: 24, y: 16 },
+  wide: { x: 40, y: 28 },
+}
+
+const layerMotion = {
+  background: { parallaxFactor: 0 },
+  middle: { parallaxFactor: 1 / 3, floatDistance: '-3px', floatDuration: '8s' },
+  foreground: { parallaxFactor: 1, floatDistance: '-4px', floatDuration: '6s' },
+}
+
 const props = defineProps({
   layers: { type: Object, required: true },
   layerLayout: { type: Object, required: true },
-  parallaxRange: { type: Object, required: true },
+  motionProfile: { type: String, default: 'wide' },
   steam: { type: Object, default: null },
 })
 
@@ -38,25 +49,27 @@ function updateParallax(event) {
   if (!bounds.width || !bounds.height) return
 
   const normalize = (position, size) => Math.max(-1, Math.min(1, position / size * 2 - 1))
+  const range = motionProfiles[props.motionProfile] ?? motionProfiles.wide
   parallaxOffset.value = {
-    x: normalize(event.clientX - bounds.left, bounds.width) * props.parallaxRange.x,
-    y: normalize(event.clientY - bounds.top, bounds.height) * props.parallaxRange.y,
+    x: normalize(event.clientX - bounds.left, bounds.width) * range.x,
+    y: normalize(event.clientY - bounds.top, bounds.height) * range.y,
   }
 }
 
 function layerStyle(layer, name) {
-  const factor = layer.parallaxFactor ?? 0
+  const motion = layerMotion[name]
   return {
     ...heroLayerStyle(
       props.layerLayout[name],
-      parallaxOffset.value.x * factor,
-      parallaxOffset.value.y * factor,
+      parallaxOffset.value.x * (motion?.parallaxFactor ?? 0),
+      parallaxOffset.value.y * (motion?.parallaxFactor ?? 0),
     ),
     '--hero-layer-base-x-mobile': layer.baseX?.mobile ?? '0px',
     '--hero-layer-base-x-desktop': layer.baseX?.desktop ?? '0px',
+    '--float-distance': motion?.floatDistance,
+    '--float-duration': motion?.floatDuration,
     animationPlayState: layersVisible.value ? 'running' : 'paused',
     zIndex: layer.zIndex,
-    ...layer.style,
   }
 }
 
@@ -93,7 +106,10 @@ onBeforeUnmount(() => {
       <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
         :ref="name === 'middle' ? setMiddleImage : undefined"
-        :class="['hero-composition-layer', layer.className, { 'hero-composition-layer-float': layer.float }]"
+        :class="['hero-composition-layer', layer.className, {
+          'hero-composition-layer-moving': name !== 'background',
+          'hero-composition-layer-float': layerMotion[name]?.floatDuration,
+        }]"
         :style="layerStyle(layer, name)"
         :sizes="layer.sizes"
         :srcset="layer.srcset"
@@ -125,6 +141,16 @@ onBeforeUnmount(() => {
   pointer-events: none;
   scale: var(--hero-layer-mobile-scale);
   translate: calc(var(--hero-layer-base-x-mobile) + var(--hero-layer-mobile-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-mobile-y) + var(--hero-layer-parallax-y));
+}
+
+.hero-composition-layer-moving {
+  transition: translate 500ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-composition-layer-moving {
+    transition: none;
+  }
 }
 
 @media (min-width: 40rem) {

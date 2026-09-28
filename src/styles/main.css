@@ -81,6 +81,10 @@
   }
 }
 
+@utility hero-description {
+  @apply text-body-large font-medium;
+}
+
 @layer components {
   section.bg-panel {
     position: relative;

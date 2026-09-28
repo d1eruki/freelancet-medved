@@ -29,7 +29,6 @@ const catalogHeroLayout = {
   middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 100, y: 50 } },
   foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
 }
-const catalogHeroParallaxRange = { x: 40, y: 28 }
 const catalogHeroSteam = { fit: 'cover', anchorX: 0.71, anchorY: 0.2, scaleDivisor: 3500 }
 
 const catalogHeroLayers = {
@@ -40,7 +39,6 @@ const catalogHeroLayers = {
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Старинная иллюстрация: медовар поднимает бокал рядом с бочкой, бутылками, фруктами и сотами',
-    parallaxFactor: 1 / 6,
     zIndex: -2,
   },
   middle: {
@@ -48,10 +46,7 @@ const catalogHeroLayers = {
     srcset: `${catalogHeroMan640Url} 640w, ${catalogHeroMan960Url} 960w, ${catalogHeroManUrl} 1672w`,
     avifSrcset: `${catalogHeroManAvif640Url} 640w, ${catalogHeroManAvif960Url} 960w, ${catalogHeroManAvifUrl} 1672w`,
     sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center transition-[translate] duration-500 ease-out motion-reduce:transition-none',
-    parallaxFactor: 1 / 3,
-    float: true,
-    style: { '--float-distance': '-3px', '--float-duration': '8s' },
+    className: 'absolute inset-0 size-full object-cover object-center',
     zIndex: -2,
   },
   foreground: {
@@ -59,10 +54,7 @@ const catalogHeroLayers = {
     srcset: `${catalogHeroForeground640Url} 640w, ${catalogHeroForeground960Url} 960w, ${catalogHeroForegroundUrl} 1672w`,
     avifSrcset: `${catalogHeroForegroundAvif640Url} 640w, ${catalogHeroForegroundAvif960Url} 960w, ${catalogHeroForegroundAvifUrl} 1672w`,
     sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center transition-[translate] duration-500 ease-out motion-reduce:transition-none',
-    parallaxFactor: 1,
-    float: true,
-    style: { '--float-distance': '-4px', '--float-duration': '6s' },
+    className: 'absolute inset-0 size-full object-cover object-center',
     zIndex: 3,
   },
 }
@@ -82,7 +74,7 @@ onMounted(() => {
       title-id="catalog-title"
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
-      :parallax-range="catalogHeroParallaxRange"
+      motion-profile="wide"
       :steam="catalogHeroSteam"
       overlay-variant="catalog"
     >
