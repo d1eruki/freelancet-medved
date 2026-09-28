@@ -3,18 +3,16 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import AboutPage from './components/AboutPage.vue'
-import AboutSection from './components/AboutSection.vue'
 import AgeGate from './components/AgeGate.vue'
 import CatalogPage from './components/CatalogPage.vue'
 import CategoryPage from './components/CategoryPage.vue'
 import ContactsPage from './components/ContactsPage.vue'
 import CustomCursor from './components/CustomCursor.vue'
-import HeroSection from './components/HeroSection.vue'
-import ContactSection from './components/ContactSection.vue'
+import HomePage from './components/HomePage.vue'
+import HorecaPage from './components/HorecaPage.vue'
 import LegalPage from './components/LegalPage.vue'
 import PartnersPage from './components/PartnersPage.vue'
 import ProductionPage from './components/ProductionPage.vue'
-import ProductsSection from './components/ProductsSection.vue'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import { vTypography } from './directives/typography'
@@ -30,6 +28,7 @@ const isAboutPage = currentPath === '/o-kompanii'
 const isPartnersPage = currentPath === '/partnery'
 const isProductionPage = currentPath === '/proizvodstvo'
 const isCatalogPage = currentPath === '/katalog'
+const isHorecaPage = currentPath === '/horeca'
 const isContactsPage = currentPath === '/kontakty'
 const legalPage = currentPath === '/politika-konfidencialnosti'
   ? legalContent.privacy
@@ -63,6 +62,10 @@ const seoByPath = {
   '/kontakty': {
     title: 'Контакты пиво-медоваренного завода «МЁДВЕДЬ»',
     description: 'Адрес и контакты пиво-медоваренного завода «МЁДВЕДЬ» в Санкт-Петербурге. Телефон и почта отдела оптовых продаж.',
+  },
+  '/horeca': {
+    title: 'HoReCa — медовуха, сидр и пуаре «МЁДВЕДЬ» для баров и ресторанов',
+    description: 'Напитки «МЁДВЕДЬ» для баров и ресторанов: оптовые поставки в кегах и ПЭТ-таре по Санкт-Петербургу, Ленинградской области и через региональных дистрибьюторов.',
   },
 }
 const seo = category
@@ -138,22 +141,11 @@ onBeforeUnmount(() => {
       <AboutPage v-else-if="isAboutPage" />
       <CatalogPage v-else-if="isCatalogPage" />
       <ContactsPage v-else-if="isContactsPage" />
+      <HorecaPage v-else-if="isHorecaPage" />
       <LegalPage v-else-if="legalPage" :page="legalPage" />
       <CategoryPage v-else-if="category" :category="category" />
 
-      <template v-else>
-        <HeroSection />
-        <ProductsSection />
-        <AboutSection />
-        <ContactSection
-          id="contact-form"
-          class="scroll-mt-20"
-          title="Связаться с нами"
-          description="Оставьте контакты и расскажите о вашем вопросе."
-          heading-id="home-contact-title"
-          id-prefix="home-contact"
-        />
-      </template>
+      <HomePage v-else />
     </main>
 
     <SiteFooter />

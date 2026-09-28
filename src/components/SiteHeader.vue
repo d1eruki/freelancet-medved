@@ -1,7 +1,7 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import logoUrl from '../assets/brand-logo-wordmark.svg'
+import logoUrl from '../assets/brand-logo-mark.svg'
 import { navigation } from '../data/navigation'
 
 const props = defineProps({
@@ -12,6 +12,7 @@ const isMenuOpen = ref(false)
 const isHeaderVisible = ref(true)
 const isDarkHeader = ref(false)
 const headerBackground = ref('')
+const navigationGroups = [navigation.slice(0, 3), navigation.slice(3)]
 
 let lastScrollPosition = 0
 let scrollFrame = 0
@@ -118,10 +119,10 @@ onBeforeUnmount(() => {
     :style="{ backgroundColor: headerBackground }"
     :inert="!isHeaderVisible || undefined"
   >
-    <div class="site-container flex h-16 items-center justify-between sm:h-20">
-      <a class="inline-flex shrink-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
+    <div class="site-container relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
+      <a class="absolute left-1/2 z-10 inline-flex -translate-x-1/2 wide:static wide:col-start-4 wide:row-start-1 wide:justify-self-center wide:translate-x-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
-          class="h-12 w-30 -translate-y-0.5 object-contain sm:h-14 sm:w-40"
+          class="h-24 w-auto object-contain sm:h-28"
           :class="isDarkHeader ? 'brightness-0' : 'brightness-0 invert'"
           :src="logoUrl"
           alt="МЁДВЕДЬ"
@@ -130,12 +131,17 @@ onBeforeUnmount(() => {
 
       <nav
         id="main-navigation"
-        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out nav:static nav:ml-auto nav:block nav:bg-transparent nav:p-0 nav:shadow-none"
-        :class="[isMenuOpen ? 'block' : 'hidden', isDarkHeader ? 'nav:text-foreground' : 'nav:text-surface']"
+        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out wide:static wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:grid-cols-7 wide:items-center wide:bg-transparent wide:p-0 wide:shadow-none"
+        :class="[isMenuOpen ? 'block' : 'hidden', isDarkHeader ? 'wide:text-foreground' : 'wide:text-surface']"
         aria-label="Основная навигация"
       >
-        <ul class="flex flex-col gap-1 nav:flex-row nav:items-center nav:gap-6 wide:gap-10">
-          <li v-for="item in navigation" :key="item.href">
+        <ul
+          v-for="(group, groupIndex) in navigationGroups"
+          :key="groupIndex"
+          class="flex flex-col gap-1 wide:col-span-3 wide:grid wide:grid-cols-3 wide:items-center wide:justify-items-center wide:gap-0"
+          :class="groupIndex === 0 ? 'wide:col-start-1' : 'wide:col-start-5'"
+        >
+          <li v-for="item in group" :key="item.href">
             <a
               class="secondary-action block py-3 text-label font-extrabold tracking-wide uppercase"
               :class="{ 'nav-link--current': isCurrentPage(item.href) }"
@@ -149,9 +155,9 @@ onBeforeUnmount(() => {
         </ul>
       </nav>
 
-      <div class="flex shrink-0 items-center gap-4">
+      <div class="ml-auto flex shrink-0 items-center gap-4 wide:hidden">
         <button
-          class="menu-button grid size-12 place-items-center rounded-full border border-current/60 nav:hidden"
+          class="menu-button grid size-12 place-items-center rounded-full border border-current/60"
           type="button"
           aria-controls="main-navigation"
           :aria-expanded="isMenuOpen"

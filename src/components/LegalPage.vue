@@ -49,7 +49,7 @@ onMounted(() => {
 
 .legal-copy :deep(h2) {
   margin-top: calc(var(--spacing) * 12);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display);
   font-size: var(--text-h4);
   line-height: 1.2;
 }
