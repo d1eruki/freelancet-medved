@@ -5,5 +5,6 @@ export const navigation = [
   { label: 'Производство', href: sitePath('/proizvodstvo/') },
   { label: 'О компании', href: sitePath('/o-kompanii/') },
   { label: 'Где купить', href: sitePath('/partnery/') },
+  { label: 'HoReCa', href: sitePath('/horeca/') },
   { label: 'Контакты', href: sitePath('/kontakty/') },
 ]

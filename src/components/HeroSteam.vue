@@ -1,7 +1,13 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-const props = defineProps({ source: { type: Object, default: null } })
+const props = defineProps({
+  source: { type: Object, default: null },
+  fit: { type: String, default: 'contain-bottom' },
+  anchorX: { type: Number, default: 0.66 },
+  anchorY: { type: Number, default: 0.445 },
+  scaleDivisor: { type: Number, default: 700 },
+})
 const host = ref(null)
 let dispose = () => {}
 let unmounted = false
@@ -96,13 +102,18 @@ onMounted(async () => {
     if (source?.naturalWidth) {
       const bounds = source.getBoundingClientRect()
       const container = host.value.parentElement.getBoundingClientRect()
-      // object-contain + object-bottom: map the mouth from image coordinates.
-      const imageScale = Math.min(bounds.width / source.naturalWidth, bounds.height / source.naturalHeight)
+      const imageScale = props.fit === 'cover'
+        ? Math.max(bounds.width / source.naturalWidth, bounds.height / source.naturalHeight)
+        : Math.min(bounds.width / source.naturalWidth, bounds.height / source.naturalHeight)
       const width = source.naturalWidth * imageScale
       const height = source.naturalHeight * imageScale
-      const scale = width / 700
-      const x = bounds.left - container.left + (bounds.width - width) / 2 + width * 0.66
-      const y = bounds.bottom - container.top - height + height * 0.445
+      const scale = width / props.scaleDivisor
+      const left = bounds.left - container.left + (bounds.width - width) / 2
+      const top = props.fit === 'cover'
+        ? bounds.top - container.top + (bounds.height - height) / 2
+        : bounds.bottom - container.top - height
+      const x = left + width * props.anchorX
+      const y = top + height * props.anchorY
       host.value.style.transform = `translate(${x - 520 * scale}px, ${y - 280 * scale}px) scale(${scale})`
       material.uniforms.mouth.value.set(520, 140)
       const breathing = source.getAnimations().find(animation => animation.animationName?.startsWith('hero-layer-float'))

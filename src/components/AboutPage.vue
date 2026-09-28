@@ -4,6 +4,7 @@ import SectionWatermark from './SectionWatermark.vue'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about-company-enhanced.png'
 import aboutHeroImageUrl from '../assets/about-hero.png'
+import durdinPortraitUrl from '../assets/durdin-portrait.png'
 import awardInterfood2007Url from '../assets/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../assets/award-medovukha-fest-2016.jpg'
 import awardNewProduct2007Url from '../assets/award-new-product-2007.jpg'
@@ -95,7 +96,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="durdin-title">
+    <section class="relative min-h-svh overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" data-header-theme="light" aria-labelledby="durdin-title">
       <SectionWatermark text="Дурдин" />
 
       <div class="site-container relative z-10">
@@ -103,6 +104,13 @@ onMounted(() => {
           <div class="nav:col-span-5">
             <p class="font-display text-h1 text-surface">1874</p>
             <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
+            <img
+              class="mt-75 ml-35 block -scale-x-250 scale-250 h-auto w-full max-w-sm absolute"
+              :src="durdinPortraitUrl"
+              alt="Стилизованный портрет Ивана Алексеевича Дурдина с подмигиванием"
+              loading="lazy"
+              decoding="async"
+            >
           </div>
 
           <div class="nav:col-span-7">

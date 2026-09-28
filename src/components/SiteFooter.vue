@@ -94,6 +94,7 @@ const socialLinks = [
             Реквизиты ООО «ФАРТ СПБ»
           </a>
         </div>
+        <p class="mt-3">Шрифт Gabin разработан Э Рен Че в Школе дизайна НИУ ВШЭ.</p>
       </div>
     </div>
   </footer>
