@@ -3,6 +3,7 @@
 ## Change Approval and Visual Work
 
 - Before every file change, present a concrete plan and wait for the user's explicit approval. If the scope changes, update the plan and get approval again before editing.
+- Before changing an interface, consider its effects on adjacent elements, screen sizes, and UI states. After editing, review predictable side effects in the code and address them within the approved scope. If another visual change is needed, get approval for the updated plan first.
 - Do not place eyebrow or overline labels above `h1` or `h2` headings.
 - Do not reduce a heading's font size to make it fit. Change the layout, column widths, or wrapping instead.
 - Do not change font sizes with local overrides on individual components or pages. Change shared typography variables instead. Resolve isolated text overflow through layout or wrapping.
