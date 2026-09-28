@@ -1,6 +1,6 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
-import logoUrl from '../assets/brand-logo.svg'
+import logoUrl from '../assets/branding/brand-logo.svg'
 import { navigation } from '../data/navigation'
 
 const showSocialLinks = false
@@ -94,7 +94,7 @@ const socialLinks = [
             Реквизиты ООО «ФАРТ СПБ»
           </a>
         </div>
-        <p class="mt-3">Шрифт Gabin разработан Э Рен Че в Школе дизайна НИУ ВШЭ.</p>
+        <p class="mt-3">Шрифт Gabin разработан Э Рен Че в Школе дизайна НИУ ВШЭ. Метрики лигатур адаптированы для сайта.</p>
       </div>
     </div>
   </footer>

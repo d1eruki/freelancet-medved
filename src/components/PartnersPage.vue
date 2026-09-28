@@ -7,7 +7,7 @@ import PartnerCard from './PartnerCard.vue'
 import SectionWatermark from './SectionWatermark.vue'
 import { partnerCities, partners } from '../data/partners'
 import { sitePath } from '../utils/site-path'
-import partnersHeroUrl from '../assets/partners-hero.png'
+import partnersHeroUrl from '../assets/heroes/partners-hero.png'
 
 const allCitiesLabel = 'Все города'
 const selectedCity = ref(allCitiesLabel)

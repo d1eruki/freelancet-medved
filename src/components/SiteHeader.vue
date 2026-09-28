@@ -1,7 +1,7 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import logoUrl from '../assets/brand-logo-mark.svg'
+import logoUrl from '../assets/branding/brand-logo-mark.svg'
 import { navigation } from '../data/navigation'
 
 const props = defineProps({
@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
     :style="{ backgroundColor: headerBackground }"
     :inert="!isHeaderVisible || undefined"
   >
-    <div class="site-container relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
+    <div class="site-container relative flex h-16 items-center sm:h-20 wide:grid wide:max-w-6xl wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
       <a class="absolute left-1/2 z-10 inline-flex -translate-x-1/2 wide:static wide:col-start-4 wide:row-start-1 wide:justify-self-center wide:translate-x-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
           class="h-24 w-auto object-contain sm:h-28"

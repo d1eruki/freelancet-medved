@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import contactsHeroImageUrl from '../assets/contacts-hero.png'
+import contactsHeroImageUrl from '../assets/heroes/contacts-hero.png'
 import CircleArrow from './CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import ContactSection from './ContactSection.vue'

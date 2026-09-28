@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
-import productionImageUrl from '../assets/production-hero.png'
+import productionImageUrl from '../assets/heroes/production-hero.png'
 
 const props = defineProps({
   titleId: { type: String, required: true },

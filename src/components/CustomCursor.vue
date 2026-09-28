@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import pawUrl from '../assets/paw-cursor.svg'
+import pawUrl from '../assets/ui/paw-cursor.svg'
 
 const cursorElement = ref(null)
 const cursorLabel = ref(null)
