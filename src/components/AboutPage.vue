@@ -3,7 +3,24 @@ import { onMounted } from 'vue'
 import SectionWatermark from './SectionWatermark.vue'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about/about-company-enhanced.png'
-import aboutHeroImageUrl from '../assets/heroes/about-hero.png'
+import aboutHeroBackgroundUrl from '../assets/heroes/about-hero-background.png'
+import aboutHeroBackground640Url from '../assets/heroes/about-hero-background.png?width=640'
+import aboutHeroBackground960Url from '../assets/heroes/about-hero-background.png?width=960'
+import aboutHeroBackgroundAvifUrl from '../assets/heroes/about-hero-background.png?format=avif'
+import aboutHeroBackgroundAvif640Url from '../assets/heroes/about-hero-background.png?format=avif&width=640'
+import aboutHeroBackgroundAvif960Url from '../assets/heroes/about-hero-background.png?format=avif&width=960'
+import aboutHeroWorkerUrl from '../assets/heroes/about-hero-worker.png'
+import aboutHeroWorker640Url from '../assets/heroes/about-hero-worker.png?width=640'
+import aboutHeroWorker960Url from '../assets/heroes/about-hero-worker.png?width=960'
+import aboutHeroWorkerAvifUrl from '../assets/heroes/about-hero-worker.png?format=avif'
+import aboutHeroWorkerAvif640Url from '../assets/heroes/about-hero-worker.png?format=avif&width=640'
+import aboutHeroWorkerAvif960Url from '../assets/heroes/about-hero-worker.png?format=avif&width=960'
+import aboutHeroForegroundUrl from '../assets/heroes/about-hero-foreground.png'
+import aboutHeroForeground640Url from '../assets/heroes/about-hero-foreground.png?width=640'
+import aboutHeroForeground960Url from '../assets/heroes/about-hero-foreground.png?width=960'
+import aboutHeroForegroundAvifUrl from '../assets/heroes/about-hero-foreground.png?format=avif'
+import aboutHeroForegroundAvif640Url from '../assets/heroes/about-hero-foreground.png?format=avif&width=640'
+import aboutHeroForegroundAvif960Url from '../assets/heroes/about-hero-foreground.png?format=avif&width=960'
 import durdinPortraitUrl from '../assets/about/durdin-portrait.png'
 import awardInterfood2007Url from '../assets/awards/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../assets/awards/award-medovukha-fest-2016.jpg'
@@ -16,6 +33,40 @@ import AwardCard from './AwardCard.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
 import PageHero from './PageHero.vue'
 import { catalogCategories } from '../data/catalog'
+
+const aboutHeroLayout = {
+  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
+  middle: { mobile: { scale: 1, x: 40, y: -100 }, desktop: { scale: 1, x: 40, y: -100 } },
+  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1.1, x: -50, y: 100 } },
+}
+
+const aboutHeroLayers = {
+  background: {
+    src: aboutHeroBackgroundUrl,
+    srcset: `${aboutHeroBackground640Url} 640w, ${aboutHeroBackground960Url} 960w, ${aboutHeroBackgroundUrl} 1672w`,
+    avifSrcset: `${aboutHeroBackgroundAvif640Url} 640w, ${aboutHeroBackgroundAvif960Url} 960w, ${aboutHeroBackgroundAvifUrl} 1672w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+    alt: 'Старинная иллюстрация: мастер работает с медовыми сотами у окна с видом на Петербург',
+    zIndex: -2,
+  },
+  middle: {
+    src: aboutHeroWorkerUrl,
+    srcset: `${aboutHeroWorker640Url} 640w, ${aboutHeroWorker960Url} 960w, ${aboutHeroWorkerUrl} 1672w`,
+    avifSrcset: `${aboutHeroWorkerAvif640Url} 640w, ${aboutHeroWorkerAvif960Url} 960w, ${aboutHeroWorkerAvifUrl} 1672w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+    zIndex: -2,
+  },
+  foreground: {
+    src: aboutHeroForegroundUrl,
+    srcset: `${aboutHeroForeground640Url} 640w, ${aboutHeroForeground960Url} 960w, ${aboutHeroForegroundUrl} 1672w`,
+    avifSrcset: `${aboutHeroForegroundAvif640Url} 640w, ${aboutHeroForegroundAvif960Url} 960w, ${aboutHeroForegroundAvifUrl} 1672w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+    zIndex: 3,
+  },
+}
 
 const productGroups = catalogCategories.map((category) => ({
   title: category.name,
@@ -68,7 +119,13 @@ onMounted(() => {
 
 <template>
   <div>
-    <PageHero title-id="about-page-title" :image-url="aboutHeroImageUrl" image-alt="Руки мастера работают с медовыми сотами на деревянном столе">
+    <PageHero
+      title-id="about-page-title"
+      :layers="aboutHeroLayers"
+      :layer-layout="aboutHeroLayout"
+      motion-profile="gentle"
+      overlay-variant="catalog"
+    >
       <template #title>Традиция<br>живёт здесь</template>
       Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.
     </PageHero>

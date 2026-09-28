@@ -2,39 +2,39 @@
 import { sitePath } from '../utils/site-path'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
-import heroLayerForegroundUrl from '../assets/heroes/hero-engraved-bottle.png'
-import heroLayerForeground640Url from '../assets/heroes/hero-engraved-bottle.png?width=640'
-import heroLayerForeground960Url from '../assets/heroes/hero-engraved-bottle.png?width=960'
-import heroLayerForegroundAvifUrl from '../assets/heroes/hero-engraved-bottle.png?format=avif'
-import heroLayerForegroundAvif640Url from '../assets/heroes/hero-engraved-bottle.png?format=avif&width=640'
-import heroLayerForegroundAvif960Url from '../assets/heroes/hero-engraved-bottle.png?format=avif&width=960'
-import heroLayerBackgroundUrl from '../assets/heroes/hero-engraved-forest.png'
-import heroLayerBackground640Url from '../assets/heroes/hero-engraved-forest.png?width=640'
-import heroLayerBackground960Url from '../assets/heroes/hero-engraved-forest.png?width=960'
-import heroLayerBackgroundAvifUrl from '../assets/heroes/hero-engraved-forest.png?format=avif'
-import heroLayerBackgroundAvif640Url from '../assets/heroes/hero-engraved-forest.png?format=avif&width=640'
-import heroLayerBackgroundAvif960Url from '../assets/heroes/hero-engraved-forest.png?format=avif&width=960'
-import heroLayerMiddleUrl from '../assets/heroes/hero-engraved-bear.png'
-import heroLayerMiddle640Url from '../assets/heroes/hero-engraved-bear.png?width=640'
-import heroLayerMiddle960Url from '../assets/heroes/hero-engraved-bear.png?width=960'
-import heroLayerMiddleAvifUrl from '../assets/heroes/hero-engraved-bear.png?format=avif'
-import heroLayerMiddleAvif640Url from '../assets/heroes/hero-engraved-bear.png?format=avif&width=640'
-import heroLayerMiddleAvif960Url from '../assets/heroes/hero-engraved-bear.png?format=avif&width=960'
-import heroLayerMiddleBlinkUrl from '../assets/heroes/hero-engraved-bear-blink.png'
-import heroLayerMiddleBlink640Url from '../assets/heroes/hero-engraved-bear-blink.png?width=640'
-import heroLayerMiddleBlink960Url from '../assets/heroes/hero-engraved-bear-blink.png?width=960'
-import heroLayerMiddleBlinkAvifUrl from '../assets/heroes/hero-engraved-bear-blink.png?format=avif'
-import heroLayerMiddleBlinkAvif640Url from '../assets/heroes/hero-engraved-bear-blink.png?format=avif&width=640'
-import heroLayerMiddleBlinkAvif960Url from '../assets/heroes/hero-engraved-bear-blink.png?format=avif&width=960'
+import heroLayerForegroundUrl from '../assets/heroes/hero-layer-foreground.png'
+import heroLayerForeground640Url from '../assets/heroes/hero-layer-foreground.png?width=640'
+import heroLayerForeground960Url from '../assets/heroes/hero-layer-foreground.png?width=960'
+import heroLayerForegroundAvifUrl from '../assets/heroes/hero-layer-foreground.png?format=avif'
+import heroLayerForegroundAvif640Url from '../assets/heroes/hero-layer-foreground.png?format=avif&width=640'
+import heroLayerForegroundAvif960Url from '../assets/heroes/hero-layer-foreground.png?format=avif&width=960'
+import heroLayerBackgroundUrl from '../assets/heroes/hero-layer-background.png'
+import heroLayerBackground640Url from '../assets/heroes/hero-layer-background.png?width=640'
+import heroLayerBackground960Url from '../assets/heroes/hero-layer-background.png?width=960'
+import heroLayerBackgroundAvifUrl from '../assets/heroes/hero-layer-background.png?format=avif'
+import heroLayerBackgroundAvif640Url from '../assets/heroes/hero-layer-background.png?format=avif&width=640'
+import heroLayerBackgroundAvif960Url from '../assets/heroes/hero-layer-background.png?format=avif&width=960'
+import heroLayerMiddleUrl from '../assets/heroes/hero-layer-middle.png'
+import heroLayerMiddle640Url from '../assets/heroes/hero-layer-middle.png?width=640'
+import heroLayerMiddle960Url from '../assets/heroes/hero-layer-middle.png?width=960'
+import heroLayerMiddleAvifUrl from '../assets/heroes/hero-layer-middle.png?format=avif'
+import heroLayerMiddleAvif640Url from '../assets/heroes/hero-layer-middle.png?format=avif&width=640'
+import heroLayerMiddleAvif960Url from '../assets/heroes/hero-layer-middle.png?format=avif&width=960'
+import heroLayerMiddleBlinkUrl from '../assets/heroes/hero-layer-middle-blink.png'
+import heroLayerMiddleBlink640Url from '../assets/heroes/hero-layer-middle-blink.png?width=640'
+import heroLayerMiddleBlink960Url from '../assets/heroes/hero-layer-middle-blink.png?width=960'
+import heroLayerMiddleBlinkAvifUrl from '../assets/heroes/hero-layer-middle-blink.png?format=avif'
+import heroLayerMiddleBlinkAvif640Url from '../assets/heroes/hero-layer-middle-blink.png?format=avif&width=640'
+import heroLayerMiddleBlinkAvif960Url from '../assets/heroes/hero-layer-middle-blink.png?format=avif&width=960'
 
-const heroLayerBackgroundSrcset = `${heroLayerBackground640Url} 640w, ${heroLayerBackground960Url} 960w, ${heroLayerBackgroundUrl} 1254w`
-const heroLayerMiddleSrcset = `${heroLayerMiddle640Url} 640w, ${heroLayerMiddle960Url} 960w, ${heroLayerMiddleUrl} 1254w`
-const heroLayerMiddleBlinkSrcset = `${heroLayerMiddleBlink640Url} 640w, ${heroLayerMiddleBlink960Url} 960w, ${heroLayerMiddleBlinkUrl} 1254w`
-const heroLayerForegroundSrcset = `${heroLayerForeground640Url} 640w, ${heroLayerForeground960Url} 960w, ${heroLayerForegroundUrl} 1024w`
-const heroLayerBackgroundAvifSrcset = `${heroLayerBackgroundAvif640Url} 640w, ${heroLayerBackgroundAvif960Url} 960w, ${heroLayerBackgroundAvifUrl} 1254w`
-const heroLayerMiddleAvifSrcset = `${heroLayerMiddleAvif640Url} 640w, ${heroLayerMiddleAvif960Url} 960w, ${heroLayerMiddleAvifUrl} 1254w`
-const heroLayerMiddleBlinkAvifSrcset = `${heroLayerMiddleBlinkAvif640Url} 640w, ${heroLayerMiddleBlinkAvif960Url} 960w, ${heroLayerMiddleBlinkAvifUrl} 1254w`
-const heroLayerForegroundAvifSrcset = `${heroLayerForegroundAvif640Url} 640w, ${heroLayerForegroundAvif960Url} 960w, ${heroLayerForegroundAvifUrl} 1024w`
+const heroLayerBackgroundSrcset = `${heroLayerBackground640Url} 640w, ${heroLayerBackground960Url} 960w, ${heroLayerBackgroundUrl} 2048w`
+const heroLayerMiddleSrcset = `${heroLayerMiddle640Url} 640w, ${heroLayerMiddle960Url} 960w, ${heroLayerMiddleUrl} 2508w`
+const heroLayerMiddleBlinkSrcset = `${heroLayerMiddleBlink640Url} 640w, ${heroLayerMiddleBlink960Url} 960w, ${heroLayerMiddleBlinkUrl} 2508w`
+const heroLayerForegroundSrcset = `${heroLayerForeground640Url} 640w, ${heroLayerForeground960Url} 960w, ${heroLayerForegroundUrl} 2048w`
+const heroLayerBackgroundAvifSrcset = `${heroLayerBackgroundAvif640Url} 640w, ${heroLayerBackgroundAvif960Url} 960w, ${heroLayerBackgroundAvifUrl} 2048w`
+const heroLayerMiddleAvifSrcset = `${heroLayerMiddleAvif640Url} 640w, ${heroLayerMiddleAvif960Url} 960w, ${heroLayerMiddleAvifUrl} 2508w`
+const heroLayerMiddleBlinkAvifSrcset = `${heroLayerMiddleBlinkAvif640Url} 640w, ${heroLayerMiddleBlinkAvif960Url} 960w, ${heroLayerMiddleBlinkAvifUrl} 2508w`
+const heroLayerForegroundAvifSrcset = `${heroLayerForegroundAvif640Url} 640w, ${heroLayerForegroundAvif960Url} 960w, ${heroLayerForegroundAvifUrl} 2048w`
 
 const heroLayerBackgroundSizes = '(min-width: 54rem) 118vw, (min-width: 40rem) 280vw, 100vw'
 const heroLayerMiddleSizes = '(min-width: 54rem) 84vw, (min-width: 40rem) 200vw, 115vw'

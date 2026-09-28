@@ -7,7 +7,58 @@ import PartnerCard from './PartnerCard.vue'
 import SectionWatermark from './SectionWatermark.vue'
 import { partnerCities, partners } from '../data/partners'
 import { sitePath } from '../utils/site-path'
-import partnersHeroUrl from '../assets/heroes/partners-hero.png'
+import partnersHeroBackgroundUrl from '../assets/heroes/partners-hero-background.png'
+import partnersHeroBackground640Url from '../assets/heroes/partners-hero-background.png?width=640'
+import partnersHeroBackground960Url from '../assets/heroes/partners-hero-background.png?width=960'
+import partnersHeroBackgroundAvifUrl from '../assets/heroes/partners-hero-background.png?format=avif'
+import partnersHeroBackgroundAvif640Url from '../assets/heroes/partners-hero-background.png?format=avif&width=640'
+import partnersHeroBackgroundAvif960Url from '../assets/heroes/partners-hero-background.png?format=avif&width=960'
+import partnersHeroBarrelUrl from '../assets/heroes/partners-hero-barrel.png'
+import partnersHeroBarrel640Url from '../assets/heroes/partners-hero-barrel.png?width=640'
+import partnersHeroBarrel960Url from '../assets/heroes/partners-hero-barrel.png?width=960'
+import partnersHeroBarrelAvifUrl from '../assets/heroes/partners-hero-barrel.png?format=avif'
+import partnersHeroBarrelAvif640Url from '../assets/heroes/partners-hero-barrel.png?format=avif&width=640'
+import partnersHeroBarrelAvif960Url from '../assets/heroes/partners-hero-barrel.png?format=avif&width=960'
+import partnersHeroForegroundUrl from '../assets/heroes/partners-hero-foreground.png'
+import partnersHeroForeground640Url from '../assets/heroes/partners-hero-foreground.png?width=640'
+import partnersHeroForeground960Url from '../assets/heroes/partners-hero-foreground.png?width=960'
+import partnersHeroForegroundAvifUrl from '../assets/heroes/partners-hero-foreground.png?format=avif'
+import partnersHeroForegroundAvif640Url from '../assets/heroes/partners-hero-foreground.png?format=avif&width=640'
+import partnersHeroForegroundAvif960Url from '../assets/heroes/partners-hero-foreground.png?format=avif&width=960'
+
+const partnersHeroLayout = {
+  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
+  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
+  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1.3, x: 50, y: 100 } },
+}
+
+const partnersHeroLayers = {
+  background: {
+    src: partnersHeroBackgroundUrl,
+    srcset: `${partnersHeroBackground640Url} 640w, ${partnersHeroBackground960Url} 960w, ${partnersHeroBackgroundUrl} 1672w`,
+    avifSrcset: `${partnersHeroBackgroundAvif640Url} 640w, ${partnersHeroBackgroundAvif960Url} 960w, ${partnersHeroBackgroundAvifUrl} 1672w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+    alt: 'Иллюстрация старинного магазина напитков с бочкой и витриной',
+    zIndex: -2,
+  },
+  middle: {
+    src: partnersHeroBarrelUrl,
+    srcset: `${partnersHeroBarrel640Url} 640w, ${partnersHeroBarrel960Url} 960w, ${partnersHeroBarrelUrl} 1672w`,
+    avifSrcset: `${partnersHeroBarrelAvif640Url} 640w, ${partnersHeroBarrelAvif960Url} 960w, ${partnersHeroBarrelAvifUrl} 1672w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+    zIndex: -2,
+  },
+  foreground: {
+    src: partnersHeroForegroundUrl,
+    srcset: `${partnersHeroForeground640Url} 640w, ${partnersHeroForeground960Url} 960w, ${partnersHeroForegroundUrl} 1671w`,
+    avifSrcset: `${partnersHeroForegroundAvif640Url} 640w, ${partnersHeroForegroundAvif960Url} 960w, ${partnersHeroForegroundAvifUrl} 1671w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+    zIndex: 3,
+  },
+}
 
 const allCitiesLabel = 'Все города'
 const selectedCity = ref(allCitiesLabel)
@@ -49,8 +100,10 @@ onMounted(() => {
   <div>
     <PageHero
       title-id="partners-page-title"
-      :image-url="partnersHeroUrl"
-      image-alt="Бутылки медовухи и сидра на полках магазина"
+      :layers="partnersHeroLayers"
+      :layer-layout="partnersHeroLayout"
+      motion-profile="wide"
+      overlay-variant="catalog"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
       Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.

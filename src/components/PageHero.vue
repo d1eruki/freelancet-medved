@@ -72,7 +72,7 @@ onBeforeUnmount(() => {
       </template>
     </figure>
     <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :motion-profile="motionProfile" :steam="steam" />
-    <figure v-if="layers && overlayVariant === 'catalog'" class="pointer-events-none absolute inset-0 -z-1">
+    <figure v-if="overlayVariant === 'catalog'" class="pointer-events-none absolute inset-0 -z-1">
       <span class="catalog-overlay-bottom absolute inset-0" aria-hidden="true" />
       <span class="catalog-overlay-center absolute inset-0" aria-hidden="true" />
     </figure>

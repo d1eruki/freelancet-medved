@@ -11,12 +11,6 @@ import catalogHeroBackground960Url from '../assets/heroes/catalog-hero-backgroun
 import catalogHeroBackgroundAvifUrl from '../assets/heroes/catalog-hero-background.png?format=avif'
 import catalogHeroBackgroundAvif640Url from '../assets/heroes/catalog-hero-background.png?format=avif&width=640'
 import catalogHeroBackgroundAvif960Url from '../assets/heroes/catalog-hero-background.png?format=avif&width=960'
-import catalogHeroManUrl from '../assets/heroes/catalog-hero-man.png'
-import catalogHeroMan640Url from '../assets/heroes/catalog-hero-man.png?width=640'
-import catalogHeroMan960Url from '../assets/heroes/catalog-hero-man.png?width=960'
-import catalogHeroManAvifUrl from '../assets/heroes/catalog-hero-man.png?format=avif'
-import catalogHeroManAvif640Url from '../assets/heroes/catalog-hero-man.png?format=avif&width=640'
-import catalogHeroManAvif960Url from '../assets/heroes/catalog-hero-man.png?format=avif&width=960'
 import catalogHeroForegroundUrl from '../assets/heroes/catalog-hero-foreground.png'
 import catalogHeroForeground640Url from '../assets/heroes/catalog-hero-foreground.png?width=640'
 import catalogHeroForeground960Url from '../assets/heroes/catalog-hero-foreground.png?width=960'
@@ -26,10 +20,8 @@ import catalogHeroForegroundAvif960Url from '../assets/heroes/catalog-hero-foreg
 
 const catalogHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 100, y: 50 } },
   foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
 }
-const catalogHeroSteam = { fit: 'cover', anchorX: 0.71, anchorY: 0.2, scaleDivisor: 3500 }
 
 const catalogHeroLayers = {
   background: {
@@ -38,15 +30,7 @@ const catalogHeroLayers = {
     avifSrcset: `${catalogHeroBackgroundAvif640Url} 640w, ${catalogHeroBackgroundAvif960Url} 960w, ${catalogHeroBackgroundAvifUrl} 1672w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    alt: 'Старинная иллюстрация: медовар поднимает бокал рядом с бочкой, бутылками, фруктами и сотами',
-    zIndex: -2,
-  },
-  middle: {
-    src: catalogHeroManUrl,
-    srcset: `${catalogHeroMan640Url} 640w, ${catalogHeroMan960Url} 960w, ${catalogHeroManUrl} 1672w`,
-    avifSrcset: `${catalogHeroManAvif640Url} 640w, ${catalogHeroManAvif960Url} 960w, ${catalogHeroManAvifUrl} 1672w`,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
+    alt: 'Старинная иллюстрация: цветущие деревья у реки и город на дальнем берегу',
     zIndex: -2,
   },
   foreground: {
@@ -75,7 +59,6 @@ onMounted(() => {
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
       motion-profile="wide"
-      :steam="catalogHeroSteam"
       overlay-variant="catalog"
     >
       <template #title>Наши<br>напитки</template>
