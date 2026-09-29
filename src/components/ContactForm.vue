@@ -61,24 +61,18 @@ async function submitForm() {
   status.value = 'sending'
 
   try {
-    const formData = new URLSearchParams()
-    formData.set('fid', 'feedback')
-    formData.set('data[trap]', fields.website)
-    formData.set('data[name]', fields.name)
-    formData.set('data[message]', `Телефон: ${phoneDigits}${fields.message ? `\n\n${fields.message}` : ''}`)
-    if (fields.email) formData.set('data[email]', fields.email)
-
-    const response = await fetch('/udata://content/send/.json', {
+    const response = await fetch(sitePath('/api/contact.php'), {
       method: 'POST',
       headers: {
         Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify({ ...fields, phone: phoneDigits }),
     })
     const result = await response.json().catch(() => ({}))
     const serverMessage = typeof result.message === 'string' ? result.message.trim() : ''
 
-    if (!response.ok || ![true, 1, '1'].includes(result.success)) {
+    if (!response.ok || result.ok !== true) {
       status.value = 'error'
       feedback.value = serverMessage || 'Не удалось отправить сообщение. Попробуйте ещё раз.'
       return
