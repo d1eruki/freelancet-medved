@@ -30,6 +30,12 @@ jobs:
         run: npm run build
         env:
           SITE_BASE: /
+      - name: Check published pages and links
+        run: npm test
+      - name: Check contact API
+        run: |
+          php -l public/api/contact.php
+          npm run test:api
       - name: Configure SSH
         env:
           TIMEWEB_SSH_KEY: ${{ secrets.TIMEWEB_SSH_KEY }}

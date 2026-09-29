@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import SectionWatermark from './SectionWatermark.vue'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about/about-company-enhanced.png'
@@ -106,15 +105,6 @@ const awards = [
   },
 ]
 
-onMounted(() => {
-  document.title = 'О компании «МЁДВЕДЬ» — петербургская традиция медоварения'
-
-  const description = document.querySelector('meta[name="description"]')
-  description?.setAttribute(
-    'content',
-    'История пиво-медоваренного завода «МЁДВЕДЬ»: традиции Ивана Дурдина, развитие компании, ассортимент и награды.',
-  )
-})
 </script>
 
 <template>

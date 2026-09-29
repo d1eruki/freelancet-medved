@@ -1,17 +1,11 @@
 <script setup>
-import { onMounted } from 'vue'
-
-const props = defineProps({
+defineProps({
   page: {
     type: Object,
     required: true,
   },
 })
 
-onMounted(() => {
-  document.title = props.page.title
-  document.querySelector('meta[name="description"]')?.setAttribute('content', '')
-})
 </script>
 
 <template>

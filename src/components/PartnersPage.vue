@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import CircleArrow from './CircleArrow.vue'
 import ActionTile from './ActionTile.vue'
 import PageHero from './PageHero.vue'
@@ -85,15 +85,6 @@ const pointCountLabel = computed(() => {
   return `${count} точек продаж`
 })
 
-onMounted(() => {
-  document.title = 'Где купить медовуху и сидр «МЁДВЕДЬ»'
-
-  const description = document.querySelector('meta[name="description"]')
-  description?.setAttribute(
-    'content',
-    'Где купить напитки «МЁДВЕДЬ» в Санкт-Петербурге и регионах: адреса и телефоны точек продаж и дистрибьюторов.',
-  )
-})
 </script>
 
 <template>

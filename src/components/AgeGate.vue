@@ -36,7 +36,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div v-typography class="fixed inset-0 z-100 grid place-items-center overflow-y-auto bg-foreground/75 p-4 backdrop-blur-sm sm:p-8">
+  <div id="age-gate" v-typography class="fixed inset-0 z-100 grid place-items-center overflow-y-auto bg-foreground/75 p-4 backdrop-blur-sm sm:p-8">
     <section
       class="w-full min-w-0 max-w-3xl rounded-4xl bg-surface p-7 text-center shadow-2xl sm:px-8 sm:py-12"
       role="dialog"

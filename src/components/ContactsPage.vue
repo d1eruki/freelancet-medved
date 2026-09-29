@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import contactsHeroImageUrl from '../assets/heroes/contacts-hero-illustration.png'
 import CircleArrow from './CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
@@ -11,13 +10,6 @@ import { sitePath } from '../utils/site-path'
 const address = '190020, Санкт-Петербург, Курляндская ул., д. 28, литер Г, помещение 75'
 const routeUrl = `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponent(address)}&rtt=auto`
 
-onMounted(() => {
-  document.title = 'Контакты пиво-медоваренного завода «МЁДВЕДЬ»'
-  document.querySelector('meta[name="description"]')?.setAttribute(
-    'content',
-    'Адрес и контакты пиво-медоваренного завода «МЁДВЕДЬ» в Санкт-Петербурге. Телефон и почта отдела оптовых продаж.',
-  )
-})
 </script>
 
 <template>

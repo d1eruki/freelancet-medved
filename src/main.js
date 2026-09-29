@@ -1,5 +1,7 @@
-import { createApp } from 'vue'
+import { createApp, createSSRApp } from 'vue'
 import App from './App.vue'
 import './styles/main.css'
 
-createApp(App).mount('#app')
+const root = document.querySelector('#app')
+const app = root?.hasChildNodes() ? createSSRApp(App) : createApp(App)
+app.mount(root)

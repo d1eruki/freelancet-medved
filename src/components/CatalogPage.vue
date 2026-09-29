@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue'
 import CatalogCategoryCard from './CatalogCategoryCard.vue'
 import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
@@ -43,13 +42,6 @@ const catalogHeroLayers = {
   },
 }
 
-onMounted(() => {
-  document.title = 'Каталог медовухи, сидра и пуаре «МЁДВЕДЬ»'
-  document.querySelector('meta[name="description"]')?.setAttribute(
-    'content',
-    'Медовуха «МЁДВЕДЬ», яблочный сидр и грушевое пуаре от петербургского производителя. Выберите категорию и познакомьтесь с ассортиментом.',
-  )
-})
 </script>
 
 <template>

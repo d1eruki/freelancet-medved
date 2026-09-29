@@ -18,6 +18,14 @@
     <meta name="twitter:title" content="«МЁДВЕДЬ» Производитель русской медовухи, сидра, пуаре Санкт-Петербург">
     <meta name="twitter:description" content="Слабоалкогольные напитки оптом от производителя в СПБ">
     <title>«МЁДВЕДЬ» Производитель русской медовухи, сидра, пуаре Санкт-Петербург</title>
+    <script>
+      try {
+        if (localStorage.getItem('medved-age-confirmed') === 'true') {
+          document.documentElement.dataset.ageConfirmed = 'true'
+        }
+      } catch {}
+    </script>
+    <style>html[data-age-confirmed="true"] #age-gate { display: none }</style>
   </head>
   <body>
     <div id="app"></div>

@@ -1,17 +1,11 @@
 <script setup>
-import { onMounted } from 'vue'
 import CategoryHero from './CategoryHero.vue'
 import FlavorCard from './FlavorCard.vue'
 import SectionLink from './SectionLink.vue'
 import { sitePath } from '../utils/site-path'
 
-const props = defineProps({
+defineProps({
   category: { type: Object, required: true },
-})
-
-onMounted(() => {
-  document.title = `${props.category.name} «МЁДВЕДЬ» — ассортимент`
-  document.querySelector('meta[name="description"]')?.setAttribute('content', props.category.description)
 })
 </script>
 

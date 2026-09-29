@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import Snap from 'lenis/snap'
 import { sitePath } from '../utils/site-path'
 import brewingImageUrl from '../assets/production/production-brewing.png'
@@ -60,7 +60,9 @@ const processSteps = [
 const activeStepIndex = ref(0)
 const processScrollSection = ref(null)
 let touchStartY = null
-const desktopProcess = window.matchMedia('(min-width: 54rem)')
+const desktopProcess = typeof window === 'undefined'
+  ? { matches: false, addEventListener() {}, removeEventListener() {} }
+  : window.matchMedia('(min-width: 54rem)')
 
 const props = defineProps({
   lenis: { type: Object, default: null },
@@ -163,15 +165,6 @@ const qualityPoints = [
   'Контроль времени и температуры',
 ]
 
-onMounted(() => {
-  document.title = 'Производство «МЁДВЕДЬ» — традиционные рецептуры и современное оборудование'
-
-  const description = document.querySelector('meta[name="description"]')
-  description?.setAttribute(
-    'content',
-    'Как производят медовуху и сидр «МЁДВЕДЬ»: натуральное сырьё, брожение без добавления спирта и контроль качества на каждом этапе.',
-  )
-})
 </script>
 
 <template>

@@ -26,6 +26,13 @@
 - When a card, action block, or other page element is repeated or is designed to be repeated with different data, make it a Vue component from its first implementation. Pass content and meaningful variants through props or slots instead of copying its markup into page templates.
 - Reuse an existing component when it fits the same element. Keep unique page content in its page component.
 
+## Technical Architecture
+
+- Give each shared concern one owner. Keep routes, page SEO fields, canonical URLs, and indexing rules in one route registry; derive client routing, generated HTML, sitemap, and server route rules from it. Do not copy the same page list or metadata into components, build scripts, or configuration files.
+- Reuse an existing component, utility, or state mechanism when repeated behavior has the same contract and lifecycle. Extract shared logic when it has multiple real consumers; keep unique page content in its page component.
+- When changing a shared mechanism, trace its consumers before editing and update them together. For routes and rendering, check direct URLs, development and production base paths, HTML and metadata before JavaScript, asset paths, hydration, and persisted states. Verify the generated output rather than relying on source inspection alone.
+- Keep `docs/site-structure.md` aligned with the routes currently implemented; list service pages such as 404 separately from indexable content pages. Before a project review or deployment change, inspect hidden configuration files, including `.htaccess` and workflow files.
+
 ## Document Content
 
 - Do not add document-level metadata or provenance blocks unless the user explicitly requests them. This includes any status, date, source, author, version, approval state, check timestamp, or similar information, whether formatted as labeled fields or written as introductory prose below the title.

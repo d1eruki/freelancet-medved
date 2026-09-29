@@ -6,6 +6,7 @@ import { navigation } from '../data/navigation'
 
 const props = defineProps({
   lenis: { type: Object, default: null },
+  path: { type: String, default: '/' },
 })
 
 const isMenuOpen = ref(false)
@@ -80,8 +81,9 @@ function closeMenu() {
 }
 
 function isCurrentPage(href) {
-  const currentPath = window.location.pathname.replace(/\/+$/, '')
-  const targetPath = new URL(href, window.location.origin).pathname.replace(/\/+$/, '')
+  const currentPath = props.path.replace(/\/+$/, '')
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, '')
+  const targetPath = new URL(href, 'https://medved.beer').pathname.slice(basePath.length).replace(/\/+$/, '')
 
   return currentPath === targetPath
 }
