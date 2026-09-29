@@ -11,6 +11,7 @@ import CustomCursor from './components/CustomCursor.vue'
 import HomePage from './components/HomePage.vue'
 import HorecaPage from './components/HorecaPage.vue'
 import LegalPage from './components/LegalPage.vue'
+import NotFoundPage from './components/NotFoundPage.vue'
 import PartnersPage from './components/PartnersPage.vue'
 import ProductionPage from './components/ProductionPage.vue'
 import SiteHeader from './components/SiteHeader.vue'
@@ -75,7 +76,8 @@ const seo = category
     }
   : legalPage
     ? { title: legalPage.title, description: '' }
-    : seoByPath[currentPath] || defaultSeo
+    : seoByPath[currentPath]
+      || (currentPath === '/' ? defaultSeo : { title: 'Страница не найдена', description: '' })
 const canonicalPath = currentPath === '/' ? '/' : `${currentPath}/`
 const canonicalUrl = new URL(canonicalPath, 'https://medved.beer').href
 
@@ -145,7 +147,8 @@ onBeforeUnmount(() => {
       <LegalPage v-else-if="legalPage" :page="legalPage" />
       <CategoryPage v-else-if="category" :category="category" />
 
-      <HomePage v-else />
+      <HomePage v-else-if="currentPath === '/'" />
+      <NotFoundPage v-else />
     </main>
 
     <SiteFooter />
