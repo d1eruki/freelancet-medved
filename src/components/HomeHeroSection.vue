@@ -161,7 +161,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" motion-profile="gentle" :steam="heroSteam" />
+    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" :steam="heroSteam" />
   </section>
 </template>
 

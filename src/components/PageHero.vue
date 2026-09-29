@@ -10,7 +10,6 @@ const props = defineProps({
   pointerParallax: { type: Boolean, default: false },
   layers: { type: Object, default: null },
   layerLayout: { type: Object, default: null },
-  motionProfile: { type: String, default: 'wide' },
   steam: { type: Object, default: null },
 })
 
@@ -65,20 +64,22 @@ onBeforeUnmount(() => {
         :alt="imageAlt"
       >
     </figure>
-    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :motion-profile="motionProfile" :steam="steam" />
+    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :steam="steam" />
     <figure class="pointer-events-none absolute inset-0 -z-1">
       <span class="hero-overlay-bottom absolute inset-0" aria-hidden="true" />
       <span class="hero-overlay-center absolute inset-0" aria-hidden="true" />
     </figure>
 
-    <div class="site-container relative grid min-h-svh grid-rows-1 pt-28 pb-8 sm:pt-32 sm:pb-12">
-      <h1 :id="titleId" class="relative z-2 col-start-1 row-start-1 self-center font-display text-h1 uppercase">
-        <slot name="title" />
-      </h1>
+    <div class="site-container relative flex min-h-svh flex-col justify-center pt-28 pb-8 sm:pt-32 sm:pb-12">
+      <div class="flex flex-col gap-6">
+        <h1 :id="titleId" class="relative z-2 font-display text-h1 uppercase">
+          <slot name="title" />
+        </h1>
 
-      <p class="hero-description relative z-4 col-start-1 row-start-1 self-end max-w-xl text-surface/80 nav:max-w-md">
-        <slot />
-      </p>
+        <p class="hero-description relative z-4 max-w-xl text-surface/80 nav:max-w-md">
+          <slot />
+        </p>
+      </div>
     </div>
   </section>
 </template>

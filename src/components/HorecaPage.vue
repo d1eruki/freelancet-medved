@@ -63,7 +63,6 @@ const horecaHeroLayers = {
       title-id="horeca-page-title"
       :layers="horecaHeroLayers"
       :layer-layout="horecaHeroLayout"
-      motion-profile="wide"
       :steam="horecaHeroSteam"
     >
       <template #title>HoReCa</template>

@@ -20,7 +20,7 @@ import catalogHeroForegroundAvif960Url from '../assets/heroes/catalog-hero-foreg
 
 const catalogHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
+  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
 }
 
 const catalogHeroLayers = {
@@ -33,13 +33,13 @@ const catalogHeroLayers = {
     alt: 'Старинная иллюстрация: цветущие деревья у реки и город на дальнем берегу',
     zIndex: -2,
   },
-  foreground: {
+  middle: {
     src: catalogHeroForegroundUrl,
     srcset: `${catalogHeroForeground640Url} 640w, ${catalogHeroForeground960Url} 960w, ${catalogHeroForegroundUrl} 1672w`,
     avifSrcset: `${catalogHeroForegroundAvif640Url} 640w, ${catalogHeroForegroundAvif960Url} 960w, ${catalogHeroForegroundAvifUrl} 1672w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    zIndex: 3,
+    zIndex: -2,
   },
 }
 
@@ -58,7 +58,6 @@ onMounted(() => {
       title-id="catalog-title"
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
-      motion-profile="wide"
     >
       <template #title>Наши<br>напитки</template>
       Медовуха, сидр и пуаре собственного производства. Выберите напиток по настроению — от медовых и пряных до свежих фруктовых вкусов.
