@@ -1,8 +1,8 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
 import logoUrl from '../assets/branding/brand-logo.svg'
-import { navigation } from '../data/navigation'
 
+const addressMapUrl = `https://yandex.ru/maps/?text=${encodeURIComponent('Санкт-Петербург, Курляндская улица, 28Г')}`
 const showSocialLinks = false
 
 const socialLinks = [
@@ -27,42 +27,34 @@ const socialLinks = [
 <template>
   <footer class="bg-brand py-20 text-surface sm:py-24 wide:py-28">
     <div class="site-container">
-      <div class="grid gap-12 border-b border-surface/40 pb-12 nav:grid-cols-2 wide:gap-24 wide:pb-20">
+      <div class="grid gap-12 border-b border-surface/40 pb-12 wide:grid-cols-3 wide:gap-12 wide:pb-20">
         <a class="inline-flex w-max" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
           <img class="h-auto w-64 object-contain brightness-0 invert sm:w-80" :src="logoUrl" alt="МЁДВЕДЬ" width="511" height="133">
         </a>
 
-        <nav aria-label="Навигация в подвале">
-          <ul class="grid gap-3 wide:grid-cols-2 sm:gap-x-10 sm:gap-y-4">
-            <li v-for="item in navigation" :key="item.href">
-              <a class="footer-link relative inline-flex py-1 font-display text-body-large uppercase" :href="item.href">
-                {{ item.label }}
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-
-      <div class="grid gap-8 py-12 nav:grid-cols-3 wide:gap-20 wide:py-16">
         <div>
           <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Адрес</span>
           <address class="max-w-xl text-body-large font-semibold not-italic">
-            г. Санкт-Петербург, Курляндская улица, д. 28Г, пом. 75
+            <a class="border-b border-surface/60" :href="addressMapUrl" target="_blank" rel="noopener noreferrer">
+              г. Санкт-Петербург, Курляндская улица, д. 28Г, пом. 75
+            </a>
           </address>
         </div>
 
         <div>
-          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Телефон</span>
-          <a class="border-b border-surface/60 text-body-large font-semibold" href="tel:+78129408427">
-            +7 (812) 940-84-27
-          </a>
-        </div>
-
-        <div>
-          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Почта</span>
-          <a class="border-b border-surface/60 text-body-large font-semibold" href="mailto:info@medved.beer">
-            info@medved.beer
-          </a>
+          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Контакты</span>
+          <ul class="grid gap-3">
+            <li>
+              <a class="border-b border-surface/60 text-body-large font-semibold" href="tel:+78129408427">
+                +7 (812) 940-84-27
+              </a>
+            </li>
+            <li>
+              <a class="border-b border-surface/60 text-body-large font-semibold" href="mailto:info@medved.beer">
+                info@medved.beer
+              </a>
+            </li>
+          </ul>
           <ul v-if="showSocialLinks" class="mt-6 flex items-center gap-3" aria-label="Социальные сети">
             <li v-for="social in socialLinks" :key="social.label">
               <a
@@ -99,24 +91,3 @@ const socialLinks = [
     </div>
   </footer>
 </template>
-
-<style scoped>
-.footer-link::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  content: '';
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 180ms ease;
-}
-
-.footer-link:hover::after,
-.footer-link:focus-visible::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-</style>
