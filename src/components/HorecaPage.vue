@@ -65,7 +65,6 @@ const horecaHeroLayers = {
       :layer-layout="horecaHeroLayout"
       motion-profile="wide"
       :steam="horecaHeroSteam"
-      overlay-variant="catalog"
     >
       <template #title>HoReCa</template>
       Медовуха, сидр и пуаре «МЁДВЕДЬ» для баров и ресторанов. Поставляем напитки оптом в многооборотных кегах и одноразовой ПЭТ-таре.

@@ -103,7 +103,6 @@ onMounted(() => {
       :layers="partnersHeroLayers"
       :layer-layout="partnersHeroLayout"
       motion-profile="wide"
-      overlay-variant="catalog"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
       Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.

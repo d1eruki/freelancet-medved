@@ -109,6 +109,8 @@ onBeforeUnmount(() => {
         :class="['hero-composition-layer', layer.className, {
           'hero-composition-layer-moving': name !== 'background',
           'hero-composition-layer-float': layerMotion[name]?.floatDuration,
+          'drop-shadow-[0_0_100px_rgba(1,1,1,0.5)]': name === 'middle',
+          'drop-shadow-[0_0_100px_rgba(0,0,0,1)]': name === 'foreground',
         }]"
         :style="layerStyle(layer, name)"
         :sizes="layer.sizes"

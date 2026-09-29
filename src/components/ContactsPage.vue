@@ -26,7 +26,6 @@ onMounted(() => {
       title-id="contacts-title"
       :image-url="contactsHeroImageUrl"
       image-alt="Иллюстрация кирпичного промышленного здания у воды"
-      overlay-variant="catalog"
     >
       <template #title>Контакты</template>
       Товарищество пиво-медоваренного завода «МЁДВЕДЬ». Производим и поставляем медовуху, сидр и пуаре из Санкт-Петербурга.

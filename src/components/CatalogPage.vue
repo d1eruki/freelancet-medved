@@ -59,7 +59,6 @@ onMounted(() => {
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
       motion-profile="wide"
-      overlay-variant="catalog"
     >
       <template #title>Наши<br>напитки</template>
       Медовуха, сидр и пуаре собственного производства. Выберите напиток по настроению — от медовых и пряных до свежих фруктовых вкусов.

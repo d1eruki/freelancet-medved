@@ -124,7 +124,6 @@ onMounted(() => {
       :layers="aboutHeroLayers"
       :layer-layout="aboutHeroLayout"
       motion-profile="gentle"
-      overlay-variant="catalog"
     >
       <template #title>Традиция<br>живёт здесь</template>
       Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.

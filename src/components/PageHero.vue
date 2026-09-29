@@ -7,7 +7,6 @@ const props = defineProps({
   titleId: { type: String, required: true },
   imageUrl: { type: String, default: productionImageUrl },
   imageAlt: { type: String, default: 'Производственный цех с оборудованием из нержавеющей стали' },
-  overlayVariant: { type: String, default: 'default' },
   pointerParallax: { type: Boolean, default: false },
   layers: { type: Object, default: null },
   layerLayout: { type: Object, default: null },
@@ -65,16 +64,11 @@ onBeforeUnmount(() => {
         :src="imageUrl"
         :alt="imageAlt"
       >
-      <template v-if="overlayVariant === 'default'">
-        <span class="absolute inset-0 bg-foreground/60" aria-hidden="true" />
-        <span class="absolute inset-0 bg-linear-to-t from-foreground/85 via-transparent to-foreground/20" aria-hidden="true" />
-        <span class="absolute inset-0 hidden bg-linear-to-r from-foreground/75 via-foreground/15 to-transparent nav:block" aria-hidden="true" />
-      </template>
     </figure>
     <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :motion-profile="motionProfile" :steam="steam" />
-    <figure v-if="overlayVariant === 'catalog'" class="pointer-events-none absolute inset-0 -z-1">
-      <span class="catalog-overlay-bottom absolute inset-0" aria-hidden="true" />
-      <span class="catalog-overlay-center absolute inset-0" aria-hidden="true" />
+    <figure class="pointer-events-none absolute inset-0 -z-1">
+      <span class="hero-overlay-bottom absolute inset-0" aria-hidden="true" />
+      <span class="hero-overlay-center absolute inset-0" aria-hidden="true" />
     </figure>
 
     <div class="site-container relative grid min-h-svh grid-rows-1 pt-28 pb-8 sm:pt-32 sm:pb-12">
@@ -90,11 +84,11 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.catalog-overlay-bottom {
+.hero-overlay-bottom {
   background: radial-gradient(ellipse 65% 80% at 0% 100%, rgb(16 16 16 / 72%) 0%, rgb(16 16 16 / 40%) 42%, transparent 100%);
 }
 
-.catalog-overlay-center {
+.hero-overlay-center {
   background: radial-gradient(ellipse 56% 80% at 0% 48%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 24%) 48%, transparent 100%);
 }
 </style>
