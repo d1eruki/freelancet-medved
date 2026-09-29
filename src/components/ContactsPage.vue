@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import contactsHeroImageUrl from '../assets/contacts-hero.png'
+import contactsHeroImageUrl from '../assets/heroes/contacts-hero-illustration.png'
 import CircleArrow from './CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import ContactSection from './ContactSection.vue'
@@ -25,7 +25,7 @@ onMounted(() => {
     <PageHero
       title-id="contacts-title"
       :image-url="contactsHeroImageUrl"
-      image-alt="Иллюстрация кирпичного промышленного здания с входом"
+      image-alt="Иллюстрация кирпичного промышленного здания у воды"
     >
       <template #title>Контакты</template>
       Товарищество пиво-медоваренного завода «МЁДВЕДЬ». Производим и поставляем медовуху, сидр и пуаре из Санкт-Петербурга.

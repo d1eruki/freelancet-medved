@@ -1,17 +1,15 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
-import productionImageUrl from '../assets/production-hero.png'
+import productionImageUrl from '../assets/heroes/production-hero.png'
 
 const props = defineProps({
   titleId: { type: String, required: true },
   imageUrl: { type: String, default: productionImageUrl },
   imageAlt: { type: String, default: 'Производственный цех с оборудованием из нержавеющей стали' },
-  overlayVariant: { type: String, default: 'default' },
   pointerParallax: { type: Boolean, default: false },
   layers: { type: Object, default: null },
   layerLayout: { type: Object, default: null },
-  motionProfile: { type: String, default: 'wide' },
   steam: { type: Object, default: null },
 })
 
@@ -65,36 +63,33 @@ onBeforeUnmount(() => {
         :src="imageUrl"
         :alt="imageAlt"
       >
-      <template v-if="overlayVariant === 'default'">
-        <span class="absolute inset-0 bg-foreground/60" aria-hidden="true" />
-        <span class="absolute inset-0 bg-linear-to-t from-foreground/85 via-transparent to-foreground/20" aria-hidden="true" />
-        <span class="absolute inset-0 hidden bg-linear-to-r from-foreground/75 via-foreground/15 to-transparent nav:block" aria-hidden="true" />
-      </template>
     </figure>
-    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :motion-profile="motionProfile" :steam="steam" />
-    <figure v-if="layers && overlayVariant === 'catalog'" class="pointer-events-none absolute inset-0 -z-1">
-      <span class="catalog-overlay-bottom absolute inset-0" aria-hidden="true" />
-      <span class="catalog-overlay-center absolute inset-0" aria-hidden="true" />
+    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :steam="steam" />
+    <figure class="pointer-events-none absolute inset-0 -z-1">
+      <span class="hero-overlay-bottom absolute inset-0" aria-hidden="true" />
+      <span class="hero-overlay-center absolute inset-0" aria-hidden="true" />
     </figure>
 
-    <div class="site-container relative grid min-h-svh grid-rows-1 pt-28 pb-8 sm:pt-32 sm:pb-12">
-      <h1 :id="titleId" class="relative z-2 col-start-1 row-start-1 self-center font-display text-h1 uppercase">
-        <slot name="title" />
-      </h1>
+    <div class="site-container relative flex min-h-svh flex-col justify-center pt-28 pb-8 sm:pt-32 sm:pb-12">
+      <div class="flex flex-col gap-6">
+        <h1 :id="titleId" class="relative z-2 font-display text-h1 uppercase">
+          <slot name="title" />
+        </h1>
 
-      <p class="hero-description relative z-4 col-start-1 row-start-1 self-end max-w-xl text-surface/80 nav:max-w-md">
-        <slot />
-      </p>
+        <p class="hero-description relative z-4 max-w-xl text-surface/80 nav:max-w-md">
+          <slot />
+        </p>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.catalog-overlay-bottom {
+.hero-overlay-bottom {
   background: radial-gradient(ellipse 65% 80% at 0% 100%, rgb(16 16 16 / 72%) 0%, rgb(16 16 16 / 40%) 42%, transparent 100%);
 }
 
-.catalog-overlay-center {
+.hero-overlay-center {
   background: radial-gradient(ellipse 56% 80% at 0% 48%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 24%) 48%, transparent 100%);
 }
 </style>

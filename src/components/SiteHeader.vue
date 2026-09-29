@@ -1,7 +1,7 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import logoUrl from '../assets/brand-logo-mark.svg'
+import logoUrl from '../assets/branding/brand-logo-mark.svg'
 import { navigation } from '../data/navigation'
 
 const props = defineProps({

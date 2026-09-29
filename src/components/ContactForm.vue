@@ -45,14 +45,70 @@ function resetFields() {
   fields.website = ''
 }
 
+function formatPhone(digits) {
+  if (!digits) return ''
+
+  let value = `(${digits.slice(0, 3)}`
+  if (digits.length >= 3) value += ')'
+  if (digits.length > 3) value += ` ${digits.slice(3, 6)}`
+  if (digits.length > 6) value += `-${digits.slice(6, 8)}`
+  if (digits.length > 8) value += `-${digits.slice(8, 10)}`
+  return value
+}
+
+function positionAfterDigits(value, count) {
+  if (!count) return value ? 1 : 0
+
+  let seen = 0
+  for (let index = 0; index < value.length; index += 1) {
+    if (!/\d/.test(value[index])) continue
+    seen += 1
+    if (seen !== count) continue
+
+    let position = index + 1
+    while (position < value.length && !/\d/.test(value[position])) position += 1
+    return position
+  }
+  return value.length
+}
+
+function onPhoneInput(event) {
+  const input = event.target
+  const rawValue = input.value
+  let digitsBeforeCursor = rawValue.slice(0, input.selectionStart ?? rawValue.length).replace(/\D/g, '').length
+  let digits = rawValue.replace(/\D/g, '')
+
+  if (digits.length > 10 && /^[78]/.test(digits)
+    && (event.inputType === 'insertFromPaste' || /^\s*\+7/.test(rawValue))) {
+    digits = digits.slice(1)
+    digitsBeforeCursor = Math.max(0, digitsBeforeCursor - 1)
+  }
+
+  if (digits.length === fields.phone.length && rawValue !== formatPhone(fields.phone)) {
+    if (event.inputType === 'deleteContentBackward' && digitsBeforeCursor > 0) {
+      digits = digits.slice(0, digitsBeforeCursor - 1) + digits.slice(digitsBeforeCursor)
+      digitsBeforeCursor -= 1
+    } else if (event.inputType === 'deleteContentForward') {
+      digits = digits.slice(0, digitsBeforeCursor) + digits.slice(digitsBeforeCursor + 1)
+    }
+  }
+
+  fields.phone = digits.slice(0, 10)
+  input.value = formatPhone(fields.phone)
+  input.setSelectionRange(
+    positionAfterDigits(input.value, Math.min(digitsBeforeCursor, fields.phone.length)),
+    positionAfterDigits(input.value, Math.min(digitsBeforeCursor, fields.phone.length)),
+  )
+  phoneError.value = ''
+}
+
 async function submitForm() {
   if (status.value === 'sending') return
 
   status.value = 'idle'
   feedback.value = ''
-  const phoneDigits = fields.phone.replace(/\D/g, '')
-  if (!/^\+?[\d\s()-]+$/.test(fields.phone) || phoneDigits.length !== 11) {
-    phoneError.value = 'Введите номер из 11 цифр.'
+  if (!/^\d{10}$/.test(fields.phone)) {
+    phoneError.value = 'Введите 10 цифр после +7.'
     phoneInput.value?.focus()
     return
   }
@@ -61,6 +117,7 @@ async function submitForm() {
   status.value = 'sending'
 
   try {
+    const phoneDigits = `7${fields.phone}`
     const response = await fetch(sitePath('/api/contact.php'), {
       method: 'POST',
       headers: {
@@ -99,7 +156,10 @@ async function submitForm() {
     </div>
     <div>
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-phone`">Телефон *</label>
-      <input :id="`${idPrefix}-phone`" ref="phoneInput" v-model.trim="fields.phone" class="min-h-14 w-full rounded-xl border px-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="phone" type="tel" autocomplete="tel" maxlength="60" required :aria-invalid="Boolean(phoneError)" :aria-describedby="phoneError ? `${idPrefix}-phone-error` : undefined" @input="phoneError = ''">
+      <div class="flex min-w-0 items-center rounded-xl border pl-5 focus-within:outline-4 focus-within:outline-offset-2" :class="[fieldClass, isDark ? 'focus-within:outline-surface' : 'focus-within:outline-brand']">
+        <span :id="`${idPrefix}-phone-code`" class="shrink-0 py-3 text-body font-medium">🇷🇺 +7</span>
+        <input :id="`${idPrefix}-phone`" ref="phoneInput" :value="formatPhone(fields.phone)" class="min-h-14 min-w-0 flex-1 bg-transparent py-3 pl-3 pr-5 text-body font-medium outline-none" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" required :aria-invalid="Boolean(phoneError)" :aria-describedby="`${idPrefix}-phone-code${phoneError ? ` ${idPrefix}-phone-error` : ''}`" @input="onPhoneInput">
+      </div>
       <p v-if="phoneError" :id="`${idPrefix}-phone-error`" class="mt-2 text-body font-semibold" :class="isDark ? 'text-red-300' : 'text-red-700'" role="alert">{{ phoneError }}</p>
     </div>
     <div class="nav:col-span-2">
