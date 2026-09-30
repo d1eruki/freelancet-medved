@@ -26,7 +26,7 @@ import catalogHeroForegroundAvif960Url from '../assets/heroes/catalog/foreground
 const catalogHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
   middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 135, y: -100 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
+  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.90, x: 155, y: 100 } },
 }
 
 const catalogHeroLayers = {
@@ -63,6 +63,7 @@ const catalogHeroLayers = {
       :title-z-index="0"
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
+      layer-entrance="foreground-first"
     >
       <template #title>Наши<br>напитки</template>
       <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре собственного </span>

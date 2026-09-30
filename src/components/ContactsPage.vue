@@ -18,6 +18,7 @@ const routeUrl = `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponen
       title-id="contacts-title"
       :image-url="contactsHeroImageUrl"
       image-alt="Иллюстрация кирпичного промышленного здания у воды"
+      animate-copy
     >
       <template #title>Будем<br>знакомы</template>
       <span class="wide:block wide:whitespace-nowrap">Товарищество пиво-медоваренного завода </span>

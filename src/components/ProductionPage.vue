@@ -6,11 +6,44 @@ import brewingImageUrl from '../assets/production/production-brewing.png'
 import fermentationImageUrl from '../assets/production/production-fermentation.png'
 import conditioningImageUrl from '../assets/production/production-conditioning.png'
 import bottlingImageUrl from '../assets/production/production-bottling.png'
+import productionHeroBackgroundUrl from '../assets/heroes/production/background.png'
+import productionHeroMiddleUrl from '../assets/heroes/production/middle.png'
+import productionHeroMiddle2Url from '../assets/heroes/production/middle-2.png'
 import ActionTile from './ActionTile.vue'
 import NumberedInfoCard from './NumberedInfoCard.vue'
 import PageHero from './PageHero.vue'
 import ProductionProcessStep from './ProductionProcessStep.vue'
 import SectionWatermark from './SectionWatermark.vue'
+
+const middleTankLayout = {
+  mobile: { scale: 1, x: 0, y: 0 },
+  desktop: { scale: 1.05, x: 0, y: 75 },
+}
+
+const productionHeroLayout = {
+  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
+  middle: middleTankLayout,
+  middle2: {
+    mobile: { ...middleTankLayout.mobile, x: -middleTankLayout.mobile.x },
+    desktop: { ...middleTankLayout.desktop, x: -middleTankLayout.desktop.x },
+  },
+}
+
+const productionHeroLayers = {
+  background: {
+    src: productionHeroBackgroundUrl,
+    className: 'absolute inset-0 size-full object-cover object-center',
+    alt: 'Иллюстрация исторического кирпичного цеха с рядами баков из нержавеющей стали',
+  },
+  middle: {
+    src: productionHeroMiddleUrl,
+    className: 'absolute inset-0 size-full object-cover object-center',
+  },
+  middle2: {
+    src: productionHeroMiddle2Url,
+    className: 'absolute inset-0 size-full object-cover object-center',
+  },
+}
 
 const ingredients = [
   {
@@ -169,7 +202,13 @@ const qualityPoints = [
 
 <template>
   <div>
-    <PageHero title-id="production-page-title">
+    <PageHero
+      title-id="production-page-title"
+      content-align="center"
+      :layers="productionHeroLayers"
+      :layer-layout="productionHeroLayout"
+      layer-entrance="split-slide"
+    >
       <template #title>Варим<br>с душой</template>
       <span class="wide:block wide:whitespace-nowrap">Воссоздаём рецептуры русских напитков </span>
       <span class="wide:block wide:whitespace-nowrap">в исторической солодовне, соединяя </span>

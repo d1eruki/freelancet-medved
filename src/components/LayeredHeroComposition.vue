@@ -5,21 +5,35 @@ import { heroLayerStyle } from '../utils/hero-layer-layout'
 
 const pointerRange = { x: 12, y: 12 }
 
+const middleMotion = { parallaxFactor: 1 / 6, scrollDistance: 24, floatDistance: '-3px', floatDuration: '8s' }
+
 const layerMotion = {
   background: { parallaxFactor: 0, scrollDistance: 0 },
-  middle: { parallaxFactor: 1 / 6, scrollDistance: 24, floatDistance: '-3px', floatDuration: '8s' },
+  middle: middleMotion,
+  middle2: middleMotion,
   foreground: { parallaxFactor: 1 / 2, scrollDistance: 48, floatDistance: '-4px', floatDuration: '6s' },
 }
 
+const middleShadow = { offsetX: 0, offsetY: 0, blur: 100, color: [1, 1, 1], opacity: 1 }
+
 const layerShadows = {
-  middle: { offsetX: 0, offsetY: 0, blur: 100, color: [1, 1, 1], opacity: 1 },
+  middle: middleShadow,
+  middle2: middleShadow,
   foreground: { offsetX: 0, offsetY: 0, blur: 100, color: [0, 0, 0], opacity: 1 },
+}
+
+const entranceMotions = {
+  rise: { middle: 'hero-composition-plane-rise', middle2: 'hero-composition-plane-rise', foreground: 'hero-composition-plane-rise-delayed' },
+  'foreground-first': { middle: 'hero-composition-plane-slide', middle2: 'hero-composition-plane-slide', foreground: 'hero-composition-plane-rise' },
+  'middle-first': { middle: 'hero-composition-plane-rise', middle2: 'hero-composition-plane-rise', foreground: 'hero-composition-plane-slide' },
+  'split-slide': { middle: 'hero-composition-plane-slide-left', middle2: 'hero-composition-plane-slide' },
 }
 
 const props = defineProps({
   layers: { type: Object, required: true },
   layerLayout: { type: Object, required: true },
   layerZIndex: { type: Object, default: null },
+  entrance: { type: String, default: 'rise', validator: (value) => ['rise', 'foreground-first', 'middle-first', 'split-slide'].includes(value) },
   steam: { type: Object, default: null },
 })
 
@@ -95,7 +109,6 @@ function layerStyle(layer, name) {
     filter: shadow
       ? `drop-shadow(${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px rgba(${shadow.color.join(', ')}, ${shadow.opacity}))`
       : undefined,
-    zIndex: props.layerZIndex?.[name] ?? layer.zIndex,
   }
 }
 
@@ -137,7 +150,13 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="host" class="layered-hero-composition">
-    <picture v-for="(layer, name) in layers" :key="name">
+    <picture
+      v-for="(layer, name) in layers"
+      :key="name"
+      class="hero-composition-plane"
+      :class="entranceMotions[entrance][name]"
+      :style="{ zIndex: layerZIndex?.[name] ?? layer.zIndex }"
+    >
       <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
         :ref="name === 'middle' ? setMiddleImage : undefined"
@@ -172,6 +191,11 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+.hero-composition-plane {
+  position: absolute;
+  inset: 0;
+}
+
 .hero-composition-layer {
   pointer-events: none;
   scale: var(--hero-layer-mobile-scale);
@@ -196,9 +220,48 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .hero-composition-plane-rise,
+  .hero-composition-plane-rise-delayed {
+    transform-origin: center bottom;
+    animation: hero-layer-rise var(--hero-rise-duration, 1000ms) cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-composition-plane-rise-delayed {
+    animation-delay: var(--hero-secondary-rise-delay, 120ms);
+  }
+
+  .hero-composition-plane-slide,
+  .hero-composition-plane-slide-left {
+    animation: hero-layer-slide-in var(--hero-slide-duration) cubic-bezier(0.4, 0.8, 0.6, 1) var(--hero-slide-delay) both;
+  }
+
+  .hero-composition-plane-slide-left {
+    animation-name: hero-layer-slide-in-left;
+  }
+
   .hero-composition-layer-float {
     animation: hero-layer-float var(--float-duration) ease-in-out infinite;
   }
+}
+
+@keyframes hero-layer-rise {
+  from {
+    transform: perspective(1200px) rotateX(72deg);
+  }
+
+  to {
+    transform: perspective(1200px) rotateX(0);
+  }
+}
+
+@keyframes hero-layer-slide-in {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(0); }
+}
+
+@keyframes hero-layer-slide-in-left {
+  from { transform: translateX(-100vw); }
+  to { transform: translateX(0); }
 }
 
 @keyframes hero-layer-float {

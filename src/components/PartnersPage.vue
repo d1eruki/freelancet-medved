@@ -91,6 +91,7 @@ const pointCountLabel = computed(() => {
       :title-z-index="2"
       :layers="partnersHeroLayers"
       :layer-layout="partnersHeroLayout"
+      layer-entrance="middle-first"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
       <span class="wide:block wide:whitespace-nowrap">Ищите нашу медовуху, сидр и пуаре </span>

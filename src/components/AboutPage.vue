@@ -111,6 +111,7 @@ const awards = [
       :title-z-index="0"
       :layers="aboutHeroLayers"
       :layer-layout="aboutHeroLayout"
+      layer-entrance="foreground-first"
     >
       <template #title>Традиция<br>живёт здесь</template>
       <span class="wide:block wide:whitespace-nowrap">Петербургский производитель медовухи, </span>
