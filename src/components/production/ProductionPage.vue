@@ -207,7 +207,7 @@ const qualityPoints = [
       content-align="center"
       :layers="productionHeroLayers"
       :layer-layout="productionHeroLayout"
-      layer-entrance="middle-split-slide-together"
+      layer-entrance="split-slide"
     >
       <template #title>Варим<br>с душой</template>
       <span class="wide:block wide:whitespace-nowrap">Воссоздаём рецептуры русских напитков </span>

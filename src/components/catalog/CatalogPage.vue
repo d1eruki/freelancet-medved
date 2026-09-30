@@ -63,7 +63,7 @@ const catalogHeroLayers = {
       :title-z-index="0"
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
-      layer-entrance="foreground-slide-then-middle-slide"
+      layer-entrance="foreground-first"
     >
       <template #title>Наши<br>напитки</template>
       <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре собственного </span>

@@ -1,10 +1,9 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
-import { heroEntranceScenarios, resolveHeroEntrance } from '../utils/hero-entrance'
+import { layerEntranceTimings, imageCopyTiming } from '../utils/hero-entrance'
 
 const pageHeroLayerZIndex = { background: -2, middle: 1, middle2: 1, foreground: 3 }
-
 const props = defineProps({
   titleId: { type: String, required: true },
   titleZIndex: { type: Number, default: 2 },
@@ -14,16 +13,9 @@ const props = defineProps({
   pointerParallax: { type: Boolean, default: false },
   layers: { type: Object, default: null },
   layerLayout: { type: Object, default: null },
-  layerEntrance: { type: String, validator: (value) => Object.hasOwn(heroEntranceScenarios, value) },
+  layerEntrance: { type: String, default: 'rise', validator: (value) => Object.hasOwn(layerEntranceTimings, value) },
   animateCopy: { type: Boolean, default: false },
   steam: { type: Object, default: null },
-})
-
-const copyTiming = computed(() => {
-  if (props.layers) {
-    return resolveHeroEntrance(props.layerEntrance, props.layers).copyTiming
-  }
-  return props.animateCopy ? resolveHeroEntrance('image-copy').copyTiming : undefined
 })
 
 const parallaxOffset = ref({ x: 0, y: 0 })
@@ -64,7 +56,7 @@ onBeforeUnmount(() => {
     class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface"
     data-header-theme="light"
     :aria-labelledby="titleId"
-    :style="copyTiming"
+    :style="layers ? layerEntranceTimings[layerEntrance] : animateCopy ? imageCopyTiming : undefined"
     @pointermove="!layers && updateParallax($event)"
     @pointerleave="!layers && resetParallax()"
     @pointercancel="!layers && resetParallax()"
@@ -117,7 +109,7 @@ onBeforeUnmount(() => {
 
 @media (prefers-reduced-motion: no-preference) {
   .hero-copy-rise {
-    animation: hero-copy-rise var(--hero-copy-duration) ease-out var(--hero-title-delay) both;
+    animation: hero-copy-rise 500ms ease-out var(--hero-title-delay) both;
   }
 
   .hero-description.hero-copy-rise {

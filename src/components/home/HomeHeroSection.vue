@@ -163,7 +163,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <LayeredHeroComposition entrance="rise-together" :layers="heroLayers" :layer-layout="heroLayerLayout" :steam="heroSteam" />
+    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" :steam="heroSteam" />
   </section>
 </template>
 

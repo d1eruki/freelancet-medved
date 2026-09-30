@@ -1,8 +1,8 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import HeroSteam from './HeroSteam.vue'
 import { heroLayerStyle } from '../utils/hero-layer-layout'
-import { heroEntranceScenarios, resolveHeroEntrance } from '../utils/hero-entrance'
+import { entranceMotions } from '../utils/hero-entrance'
 
 const pointerRange = { x: 12, y: 12 }
 
@@ -27,11 +27,9 @@ const props = defineProps({
   layers: { type: Object, required: true },
   layerLayout: { type: Object, required: true },
   layerZIndex: { type: Object, default: null },
-  entrance: { type: String, required: true, validator: (value) => Object.hasOwn(heroEntranceScenarios, value) },
+  entrance: { type: String, default: 'rise', validator: (value) => Object.hasOwn(entranceMotions, value) },
   steam: { type: Object, default: null },
 })
-
-const entranceAnimations = computed(() => resolveHeroEntrance(props.entrance, props.layers).animations)
 
 const host = ref(null)
 const middleImage = ref(null)
@@ -150,8 +148,8 @@ onBeforeUnmount(() => {
       v-for="(layer, name) in layers"
       :key="name"
       class="hero-composition-plane"
-      :class="entranceAnimations[name]?.className"
-      :style="{ ...entranceAnimations[name]?.style, zIndex: layerZIndex?.[name] ?? layer.zIndex }"
+      :class="entranceMotions[entrance][name]"
+      :style="{ zIndex: layerZIndex?.[name] ?? layer.zIndex }"
     >
       <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
@@ -216,14 +214,24 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-composition-plane-rise {
+  .hero-composition-plane-rise,
+  .hero-composition-plane-rise-delayed {
     transform-origin: center bottom;
-    animation: hero-layer-rise var(--hero-layer-duration) cubic-bezier(0.22, 1, 0.36, 1) var(--hero-layer-delay) both;
+    animation: hero-layer-rise var(--hero-rise-duration, 1000ms) cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-composition-plane-rise-delayed {
+    animation-delay: var(--hero-secondary-rise-delay, 120ms);
   }
 
   .hero-composition-plane-slide,
+  .hero-composition-plane-slide-delayed,
   .hero-composition-plane-slide-left {
-    animation: hero-layer-slide-in var(--hero-layer-duration) cubic-bezier(0.4, 0.8, 0.6, 1) var(--hero-layer-delay) both;
+    animation: hero-layer-slide-in var(--hero-slide-duration) cubic-bezier(0.4, 0.8, 0.6, 1) var(--hero-slide-delay) both;
+  }
+
+  .hero-composition-plane-slide-delayed {
+    animation-delay: var(--hero-secondary-slide-delay);
   }
 
   .hero-composition-plane-slide-left {

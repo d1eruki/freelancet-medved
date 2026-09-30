@@ -61,7 +61,6 @@ const horecaHeroLayers = {
       :title-z-index="0"
       :layers="horecaHeroLayers"
       :layer-layout="horecaHeroLayout"
-      layer-entrance="rise-together"
       :steam="horecaHeroSteam"
     >
       <template #title>Для ваших<br>гостей</template>
