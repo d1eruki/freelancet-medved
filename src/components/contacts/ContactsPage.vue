@@ -1,11 +1,11 @@
 <script setup>
-import contactsHeroImageUrl from '../assets/heroes/contacts/hero.png'
-import CircleArrow from './CircleArrow.vue'
+import contactsHeroImageUrl from '../../assets/heroes/contacts/hero.png'
+import CircleArrow from '../CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
-import ContactSection from './ContactSection.vue'
-import PageHero from './PageHero.vue'
-import SectionLink from './SectionLink.vue'
-import { sitePath } from '../utils/site-path'
+import ContactSection from '../ContactSection.vue'
+import PageHero from '../PageHero.vue'
+import SectionLink from '../SectionLink.vue'
+import { sitePath } from '../../utils/site-path'
 
 const address = '190020, Санкт-Петербург, Курляндская ул., д. 28, литер Г, помещение 75'
 const routeUrl = `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponent(address)}&rtt=auto`

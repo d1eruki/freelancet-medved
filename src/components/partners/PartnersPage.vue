@@ -1,30 +1,30 @@
 <script setup>
 import { computed, ref } from 'vue'
-import CircleArrow from './CircleArrow.vue'
-import ActionTile from './ActionTile.vue'
-import PageHero from './PageHero.vue'
+import CircleArrow from '../CircleArrow.vue'
+import ActionTile from '../ActionTile.vue'
+import PageHero from '../PageHero.vue'
 import PartnerCard from './PartnerCard.vue'
-import SectionWatermark from './SectionWatermark.vue'
-import { partnerCities, partners } from '../data/partners'
-import { sitePath } from '../utils/site-path'
-import partnersHeroBackgroundUrl from '../assets/heroes/partners/background.png'
-import partnersHeroBackground640Url from '../assets/heroes/partners/background.png?width=640'
-import partnersHeroBackground960Url from '../assets/heroes/partners/background.png?width=960'
-import partnersHeroBackgroundAvifUrl from '../assets/heroes/partners/background.png?format=avif'
-import partnersHeroBackgroundAvif640Url from '../assets/heroes/partners/background.png?format=avif&width=640'
-import partnersHeroBackgroundAvif960Url from '../assets/heroes/partners/background.png?format=avif&width=960'
-import partnersHeroMiddleUrl from '../assets/heroes/partners/middle.png'
-import partnersHeroMiddle640Url from '../assets/heroes/partners/middle.png?width=640'
-import partnersHeroMiddle960Url from '../assets/heroes/partners/middle.png?width=960'
-import partnersHeroMiddleAvifUrl from '../assets/heroes/partners/middle.png?format=avif'
-import partnersHeroMiddleAvif640Url from '../assets/heroes/partners/middle.png?format=avif&width=640'
-import partnersHeroMiddleAvif960Url from '../assets/heroes/partners/middle.png?format=avif&width=960'
-import partnersHeroForegroundUrl from '../assets/heroes/partners/foreground.png'
-import partnersHeroForeground640Url from '../assets/heroes/partners/foreground.png?width=640'
-import partnersHeroForeground960Url from '../assets/heroes/partners/foreground.png?width=960'
-import partnersHeroForegroundAvifUrl from '../assets/heroes/partners/foreground.png?format=avif'
-import partnersHeroForegroundAvif640Url from '../assets/heroes/partners/foreground.png?format=avif&width=640'
-import partnersHeroForegroundAvif960Url from '../assets/heroes/partners/foreground.png?format=avif&width=960'
+import SectionWatermark from '../SectionWatermark.vue'
+import { partnerCities, partners } from '../../data/partners'
+import { sitePath } from '../../utils/site-path'
+import partnersHeroBackgroundUrl from '../../assets/heroes/partners/background.png'
+import partnersHeroBackground640Url from '../../assets/heroes/partners/background.png?width=640'
+import partnersHeroBackground960Url from '../../assets/heroes/partners/background.png?width=960'
+import partnersHeroBackgroundAvifUrl from '../../assets/heroes/partners/background.png?format=avif'
+import partnersHeroBackgroundAvif640Url from '../../assets/heroes/partners/background.png?format=avif&width=640'
+import partnersHeroBackgroundAvif960Url from '../../assets/heroes/partners/background.png?format=avif&width=960'
+import partnersHeroMiddleUrl from '../../assets/heroes/partners/middle.png'
+import partnersHeroMiddle640Url from '../../assets/heroes/partners/middle.png?width=640'
+import partnersHeroMiddle960Url from '../../assets/heroes/partners/middle.png?width=960'
+import partnersHeroMiddleAvifUrl from '../../assets/heroes/partners/middle.png?format=avif'
+import partnersHeroMiddleAvif640Url from '../../assets/heroes/partners/middle.png?format=avif&width=640'
+import partnersHeroMiddleAvif960Url from '../../assets/heroes/partners/middle.png?format=avif&width=960'
+import partnersHeroForegroundUrl from '../../assets/heroes/partners/foreground.png'
+import partnersHeroForeground640Url from '../../assets/heroes/partners/foreground.png?width=640'
+import partnersHeroForeground960Url from '../../assets/heroes/partners/foreground.png?width=960'
+import partnersHeroForegroundAvifUrl from '../../assets/heroes/partners/foreground.png?format=avif'
+import partnersHeroForegroundAvif640Url from '../../assets/heroes/partners/foreground.png?format=avif&width=640'
+import partnersHeroForegroundAvif960Url from '../../assets/heroes/partners/foreground.png?format=avif&width=960'
 
 const partnersHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
@@ -91,7 +91,7 @@ const pointCountLabel = computed(() => {
       :title-z-index="2"
       :layers="partnersHeroLayers"
       :layer-layout="partnersHeroLayout"
-      layer-entrance="middle-first"
+      layer-entrance="foreground-slide-then-middle-slide"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
       <span class="wide:block wide:whitespace-nowrap">Ищите нашу медовуху, сидр и пуаре </span>

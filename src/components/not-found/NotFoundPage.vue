@@ -1,5 +1,5 @@
 <script setup>
-import { sitePath } from '../utils/site-path'
+import { sitePath } from '../../utils/site-path'
 </script>
 
 <template>

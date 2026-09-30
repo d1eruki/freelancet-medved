@@ -2,7 +2,7 @@
 import HomeHeroSection from './HomeHeroSection.vue'
 import HomeProductsSection from './HomeProductsSection.vue'
 import HomeAboutSection from './HomeAboutSection.vue'
-import ContactSection from './ContactSection.vue'
+import ContactSection from '../ContactSection.vue'
 </script>
 
 <template>

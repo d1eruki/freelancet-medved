@@ -1,6 +1,6 @@
 <script setup>
-import CircleArrow from './CircleArrow.vue'
-import { sitePath } from '../utils/site-path'
+import CircleArrow from '../CircleArrow.vue'
+import { sitePath } from '../../utils/site-path'
 
 defineProps({
   category: { type: Object, required: true },

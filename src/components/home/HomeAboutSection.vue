@@ -1,7 +1,7 @@
 <script setup>
-import productionImageUrl from '../assets/heroes/production-hero-composition.png'
-import { catalogCategories } from '../data/catalog'
-import SectionWatermark from './SectionWatermark.vue'
+import productionImageUrl from '../../assets/heroes/production-hero-composition.png'
+import { catalogCategories } from '../../data/catalog'
+import SectionWatermark from '../SectionWatermark.vue'
 </script>
 
 <template>

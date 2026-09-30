@@ -1,25 +1,25 @@
 <script setup>
-import PageHero from './PageHero.vue'
-import SectionLink from './SectionLink.vue'
-import { sitePath } from '../utils/site-path'
-import horecaHeroBackgroundUrl from '../assets/heroes/horeca/background.png'
-import horecaHeroBackground640Url from '../assets/heroes/horeca/background.png?width=640'
-import horecaHeroBackground960Url from '../assets/heroes/horeca/background.png?width=960'
-import horecaHeroBackgroundAvifUrl from '../assets/heroes/horeca/background.png?format=avif'
-import horecaHeroBackgroundAvif640Url from '../assets/heroes/horeca/background.png?format=avif&width=640'
-import horecaHeroBackgroundAvif960Url from '../assets/heroes/horeca/background.png?format=avif&width=960'
-import horecaHeroMiddleUrl from '../assets/heroes/horeca/middle.png'
-import horecaHeroMiddle640Url from '../assets/heroes/horeca/middle.png?width=640'
-import horecaHeroMiddle960Url from '../assets/heroes/horeca/middle.png?width=960'
-import horecaHeroMiddleAvifUrl from '../assets/heroes/horeca/middle.png?format=avif'
-import horecaHeroMiddleAvif640Url from '../assets/heroes/horeca/middle.png?format=avif&width=640'
-import horecaHeroMiddleAvif960Url from '../assets/heroes/horeca/middle.png?format=avif&width=960'
-import horecaHeroForegroundUrl from '../assets/heroes/horeca/foreground.png'
-import horecaHeroForeground640Url from '../assets/heroes/horeca/foreground.png?width=640'
-import horecaHeroForeground960Url from '../assets/heroes/horeca/foreground.png?width=960'
-import horecaHeroForegroundAvifUrl from '../assets/heroes/horeca/foreground.png?format=avif'
-import horecaHeroForegroundAvif640Url from '../assets/heroes/horeca/foreground.png?format=avif&width=640'
-import horecaHeroForegroundAvif960Url from '../assets/heroes/horeca/foreground.png?format=avif&width=960'
+import PageHero from '../PageHero.vue'
+import SectionLink from '../SectionLink.vue'
+import { sitePath } from '../../utils/site-path'
+import horecaHeroBackgroundUrl from '../../assets/heroes/horeca/background.png'
+import horecaHeroBackground640Url from '../../assets/heroes/horeca/background.png?width=640'
+import horecaHeroBackground960Url from '../../assets/heroes/horeca/background.png?width=960'
+import horecaHeroBackgroundAvifUrl from '../../assets/heroes/horeca/background.png?format=avif'
+import horecaHeroBackgroundAvif640Url from '../../assets/heroes/horeca/background.png?format=avif&width=640'
+import horecaHeroBackgroundAvif960Url from '../../assets/heroes/horeca/background.png?format=avif&width=960'
+import horecaHeroMiddleUrl from '../../assets/heroes/horeca/middle.png'
+import horecaHeroMiddle640Url from '../../assets/heroes/horeca/middle.png?width=640'
+import horecaHeroMiddle960Url from '../../assets/heroes/horeca/middle.png?width=960'
+import horecaHeroMiddleAvifUrl from '../../assets/heroes/horeca/middle.png?format=avif'
+import horecaHeroMiddleAvif640Url from '../../assets/heroes/horeca/middle.png?format=avif&width=640'
+import horecaHeroMiddleAvif960Url from '../../assets/heroes/horeca/middle.png?format=avif&width=960'
+import horecaHeroForegroundUrl from '../../assets/heroes/horeca/foreground.png'
+import horecaHeroForeground640Url from '../../assets/heroes/horeca/foreground.png?width=640'
+import horecaHeroForeground960Url from '../../assets/heroes/horeca/foreground.png?width=960'
+import horecaHeroForegroundAvifUrl from '../../assets/heroes/horeca/foreground.png?format=avif'
+import horecaHeroForegroundAvif640Url from '../../assets/heroes/horeca/foreground.png?format=avif&width=640'
+import horecaHeroForegroundAvif960Url from '../../assets/heroes/horeca/foreground.png?format=avif&width=960'
 
 const horecaHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
@@ -61,6 +61,7 @@ const horecaHeroLayers = {
       :title-z-index="0"
       :layers="horecaHeroLayers"
       :layer-layout="horecaHeroLayout"
+      layer-entrance="rise-together"
       :steam="horecaHeroSteam"
     >
       <template #title>Для ваших<br>гостей</template>

@@ -1,7 +1,7 @@
 <script setup>
-import { catalogCategories } from '../data/catalog'
-import { sitePath } from '../utils/site-path'
-import CategoryPattern from './CategoryPattern.vue'
+import { catalogCategories } from '../../data/catalog'
+import { sitePath } from '../../utils/site-path'
+import CategoryPattern from '../CategoryPattern.vue'
 
 defineProps({
   category: { type: Object, required: true },

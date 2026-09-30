@@ -1,27 +1,27 @@
 <script setup>
 import CatalogCategoryCard from './CatalogCategoryCard.vue'
-import PageHero from './PageHero.vue'
-import SectionLink from './SectionLink.vue'
-import { catalogCategories } from '../data/catalog'
-import { sitePath } from '../utils/site-path'
-import catalogHeroBackgroundUrl from '../assets/heroes/catalog/background.png'
-import catalogHeroBackground640Url from '../assets/heroes/catalog/background.png?width=640'
-import catalogHeroBackground960Url from '../assets/heroes/catalog/background.png?width=960'
-import catalogHeroBackgroundAvifUrl from '../assets/heroes/catalog/background.png?format=avif'
-import catalogHeroBackgroundAvif640Url from '../assets/heroes/catalog/background.png?format=avif&width=640'
-import catalogHeroBackgroundAvif960Url from '../assets/heroes/catalog/background.png?format=avif&width=960'
-import catalogHeroMiddleUrl from '../assets/heroes/catalog/middle.png'
-import catalogHeroMiddle640Url from '../assets/heroes/catalog/middle.png?width=640'
-import catalogHeroMiddle960Url from '../assets/heroes/catalog/middle.png?width=960'
-import catalogHeroMiddleAvifUrl from '../assets/heroes/catalog/middle.png?format=avif'
-import catalogHeroMiddleAvif640Url from '../assets/heroes/catalog/middle.png?format=avif&width=640'
-import catalogHeroMiddleAvif960Url from '../assets/heroes/catalog/middle.png?format=avif&width=960'
-import catalogHeroForegroundUrl from '../assets/heroes/catalog/foreground.png'
-import catalogHeroForeground640Url from '../assets/heroes/catalog/foreground.png?width=640'
-import catalogHeroForeground960Url from '../assets/heroes/catalog/foreground.png?width=960'
-import catalogHeroForegroundAvifUrl from '../assets/heroes/catalog/foreground.png?format=avif'
-import catalogHeroForegroundAvif640Url from '../assets/heroes/catalog/foreground.png?format=avif&width=640'
-import catalogHeroForegroundAvif960Url from '../assets/heroes/catalog/foreground.png?format=avif&width=960'
+import PageHero from '../PageHero.vue'
+import SectionLink from '../SectionLink.vue'
+import { catalogCategories } from '../../data/catalog'
+import { sitePath } from '../../utils/site-path'
+import catalogHeroBackgroundUrl from '../../assets/heroes/catalog/background.png'
+import catalogHeroBackground640Url from '../../assets/heroes/catalog/background.png?width=640'
+import catalogHeroBackground960Url from '../../assets/heroes/catalog/background.png?width=960'
+import catalogHeroBackgroundAvifUrl from '../../assets/heroes/catalog/background.png?format=avif'
+import catalogHeroBackgroundAvif640Url from '../../assets/heroes/catalog/background.png?format=avif&width=640'
+import catalogHeroBackgroundAvif960Url from '../../assets/heroes/catalog/background.png?format=avif&width=960'
+import catalogHeroMiddleUrl from '../../assets/heroes/catalog/middle.png'
+import catalogHeroMiddle640Url from '../../assets/heroes/catalog/middle.png?width=640'
+import catalogHeroMiddle960Url from '../../assets/heroes/catalog/middle.png?width=960'
+import catalogHeroMiddleAvifUrl from '../../assets/heroes/catalog/middle.png?format=avif'
+import catalogHeroMiddleAvif640Url from '../../assets/heroes/catalog/middle.png?format=avif&width=640'
+import catalogHeroMiddleAvif960Url from '../../assets/heroes/catalog/middle.png?format=avif&width=960'
+import catalogHeroForegroundUrl from '../../assets/heroes/catalog/foreground.png'
+import catalogHeroForeground640Url from '../../assets/heroes/catalog/foreground.png?width=640'
+import catalogHeroForeground960Url from '../../assets/heroes/catalog/foreground.png?width=960'
+import catalogHeroForegroundAvifUrl from '../../assets/heroes/catalog/foreground.png?format=avif'
+import catalogHeroForegroundAvif640Url from '../../assets/heroes/catalog/foreground.png?format=avif&width=640'
+import catalogHeroForegroundAvif960Url from '../../assets/heroes/catalog/foreground.png?format=avif&width=960'
 
 const catalogHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
@@ -63,7 +63,7 @@ const catalogHeroLayers = {
       :title-z-index="0"
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
-      layer-entrance="foreground-first"
+      layer-entrance="foreground-slide-then-middle-slide"
     >
       <template #title>Наши<br>напитки</template>
       <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре собственного </span>

@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import CircleArrow from './CircleArrow.vue'
+import CircleArrow from '../CircleArrow.vue'
 
 const props = defineProps({
   partner: { type: Object, required: true },

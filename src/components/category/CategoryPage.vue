@@ -1,8 +1,8 @@
 <script setup>
 import CategoryHero from './CategoryHero.vue'
 import FlavorCard from './FlavorCard.vue'
-import SectionLink from './SectionLink.vue'
-import { sitePath } from '../utils/site-path'
+import SectionLink from '../SectionLink.vue'
+import { sitePath } from '../../utils/site-path'
 
 defineProps({
   category: { type: Object, required: true },

@@ -1,7 +1,8 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import HeroSteam from './HeroSteam.vue'
 import { heroLayerStyle } from '../utils/hero-layer-layout'
+import { heroEntranceScenarios, resolveHeroEntrance } from '../utils/hero-entrance'
 
 const pointerRange = { x: 12, y: 12 }
 
@@ -22,20 +23,15 @@ const layerShadows = {
   foreground: { offsetX: 0, offsetY: 0, blur: 100, color: [0, 0, 0], opacity: 1 },
 }
 
-const entranceMotions = {
-  rise: { middle: 'hero-composition-plane-rise', middle2: 'hero-composition-plane-rise', foreground: 'hero-composition-plane-rise-delayed' },
-  'foreground-first': { middle: 'hero-composition-plane-slide', middle2: 'hero-composition-plane-slide', foreground: 'hero-composition-plane-rise' },
-  'middle-first': { middle: 'hero-composition-plane-rise', middle2: 'hero-composition-plane-rise', foreground: 'hero-composition-plane-slide' },
-  'split-slide': { middle: 'hero-composition-plane-slide-left', middle2: 'hero-composition-plane-slide' },
-}
-
 const props = defineProps({
   layers: { type: Object, required: true },
   layerLayout: { type: Object, required: true },
   layerZIndex: { type: Object, default: null },
-  entrance: { type: String, default: 'rise', validator: (value) => ['rise', 'foreground-first', 'middle-first', 'split-slide'].includes(value) },
+  entrance: { type: String, required: true, validator: (value) => Object.hasOwn(heroEntranceScenarios, value) },
   steam: { type: Object, default: null },
 })
+
+const entranceAnimations = computed(() => resolveHeroEntrance(props.entrance, props.layers).animations)
 
 const host = ref(null)
 const middleImage = ref(null)
@@ -154,8 +150,8 @@ onBeforeUnmount(() => {
       v-for="(layer, name) in layers"
       :key="name"
       class="hero-composition-plane"
-      :class="entranceMotions[entrance][name]"
-      :style="{ zIndex: layerZIndex?.[name] ?? layer.zIndex }"
+      :class="entranceAnimations[name]?.className"
+      :style="{ ...entranceAnimations[name]?.style, zIndex: layerZIndex?.[name] ?? layer.zIndex }"
     >
       <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
@@ -220,19 +216,14 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero-composition-plane-rise,
-  .hero-composition-plane-rise-delayed {
+  .hero-composition-plane-rise {
     transform-origin: center bottom;
-    animation: hero-layer-rise var(--hero-rise-duration, 1000ms) cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .hero-composition-plane-rise-delayed {
-    animation-delay: var(--hero-secondary-rise-delay, 120ms);
+    animation: hero-layer-rise var(--hero-layer-duration) cubic-bezier(0.22, 1, 0.36, 1) var(--hero-layer-delay) both;
   }
 
   .hero-composition-plane-slide,
   .hero-composition-plane-slide-left {
-    animation: hero-layer-slide-in var(--hero-slide-duration) cubic-bezier(0.4, 0.8, 0.6, 1) var(--hero-slide-delay) both;
+    animation: hero-layer-slide-in var(--hero-layer-duration) cubic-bezier(0.4, 0.8, 0.6, 1) var(--hero-layer-delay) both;
   }
 
   .hero-composition-plane-slide-left {

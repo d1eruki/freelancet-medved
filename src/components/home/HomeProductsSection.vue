@@ -1,10 +1,10 @@
 <script setup>
-import { sitePath } from '../utils/site-path'
+import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, ref } from 'vue'
-import CategoryPattern from './CategoryPattern.vue'
-import CircleArrow from './CircleArrow.vue'
+import CategoryPattern from '../CategoryPattern.vue'
+import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
-import { catalogCategories } from '../data/catalog'
+import { catalogCategories } from '../../data/catalog'
 
 const products = catalogCategories.map((category) => ({
   slug: category.slug,

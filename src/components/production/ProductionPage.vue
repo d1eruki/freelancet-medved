@@ -1,19 +1,19 @@
 <script setup>
 import { ref, watch } from 'vue'
 import Snap from 'lenis/snap'
-import { sitePath } from '../utils/site-path'
-import brewingImageUrl from '../assets/production/production-brewing.png'
-import fermentationImageUrl from '../assets/production/production-fermentation.png'
-import conditioningImageUrl from '../assets/production/production-conditioning.png'
-import bottlingImageUrl from '../assets/production/production-bottling.png'
-import productionHeroBackgroundUrl from '../assets/heroes/production/background.png'
-import productionHeroMiddleUrl from '../assets/heroes/production/middle.png'
-import productionHeroMiddle2Url from '../assets/heroes/production/middle-2.png'
-import ActionTile from './ActionTile.vue'
-import NumberedInfoCard from './NumberedInfoCard.vue'
-import PageHero from './PageHero.vue'
+import { sitePath } from '../../utils/site-path'
+import brewingImageUrl from '../../assets/production/production-brewing.png'
+import fermentationImageUrl from '../../assets/production/production-fermentation.png'
+import conditioningImageUrl from '../../assets/production/production-conditioning.png'
+import bottlingImageUrl from '../../assets/production/production-bottling.png'
+import productionHeroBackgroundUrl from '../../assets/heroes/production/background.png'
+import productionHeroMiddleUrl from '../../assets/heroes/production/middle.png'
+import productionHeroMiddle2Url from '../../assets/heroes/production/middle-2.png'
+import ActionTile from '../ActionTile.vue'
+import NumberedInfoCard from '../NumberedInfoCard.vue'
+import PageHero from '../PageHero.vue'
 import ProductionProcessStep from './ProductionProcessStep.vue'
-import SectionWatermark from './SectionWatermark.vue'
+import SectionWatermark from '../SectionWatermark.vue'
 
 const middleTankLayout = {
   mobile: { scale: 1, x: 0, y: 0 },
@@ -207,7 +207,7 @@ const qualityPoints = [
       content-align="center"
       :layers="productionHeroLayers"
       :layer-layout="productionHeroLayout"
-      layer-entrance="split-slide"
+      layer-entrance="middle-split-slide-together"
     >
       <template #title>Варим<br>с душой</template>
       <span class="wide:block wide:whitespace-nowrap">Воссоздаём рецептуры русских напитков </span>

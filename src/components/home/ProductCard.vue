@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import CircleArrow from './CircleArrow.vue'
+import CircleArrow from '../CircleArrow.vue'
 
 const hoverAngle = ref(3)
 
