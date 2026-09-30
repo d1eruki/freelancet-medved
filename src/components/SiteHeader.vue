@@ -11,30 +11,13 @@ const props = defineProps({
 
 const isMenuOpen = ref(false)
 const isHeaderVisible = ref(true)
-const isDarkHeader = ref(false)
-const headerBackground = ref('')
 const navigationGroups = [navigation.slice(0, 3), navigation.slice(3)]
 
 let lastScrollPosition = 0
 let scrollFrame = 0
-let initialThemeFrame = 0
-
-function updateHeaderTheme() {
-  const sections = [...document.querySelectorAll('main [data-header-theme], footer')]
-  const currentSection = sections
-    .filter((section) => section.getBoundingClientRect().top <= 0)
-    .at(-1)
-
-  isDarkHeader.value = currentSection?.dataset.headerTheme === 'dark'
-  headerBackground.value = currentSection && currentSection !== sections[0]
-    ? window.getComputedStyle(currentSection).backgroundColor
-    : ''
-}
 
 function updateHeaderVisibility() {
   const currentScrollPosition = Math.max(window.scrollY, 0)
-
-  updateHeaderTheme()
 
   if (isMenuOpen.value || currentScrollPosition <= 16) {
     isHeaderVisible.value = true
@@ -61,7 +44,6 @@ watch(() => props.lenis, (lenis, _previous, onCleanup) => {
   const stopListening = lenis.on('scroll', (instance) => {
     if (instance.userData?.initiator === 'snap') {
       lastScrollPosition = Math.max(window.scrollY, 0)
-      updateHeaderTheme()
       return
     }
 
@@ -90,42 +72,28 @@ function isCurrentPage(href) {
 
 onMounted(() => {
   lastScrollPosition = Math.max(window.scrollY, 0)
-  updateHeaderTheme()
-  initialThemeFrame = window.requestAnimationFrame(() => {
-    initialThemeFrame = window.requestAnimationFrame(() => {
-      initialThemeFrame = 0
-      updateHeaderTheme()
-    })
-  })
   window.addEventListener('scroll', handleScroll, { passive: true })
-  window.addEventListener('resize', updateHeaderTheme)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
-  window.removeEventListener('resize', updateHeaderTheme)
 
   if (scrollFrame) {
     window.cancelAnimationFrame(scrollFrame)
-  }
-  if (initialThemeFrame) {
-    window.cancelAnimationFrame(initialThemeFrame)
   }
 })
 </script>
 
 <template>
   <header
-    class="fixed inset-x-0 top-3 z-50 mx-auto w-full max-w-[1440px] rounded-3xl border transition-[color,background-color,border-color,box-shadow,translate] duration-300 ease-out"
-    :class="[isHeaderVisible ? 'translate-y-0' : '-translate-y-[calc(100%+12px)]', isDarkHeader ? 'text-foreground' : 'text-surface', headerBackground ? 'shadow-xl/15' : 'shadow-none', headerBackground ? (isDarkHeader ? 'border-foreground/5' : 'border-surface/10') : 'border-transparent']"
-    :style="{ backgroundColor: headerBackground }"
+    class="site-header pointer-events-none fixed inset-x-0 top-0 z-50 w-full pt-3 pb-16 text-surface transition-transform duration-300 ease-out"
+    :class="isHeaderVisible ? 'translate-y-0' : '-translate-y-full'"
     :inert="!isHeaderVisible || undefined"
   >
-    <div class="site-container relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
+    <div class="site-container pointer-events-auto relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
       <a class="absolute left-1/2 z-10 inline-flex -translate-x-1/2 wide:static wide:col-start-4 wide:row-start-1 wide:justify-self-center wide:translate-x-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
         <img
-          class="h-24 w-auto object-contain sm:h-28"
-          :class="isDarkHeader ? 'brightness-0' : 'brightness-0 invert'"
+          class="h-20 w-auto object-contain brightness-0 invert sm:h-24"
           :src="logoUrl"
           alt="МЁДВЕДЬ"
         >
@@ -133,8 +101,8 @@ onBeforeUnmount(() => {
 
       <nav
         id="main-navigation"
-        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out wide:static wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:grid-cols-7 wide:items-center wide:bg-transparent wide:p-0 wide:shadow-none"
-        :class="[isMenuOpen ? 'block' : 'hidden', isDarkHeader ? 'wide:text-foreground' : 'wide:text-surface']"
+        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out wide:static wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:grid-cols-7 wide:items-center wide:bg-transparent wide:p-0 wide:text-surface wide:shadow-none"
+        :class="isMenuOpen ? 'block' : 'hidden'"
         aria-label="Основная навигация"
       >
         <ul
@@ -159,7 +127,7 @@ onBeforeUnmount(() => {
 
       <div class="ml-auto flex shrink-0 items-center gap-4 wide:hidden">
         <button
-          class="menu-button grid size-12 place-items-center rounded-full border border-current/60"
+          class="menu-button grid size-12 place-items-center rounded-full"
           type="button"
           aria-controls="main-navigation"
           :aria-expanded="isMenuOpen"
@@ -175,6 +143,10 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.site-header {
+  background: linear-gradient(to bottom, rgb(16 16 16 / 72%) 0%, rgb(16 16 16 / 40%) 42%, transparent 100%);
+}
+
 .menu-icon,
 .menu-icon::before,
 .menu-icon::after {
