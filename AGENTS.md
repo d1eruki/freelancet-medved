@@ -1,39 +1,43 @@
-# Agent Instructions
+# Инструкции для агента
 
-## Visual Work
+## Визуальные изменения
 
-- Do not place eyebrow or overline labels above `h1` or `h2` headings.
-- Do not reduce a heading's font size to make it fit. Change the layout, column widths, or wrapping instead.
-- The user controls visual design and performs visual review. Implement only the exact visual changes the user requests and approves; do not add adjustments based on your own visual judgment.
-- After a visual change, do not open a browser, capture screenshots, inspect the rendered layout, or claim visual approval unless the user explicitly requests that verification. Run nonvisual checks and hand the result to the user for visual review.
+- Не размещай надзаголовки или метки над заголовками `h1` и `h2`.
+- Не уменьшай размер шрифта заголовка, чтобы он поместился. Вместо этого меняй компоновку, ширину колонок или переносы строк.
+- Пользователь управляет визуальным дизайном и проводит визуальную проверку. Выполняй только те визуальные изменения, которые пользователь запросил и одобрил; не добавляй исправления на основе собственного визуального суждения.
+- После визуального изменения не открывай браузер, не делай скриншоты, не проверяй отображаемую страницу и не утверждай, что внешний вид одобрен, если пользователь явно не попросил такую проверку. Выполняй невизуальные проверки и передавай результат пользователю для визуальной оценки.
 
-## Image Generation Style
+## Слои заголовка в `PageHero`
 
-- Before generating images for this project, read `materials/image-generation/style.json` and use its reference image and description as style guidance. Adapt the style to the requested subject without copying the poster's exact composition, marks, or text.
-- If a generated image may have a style problem, describe the specific mismatch in text and show that result to the user. Do not generate the next image until the user has assessed it and said what to change.
+- На страницах с многослойным `PageHero` регулируй положение заголовка только параметром `titleZIndex`: `0` — за средним слоем, `2` — перед средним слоем. Порядок слоёв изображений задаётся централизованно в `PageHero.vue`; не добавляй отдельные настройки `zIndex` изображений на страницах.
 
-## File Naming
+## Стиль генерации изображений
 
-- Write all file and directory names in English.
-- Use lowercase kebab-case for new file and directory names unless the technology or an established convention requires another format.
-- Keep document contents in the language appropriate for the project and its audience. The English-only rule applies to file and directory names, not necessarily to their contents.
+- Перед генерацией изображений для этого проекта прочитай `materials/image-generation/style.json` и используй указанные там референсное изображение и описание как ориентир по стилю. Адаптируй стиль к запрошенному сюжету, не копируя точную композицию, знаки или текст постера.
+- Если у сгенерированного изображения может быть проблема со стилем, опиши конкретное расхождение и покажи результат пользователю. Не генерируй следующее изображение, пока пользователь не оценит результат и не скажет, что изменить.
 
-## Vue Components
+## Имена файлов
 
-- When a card, action block, or other page element is repeated or is designed to be repeated with different data, make it a Vue component from its first implementation. Pass content and meaningful variants through props or slots instead of copying its markup into page templates.
+- Давай всем файлам и каталогам имена на английском языке.
+- Для новых файлов и каталогов используй строчные имена в формате `kebab-case`, если технология или сложившееся соглашение не требуют другого формата.
+- Пиши содержимое документов на языке, подходящем проекту и его аудитории. Требование использовать английский язык относится к именам файлов и каталогов, но не обязательно к их содержимому.
 
-## Interface Spacing in `src/`
+## Компоненты Vue
 
-- Keep the relationship between elements more important than making every gap identical.
-- Use 12–16 px (`3`–`4` on Tailwind's spacing scale) inside one control, including a field label and its field or an icon and its text.
-- Use 24 px (`6`) between related text elements: a small label and its display title, or a heading and its description.
-- Use 40 px (`10`) between a text group and its related action, form, or separate content group.
-- Use 48 px (`12`) on small screens and 64 px (`16`) from a section introduction to a collection of cards or items.
-- Use `py-20 sm:py-24 wide:py-28` for ordinary section top and bottom padding. Full-screen heroes and the pinned production process use their own viewport-driven geometry; the legal title band needs extra top space below the fixed header.
-- If a component uses `mt-auto` to align content, keep the explicitly related text together with the appropriate gap; let the free space separate content groups instead.
+- Если карточка, блок действия или другой элемент страницы повторяется либо рассчитан на повторное использование с разными данными, сразу оформляй его как компонент Vue. Передавай содержимое и значимые варианты через props или slots вместо копирования разметки в шаблоны страниц.
 
-## Technical Architecture
+## Отступы интерфейса в `src/`
 
-- Give each shared concern one owner. Keep routes, page SEO fields, canonical URLs, and indexing rules in one route registry; derive client routing, generated HTML, sitemap, and server route rules from it. Do not copy the same page list or metadata into components, build scripts, or configuration files.
-- For routes and rendering, check direct URLs, development and production base paths, HTML and metadata before JavaScript, asset paths, hydration, and persisted states. Verify the generated output rather than relying on source inspection alone.
-- Keep `docs/site-structure.md` aligned with the routes currently implemented; list service pages such as 404 separately from indexable content pages. Before a project review or deployment change, inspect hidden configuration files, including `.htaccess` and workflow files.
+- Ставь смысловую связь между элементами выше стремления сделать все промежутки одинаковыми.
+- Используй 12–16 px (`3`–`4` по шкале отступов Tailwind) внутри одного элемента управления, в том числе между подписью и полем или между иконкой и текстом.
+- Используй 24 px (`6`) между связанными текстовыми элементами: небольшой подписью и крупным заголовком или заголовком и его описанием.
+- Используй 40 px (`10`) между текстовой группой и связанным с ней действием, формой или отдельной группой содержимого.
+- Используй 48 px (`12`) на небольших экранах и 64 px (`16`) между вводной частью секции и набором карточек или элементов.
+- Используй `py-20 sm:py-24 wide:py-28` для обычных верхнего и нижнего отступов секции. Полноэкранные hero-блоки и закреплённая секция производственного процесса используют собственную геометрию, зависящую от размера экрана; полосе заголовка юридических страниц нужен дополнительный отступ сверху под фиксированной шапкой.
+- Если компонент использует `mt-auto` для выравнивания содержимого, оставляй явно связанные текстовые элементы вместе с нужным промежутком; свободное пространство должно разделять группы содержимого.
+
+## Техническая архитектура
+
+- Назначай каждому общему аспекту одного владельца. Храни маршруты, SEO-поля страниц, канонические URL и правила индексации в одном реестре маршрутов; выводи из него клиентскую маршрутизацию, сгенерированный HTML, sitemap и правила маршрутов на сервере. Не копируй тот же список страниц или метаданные в компоненты, скрипты сборки и конфигурационные файлы.
+- При работе с маршрутами и отображением проверяй прямые URL, базовые пути разработки и продакшена, HTML и метаданные до выполнения JavaScript, пути к ресурсам, гидратацию и сохранённые состояния. Проверяй сгенерированный результат, а не полагайся только на просмотр исходного кода.
+- Поддерживай `docs/site-structure.md` в соответствии с реализованными маршрутами; служебные страницы, такие как 404, перечисляй отдельно от индексируемых страниц с содержимым. Перед проверкой проекта или изменением развёртывания изучай скрытые конфигурационные файлы, включая `.htaccess` и файлы workflows.
