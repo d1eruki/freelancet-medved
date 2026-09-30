@@ -19,6 +19,7 @@ const layerShadows = {
 const props = defineProps({
   layers: { type: Object, required: true },
   layerLayout: { type: Object, required: true },
+  layerZIndex: { type: Object, default: null },
   steam: { type: Object, default: null },
 })
 
@@ -94,7 +95,7 @@ function layerStyle(layer, name) {
     filter: shadow
       ? `drop-shadow(${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px rgba(${shadow.color.join(', ')}, ${shadow.opacity}))`
       : undefined,
-    zIndex: layer.zIndex,
+    zIndex: props.layerZIndex?.[name] ?? layer.zIndex,
   }
 }
 

@@ -2,24 +2,24 @@
 import SectionWatermark from './SectionWatermark.vue'
 import { sitePath } from '../utils/site-path'
 import aboutCompanyImageUrl from '../assets/about/about-company-enhanced.png'
-import aboutHeroBackgroundUrl from '../assets/heroes/about-hero-background.png'
-import aboutHeroBackground640Url from '../assets/heroes/about-hero-background.png?width=640'
-import aboutHeroBackground960Url from '../assets/heroes/about-hero-background.png?width=960'
-import aboutHeroBackgroundAvifUrl from '../assets/heroes/about-hero-background.png?format=avif'
-import aboutHeroBackgroundAvif640Url from '../assets/heroes/about-hero-background.png?format=avif&width=640'
-import aboutHeroBackgroundAvif960Url from '../assets/heroes/about-hero-background.png?format=avif&width=960'
-import aboutHeroWorkerUrl from '../assets/heroes/about-hero-worker.png'
-import aboutHeroWorker640Url from '../assets/heroes/about-hero-worker.png?width=640'
-import aboutHeroWorker960Url from '../assets/heroes/about-hero-worker.png?width=960'
-import aboutHeroWorkerAvifUrl from '../assets/heroes/about-hero-worker.png?format=avif'
-import aboutHeroWorkerAvif640Url from '../assets/heroes/about-hero-worker.png?format=avif&width=640'
-import aboutHeroWorkerAvif960Url from '../assets/heroes/about-hero-worker.png?format=avif&width=960'
-import aboutHeroForegroundUrl from '../assets/heroes/about-hero-foreground.png'
-import aboutHeroForeground640Url from '../assets/heroes/about-hero-foreground.png?width=640'
-import aboutHeroForeground960Url from '../assets/heroes/about-hero-foreground.png?width=960'
-import aboutHeroForegroundAvifUrl from '../assets/heroes/about-hero-foreground.png?format=avif'
-import aboutHeroForegroundAvif640Url from '../assets/heroes/about-hero-foreground.png?format=avif&width=640'
-import aboutHeroForegroundAvif960Url from '../assets/heroes/about-hero-foreground.png?format=avif&width=960'
+import aboutHeroBackgroundUrl from '../assets/heroes/about/background.png'
+import aboutHeroBackground640Url from '../assets/heroes/about/background.png?width=640'
+import aboutHeroBackground960Url from '../assets/heroes/about/background.png?width=960'
+import aboutHeroBackgroundAvifUrl from '../assets/heroes/about/background.png?format=avif'
+import aboutHeroBackgroundAvif640Url from '../assets/heroes/about/background.png?format=avif&width=640'
+import aboutHeroBackgroundAvif960Url from '../assets/heroes/about/background.png?format=avif&width=960'
+import aboutHeroMiddleUrl from '../assets/heroes/about/middle.png'
+import aboutHeroMiddle640Url from '../assets/heroes/about/middle.png?width=640'
+import aboutHeroMiddle960Url from '../assets/heroes/about/middle.png?width=960'
+import aboutHeroMiddleAvifUrl from '../assets/heroes/about/middle.png?format=avif'
+import aboutHeroMiddleAvif640Url from '../assets/heroes/about/middle.png?format=avif&width=640'
+import aboutHeroMiddleAvif960Url from '../assets/heroes/about/middle.png?format=avif&width=960'
+import aboutHeroForegroundUrl from '../assets/heroes/about/foreground.png'
+import aboutHeroForeground640Url from '../assets/heroes/about/foreground.png?width=640'
+import aboutHeroForeground960Url from '../assets/heroes/about/foreground.png?width=960'
+import aboutHeroForegroundAvifUrl from '../assets/heroes/about/foreground.png?format=avif'
+import aboutHeroForegroundAvif640Url from '../assets/heroes/about/foreground.png?format=avif&width=640'
+import aboutHeroForegroundAvif960Url from '../assets/heroes/about/foreground.png?format=avif&width=960'
 import durdinPortraitUrl from '../assets/about/durdin-portrait.png'
 import awardInterfood2007Url from '../assets/awards/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../assets/awards/award-medovukha-fest-2016.jpg'
@@ -47,15 +47,13 @@ const aboutHeroLayers = {
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Старинная иллюстрация: мастер работает с медовыми сотами у окна с видом на Петербург',
-    zIndex: -2,
   },
   middle: {
-    src: aboutHeroWorkerUrl,
-    srcset: `${aboutHeroWorker640Url} 640w, ${aboutHeroWorker960Url} 960w, ${aboutHeroWorkerUrl} 1672w`,
-    avifSrcset: `${aboutHeroWorkerAvif640Url} 640w, ${aboutHeroWorkerAvif960Url} 960w, ${aboutHeroWorkerAvifUrl} 1672w`,
+    src: aboutHeroMiddleUrl,
+    srcset: `${aboutHeroMiddle640Url} 640w, ${aboutHeroMiddle960Url} 960w, ${aboutHeroMiddleUrl} 1672w`,
+    avifSrcset: `${aboutHeroMiddleAvif640Url} 640w, ${aboutHeroMiddleAvif960Url} 960w, ${aboutHeroMiddleAvifUrl} 1672w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    zIndex: -2,
   },
   foreground: {
     src: aboutHeroForegroundUrl,
@@ -63,7 +61,6 @@ const aboutHeroLayers = {
     avifSrcset: `${aboutHeroForegroundAvif640Url} 640w, ${aboutHeroForegroundAvif960Url} 960w, ${aboutHeroForegroundAvifUrl} 1672w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    zIndex: 3,
   },
 }
 
@@ -111,11 +108,14 @@ const awards = [
   <div>
     <PageHero
       title-id="about-page-title"
+      :title-z-index="0"
       :layers="aboutHeroLayers"
       :layer-layout="aboutHeroLayout"
     >
       <template #title>Традиция<br>живёт здесь</template>
-      Петербургский производитель медовухи, сидра и пуаре с собственной историей, характером и узнаваемыми рецептами.
+      <span class="wide:block wide:whitespace-nowrap">Петербургский производитель медовухи, </span>
+      <span class="wide:block wide:whitespace-nowrap">сидра и пуаре с собственной историей, </span>
+      <span class="wide:block wide:whitespace-nowrap">характером и узнаваемыми рецептами.</span>
     </PageHero>
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="tradition-title">

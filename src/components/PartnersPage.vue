@@ -7,24 +7,24 @@ import PartnerCard from './PartnerCard.vue'
 import SectionWatermark from './SectionWatermark.vue'
 import { partnerCities, partners } from '../data/partners'
 import { sitePath } from '../utils/site-path'
-import partnersHeroBackgroundUrl from '../assets/heroes/partners-hero-background.png'
-import partnersHeroBackground640Url from '../assets/heroes/partners-hero-background.png?width=640'
-import partnersHeroBackground960Url from '../assets/heroes/partners-hero-background.png?width=960'
-import partnersHeroBackgroundAvifUrl from '../assets/heroes/partners-hero-background.png?format=avif'
-import partnersHeroBackgroundAvif640Url from '../assets/heroes/partners-hero-background.png?format=avif&width=640'
-import partnersHeroBackgroundAvif960Url from '../assets/heroes/partners-hero-background.png?format=avif&width=960'
-import partnersHeroBarrelUrl from '../assets/heroes/partners-hero-barrel.png'
-import partnersHeroBarrel640Url from '../assets/heroes/partners-hero-barrel.png?width=640'
-import partnersHeroBarrel960Url from '../assets/heroes/partners-hero-barrel.png?width=960'
-import partnersHeroBarrelAvifUrl from '../assets/heroes/partners-hero-barrel.png?format=avif'
-import partnersHeroBarrelAvif640Url from '../assets/heroes/partners-hero-barrel.png?format=avif&width=640'
-import partnersHeroBarrelAvif960Url from '../assets/heroes/partners-hero-barrel.png?format=avif&width=960'
-import partnersHeroForegroundUrl from '../assets/heroes/partners-hero-foreground.png'
-import partnersHeroForeground640Url from '../assets/heroes/partners-hero-foreground.png?width=640'
-import partnersHeroForeground960Url from '../assets/heroes/partners-hero-foreground.png?width=960'
-import partnersHeroForegroundAvifUrl from '../assets/heroes/partners-hero-foreground.png?format=avif'
-import partnersHeroForegroundAvif640Url from '../assets/heroes/partners-hero-foreground.png?format=avif&width=640'
-import partnersHeroForegroundAvif960Url from '../assets/heroes/partners-hero-foreground.png?format=avif&width=960'
+import partnersHeroBackgroundUrl from '../assets/heroes/partners/background.png'
+import partnersHeroBackground640Url from '../assets/heroes/partners/background.png?width=640'
+import partnersHeroBackground960Url from '../assets/heroes/partners/background.png?width=960'
+import partnersHeroBackgroundAvifUrl from '../assets/heroes/partners/background.png?format=avif'
+import partnersHeroBackgroundAvif640Url from '../assets/heroes/partners/background.png?format=avif&width=640'
+import partnersHeroBackgroundAvif960Url from '../assets/heroes/partners/background.png?format=avif&width=960'
+import partnersHeroMiddleUrl from '../assets/heroes/partners/middle.png'
+import partnersHeroMiddle640Url from '../assets/heroes/partners/middle.png?width=640'
+import partnersHeroMiddle960Url from '../assets/heroes/partners/middle.png?width=960'
+import partnersHeroMiddleAvifUrl from '../assets/heroes/partners/middle.png?format=avif'
+import partnersHeroMiddleAvif640Url from '../assets/heroes/partners/middle.png?format=avif&width=640'
+import partnersHeroMiddleAvif960Url from '../assets/heroes/partners/middle.png?format=avif&width=960'
+import partnersHeroForegroundUrl from '../assets/heroes/partners/foreground.png'
+import partnersHeroForeground640Url from '../assets/heroes/partners/foreground.png?width=640'
+import partnersHeroForeground960Url from '../assets/heroes/partners/foreground.png?width=960'
+import partnersHeroForegroundAvifUrl from '../assets/heroes/partners/foreground.png?format=avif'
+import partnersHeroForegroundAvif640Url from '../assets/heroes/partners/foreground.png?format=avif&width=640'
+import partnersHeroForegroundAvif960Url from '../assets/heroes/partners/foreground.png?format=avif&width=960'
 
 const partnersHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
@@ -40,15 +40,13 @@ const partnersHeroLayers = {
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Иллюстрация старинного магазина напитков с бочкой и витриной',
-    zIndex: -2,
   },
   middle: {
-    src: partnersHeroBarrelUrl,
-    srcset: `${partnersHeroBarrel640Url} 640w, ${partnersHeroBarrel960Url} 960w, ${partnersHeroBarrelUrl} 1672w`,
-    avifSrcset: `${partnersHeroBarrelAvif640Url} 640w, ${partnersHeroBarrelAvif960Url} 960w, ${partnersHeroBarrelAvifUrl} 1672w`,
+    src: partnersHeroMiddleUrl,
+    srcset: `${partnersHeroMiddle640Url} 640w, ${partnersHeroMiddle960Url} 960w, ${partnersHeroMiddleUrl} 1672w`,
+    avifSrcset: `${partnersHeroMiddleAvif640Url} 640w, ${partnersHeroMiddleAvif960Url} 960w, ${partnersHeroMiddleAvifUrl} 1672w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    zIndex: -2,
   },
   foreground: {
     src: partnersHeroForegroundUrl,
@@ -56,7 +54,6 @@ const partnersHeroLayers = {
     avifSrcset: `${partnersHeroForegroundAvif640Url} 640w, ${partnersHeroForegroundAvif960Url} 960w, ${partnersHeroForegroundAvifUrl} 1671w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    zIndex: 3,
   },
 }
 
@@ -91,11 +88,14 @@ const pointCountLabel = computed(() => {
   <div>
     <PageHero
       title-id="partners-page-title"
+      :title-z-index="2"
       :layers="partnersHeroLayers"
       :layer-layout="partnersHeroLayout"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
-      Ищите нашу медовуху, сидр и пуаре у региональных партнёров — в бутылках, кегах и в розлив.
+      <span class="wide:block wide:whitespace-nowrap">Ищите нашу медовуху, сидр и пуаре </span>
+      <span class="wide:block wide:whitespace-nowrap">у региональных партнёров — </span>
+      <span class="wide:block wide:whitespace-nowrap">в бутылках, кегах и в розлив.</span>
     </PageHero>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="partners-list-title">

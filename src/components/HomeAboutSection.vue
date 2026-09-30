@@ -1,5 +1,5 @@
 <script setup>
-import productionImageUrl from '../assets/heroes/production-hero.png'
+import productionImageUrl from '../assets/heroes/production/hero.png'
 import { catalogCategories } from '../data/catalog'
 import SectionWatermark from './SectionWatermark.vue'
 </script>

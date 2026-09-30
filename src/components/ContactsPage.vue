@@ -1,5 +1,5 @@
 <script setup>
-import contactsHeroImageUrl from '../assets/heroes/contacts-hero-illustration.png'
+import contactsHeroImageUrl from '../assets/heroes/contacts/hero.png'
 import CircleArrow from './CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import ContactSection from './ContactSection.vue'
@@ -19,8 +19,10 @@ const routeUrl = `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponen
       :image-url="contactsHeroImageUrl"
       image-alt="Иллюстрация кирпичного промышленного здания у воды"
     >
-      <template #title>Контакты</template>
-      Товарищество пиво-медоваренного завода «МЁДВЕДЬ». Производим и поставляем медовуху, сидр и пуаре из Санкт-Петербурга.
+      <template #title>Будем<br>знакомы</template>
+      <span class="wide:block wide:whitespace-nowrap">Товарищество пиво-медоваренного завода </span>
+      <span class="wide:block wide:whitespace-nowrap">«МЁДВЕДЬ». Производим и поставляем </span>
+      <span class="wide:block wide:whitespace-nowrap">медовуху, сидр и пуаре из Санкт-Петербурга.</span>
     </PageHero>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="contacts-details-title">

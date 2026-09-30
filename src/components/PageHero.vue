@@ -1,10 +1,13 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
-import productionImageUrl from '../assets/heroes/production-hero.png'
+import productionImageUrl from '../assets/heroes/production/hero.png'
+
+const pageHeroLayerZIndex = { background: -2, middle: 1, foreground: 3 }
 
 const props = defineProps({
   titleId: { type: String, required: true },
+  titleZIndex: { type: Number, default: 2 },
   imageUrl: { type: String, default: productionImageUrl },
   imageAlt: { type: String, default: 'Производственный цех с оборудованием из нержавеющей стали' },
   pointerParallax: { type: Boolean, default: false },
@@ -64,7 +67,7 @@ onBeforeUnmount(() => {
         :alt="imageAlt"
       >
     </figure>
-    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :steam="steam" />
+    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :layer-z-index="pageHeroLayerZIndex" :steam="steam" />
     <figure class="pointer-events-none absolute inset-0 -z-1">
       <span class="hero-overlay-bottom absolute inset-0" aria-hidden="true" />
       <span class="hero-overlay-center absolute inset-0" aria-hidden="true" />
@@ -72,7 +75,7 @@ onBeforeUnmount(() => {
 
     <div class="site-container relative flex min-h-svh flex-col justify-center pt-28 pb-8 sm:pt-32 sm:pb-12">
       <div class="flex flex-col gap-6">
-        <h1 :id="titleId" class="relative z-2 font-display text-h1 uppercase">
+        <h1 :id="titleId" class="relative font-display text-h1 uppercase" :style="{ zIndex: titleZIndex }">
           <slot name="title" />
         </h1>
 

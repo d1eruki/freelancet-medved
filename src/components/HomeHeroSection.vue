@@ -2,30 +2,30 @@
 import { sitePath } from '../utils/site-path'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
-import heroLayerForegroundUrl from '../assets/heroes/hero-layer-foreground.png'
-import heroLayerForeground640Url from '../assets/heroes/hero-layer-foreground.png?width=640'
-import heroLayerForeground960Url from '../assets/heroes/hero-layer-foreground.png?width=960'
-import heroLayerForegroundAvifUrl from '../assets/heroes/hero-layer-foreground.png?format=avif'
-import heroLayerForegroundAvif640Url from '../assets/heroes/hero-layer-foreground.png?format=avif&width=640'
-import heroLayerForegroundAvif960Url from '../assets/heroes/hero-layer-foreground.png?format=avif&width=960'
-import heroLayerBackgroundUrl from '../assets/heroes/hero-layer-background.png'
-import heroLayerBackground640Url from '../assets/heroes/hero-layer-background.png?width=640'
-import heroLayerBackground960Url from '../assets/heroes/hero-layer-background.png?width=960'
-import heroLayerBackgroundAvifUrl from '../assets/heroes/hero-layer-background.png?format=avif'
-import heroLayerBackgroundAvif640Url from '../assets/heroes/hero-layer-background.png?format=avif&width=640'
-import heroLayerBackgroundAvif960Url from '../assets/heroes/hero-layer-background.png?format=avif&width=960'
-import heroLayerMiddleUrl from '../assets/heroes/hero-layer-middle.png'
-import heroLayerMiddle640Url from '../assets/heroes/hero-layer-middle.png?width=640'
-import heroLayerMiddle960Url from '../assets/heroes/hero-layer-middle.png?width=960'
-import heroLayerMiddleAvifUrl from '../assets/heroes/hero-layer-middle.png?format=avif'
-import heroLayerMiddleAvif640Url from '../assets/heroes/hero-layer-middle.png?format=avif&width=640'
-import heroLayerMiddleAvif960Url from '../assets/heroes/hero-layer-middle.png?format=avif&width=960'
-import heroLayerMiddleBlinkUrl from '../assets/heroes/hero-layer-middle-blink.png'
-import heroLayerMiddleBlink640Url from '../assets/heroes/hero-layer-middle-blink.png?width=640'
-import heroLayerMiddleBlink960Url from '../assets/heroes/hero-layer-middle-blink.png?width=960'
-import heroLayerMiddleBlinkAvifUrl from '../assets/heroes/hero-layer-middle-blink.png?format=avif'
-import heroLayerMiddleBlinkAvif640Url from '../assets/heroes/hero-layer-middle-blink.png?format=avif&width=640'
-import heroLayerMiddleBlinkAvif960Url from '../assets/heroes/hero-layer-middle-blink.png?format=avif&width=960'
+import heroLayerForegroundUrl from '../assets/heroes/home/foreground.png'
+import heroLayerForeground640Url from '../assets/heroes/home/foreground.png?width=640'
+import heroLayerForeground960Url from '../assets/heroes/home/foreground.png?width=960'
+import heroLayerForegroundAvifUrl from '../assets/heroes/home/foreground.png?format=avif'
+import heroLayerForegroundAvif640Url from '../assets/heroes/home/foreground.png?format=avif&width=640'
+import heroLayerForegroundAvif960Url from '../assets/heroes/home/foreground.png?format=avif&width=960'
+import heroLayerBackgroundUrl from '../assets/heroes/home/background.png'
+import heroLayerBackground640Url from '../assets/heroes/home/background.png?width=640'
+import heroLayerBackground960Url from '../assets/heroes/home/background.png?width=960'
+import heroLayerBackgroundAvifUrl from '../assets/heroes/home/background.png?format=avif'
+import heroLayerBackgroundAvif640Url from '../assets/heroes/home/background.png?format=avif&width=640'
+import heroLayerBackgroundAvif960Url from '../assets/heroes/home/background.png?format=avif&width=960'
+import heroLayerMiddleUrl from '../assets/heroes/home/middle.png'
+import heroLayerMiddle640Url from '../assets/heroes/home/middle.png?width=640'
+import heroLayerMiddle960Url from '../assets/heroes/home/middle.png?width=960'
+import heroLayerMiddleAvifUrl from '../assets/heroes/home/middle.png?format=avif'
+import heroLayerMiddleAvif640Url from '../assets/heroes/home/middle.png?format=avif&width=640'
+import heroLayerMiddleAvif960Url from '../assets/heroes/home/middle.png?format=avif&width=960'
+import heroLayerMiddleBlinkUrl from '../assets/heroes/home/middle-blink.png'
+import heroLayerMiddleBlink640Url from '../assets/heroes/home/middle-blink.png?width=640'
+import heroLayerMiddleBlink960Url from '../assets/heroes/home/middle-blink.png?width=960'
+import heroLayerMiddleBlinkAvifUrl from '../assets/heroes/home/middle-blink.png?format=avif'
+import heroLayerMiddleBlinkAvif640Url from '../assets/heroes/home/middle-blink.png?format=avif&width=640'
+import heroLayerMiddleBlinkAvif960Url from '../assets/heroes/home/middle-blink.png?format=avif&width=960'
 
 const heroLayerBackgroundSrcset = `${heroLayerBackground640Url} 640w, ${heroLayerBackground960Url} 960w, ${heroLayerBackgroundUrl} 2048w`
 const heroLayerMiddleSrcset = `${heroLayerMiddle640Url} 640w, ${heroLayerMiddle960Url} 960w, ${heroLayerMiddleUrl} 2508w`
@@ -142,7 +142,9 @@ onBeforeUnmount(() => {
       <div class="relative z-1 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-rows-none sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6">
         <div class="max-w-sm nav:mb-12 wide:mb-16">
           <p class="hero-description text-center sm:text-left">
-            Пиво-медоваренный завод «Медведь». Производим медовуху, сидр и пуаре в Санкт-Петербурге с 2006 года.
+            <span class="wide:block wide:whitespace-nowrap">Пиво-медоваренный завод «Медведь». </span>
+            <span class="wide:block wide:whitespace-nowrap">Производим медовуху, сидр и пуаре </span>
+            <span class="wide:block wide:whitespace-nowrap">в Санкт-Петербурге с 2006 года.</span>
           </p>
         </div>
 

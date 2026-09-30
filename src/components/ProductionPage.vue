@@ -171,7 +171,9 @@ const qualityPoints = [
   <div>
     <PageHero title-id="production-page-title">
       <template #title>Варим<br>с душой</template>
-      Воссоздаём рецептуры русских напитков в исторической солодовне, соединяя натуральное сырьё и современное оборудование.
+      <span class="wide:block wide:whitespace-nowrap">Воссоздаём рецептуры русских напитков </span>
+      <span class="wide:block wide:whitespace-nowrap">в исторической солодовне, соединяя </span>
+      <span class="wide:block wide:whitespace-nowrap">натуральное сырьё и современное оборудование.</span>
     </PageHero>
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="production-history-title">

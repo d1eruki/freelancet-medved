@@ -4,22 +4,29 @@ import PageHero from './PageHero.vue'
 import SectionLink from './SectionLink.vue'
 import { catalogCategories } from '../data/catalog'
 import { sitePath } from '../utils/site-path'
-import catalogHeroBackgroundUrl from '../assets/heroes/catalog-hero-background.png'
-import catalogHeroBackground640Url from '../assets/heroes/catalog-hero-background.png?width=640'
-import catalogHeroBackground960Url from '../assets/heroes/catalog-hero-background.png?width=960'
-import catalogHeroBackgroundAvifUrl from '../assets/heroes/catalog-hero-background.png?format=avif'
-import catalogHeroBackgroundAvif640Url from '../assets/heroes/catalog-hero-background.png?format=avif&width=640'
-import catalogHeroBackgroundAvif960Url from '../assets/heroes/catalog-hero-background.png?format=avif&width=960'
-import catalogHeroForegroundUrl from '../assets/heroes/catalog-hero-foreground.png'
-import catalogHeroForeground640Url from '../assets/heroes/catalog-hero-foreground.png?width=640'
-import catalogHeroForeground960Url from '../assets/heroes/catalog-hero-foreground.png?width=960'
-import catalogHeroForegroundAvifUrl from '../assets/heroes/catalog-hero-foreground.png?format=avif'
-import catalogHeroForegroundAvif640Url from '../assets/heroes/catalog-hero-foreground.png?format=avif&width=640'
-import catalogHeroForegroundAvif960Url from '../assets/heroes/catalog-hero-foreground.png?format=avif&width=960'
+import catalogHeroBackgroundUrl from '../assets/heroes/catalog/background.png'
+import catalogHeroBackground640Url from '../assets/heroes/catalog/background.png?width=640'
+import catalogHeroBackground960Url from '../assets/heroes/catalog/background.png?width=960'
+import catalogHeroBackgroundAvifUrl from '../assets/heroes/catalog/background.png?format=avif'
+import catalogHeroBackgroundAvif640Url from '../assets/heroes/catalog/background.png?format=avif&width=640'
+import catalogHeroBackgroundAvif960Url from '../assets/heroes/catalog/background.png?format=avif&width=960'
+import catalogHeroMiddleUrl from '../assets/heroes/catalog/middle.png'
+import catalogHeroMiddle640Url from '../assets/heroes/catalog/middle.png?width=640'
+import catalogHeroMiddle960Url from '../assets/heroes/catalog/middle.png?width=960'
+import catalogHeroMiddleAvifUrl from '../assets/heroes/catalog/middle.png?format=avif'
+import catalogHeroMiddleAvif640Url from '../assets/heroes/catalog/middle.png?format=avif&width=640'
+import catalogHeroMiddleAvif960Url from '../assets/heroes/catalog/middle.png?format=avif&width=960'
+import catalogHeroForegroundUrl from '../assets/heroes/catalog/foreground.png'
+import catalogHeroForeground640Url from '../assets/heroes/catalog/foreground.png?width=640'
+import catalogHeroForeground960Url from '../assets/heroes/catalog/foreground.png?width=960'
+import catalogHeroForegroundAvifUrl from '../assets/heroes/catalog/foreground.png?format=avif'
+import catalogHeroForegroundAvif640Url from '../assets/heroes/catalog/foreground.png?format=avif&width=640'
+import catalogHeroForegroundAvif960Url from '../assets/heroes/catalog/foreground.png?format=avif&width=960'
 
 const catalogHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
+  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 135, y: -100 } },
+  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 200, y: 100 } },
 }
 
 const catalogHeroLayers = {
@@ -30,15 +37,20 @@ const catalogHeroLayers = {
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Старинная иллюстрация: цветущие деревья у реки и город на дальнем берегу',
-    zIndex: -2,
   },
   middle: {
+    src: catalogHeroMiddleUrl,
+    srcset: `${catalogHeroMiddle640Url} 640w, ${catalogHeroMiddle960Url} 960w, ${catalogHeroMiddleUrl} 1672w`,
+    avifSrcset: `${catalogHeroMiddleAvif640Url} 640w, ${catalogHeroMiddleAvif960Url} 960w, ${catalogHeroMiddleAvifUrl} 1672w`,
+    sizes: '100vw',
+    className: 'absolute inset-0 size-full object-cover object-center',
+  },
+  foreground: {
     src: catalogHeroForegroundUrl,
     srcset: `${catalogHeroForeground640Url} 640w, ${catalogHeroForeground960Url} 960w, ${catalogHeroForegroundUrl} 1672w`,
     avifSrcset: `${catalogHeroForegroundAvif640Url} 640w, ${catalogHeroForegroundAvif960Url} 960w, ${catalogHeroForegroundAvifUrl} 1672w`,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
-    zIndex: -2,
   },
 }
 
@@ -48,11 +60,14 @@ const catalogHeroLayers = {
   <div>
     <PageHero
       title-id="catalog-title"
+      :title-z-index="0"
       :layers="catalogHeroLayers"
       :layer-layout="catalogHeroLayout"
     >
       <template #title>Наши<br>напитки</template>
-      Медовуха, сидр и пуаре собственного производства. Выберите напиток по настроению — от медовых и пряных до свежих фруктовых вкусов.
+      <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре собственного </span>
+      <span class="wide:block wide:whitespace-nowrap">производства. Выберите напиток по настроению — </span>
+      <span class="wide:block wide:whitespace-nowrap">от медовых и пряных до свежих фруктовых вкусов.</span>
     </PageHero>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
