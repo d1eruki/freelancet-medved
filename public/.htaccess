@@ -13,6 +13,9 @@ RewriteRule ^proizvodstvo/etap-[1-4]/?$ /proizvodstvo/ [R=301,L,NE]
 RewriteRule ^novosti-pivovareniya(?:/[^/]+)?/?$ /o-kompanii/ [R=301,L,NE]
 
 # Keep a single trailing-slash URL for every public page.
+# Временно скрытый раздел: блокировать также сохранённые HTML-файлы.
+RewriteRule ^partnery(?:/.*)?$ - [R=404,L]
+
 # @active-route-redirects@
 
 # Let Apache serve real assets and API files directly.

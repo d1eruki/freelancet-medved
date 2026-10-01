@@ -1,9 +1,11 @@
 <script setup>
 import contactsHeroImageUrl from '../../assets/heroes/contacts/hero.png'
+import contactsDividerUrl from '../../assets/heroes/contacts/divider.png'
 import CircleArrow from '../CircleArrow.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import ContactSection from '../ContactSection.vue'
 import PageHero from '../PageHero.vue'
+import HeroDivider from '../HeroDivider.vue'
 import SectionLink from '../SectionLink.vue'
 import { sitePath } from '../../utils/site-path'
 
@@ -23,8 +25,10 @@ const routeUrl = `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponen
       <template #title>Будем<br>знакомы</template>
       <span class="wide:block wide:whitespace-nowrap">Товарищество пиво-медоваренного завода </span>
       <span class="wide:block wide:whitespace-nowrap">«МЁДВЕДЬ». Производим и поставляем </span>
-      <span class="wide:block wide:whitespace-nowrap">медовуху, сидр и пуаре из Санкт-Петербурга.</span>
+      <span class="wide:block wide:whitespace-nowrap">мид, сидр и пуаре из Санкт-Петербурга.</span>
     </PageHero>
+
+    <HeroDivider :image-url="contactsDividerUrl" />
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="contacts-details-title">
       <div class="site-container">
@@ -89,7 +93,7 @@ const routeUrl = `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponen
     <SectionLink
       heading-id="contacts-catalog-title"
       title="Наши напитки"
-      description="Познакомьтесь с ассортиментом медовухи, сидра и пуаре."
+      description="Познакомьтесь с ассортиментом мида, сидра и пуаре."
       :href="sitePath('/katalog/')"
       label="В каталог"
       :background="'foreground'"

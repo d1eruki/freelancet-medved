@@ -9,9 +9,11 @@ import bottlingImageUrl from '../../assets/production/production-bottling.png'
 import productionHeroBackgroundUrl from '../../assets/heroes/production/background.png'
 import productionHeroMiddleUrl from '../../assets/heroes/production/middle.png'
 import productionHeroMiddle2Url from '../../assets/heroes/production/middle-2.png'
+import productionDividerUrl from '../../assets/heroes/production/divider.png'
 import ActionTile from '../ActionTile.vue'
 import NumberedInfoCard from '../NumberedInfoCard.vue'
 import PageHero from '../PageHero.vue'
+import HeroDivider from '../HeroDivider.vue'
 import ProductionProcessStep from './ProductionProcessStep.vue'
 import SectionWatermark from '../SectionWatermark.vue'
 
@@ -47,7 +49,7 @@ const productionHeroLayers = {
 
 const ingredients = [
   {
-    title: 'Мёд и патока',
+    title: 'Основа мида',
     text: 'Цветочный и гречишный мёд формируют основу напитка, а патока дополняет рецептуру.',
     icons: ['hexagons'],
   },
@@ -215,6 +217,8 @@ const qualityPoints = [
       <span class="wide:block wide:whitespace-nowrap">натуральное сырьё и современное оборудование.</span>
     </PageHero>
 
+    <HeroDivider :image-url="productionDividerUrl" />
+
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="production-history-title">
       <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="nav:col-span-4">
@@ -243,7 +247,7 @@ const qualityPoints = [
             Честный состав
           </h2>
           <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
-            Медовуха и сидр проходят естественное брожение без добавления спирта.
+            Мид и сидр проходят естественное брожение без добавления спирта.
           </p>
         </div>
 

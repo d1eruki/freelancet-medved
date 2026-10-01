@@ -11,7 +11,7 @@ const props = defineProps({
 
 const isMenuOpen = ref(false)
 const isHeaderVisible = ref(true)
-const navigationGroups = [navigation.slice(0, 3), navigation.slice(3)]
+const navigationGroups = [navigation.slice(0, 2), navigation.slice(2)]
 
 let lastScrollPosition = 0
 let scrollFrame = 0
@@ -108,8 +108,8 @@ onBeforeUnmount(() => {
         <ul
           v-for="(group, groupIndex) in navigationGroups"
           :key="groupIndex"
-          class="flex flex-col gap-1 wide:col-span-3 wide:grid wide:grid-cols-3 wide:items-center wide:justify-items-center wide:gap-0"
-          :class="groupIndex === 0 ? 'wide:col-start-1' : 'wide:col-start-5'"
+          class="flex flex-col gap-1 wide:col-span-3 wide:grid wide:items-center wide:justify-items-center wide:gap-0"
+          :class="groupIndex === 0 ? 'wide:col-start-1 wide:grid-cols-2' : 'wide:col-start-5 wide:grid-cols-3'"
         >
           <li v-for="item in group" :key="item.href">
             <a

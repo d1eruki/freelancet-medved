@@ -1,7 +1,8 @@
 <script setup>
-import productionImageUrl from '../../assets/heroes/production-hero-composition.png'
-import { catalogCategories } from '../../data/catalog'
+import productionImageUrl from '../../assets/production-real.png'
+import { catalogCategories, meadExplanation } from '../../data/catalog'
 import SectionWatermark from '../SectionWatermark.vue'
+import NumberedInfoCard from '../NumberedInfoCard.vue'
 </script>
 
 <template>
@@ -22,7 +23,7 @@ import SectionWatermark from '../SectionWatermark.vue'
           <img
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
             :src="productionImageUrl"
-            alt="Иллюстрация исторического кирпичного цеха с баками из нержавеющей стали"
+            alt="Производственный цех с ёмкостями из нержавеющей стали"
           >
           <span class="absolute inset-0 bg-linear-to-t from-foreground via-foreground/5 to-transparent" aria-hidden="true" />
 
@@ -64,11 +65,11 @@ import SectionWatermark from '../SectionWatermark.vue'
           <div class="grid gap-8 sm:grid-cols-3 sm:items-end">
             <div>
               <p class="font-display text-h1 text-brand">{{ catalogCategories[0].items.length }}</p>
-              <p class="mt-3 text-label font-extrabold tracking-wider uppercase">сортов медовухи</p>
+              <p class="mt-3 text-label font-extrabold tracking-wider uppercase">сортов мида</p>
             </div>
 
             <p class="text-body font-medium text-subtle sm:col-span-2">
-              В каталоге — семь сортов медовухи, шесть сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
+              В каталоге — семь сортов мида, шесть сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
             </p>
           </div>
         </article>
@@ -80,6 +81,13 @@ import SectionWatermark from '../SectionWatermark.vue'
           </p>
         </article>
       </div>
+
+      <NumberedInfoCard
+        class="mt-10 text-foreground"
+        :title="meadExplanation.title"
+        :text="meadExplanation.text"
+        variant="group"
+      />
     </div>
   </section>
 </template>

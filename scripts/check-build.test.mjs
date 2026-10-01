@@ -10,7 +10,7 @@ const sitemap = await readFile(path.join(output, 'sitemap.xml'), 'utf8')
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
 
 test('every published URL has its own HTML and metadata', async () => {
-  assert.equal(urls.length, 12)
+  assert.equal(urls.length, 11)
   assert.equal(new Set(urls).size, urls.length)
   assert.ok(urls.includes(`${origin}/horeca/`))
 
@@ -43,6 +43,24 @@ test('internal links in published HTML resolve to a page or file', async () => {
       assert.ok((await stat(targetPath).catch(() => null))?.isFile(), `${url} -> ${href}`)
     }
   }
+})
+
+test('temporarily hidden page is absent from output and blocked before existing files', async () => {
+  assert.ok(!urls.includes(`${origin}/partnery/`))
+  assert.equal(await stat(path.join(output, 'partnery')).catch(() => null), null)
+  const config = await readFile(path.join(output, '.htaccess'), 'utf8')
+  const hiddenRule = config.match(/^RewriteRule (\^partnery[^\s]*) - \[R=404,L\]$/m)
+  assert.ok(hiddenRule, 'missing hidden page rule')
+  assert.ok(hiddenRule.index < config.indexOf('RewriteCond %{REQUEST_FILENAME} -f'))
+  const hiddenPattern = new RegExp(hiddenRule[1])
+  for (const route of ['partnery', 'partnery/', 'partnery/index.html']) {
+    assert.ok(hiddenPattern.test(route), route)
+  }
+  for (const url of urls) {
+    const html = await readFile(path.join(output, new URL(url).pathname.slice(1), 'index.html'), 'utf8')
+    assert.doesNotMatch(html, /href="[^"]*\/partnery(?:\/|["?#])/)
+  }
+  assert.doesNotMatch(await readFile(path.join(output, 'llms.txt'), 'utf8'), /partnery/)
 })
 
 test('published pages match the documented structure', async () => {

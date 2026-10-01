@@ -5,6 +5,7 @@ import CategoryPattern from '../CategoryPattern.vue'
 import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { catalogCategories } from '../../data/catalog'
+import barCounterTexture from '../../assets/home/bar-counter-texture.png'
 
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
@@ -147,7 +148,12 @@ onBeforeUnmount(clearTransitionTimers)
 
 <template>
   <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" data-header-theme="dark" aria-labelledby="products-title">
-    <span class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] bg-brand/7" aria-hidden="true" />
+    <img
+      :src="barCounterTexture"
+      alt=""
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] w-full object-fill"
+    />
     <div class="pointer-events-none absolute inset-x-0 top-0 bottom-[30svh] z-1 overflow-hidden" aria-hidden="true">
       <div class="product-track flex h-full" :class="{ 'is-dragging': isDragging }" :style="{ transform: trackTransform }">
         <CategoryPattern

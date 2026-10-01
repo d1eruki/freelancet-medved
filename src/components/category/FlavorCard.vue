@@ -8,7 +8,7 @@ const props = defineProps({
 const activeVariantIndex = ref(0)
 const transitionDirection = ref('forward')
 const activeVariant = computed(() => props.item.variants[activeVariantIndex.value])
-const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
+const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Мид|Медовуха|Пуаре)\s+/u, ''))
 
 function selectVariant(index) {
   if (index === activeVariantIndex.value) return

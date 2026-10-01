@@ -2,6 +2,7 @@
 import SectionWatermark from '../SectionWatermark.vue'
 import { sitePath } from '../../utils/site-path'
 import aboutCompanyImageUrl from '../../assets/about/about-company-enhanced.png'
+import aboutDividerUrl from '../../assets/heroes/about/divider.png'
 import aboutHeroBackgroundUrl from '../../assets/heroes/about/background.png'
 import aboutHeroBackground640Url from '../../assets/heroes/about/background.png?width=640'
 import aboutHeroBackground960Url from '../../assets/heroes/about/background.png?width=960'
@@ -31,6 +32,7 @@ import ActionTile from '../ActionTile.vue'
 import AwardCard from './AwardCard.vue'
 import NumberedInfoCard from '../NumberedInfoCard.vue'
 import PageHero from '../PageHero.vue'
+import HeroDivider from '../HeroDivider.vue'
 import { catalogCategories } from '../../data/catalog'
 
 const aboutHeroLayout = {
@@ -114,15 +116,17 @@ const awards = [
       layer-entrance="foreground-first"
     >
       <template #title>Традиция<br>живёт здесь</template>
-      <span class="wide:block wide:whitespace-nowrap">Петербургский производитель медовухи, </span>
+      <span class="wide:block wide:whitespace-nowrap">Петербургский производитель мида, </span>
       <span class="wide:block wide:whitespace-nowrap">сидра и пуаре с собственной историей, </span>
       <span class="wide:block wide:whitespace-nowrap">характером и узнаваемыми рецептами.</span>
     </PageHero>
 
+    <HeroDivider :image-url="aboutDividerUrl" />
+
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="tradition-title">
       <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="nav:col-span-4">
-          <p class="font-display text-h1 text-brand uppercase">Мёд</p>
+          <p class="font-display text-h1 text-brand uppercase">Мид</p>
           <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Напиток с историей</p>
         </div>
 
@@ -241,7 +245,7 @@ const awards = [
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="awards-title" class="font-display text-h2 uppercase nav:col-span-8">Дело говорит<br>за себя</h2>
           <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
-            Качество продукции отмечено дипломами выставок и фестивалей медовухи.
+            Качество продукции отмечено дипломами выставок и фестивалей напитков.
           </p>
         </div>
 

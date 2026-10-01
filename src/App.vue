@@ -12,7 +12,6 @@ import HomePage from './components/home/HomePage.vue'
 import HorecaPage from './components/horeca/HorecaPage.vue'
 import LegalPage from './components/legal/LegalPage.vue'
 import NotFoundPage from './components/not-found/NotFoundPage.vue'
-import PartnersPage from './components/partners/PartnersPage.vue'
 import ProductionPage from './components/production/ProductionPage.vue'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
@@ -92,7 +91,6 @@ onBeforeUnmount(() => {
 
     <main>
       <ProductionPage v-if="page?.type === 'production'" :lenis="lenis" />
-      <PartnersPage v-else-if="page?.type === 'partners'" />
       <AboutPage v-else-if="page?.type === 'about'" />
       <CatalogPage v-else-if="page?.type === 'catalog'" />
       <ContactsPage v-else-if="page?.type === 'contacts'" />

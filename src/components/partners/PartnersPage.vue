@@ -3,11 +3,13 @@ import { computed, ref } from 'vue'
 import CircleArrow from '../CircleArrow.vue'
 import ActionTile from '../ActionTile.vue'
 import PageHero from '../PageHero.vue'
+import HeroDivider from '../HeroDivider.vue'
 import PartnerCard from './PartnerCard.vue'
 import SectionWatermark from '../SectionWatermark.vue'
 import { partnerCities, partners } from '../../data/partners'
 import { sitePath } from '../../utils/site-path'
 import partnersHeroBackgroundUrl from '../../assets/heroes/partners/background.png'
+import partnersDividerUrl from '../../assets/heroes/partners/divider.png'
 import partnersHeroBackground640Url from '../../assets/heroes/partners/background.png?width=640'
 import partnersHeroBackground960Url from '../../assets/heroes/partners/background.png?width=960'
 import partnersHeroBackgroundAvifUrl from '../../assets/heroes/partners/background.png?format=avif'
@@ -94,10 +96,12 @@ const pointCountLabel = computed(() => {
       layer-entrance="foreground-then-middle"
     >
       <template #title>Где купить<br>«Мёдведь»</template>
-      <span class="wide:block wide:whitespace-nowrap">Ищите нашу медовуху, сидр и пуаре </span>
+      <span class="wide:block wide:whitespace-nowrap">Ищите наш мид, сидр и пуаре </span>
       <span class="wide:block wide:whitespace-nowrap">у региональных партнёров — </span>
       <span class="wide:block wide:whitespace-nowrap">в бутылках, кегах и в розлив.</span>
     </PageHero>
+
+    <HeroDivider :image-url="partnersDividerUrl" />
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="partners-list-title">
       <div class="site-container">
@@ -167,7 +171,7 @@ const pointCountLabel = computed(() => {
               Благодаря региональным партнёрам напитки производства Товарищества пиво-медоваренного завода «МЁДВЕДЬ» разливают в пабах и ресторанах за пределами Петербурга.
             </p>
             <p>
-              Медовуху и фирменные сидры можно найти в отделах крафтового пива и специализированных магазинах — в бутылках и в розлив.
+              Мид и фирменные сидры можно найти в отделах крафтового пива и специализированных магазинах — в бутылках и в розлив.
             </p>
           </div>
         </div>
@@ -191,7 +195,7 @@ const pointCountLabel = computed(() => {
                 Открыты новым контактам и готовы обсудить поставки и оптовые цены.
               </p>
               <p class="text-body-large font-medium text-surface/75">
-                Для поставки доступны все сорта медовухи, сидра и пуаре. Перед поставкой подготовим выбранные напитки для дегустации в ПЭТ-бутылках.
+                Для поставки доступны все сорта мида, сидра и пуаре. Перед поставкой подготовим выбранные напитки для дегустации в ПЭТ-бутылках.
               </p>
             </div>
 

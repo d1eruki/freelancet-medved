@@ -1,6 +1,7 @@
 <script setup>
 import CatalogCategoryCard from './CatalogCategoryCard.vue'
 import PageHero from '../PageHero.vue'
+import HeroDivider from '../HeroDivider.vue'
 import SectionLink from '../SectionLink.vue'
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'
@@ -22,11 +23,12 @@ import catalogHeroForeground960Url from '../../assets/heroes/catalog/foreground.
 import catalogHeroForegroundAvifUrl from '../../assets/heroes/catalog/foreground.png?format=avif'
 import catalogHeroForegroundAvif640Url from '../../assets/heroes/catalog/foreground.png?format=avif&width=640'
 import catalogHeroForegroundAvif960Url from '../../assets/heroes/catalog/foreground.png?format=avif&width=960'
+import catalogDividerUrl from '../../assets/heroes/catalog/divider.png'
 
 const catalogHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
   middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 135, y: -100 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.90, x: 155, y: 100 } },
+  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.8, x: 225, y: 150 } },
 }
 
 const catalogHeroLayers = {
@@ -66,10 +68,12 @@ const catalogHeroLayers = {
       layer-entrance="foreground-first"
     >
       <template #title>Наши<br>напитки</template>
-      <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре собственного </span>
+      <span class="wide:block wide:whitespace-nowrap">Мид, сидр и пуаре собственного </span>
       <span class="wide:block wide:whitespace-nowrap">производства. Выберите напиток по настроению — </span>
-      <span class="wide:block wide:whitespace-nowrap">от медовых и пряных до свежих фруктовых вкусов.</span>
+      <span class="wide:block wide:whitespace-nowrap">от пряных до свежих фруктовых вкусов.</span>
     </PageHero>
+
+    <HeroDivider :image-url="catalogDividerUrl" />
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
       <div class="site-container">
