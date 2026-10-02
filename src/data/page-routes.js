@@ -4,12 +4,16 @@ import { legalContent } from './legal-content'
 const origin = 'https://medved.beer'
 
 const pages = [
-  { path: '/', title: '«МЁДВЕДЬ» Производитель мида, сидра и пуаре в Санкт-Петербурге', description: 'Слабоалкогольные напитки оптом от производителя в СПБ', type: 'home' },
+  { path: '/', title: 'Медовуха (мид), сидр и пуаре оптом в Санкт-Петербурге — «МЁДВЕДЬ»', description: 'Производим медовуху (мид), сидр и пуаре в Санкт-Петербурге с 2006 года. Оптовые поставки в кегах и ПЭТ-таре по СПб и Ленинградской области.', type: 'home' },
   { path: '/katalog/', title: 'Каталог мида, сидра и пуаре «МЁДВЕДЬ»', description: 'Мид «МЁДВЕДЬ», яблочный сидр и грушевое пуаре от петербургского производителя. Выберите категорию и познакомьтесь с ассортиментом.', type: 'catalog' },
   ...catalogCategories.map((category) => ({
     path: `/katalog/${category.slug}/`,
-    title: `${category.name} «МЁДВЕДЬ» — ассортимент`,
-    description: category.description,
+    title: category.slug === 'medovuha'
+      ? 'Медовуха (мид) оптом в Санкт-Петербурге — «МЁДВЕДЬ»'
+      : `${category.name} «МЁДВЕДЬ» — ассортимент`,
+    description: category.slug === 'medovuha'
+      ? 'Семь сортов медовухи (мида) «МЁДВЕДЬ» с фруктами, ягодами и пряностями. Оптовые поставки от производителя в Санкт-Петербурге в кегах и ПЭТ-таре.'
+      : category.description,
     type: 'category',
     category,
   })),

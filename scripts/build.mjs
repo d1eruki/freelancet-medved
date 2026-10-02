@@ -77,7 +77,8 @@ try {
 
   const activePaths = pageRoutes.filter((page) => page.path !== '/').map((page) => escapeRegex(page.path.slice(1, -1)))
   const routePattern = activePaths.join('|')
-  const redirects = `RewriteCond %{REQUEST_URI} !/$\nRewriteRule ^(${routePattern})$ /$1/ [R=301,L,NE]`
+  const canonicalOrigin = new URL(pageRoutes[0].canonicalUrl).origin
+  const redirects = `RewriteCond %{REQUEST_URI} !/$\nRewriteRule ^(${routePattern})$ ${canonicalOrigin}/$1/ [R=301,L,NE]`
   const rewrites = `RewriteRule ^$ index.html [L]\nRewriteRule ^(?:${routePattern})/?$ index.html [L]`
   const configPath = path.join(output, '.htaccess')
   const config = await readFile(configPath, 'utf8')
