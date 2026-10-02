@@ -1,8 +1,10 @@
 <script setup>
 import { computed, ref } from 'vue'
 import CircleArrow from '../CircleArrow.vue'
+import ProductModel from './ProductModel.vue'
 
 const hoverAngle = ref(3)
+const isModelHovered = ref(false)
 
 function updateHoverAngle(event) {
   const bounds = event.currentTarget.getBoundingClientRect()
@@ -95,14 +97,23 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 
         <a
           class="product-interactive product-visual relative z-1 min-w-0 max-w-64 flex-1 aspect-square rotate-0 transition duration-500 focus-visible:outline-4 focus-visible:outline-brand sm:max-w-72 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
+          :class="{ 'product-visual--model': product.model }"
           draggable="false"
+          @pointerenter="isModelHovered = $event.pointerType !== 'touch'"
           @pointermove="updateHoverAngle"
-          @pointerleave="hoverAngle = 3"
+          @pointerleave="hoverAngle = 3; isModelHovered = false"
           :href="product.href"
           :tabindex="active ? 0 : -1"
           :aria-label="`Подробнее о напитке «${product.name}»`"
         >
-          <img class="size-full object-contain" :src="product.image" alt="" draggable="false">
+          <ProductModel
+            v-if="product.model"
+            :source="product.model"
+            :fallback="product.image"
+            :active="active"
+            :paused="isModelHovered"
+          />
+          <img v-else class="size-full object-contain" :src="product.image" alt="" draggable="false">
         </a>
 
         <button
@@ -132,19 +143,28 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   transform-origin: 50% 90%;
 }
 
-.is-moving-forward .product-visual {
+.product-visual--model :deep(canvas) {
+  transform-origin: var(--model-origin, 50% 90%);
+  transition: rotate 500ms;
+}
+
+.is-moving-forward .product-visual:not(.product-visual--model),
+.is-moving-forward .product-visual--model :deep(canvas) {
   animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.is-moving-backward .product-visual {
+.is-moving-backward .product-visual:not(.product-visual--model),
+.is-moving-backward .product-visual--model :deep(canvas) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.product-card:has(a:is(:hover, :focus-visible)) .product-visual {
+.product-card:has(a:is(:hover, :focus-visible)) .product-visual:not(.product-visual--model),
+.product-card:has(a:is(:hover, :focus-visible)) .product-visual--model :deep(canvas) {
   rotate: v-bind(hoverAngleCss);
 }
 
-.is-dragging .product-visual {
+.is-dragging .product-visual:not(.product-visual--model),
+.is-dragging .product-visual--model :deep(canvas) {
   rotate: v-bind(dragAngleCss);
 }
 
