@@ -6,10 +6,6 @@ import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { catalogCategories } from '../../data/catalog'
 import barCounterTexture from '../../assets/home/bar-counter-texture.png'
-import canModelUrl from '../../assets/models/can.glb?url'
-
-// Временно показываем картинки; для возврата моделей переключить на true.
-const showProductModels = false
 
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
@@ -19,7 +15,6 @@ const products = catalogCategories.map((category) => ({
   varieties: category.introduction,
   href: sitePath(`/katalog/${category.slug}/`),
   image: category.image,
-  model: showProductModels && category.slug === 'medovuha' ? canModelUrl : null,
 }))
 
 const activeIndex = ref(0)
