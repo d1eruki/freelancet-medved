@@ -991,6 +991,9 @@
     let sharedScene = null
     let sceneStarting = false
     const sceneQuality = Object.freeze({ maxModelPixels: 720, maxPixelRatio: 1.5, samples: 4, bodySamples: 4, baseSamples: 8, traceSteps: 18, reflectionSteps: 6 })
+    // Метры: высота стакана — по Nonic 570 мл, форма остаётся нашей;
+    // банка — стандартные размеры 0,5 л. Стакан задаёт общий масштаб сцены.
+    const modelDimensions = Object.freeze({ glass: { height: 0.1495 }, can: { height: 0.168, diameter: 0.066 } })
 
     function disposeModel(model) {
       const resources = new Set()
@@ -1071,8 +1074,16 @@
           const size = bounds.getSize(new THREE.Vector3())
           const product = new THREE.Group()
           product.add(model)
-          product.scale.setScalar(2 / Math.max(size.x, size.y, size.z))
+          const dimensions = index === 0 ? modelDimensions.glass : modelDimensions.can
+          const unitsPerMeter = 2 / modelDimensions.glass.height
+          const height = dimensions.height * unitsPerMeter
+          const radialScale = dimensions.diameter
+            ? dimensions.diameter * unitsPerMeter / Math.max(size.x, size.z)
+            : height / size.y
+          product.scale.set(radialScale, height / size.y, radialScale)
           model.position.sub(bounds.getCenter(new THREE.Vector3()))
+          // При изменении высоты основание остаётся на прежнем уровне.
+          product.position.y = (height - 2) / 2
           product.rotation.y = 0.35
           product.updateMatrixWorld(true)
           const productBounds = new THREE.Box3().setFromObject(product)
