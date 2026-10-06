@@ -42,6 +42,10 @@
     }
     .lab-stage.is-loading { opacity: 0; pointer-events: none; }
     .lab-loader { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; color: #3d5a45; font: 18px system-ui, sans-serif; pointer-events: none; }
+    .lab-spinner { width: 44px; height: 44px; border: 3px solid rgb(61 90 69 / 0.18); border-top-color: #3d5a45; border-radius: 50%; animation: lab-spin 0.8s linear infinite; }
+    @keyframes lab-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .lab-spinner { animation-duration: 2s; } }
+    .product-model-shadows { position: absolute; z-index: 0; overflow: hidden; pointer-events: none; }
     .lab-stage article { position: relative; width: 100%; height: 100%; }
     .lab-model {
       position: absolute;
@@ -52,12 +56,13 @@
       aspect-ratio: 1;
       transform: translateX(-50%);
     }
-    .lab-model { z-index: 1; }
+    .lab-model { z-index: 1; pointer-events: none; }
+    .lab-hit { position: absolute; z-index: 2; pointer-events: auto; }
     .lab-model.lab-can {
       z-index: 0;
       left: calc(50% + 8rem * var(--zoom));
       bottom: calc(5rem * var(--zoom));
-      height: min(73.333333%, calc(28.8rem * var(--zoom)));
+      height: min(91.666667%, calc(36rem * var(--zoom)));
     }
     .product-model {
       display: block;
@@ -163,6 +168,13 @@
         previous = current; current = next
       }
       if (chain.length !== points.length) throw new Error('Профиль не замкнут по сетке')
+      for (const point of points) {
+        if (point.r < 0.000001 && Math.hypot(point.nr, point.ny) / point.count < 0.5) {
+          const cap = points.find(p => p.r > 0.000001 && Math.abs(p.y - point.y) < 0.000002 && Math.abs(p.ny) > 0.01)
+          if (!cap) throw new Error('Не определена нормаль центральной вершины')
+          point.ny = Math.sign(cap.ny) * point.count
+        }
+      }
       return chain.map(p => new THREE.Vector4(p.r * 10, (p.y - 0.0014) * 10, p.nr / p.count, p.ny / p.count))
     }
     
@@ -216,6 +228,84 @@
       return { texture, count: nodes.length }
     }
     
+    // Оптика банки использует её объём и развёртку этикетки, а не снимок фона.
+    let bankOptics = null
+    function createBankSurface(THREE, product, bounds) {
+      const canvas = document.createElement('canvas')
+      canvas.width = 1024; canvas.height = 1024
+      const context = canvas.getContext('2d')
+      const center = bounds.getCenter(new THREE.Vector3())
+      const height = bounds.max.y - bounds.min.y
+      product.updateMatrixWorld(true)
+      let radius = 0
+      product.traverse(mesh => {
+        if (!mesh.isMesh) return
+        const position = mesh.geometry.attributes.position
+        for (let i = 0; i < position.count; i++) {
+          const point = new THREE.Vector3().fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld)
+          radius = Math.max(radius, Math.hypot(point.x - center.x, point.z - center.z))
+        }
+      })
+      product.traverse(mesh => {
+        if (!mesh.isMesh || mesh.material?.name !== 'marion-printed-label') return
+        const source = mesh.material.map?.image
+        if (!source) throw new Error('Не найдена текстура этикетки')
+        const pos = mesh.geometry.attributes.position, uv = mesh.geometry.attributes.uv, index = mesh.geometry.index
+        const count = index?.count ?? pos.count
+        for (let i = 0; i < count; i += 3) {
+          const vertices = [0, 1, 2].map(k => {
+            const id = index ? index.getX(i + k) : i + k
+            const point = new THREE.Vector3().fromBufferAttribute(pos, id).applyMatrix4(mesh.matrixWorld)
+            return { x: (Math.atan2(point.z - center.z, point.x - center.x) / (2 * Math.PI) + 0.5) * canvas.width,
+              y: (bounds.max.y - point.y) / height * canvas.height,
+              u: uv.getX(id) * source.width, v: uv.getY(id) * source.height }
+          })
+          if (Math.max(...vertices.map(p => p.x)) - Math.min(...vertices.map(p => p.x)) > canvas.width / 2) {
+            for (const vertex of vertices) if (vertex.x < canvas.width / 2) vertex.x += canvas.width
+          }
+          const [a, b, c] = vertices
+          const du1 = b.u - a.u, dv1 = b.v - a.v, du2 = c.u - a.u, dv2 = c.v - a.v
+          const det = du1 * dv2 - du2 * dv1
+          if (Math.abs(det) < 1e-8) continue
+          const aa = ((b.x - a.x) * dv2 - (c.x - a.x) * dv1) / det
+          const bb = ((b.y - a.y) * dv2 - (c.y - a.y) * dv1) / det
+          const cc = ((c.x - a.x) * du1 - (b.x - a.x) * du2) / det
+          const dd = ((c.y - a.y) * du1 - (b.y - a.y) * du2) / det
+          for (const shift of [0, -canvas.width]) {
+            context.save()
+            context.beginPath(); context.moveTo(a.x + shift, a.y); context.lineTo(b.x + shift, b.y); context.lineTo(c.x + shift, c.y); context.closePath(); context.clip()
+            context.setTransform(aa, bb, cc, dd, a.x + shift - aa * a.u - cc * a.v, a.y - bb * a.u - dd * a.v)
+            context.drawImage(source, 0, 0)
+            context.restore()
+          }
+        }
+      })
+      return { canvas, height, radius }
+    }
+
+    function fittedLiquidProfile(THREE, glass, liquid) {
+      const rim = glass.reduce((best, point, i) => point.y > glass[best].y ? i : best, 0)
+      const inner = glass.slice(rim + 1).reverse()
+      const level = liquid.at(-1).y
+      const surfaceStart = liquid.findIndex(point => point.y > level - 0.02 && point.w > 0.5)
+      if (surfaceStart < 0) throw new Error('Не найден мениск напитка')
+      const surface = liquid.slice(surfaceStart)
+      const contactY = surface[0].y
+      const fitted = []
+      for (let i = 0; i < inner.length - 1; i++) {
+        const a = inner[i], b = inner[i + 1]
+        if (a.y > contactY) break
+        fitted.push(new THREE.Vector4(a.x, a.y, -a.z, -a.w))
+        if (a.y <= contactY && b.y > contactY) {
+          const t = (contactY - a.y) / (b.y - a.y)
+          fitted.push(new THREE.Vector4(THREE.MathUtils.lerp(a.x, b.x, t), contactY, -THREE.MathUtils.lerp(a.z, b.z, t), -THREE.MathUtils.lerp(a.w, b.w, t)))
+          break
+        }
+      }
+      if (fitted.length < 3) throw new Error('Не определён контакт напитка со стеклом')
+      return [...fitted, ...surface]
+    }
+
     const sceneSettings = { camera: [0, 0.88, 5], light: [-1.8, 2.5, 1.2] }
 
     async function createGlassRenderer(THREE, renderer, scene, camera, element, onBackgroundReady, isActive, onFrameReady, onRenderError) {
@@ -225,11 +315,8 @@
         if (node.material?.name === 'golden-mead') liquid = node
       })
       if (!glass || !liquid) throw new Error('Glass and liquid volumes are required')
-      const glassProfile = profile(THREE, glass), liquidProfile = profile(THREE, liquid)
-      for (const p of liquidProfile) {
-        if (p.z > 0.5) p.x += 0.005
-        if (p.w < -0.5 && p.y < 0.12) p.y -= 0.005
-      }
+      const glassProfile = profile(THREE, glass)
+      const liquidProfile = fittedLiquidProfile(THREE, glassProfile, profile(THREE, liquid))
       const tree = profileTree(THREE, glassProfile, liquidProfile)
       const section = element.closest('section')
       const article = element.closest('article')
@@ -253,6 +340,32 @@
       modelOrigin.y += 0.0014 * modelScale
       const labToWorld = new THREE.Matrix4().compose(modelOrigin, new THREE.Quaternion(), new THREE.Vector3().setScalar(modelScale / 10))
       const worldToLab = labToWorld.clone().invert()
+      const bankTexture = new THREE.CanvasTexture(bankOptics?.canvas ?? document.createElement('canvas'))
+      bankTexture.wrapS = THREE.RepeatWrapping
+      const bankCenter = new THREE.Vector3(), bankSize = new THREE.Vector3()
+      const bankInverse = new THREE.Matrix4()
+      function updateBankGeometry() {
+        const bank = section.querySelector('[data-lab-can]')
+        if (!bank || !bankOptics) { bankSize.set(0, 0, 0); return }
+        if (bankTexture.image !== bankOptics.canvas) { bankTexture.image = bankOptics.canvas; bankTexture.needsUpdate = true }
+        const bankRect = bank.getBoundingClientRect(), rect = element.getBoundingClientRect()
+        const factor = bankRect.width / rect.width
+        const base = new THREE.Vector3(0, -bankOptics.height / 2, 0).project(camera)
+        const screenX = bankRect.left + (base.x + 1) * bankRect.width / 2
+        const screenY = bankRect.top + (1 - base.y) * bankRect.height / 2
+        const origin = new THREE.Vector3((screenX - rect.left) / rect.width * 2 - 1, 1 - (screenY - rect.top) / rect.height * 2, -1).unproject(camera).applyMatrix4(worldToLab)
+        const direction = new THREE.Vector3(0, 0, -1).transformDirection(camera.matrixWorld)
+        const ground = origin.addScaledVector(direction, -origin.y / direction.y)
+        const scale = factor * 10 / modelScale
+        bankSize.set(bankOptics.radius * scale, bankOptics.height * scale / 2, bankOptics.radius * scale)
+        bankCenter.copy(ground).add(new THREE.Vector3(0, bankSize.y, 0))
+        const rotate = getComputedStyle(bank.querySelector('canvas')).rotate
+        const angle = rotate === 'none' ? 0 : parseFloat(rotate) * Math.PI / 180
+        const transform = new THREE.Matrix4().makeTranslation(...ground.toArray())
+          .multiply(new THREE.Matrix4().makeRotationAxis(direction, angle))
+          .multiply(new THREE.Matrix4().makeTranslation(0, bankSize.y, 0))
+        bankInverse.copy(transform).invert()
+      }
     
       if (!renderer.extensions.has('EXT_color_buffer_float') || gl.getParameter(gl.MAX_DRAW_BUFFERS) < 7) {
         tree.texture.dispose()
@@ -261,6 +374,8 @@
       }
       const workWidth = 256
       const uniforms = {
+        wallDepth: { value: -2 },
+        bankTexture: { value: bankTexture }, bankSize: { value: bankSize }, bankInverse: { value: bankInverse },
         profileTree: { value: tree.texture }, treeCount: { value: tree.count },
         hasLiquid: { value: true }, perspective: { value: camera.isPerspectiveCamera },
         keyLight: { value: new THREE.Vector3(...sceneSettings.light).add(new THREE.Vector3(0, 0.9, 0)) },
@@ -284,7 +399,10 @@
         uniform mat4 labProjection;
         uniform vec3 rayOrigin, rayRight, rayUp, rayDirection;
         uniform vec2 halfSize, backdropScale, backdropOffset;
-        uniform vec3 keyLight;
+        uniform vec3 keyLight, bankSize;
+        uniform float wallDepth;
+        uniform mat4 bankInverse;
+        uniform sampler2D bankTexture;
         vec2 backdropUV(vec3 p){
           vec4 clip=labProjection*vec4(p,1.0);
           return clamp((clip.xy/clip.w*0.5+0.5)*backdropScale+backdropOffset,vec2(0.001),vec2(0.999));
@@ -396,6 +514,30 @@
           float low=dot(nearest,nearest),high=max(dot(first,first),dot(last,last));
           return low<=bounds.w*bounds.w&&high>=bounds.z*bounds.z;
         }
+        void intersectBank(vec3 o,vec3 d,inout Hit h){
+          if(bankSize.y<=0.0)return;
+          vec3 local=(bankInverse*vec4(o,1.0)).xyz;
+          vec3 direction=(bankInverse*vec4(d,0.0)).xyz;
+          float radius=bankSize.x;
+          float a=dot(direction.xz,direction.xz),b=dot(local.xz,direction.xz),c=dot(local.xz,local.xz)-radius*radius;
+          float disc=b*b-a*c;
+          if(a>0.000001&&disc>=0.0){
+            vec2 roots=vec2(-b-sqrt(disc),-b+sqrt(disc))/a;
+            for(int i=0;i<2;i++){
+              float t=roots[i];vec3 p=local+direction*t;
+              if(t>0.00005&&t<h.t&&abs(p.y)<=bankSize.y){
+                vec3 n=normalize(transpose(mat3(bankInverse))*vec3(p.x,0,p.z));h=Hit(t,n,n,7);
+              }
+            }
+          }
+          if(abs(direction.y)>0.000001)for(int i=0;i<2;i++){
+            float signY=i==0?-1.0:1.0,t=(signY*bankSize.y-local.y)/direction.y;
+            vec3 p=local+direction*t;
+            if(t>0.00005&&t<h.t&&dot(p.xz,p.xz)<=radius*radius){
+              vec3 n=normalize(transpose(mat3(bankInverse))*vec3(0,signY,0));h=Hit(t,n,n,7);
+            }
+          }
+        }
         Hit intersect(vec3 o,vec3 d,int medium){
           Hit h=Hit(10000.0,vec3(0),vec3(0),-1);
           if(meetsGlass(o,d)){
@@ -413,11 +555,12 @@
             }
           }
           plane(o,d,vec3(0,-0.015,0),vec3(0,1,0),vec3(20,0.001,20),3,h);
-          plane(o,d,vec3(0,1,-2),vec3(0,0,1),vec3(8,8,0.001),4,h);
+          plane(o,d,vec3(0,1,wallDepth),vec3(0,0,1),vec3(24,24,0.001),4,h);
           plane(o,d,keyLight,vec3(1,0,0),vec3(0.001,1.8,0.75),5,h);
           plane(o,d,vec3(1.8,1.8,0.2),vec3(-1,0,0),vec3(0.001,1.9,0.4),5,h);
           plane(o,d,vec3(-1.3,1.2,0.65),vec3(1,0,0),vec3(0.001,2,0.08),6,h);
           plane(o,d,vec3(1.3,1.2,0.65),vec3(-1,0,0),vec3(0.001,2,0.06),6,h);
+          intersectBank(o,d,h);
           return h;
         }
         vec3 environment(vec3 d){return mix(vec3(0.35),vec3(0.85),clamp(d.y*0.5+0.5,0.0,1.0));}
@@ -468,6 +611,16 @@
         vec3 surfaceColor(Hit h,vec3 p,vec3 d){
           if(h.object==-1)return environment(d);
           if(h.object==6)return vec3(0.08);
+          if(h.object==7){
+            vec3 local=(bankInverse*vec4(p,1.0)).xyz;
+            vec2 uv=vec2(atan(local.z,local.x)/6.2831853+0.5,local.y/(2.0*bankSize.y)+0.5);
+            vec4 label=textureLod(bankTexture,uv,0.0);
+            float diffuse=max(0.0,dot(h.n,normalize(keyLight-vec3(0,0.9,0))));
+            if(label.a>0.5)return pow(label.rgb,vec3(2.2))*(0.55+diffuse*0.8);
+            vec3 reflection=reflect(d,h.n);
+            float sheen=pow(max(0.0,dot(reflection,normalize(keyLight-p))),24.0);
+            return vec3(0.8)*(environment(reflection)*0.65+sheen*3.5);
+          }
           if(h.object==5){
             // Мягкие края софтбоксов вместо жёстких белых полос в отражениях дна.
             vec3 center=p.x<0.0?keyLight:vec3(1.8,1.8,0.2);
@@ -772,35 +925,8 @@
           context.drawImage(patternImage, Math.round(patternRect.left - sectionRect.left), Math.round(patternRect.top - sectionRect.top), Math.round(patternRect.width), Math.round(patternRect.height))
           context.globalAlpha = 1
         }
-        // Банка позади стакана входит в тот же фон, который преломляет стекло.
-        const bank = section.querySelector('[data-lab-can]')
-        const bankCanvas = bank?.querySelector('canvas')
-        const bankShadow = bank?.querySelector('.product-model-shadow')
-        if (bankCanvas && bankCanvas.width > 0 && bankCanvas.height > 0) {
-          if (bankShadow && getComputedStyle(bankShadow).display !== 'none') {
-            const shadowRect = bankShadow.getBoundingClientRect()
-            context.save()
-            context.translate(shadowRect.left - sectionRect.left + shadowRect.width / 2,
-              shadowRect.top - sectionRect.top + shadowRect.height / 2)
-            context.scale(shadowRect.width / 2, shadowRect.height / 2)
-            const gradient = context.createRadialGradient(0, 0, 0, 0, 0, 1)
-            gradient.addColorStop(0, 'rgba(0,0,0,0.45)')
-            gradient.addColorStop(0.5, 'rgba(0,0,0,0.12)')
-            gradient.addColorStop(1, 'rgba(0,0,0,0)')
-            context.fillStyle = gradient
-            context.fillRect(-1, -1, 2, 2)
-            context.restore()
-          }
-          const bankRect = bank.getBoundingClientRect()
-          const style = getComputedStyle(bankCanvas)
-          const origin = style.transformOrigin.split(' ').map(parseFloat)
-          const angle = style.rotate === 'none' ? 0 : parseFloat(style.rotate) * Math.PI / 180
-          context.save()
-          context.translate(bankRect.left - sectionRect.left + origin[0], bankRect.top - sectionRect.top + origin[1])
-          context.rotate(angle)
-          context.drawImage(bankCanvas, -origin[0], -origin[1], bankRect.width, bankRect.height)
-          context.restore()
-        }
+        // Банки в картинке стены/пола нет: луч пересекает отдельный объём.
+        updateBankGeometry()
         backdropTexture.needsUpdate = true
         dirty = false
         return true
@@ -817,7 +943,15 @@
         canvas.width = Math.max(1, Math.round(sectionRect.width * backdropRatio))
         canvas.height = Math.max(1, Math.round(sectionRect.height * backdropRatio))
         camera.updateMatrixWorld(true)
+        updateBankGeometry()
         uniforms.labProjection.value.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse).multiply(labToWorld)
+        // Стена начинается на дальней границе стойки в изображении.
+        // Расстояние определяется камерой и разметкой, а не положением банки.
+        const rect = element.getBoundingClientRect(), counterRect = counter.getBoundingClientRect()
+        const edge = new THREE.Vector3(0, 1 - (counterRect.top - rect.top) / rect.height * 2, -1).unproject(camera).applyMatrix4(worldToLab)
+        const direction = new THREE.Vector3(0, 0, -1).transformDirection(camera.matrixWorld)
+        edge.addScaledVector(direction, (-0.015 - edge.y) / direction.y)
+        uniforms.wallDepth.value = Math.min(-0.55, edge.z)
         uniforms.rayOrigin.value.copy(camera.position).applyMatrix4(worldToLab)
         uniforms.rayRight.value.setFromMatrixColumn(camera.matrixWorld, 0).normalize()
         uniforms.rayUp.value.setFromMatrixColumn(camera.matrixWorld, 1).normalize()
@@ -960,6 +1094,7 @@
           section.removeEventListener('transitionend', transitionReady)
           section.removeEventListener('lab-can-ready', counterReady)
           backdropTexture.dispose()
+          bankTexture.dispose()
           tree.texture.dispose()
           initialize.dispose(); stepMaterial.dispose(); resolveMaterial.dispose()
           for (const state of states) state.dispose()
@@ -983,6 +1118,9 @@
         const ready = ref(false)
         watch(ready, value => emit('ready', value))
         const shadowStyle = ref({})
+        const contactStyle = ref({})
+        const shadowClipStyle = ref({})
+        const hitStyle = ref({})
         let unmounted = false
         let visible = false
         let nearSection = false
@@ -1036,9 +1174,10 @@
           if (started || !nearSection || unmounted) return
           started = true
           try {
-            const [THREE, { GLTFLoader }] = await Promise.all([
+            const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
               import('three'),
               import('three/addons/loaders/GLTFLoader.js'),
+              import('three/addons/environments/RoomEnvironment.js'),
             ])
             if (unmounted) return
         
@@ -1107,9 +1246,12 @@
             const scene = new THREE.Scene()
             scene.add(product)
             if (!hasGlass) {
-              const room = new THREE.Scene()
-              room.background = new THREE.Color(0x888888)
-              const softbox = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 4, 4), side: THREE.DoubleSide }))
+              const room = new RoomEnvironment()
+              room.traverse(node => {
+                if (node.isLight) node.intensity *= 0.35
+                if (node.material?.color && Math.max(...node.material.color.toArray()) > 1) node.material.color.multiplyScalar(0.12)
+              })
+              const softbox = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 6, 6), side: THREE.DoubleSide }))
               softbox.position.copy(new THREE.Vector3(...sceneSettings.light).normalize().multiplyScalar(5))
               softbox.lookAt(0, 0, 0)
               room.add(softbox)
@@ -1118,8 +1260,7 @@
                 environment = generator.fromScene(room)
                 scene.environment = environment.texture
               } finally {
-                softbox.geometry.dispose()
-                softbox.material.dispose()
+                room.dispose()
                 generator.dispose()
               }
             }
@@ -1129,6 +1270,7 @@
             scene.add(light)
         
             const productBounds = new THREE.Box3().setFromObject(product)
+            if (props.bank) bankOptics = createBankSurface(THREE, product, productBounds)
             const baseWidth = Math.max(size.x, size.z) * product.scale.x
         
             const camera = new THREE.OrthographicCamera(-1.28, 1.28, 1.28, -1.28, 0.1, 20)
@@ -1179,6 +1321,9 @@
               camera.top = halfHeight
               camera.bottom = -halfHeight
               camera.updateProjectionMatrix()
+              // Оптика рисует отдельной камерой и обновляет исходную позже.
+              // Проекция тени уже сейчас должна учитывать наклон этой камеры.
+              camera.updateMatrixWorld(true)
               renderer.setPixelRatio(pixelRatio)
               renderer.setSize(width, height, false)
               glassRenderer?.resize()
@@ -1188,6 +1333,24 @@
               const baseX = (base.x + 1) * width / 2
               const baseY = (1 - base.y) * height / 2
               host.value.style.setProperty('--model-origin', `${baseX}px ${baseY}px`)
+              const projected = []
+              for (const x of [productBounds.min.x, productBounds.max.x]) for (const y of [productBounds.min.y, productBounds.max.y]) for (const z of [productBounds.min.z, productBounds.max.z]) {
+                const point = new THREE.Vector3(x, y, z).project(camera)
+                projected.push({ x: (point.x + 1) * width / 2, y: (1 - point.y) * height / 2 })
+              }
+              const hitLeft = Math.min(...projected.map(p => p.x)), hitTop = Math.min(...projected.map(p => p.y))
+              hitStyle.value = { left: `${hitLeft}px`, top: `${hitTop}px`, width: `${Math.max(...projected.map(p => p.x)) - hitLeft}px`, height: `${Math.max(...projected.map(p => p.y)) - hitTop}px` }
+              const modelRect = host.value.getBoundingClientRect()
+              const counterRect = host.value.closest('section').querySelector('.lab-counter').getBoundingClientRect()
+              const shadowOffsetX = modelRect.left - counterRect.left, shadowOffsetY = modelRect.top - counterRect.top
+              // Тень стакана остаётся в координатах модели; стойка задаёт только
+              // область отсечения, а не новое начало координат для обеих теней.
+              shadowClipStyle.value = hasGlass ? {
+                left: '0', top: '0', width: '100%', height: '100%', overflow: 'visible',
+                clipPath: `inset(${counterRect.top - modelRect.top}px ${modelRect.right - counterRect.right}px ${modelRect.bottom - counterRect.bottom}px ${counterRect.left - modelRect.left}px)`,
+              } : { left: `${-shadowOffsetX}px`, top: `${-shadowOffsetY}px`, width: `${counterRect.width}px`, height: `${counterRect.height}px` }
+              const shadowOriginX = hasGlass ? 0 : shadowOffsetX
+              const shadowOriginY = hasGlass ? 0 : shadowOffsetY
               const projectionWidth = camera.right - camera.left
               const shadowWidth = baseWidth / projectionWidth * width
               const heightWorld = productBounds.max.y - productBounds.min.y
@@ -1197,10 +1360,15 @@
               const dy = (base.y - tip.y) * height / 2
               const length = Math.hypot(dx, dy)
               shadowStyle.value = {
-                left: `${baseX + dx / 2}px`, top: `${baseY + dy / 2}px`,
+                left: `${baseX + dx / 2 + shadowOriginX}px`, top: `${baseY + dy / 2 + shadowOriginY}px`,
                 width: `${length + shadowWidth}px`, height: `${shadowWidth * 0.35}px`,
                 transform: `translate(-50%, -50%) rotate(${Math.atan2(dy, dx)}rad)`,
-                background: 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.32), rgb(0 0 0 / 0.12) 60%, transparent)',
+                background: 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.25) 60%, transparent)',
+              }
+              contactStyle.value = {
+                left: `${baseX + shadowOriginX}px`, top: `${baseY + shadowWidth * 0.025 + shadowOriginY}px`,
+                width: `${shadowWidth * 1.65}px`, height: `${shadowWidth * 0.25}px`,
+                background: 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.42) 45%, transparent)',
               }
               if (!glassRenderer) {
                 ready.value = true
@@ -1264,7 +1432,11 @@
         })
         
         return () => h('span', { ref: host, class: 'product-model', 'aria-hidden': 'true' }, [
-          h('span', { class: 'product-model-shadow', style: { ...shadowStyle.value, display: ready.value ? undefined : 'none' } }),
+          h('span', { class: 'lab-hit', style: { ...hitStyle.value, display: ready.value ? undefined : 'none' } }),
+          h('span', { class: 'product-model-shadows', style: { ...shadowClipStyle.value, display: ready.value ? undefined : 'none' } }, [
+            h('span', { class: 'product-model-shadow', style: contactStyle.value }),
+            h('span', { class: 'product-model-shadow', style: shadowStyle.value }),
+          ]),
         ])
       },
     })
@@ -1319,7 +1491,7 @@
         }, [
         h('img', { class: 'lab-counter', src: barCounterTexture, alt: '', 'aria-hidden': 'true' }),
         h(CategoryPattern, { class: 'lab-pattern', slug: 'sidr', idPrefix: 'glass-lab', viewBox: `0 0 ${viewport.value.width} ${viewport.value.height * 0.7}` }),
-        !bothReady() && h('div', { class: 'lab-loader', role: 'status', 'aria-live': 'polite' }, loadingError.value || 'Модели загружаются…'),
+        !bothReady() && h('div', { class: 'lab-loader', role: 'status', 'aria-label': loadingError.value || 'Загрузка моделей', 'aria-live': 'polite' }, loadingError.value || h('span', { class: 'lab-spinner', 'aria-hidden': 'true' })),
         h('div', { class: ['lab-stage', { 'is-loading': !bothReady() }] }, [
           h('article', { 'aria-label': 'Стакан и банка на стойке' }, [
             h('div', { class: ['lab-model lab-can', { 'is-hovered': canHovered.value }], 'data-lab-can': '',
