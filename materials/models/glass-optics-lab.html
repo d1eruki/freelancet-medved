@@ -178,17 +178,63 @@
       return chain.map(p => new THREE.Vector4(p.r * 10, (p.y - 0.0014) * 10, p.nr / p.count, p.ny / p.count))
     }
     
+    function opticalNormals(points) {
+      const angles = points.map(point => Math.atan2(point.w, point.z))
+      const difference = (a, b) => Math.atan2(Math.sin(b - a), Math.cos(b - a))
+      return points.map((point, i) => {
+        let slope = 0
+        if (i > 0 && i < points.length - 1) {
+          const left = point.y - points[i - 1].y, right = points[i + 1].y - point.y
+          if (Math.abs(left) >= 0.000001 && Math.abs(right) >= 0.000001 && left * right > 0) {
+            const a = difference(angles[i - 1], angles[i]) / left
+            const b = difference(angles[i], angles[i + 1]) / right
+            if (a * b > 0) {
+              const wa = 2 * Math.abs(right) + Math.abs(left)
+              const wb = Math.abs(right) + 2 * Math.abs(left)
+              const mean = (wa + wb) / (wa / a + wb / b)
+              slope = Math.sign(mean) * Math.min(Math.abs(mean), 1.5 * Math.abs(a), 1.5 * Math.abs(b))
+            }
+          }
+        }
+        return { angle: angles[i], slope }
+      })
+    }
+
     // Исходные сегменты в дереве границ; геометрия не упрощается.
     function profileTree(THREE, glass, liquid) {
+      const glassNormals = opticalNormals(glass), liquidNormals = opticalNormals(liquid)
+      // Смоченная стенка — одна граница двух сред. У обеих сторон должны
+      // совпадать не только позиции, но и производные оптических нормалей.
+      liquid.forEach((point, i) => {
+        const shared = glass.findIndex(other => Math.abs(other.x - point.x) < 1e-8 && Math.abs(other.y - point.y) < 1e-8 && other.z * point.z + other.w * point.w < 0)
+        if (shared >= 0) {
+          liquidNormals[i] = { angle: Math.atan2(-glass[shared].w, -glass[shared].z), slope: glassNormals[shared].slope }
+          return
+        }
+        // У уровня напитка сегмент стенки обрезан. Нормаль и её производная
+        // здесь берутся из того же поля, а не пересчитываются по мениску.
+        for (let j = 0; j < glass.length - 1; j++) {
+          const a = glass[j], b = glass[j + 1], dy = b.y - a.y
+          if (Math.abs(dy) < 0.000001) continue
+          const u = (point.y - a.y) / dy
+          if (u <= 0 || u >= 1 || Math.abs(point.x - (a.x + u * (b.x - a.x))) >= 1e-8 || a.z * point.z + a.w * point.w >= 0) continue
+          const na = glassNormals[j], nb = glassNormals[j + 1], u2 = u * u, u3 = u2 * u
+          const delta = Math.atan2(Math.sin(nb.angle - na.angle), Math.cos(nb.angle - na.angle))
+          const angle = na.angle + (-2 * u3 + 3 * u2) * delta + (u3 - 2 * u2 + u) * dy * na.slope + (u3 - u2) * dy * nb.slope
+          const slope = (-6 * u2 + 6 * u) * delta / dy + (3 * u2 - 4 * u + 1) * na.slope + (3 * u2 - 2 * u) * nb.slope
+          liquidNormals[i] = { angle: Math.atan2(-Math.sin(angle), -Math.cos(angle)), slope }
+          break
+        }
+      })
       const segments = []
-      for (const [points, object] of [[glass, 1], [liquid, 2]]) {
+      for (const [points, normals, object] of [[glass, glassNormals, 1], [liquid, liquidNormals, 2]]) {
         for (let i = 0; i < points.length; i++) {
           const a = points[i], b = points[(i + 1) % points.length]
           // segment() допускает выход на 1e-6 по высоте. У почти плоского
           // кольца этому соответствует заметный радиальный запас.
           const dy = Math.abs(b.y - a.y)
           const radialMargin = 0.000002 * (1 + (dy >= 0.000001 ? Math.abs(b.x - a.x) / dy : 0))
-          segments.push({ a, b, object, closing: i === points.length - 1, radialMargin })
+          segments.push({ a, b, normalA: normals[i], normalB: normals[(i + 1) % points.length], object, closing: i === points.length - 1, radialMargin })
         }
       }
       const nodes = []
@@ -219,8 +265,8 @@
         data.set([node.minY, node.maxY, node.minR, node.maxR], offset)
         data.set([node.escape, node.object, Number(node.leaf), Number(Boolean(node.closing))], offset + 4)
         if (node.leaf) {
-          node.a.toArray(data, offset + 8)
-          node.b.toArray(data, offset + 12)
+          data.set([node.a.x, node.a.y, node.normalA.angle, node.normalA.slope], offset + 8)
+          data.set([node.b.x, node.b.y, node.normalB.angle, node.normalB.slope], offset + 12)
         }
       })
       const texture = new THREE.DataTexture(data, 4, nodes.length, THREE.RGBAFormat, THREE.FloatType)
@@ -429,7 +475,7 @@
             if(abs(d.y)<0.000001)return;
             float t=(a.y-o.y)/d.y;vec3 p=o+d*t;float r=length(p.xz);
             if(t>0.00005&&t<h.t&&r>=min(a.x,b.x)-0.000001&&r<=max(a.x,b.x)+0.000001){
-              vec3 n=vec3(0.0,sign(a.w+b.w),0.0);
+              vec3 n=vec3(0.0,sign(sin(a.z)+sin(b.z)),0.0);
               h=Hit(t,n,n,object);
             }return;
           }
@@ -462,7 +508,13 @@
           for(int j=0;j<2;j++){
             float t=roots[j]+reference;vec3 p=localOrigin+d*roots[j];
             if(t<=0.00005||t>=h.t||p.y<min(a.y,b.y)-0.000001||p.y>max(a.y,b.y)+0.000001)continue;
-            vec2 smoothNormal=mix(a.zw,b.zw,clamp((p.y-a.y)/dy,0.0,1.0));
+            // Общая производная в узлах убирает оптический излом между
+            // кольцами. Линейные нормали давали отдельную полосу под выпуклостью.
+            float u=clamp((p.y-a.y)/dy,0.0,1.0),u2=u*u,u3=u2*u;
+            float angleDelta=atan(sin(b.z-a.z),cos(b.z-a.z));
+            float angle=a.z+(-2.0*u3+3.0*u2)*angleDelta+
+              (u3-2.0*u2+u)*dy*a.w+(u3-u2)*dy*b.w;
+            vec2 smoothNormal=vec2(cos(angle),sin(angle));
             vec2 radial=p.xz/max(length(p.xz),0.000001);
             vec3 n=normalize(vec3(radial.x*smoothNormal.x,smoothNormal.y,radial.y*smoothNormal.x));
             vec3 geometricNormal=normalize(vec3(radial.x*dy,a.x-b.x,radial.y*dy));
