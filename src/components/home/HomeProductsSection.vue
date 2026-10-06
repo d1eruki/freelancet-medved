@@ -1,11 +1,19 @@
 <script setup>
 import { sitePath } from '../../utils/site-path'
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, provide, ref } from 'vue'
 import CategoryPattern from '../CategoryPattern.vue'
 import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { catalogCategories } from '../../data/catalog'
+import { createProductScene, productSceneKey } from '../../utils/product-scene.js'
+import antonovkaLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/antonovka.png?url'
+import williamsLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/poiret-pear.png?url'
 import barCounterTexture from '../../assets/home/bar-counter-texture.png'
+
+const productScene = createProductScene()
+provide(productSceneKey, productScene)
+
+const canLabels = { sidr: antonovkaLabel, puare: williamsLabel }
 
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
@@ -15,6 +23,8 @@ const products = catalogCategories.map((category) => ({
   varieties: category.introduction,
   href: sitePath(`/katalog/${category.slug}/`),
   image: category.image,
+  drink: category.slug === 'medovuha' ? 'mead' : 'cider',
+  canLabel: canLabels[category.slug] || '',
 }))
 
 const activeIndex = ref(0)
@@ -143,13 +153,17 @@ function showNext() {
   showProduct((activeIndex.value + 1) % products.length)
 }
 
-onBeforeUnmount(clearTransitionTimers)
+onBeforeUnmount(() => {
+  clearTransitionTimers()
+  productScene.dispose()
+})
 </script>
 
 <template>
   <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" data-header-theme="dark" aria-labelledby="products-title">
     <img
       :src="barCounterTexture"
+      data-product-counter
       alt=""
       aria-hidden="true"
       class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] w-full object-fill"
@@ -160,6 +174,7 @@ onBeforeUnmount(clearTransitionTimers)
           v-for="product in products"
           :key="product.slug"
           :slug="product.slug"
+          :data-product-pattern="product.slug"
           id-prefix="slider"
           class="h-full w-full shrink-0 text-brand opacity-[0.07]"
         />

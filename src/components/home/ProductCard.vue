@@ -1,13 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
+import ProductScene from './ProductScene.vue'
 import CircleArrow from '../CircleArrow.vue'
-
-const hoverAngle = ref(3)
-
-function updateHoverAngle(event) {
-  const bounds = event.currentTarget.getBoundingClientRect()
-  hoverAngle.value = event.clientX < bounds.left + bounds.width / 2 ? 3 : -3
-}
 
 const props = defineProps({
   product: {
@@ -37,7 +31,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['previous', 'next'])
 
-const hoverAngleCss = computed(() => `${hoverAngle.value}deg`)
 const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 </script>
 
@@ -94,15 +87,21 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
         </button>
 
         <a
-          class="product-interactive product-visual relative z-1 min-w-0 max-w-64 flex-1 aspect-square rotate-0 transition duration-500 focus-visible:outline-4 focus-visible:outline-brand sm:max-w-72 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
+          class="product-interactive product-visual relative z-1 min-w-0 max-w-64 flex-1 aspect-square focus-visible:outline-4 focus-visible:outline-brand sm:max-w-72 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
           draggable="false"
-          @pointermove="updateHoverAngle"
-          @pointerleave="hoverAngle = 3"
           :href="product.href"
           :tabindex="active ? 0 : -1"
           :aria-label="`Подробнее о напитке «${product.name}»`"
         >
-          <img class="size-full object-contain" :src="product.image" alt="" draggable="false">
+          <ProductScene
+            can-only
+            :active="active"
+            :paused="dragging || Boolean(motionDirection)"
+            :drink="product.drink"
+            :can-label="product.canLabel"
+            :pattern-slug="product.slug"
+            :fallback="product.image"
+          />
         </a>
 
         <button
@@ -128,23 +127,21 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   opacity: 0;
 }
 
-.product-visual {
+:deep(.product-scene-snapshot) {
   transform-origin: 50% 90%;
 }
 
-.is-moving-forward .product-visual {
+.is-moving-forward :deep(.product-scene-transform),
+.is-moving-forward :deep(.product-scene-snapshot) {
   animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.is-moving-backward .product-visual {
+.is-moving-backward :deep(.product-scene-transform),
+.is-moving-backward :deep(.product-scene-snapshot) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.product-card:has(a:is(:hover, :focus-visible)) .product-visual {
-  rotate: v-bind(hoverAngleCss);
-}
-
-.is-dragging .product-visual {
+.is-dragging :deep(.product-scene-transform) {
   rotate: v-bind(dragAngleCss);
 }
 
@@ -189,6 +186,13 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 
   100% {
     rotate: 0deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :deep(.product-scene-transform),
+  :deep(.product-scene-snapshot) {
+    animation: none;
+    rotate: none;
   }
 }
 </style>
