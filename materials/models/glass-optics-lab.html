@@ -49,7 +49,7 @@
     .lab-stage article { position: relative; width: 100%; height: 100%; }
     .lab-model {
       position: absolute;
-      left: 50%;
+      left: calc(50% + var(--composition-offset, 0px));
       bottom: calc(0.75rem * var(--zoom));
       height: min(91.666667%, calc(36rem * var(--zoom)));
       max-width: var(--scene-width);
@@ -60,7 +60,7 @@
     .lab-hit { position: absolute; z-index: 2; pointer-events: auto; }
     .lab-model.lab-can {
       z-index: 0;
-      left: calc(50% + 8rem * var(--zoom));
+      left: calc(50% + var(--composition-offset, 0px) + 8rem * var(--zoom));
       bottom: calc(5rem * var(--zoom));
       height: min(91.666667%, calc(36rem * var(--zoom)));
     }
@@ -1087,7 +1087,10 @@
           product.rotation.y = 0.35
           product.updateMatrixWorld(true)
           const productBounds = new THREE.Box3().setFromObject(product)
-          return { slot, model, product, productBounds, baseWidth: Math.max(size.x, size.z) * product.scale.x }
+          // Фиксируем границы реальной геометрии: вращение и наведение
+          // не должны постоянно менять положение всей композиции.
+          const compositionBounds = new THREE.Box3().setFromObject(product, true)
+          return { slot, model, product, productBounds, compositionBounds, baseWidth: Math.max(size.x, size.z) * product.scale.x }
         })
         const glassItem = items[0], canItem = items[1]
         const canPlacement = new THREE.Group()
@@ -1113,7 +1116,7 @@
             material.needsUpdate = true
           }
         })
-        let glassRect, unionRect, pixelRatio = 1
+        let glassRect, unionRect, pixelRatio = 1, compositionOffset = 0
         const referenceProjection = new THREE.Matrix4()
         const sizeBuffer = new THREE.Vector2()
         function setView(capture) {
@@ -1196,6 +1199,28 @@
         }
         function resize() {
           if (disposed) return
+          const articleRect = article.getBoundingClientRect()
+          let compositionLeft = Infinity, compositionRight = -Infinity
+          for (const { slot, compositionBounds } of items) {
+            const rect = slot.host.getBoundingClientRect()
+            if (!rect.width || !rect.height) return
+            const aspect = rect.width / rect.height
+            const halfWidth = 1.28 / Math.min(aspect, 1) * aspect
+            for (const x of [compositionBounds.min.x, compositionBounds.max.x])
+              for (const y of [compositionBounds.min.y, compositionBounds.max.y])
+                for (const z of [compositionBounds.min.z, compositionBounds.max.z]) {
+                  const point = new THREE.Vector3(x, y, z).applyMatrix4(camera.matrixWorldInverse)
+                  const screenX = rect.left + (point.x / halfWidth + 1) * rect.width / 2
+                  compositionLeft = Math.min(compositionLeft, screenX)
+                  compositionRight = Math.max(compositionRight, screenX)
+                }
+          }
+          const nextOffset = compositionOffset + articleRect.left + articleRect.width / 2
+            - (compositionLeft + compositionRight) / 2
+          if (Math.abs(nextOffset - compositionOffset) > 0.001) {
+            compositionOffset = nextOffset
+            article.style.setProperty('--composition-offset', `${compositionOffset}px`)
+          }
           glassRect = glassSlot.host.getBoundingClientRect()
           const canRect = canSlot.host.getBoundingClientRect()
           if (!glassRect.width || !canRect.width) return
