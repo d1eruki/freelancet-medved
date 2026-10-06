@@ -1035,10 +1035,10 @@
         camera.updateMatrixWorld(true)
         const environmentRoom = new RoomEnvironment()
         environmentRoom.traverse(node => {
-          if (node.isLight) node.intensity *= 0.35
+          if (node.isLight) node.intensity *= 0.65
           if (node.material?.color && Math.max(...node.material.color.toArray()) > 1) node.material.color.multiplyScalar(0.12)
         })
-        const softbox = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 6, 6), side: THREE.DoubleSide }))
+        const softbox = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 4, 4), side: THREE.DoubleSide }))
         softbox.position.copy(new THREE.Vector3(...sceneSettings.light).normalize().multiplyScalar(5))
         softbox.lookAt(0, 0, 0)
         environmentRoom.add(softbox)
@@ -1049,7 +1049,7 @@
         sharedScene.dispose = cleanup
         scene.environment = environment.texture
         scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
-        const light = new THREE.DirectionalLight(0xffffff, 3)
+        const light = new THREE.DirectionalLight(0xffffff, 1.5)
         light.position.set(...sceneSettings.light)
         scene.add(light)
         const loader = new GLTFLoader()
@@ -1105,6 +1105,10 @@
         canItem.model.traverse(node => {
           for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
             if (!material) continue
+            if (material.name.endsWith('-printed-label')) {
+              material.envMap = environment.texture
+              material.envMapIntensity = 0.25
+            }
             material.toneMapped = false
             material.onBeforeCompile = shader => {
               shader.uniforms.labDisplayPass = bankDisplay
