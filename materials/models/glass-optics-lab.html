@@ -846,26 +846,46 @@
           cream*=0.90+0.10*light;
           return max(vec3(0),cream*(1.0+pores-0.05*lower));
         }
+        // Детерминированное приближение углового рассеяния, без шума по кадрам.
+        float scatteringVariance(int medium,float distance){
+          return medium==2?liquidScattering*distance*0.0064:0.0;
+        }
+        vec3 spreadDirection(vec3 direction,float variance,int sampleIndex){
+          vec3 axis=abs(direction.y)<0.9?vec3(0,1,0):vec3(1,0,0);
+          vec3 tangent=normalize(cross(direction,axis)),bitangent=cross(direction,tangent);
+          float angle=float(sampleIndex)*2.39996323;
+          float radius=sqrt((float(sampleIndex)+0.5)/8.0)*min(sqrt(max(variance,0.0)),0.18);
+          return normalize(direction+radius*(cos(angle)*tangent+sin(angle)*bitangent));
+        }
         vec3 cachedOrigin[3],cachedDirection[3],cachedWeight[3];
+        float cachedVariance[3];
         vec3 pathWeight,discardedColor;
         vec3 staticRayColor(vec3 o,vec3 d);
-        void recordRay(vec3 origin,vec3 direction,vec3 weight){
+        vec3 filteredStaticRayColor(vec3 origin,vec3 direction,float variance){
+          if(variance<0.000001)return staticRayColor(origin,direction);
+          vec3 color=vec3(0);
+          for(int i=0;i<8;i++)color+=staticRayColor(origin,spreadDirection(direction,variance,i));
+          return color/8.0;
+        }
+        void recordRay(vec3 origin,vec3 direction,vec3 weight,float variance){
           vec4 clip=labProjection*vec4(origin,1.0);vec2 uv=clip.xy/clip.w;
           for(int i=0;i<3;i++){
             vec4 previous=labProjection*vec4(cachedOrigin[i],1.0);
-            if(dot(cachedWeight[i],vec3(1))>0.0&&distance(previous.xy/previous.w,uv)<0.006&&dot(cachedDirection[i],direction)>0.99999){
+            if(dot(cachedWeight[i],vec3(1))>0.0&&distance(previous.xy/previous.w,uv)<0.006&&dot(cachedDirection[i],direction)>0.99999
+              &&abs(cachedVariance[i]-variance)<0.00001){
               float a=dot(cachedWeight[i],vec3(1)),b=dot(weight,vec3(1));
               cachedOrigin[i]=(cachedOrigin[i]*a+origin*b)/max(a+b,0.000001);
               cachedDirection[i]=normalize(cachedDirection[i]*a+direction*b);
+              cachedVariance[i]=(cachedVariance[i]*a+variance*b)/max(a+b,0.000001);
               cachedWeight[i]+=weight;return;
             }
           }
           int slot=0;float weakest=dot(cachedWeight[0],vec3(1));
           for(int i=1;i<3;i++){float w=dot(cachedWeight[i],vec3(1));if(w<weakest){weakest=w;slot=i;}}
           if(dot(weight,vec3(1))>weakest){
-            if(weakest>0.0)discardedColor+=cachedWeight[slot]*staticRayColor(cachedOrigin[slot],cachedDirection[slot]);
-            cachedOrigin[slot]=origin;cachedDirection[slot]=direction;cachedWeight[slot]=weight;
-          }else discardedColor+=weight*staticRayColor(origin,direction);
+            if(weakest>0.0)discardedColor+=cachedWeight[slot]*filteredStaticRayColor(cachedOrigin[slot],cachedDirection[slot],cachedVariance[slot]);
+            cachedOrigin[slot]=origin;cachedDirection[slot]=direction;cachedWeight[slot]=weight;cachedVariance[slot]=variance;
+          }else discardedColor+=weight*filteredStaticRayColor(origin,direction,variance);
         }
         vec3 bankColor(Hit h,vec3 p,vec3 d){return vec3(0);}
         vec3 backdropColor(Hit h,vec3 p,vec3 d){
@@ -922,13 +942,14 @@
         layout(location=4) out vec4 bankWeight1;
         layout(location=5) out vec4 bankUV2;
         layout(location=6) out vec4 bankWeight2;
+        layout(location=7) out vec4 rayVariance;
         void primaryRay(vec2 pixel,out vec3 o,out vec3 d){
           vec2 uv=pixel/resolution;
           vec3 offset=(uv.x*2.0-1.0)*halfSize.x*rayRight+(uv.y*2.0-1.0)*halfSize.y*rayUp;
           o=rayOrigin+offset;d=rayDirection;
         }
         // Небольшая отражённая ветвь без случайной выборки и накопления кадров.
-        vec3 reflectionPath(vec3 o,vec3 d,int medium,vec3 weight){
+        vec3 reflectionPath(vec3 o,vec3 d,int medium,vec3 weight,float variance){
           vec3 color=vec3(0);
           for(int step=0;step<reflectionSteps;step++){
             Hit h=intersect(o,d,medium);vec3 p=o+d*h.t;
@@ -938,10 +959,11 @@
               float foamT=intersectFoam(o,d,h.t);
               if(foamT>0.0)return color+weight*(scattering(medium,foamT)+absorption(medium,foamT)*foamSurfaceColor(o+d*foamT));
             }
-            if(h.object==-1){recordRay(o,d,weight);return color;}
+            if(h.object==-1){recordRay(o,d,weight,variance);return color;}
+            variance+=scatteringVariance(medium,h.t);
             color+=weight*scattering(medium,h.t);
             weight*=absorption(medium,h.t);
-            if(h.object!=1&&h.object!=2){recordRay(o,d,weight);return color;}
+            if(h.object!=1&&h.object!=2){recordRay(o,d,weight,variance);return color;}
             int next=nextMedium(h,p,d);float from=ior(medium),to=ior(next);
             vec3 n=interfaceNormal(h,d,from/to);
             float f=fresnel(clamp(dot(-d,n),0.0,1.0),from,to);
@@ -952,7 +974,7 @@
           return color;
         }
         vec3 trace(vec3 o,vec3 d,float sampleWeight){
-          int medium=0;vec3 color=vec3(0),weight=vec3(sampleWeight);
+          int medium=0;vec3 color=vec3(0),weight=vec3(sampleWeight);float variance=0.0;
           for(int step=0;step<traceSteps;step++){
             Hit h=intersect(o,d,medium);vec3 p=o+d*h.t;
             // Непрозрачная пена завершает эту ветвь: луч к банке за ней
@@ -961,17 +983,18 @@
               float foamT=intersectFoam(o,d,h.t);
               if(foamT>0.0)return color+weight*(scattering(medium,foamT)+absorption(medium,foamT)*foamSurfaceColor(o+d*foamT));
             }
-            if(h.object==-1){recordRay(o,d,weight);return color;}
+            if(h.object==-1){recordRay(o,d,weight,variance);return color;}
+            variance+=scatteringVariance(medium,h.t);
             color+=weight*scattering(medium,h.t);
             weight*=absorption(medium,h.t);
-            if(h.object!=1&&h.object!=2){recordRay(o,d,weight);return color;}
+            if(h.object!=1&&h.object!=2){recordRay(o,d,weight,variance);return color;}
             int next=nextMedium(h,p,d);float from=ior(medium),to=ior(next);
             vec3 n=interfaceNormal(h,d,from/to);
             float f=fresnel(clamp(dot(-d,n),0.0,1.0),from,to);
             vec3 reflected=reflect(d,n);
             if(f>=0.9999)d=reflected;
             else{
-              if(f>0.001)color+=reflectionPath(offsetOrigin(p,h,reflected),reflected,medium,weight*f);
+              if(f>0.001)color+=reflectionPath(offsetOrigin(p,h,reflected),reflected,medium,weight*f,variance);
               weight*=1.0-f;d=refract(d,n,from/to);medium=next;
             }
             o=offsetOrigin(p,h,d);
@@ -986,7 +1009,7 @@
           return n.z>=0.0?n.xy:(1.0-abs(n.yx))*signs;
         }
         void main(){
-          for(int i=0;i<3;i++){cachedOrigin[i]=vec3(0);cachedDirection[i]=vec3(0,0,-1);cachedWeight[i]=vec3(0);}
+          for(int i=0;i<3;i++){cachedOrigin[i]=vec3(0);cachedDirection[i]=vec3(0,0,-1);cachedWeight[i]=vec3(0);cachedVariance[i]=0.0;}
           discardedColor=vec3(0);
           vec3 centerOrigin,centerDirection;primaryRay(gl_FragCoord.xy,centerOrigin,centerDirection);
           Hit center=intersect(centerOrigin,centerDirection,0);
@@ -1005,6 +1028,7 @@
           bankUV0=vec4(cachedOrigin[0],direction0.x);bankWeight0=vec4(direction0.y,cachedWeight[0]);
           bankUV1=vec4(cachedOrigin[1],direction1.x);bankWeight1=vec4(direction1.y,cachedWeight[1]);
           bankUV2=vec4(cachedOrigin[2],direction2.x);bankWeight2=vec4(direction2.y,cachedWeight[2]);
+          rayVariance=vec4(cachedVariance[0],cachedVariance[1],cachedVariance[2],0);
         }
       `
       const screenScene = scene
@@ -1016,13 +1040,13 @@
       const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), opticsMaterial)
       screenMesh.frustumCulled = false
       screenScene.add(screenMesh)
-      // Кэшируются выходящие из стекла лучи: начало, направление и цветовой вес.
+      // Кэшируются начало, направление, цветовой вес и ширина рассеяния каждого луча.
       // Фон, металл банки и её положение проверяются в общем финальном проходе.
       const opticsCache = new THREE.WebGLRenderTarget(1, 1, {
-        count: 7, type: THREE.HalfFloatType, depthBuffer: false,
+        count: 8, type: THREE.HalfFloatType, depthBuffer: false,
         minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
       })
-      if (renderer.getContext().getParameter(renderer.getContext().MAX_DRAW_BUFFERS) < 7) throw new Error('Seven optical cache attachments are required')
+      if (renderer.getContext().getParameter(renderer.getContext().MAX_DRAW_BUFFERS) < 8) throw new Error('Eight optical cache attachments are required')
       // Кэш только прямой преломлённой ветви внутри напитка. Пузырьки —
       // приближение с контуром и бликом, без вторичной трассировки каждой сферы.
       const bubbleCache = new THREE.WebGLRenderTarget(1, 1, {
@@ -1077,7 +1101,7 @@
         transparent: true, premultipliedAlpha: true,
         fragmentShader: terminalOptics + /* glsl */ `
           varying vec2 cacheUV;
-          uniform sampler2D cache0,cache1,cache2,cache3,cache4,cache5,cache6;
+          uniform sampler2D cache0,cache1,cache2,cache3,cache4,cache5,cache6,cache7;
           uniform sampler2D bubbleEntry,bubbleDirection;
           uniform sampler2D bubblePositions;
           vec3 bubbleColor(vec3 color){
@@ -1121,9 +1145,7 @@
             if(n.z<0.0)n.xy=(1.0-abs(n.yx))*signs;
             return normalize(n);
           }
-          vec3 rayColor(vec4 origin,vec4 data){
-            vec3 weight=data.yzw;if(max(weight.r,max(weight.g,weight.b))<0.00001)return vec3(0);
-            vec3 o=origin.xyz,d=decodeDirection(vec2(origin.w,data.x));
+          vec3 terminalRayColor(vec3 o,vec3 d){
             Hit h=Hit(10000.0,vec3(0),vec3(0),-1);
             plane(o,d,vec3(0,-0.015,0),vec3(0,1,0),vec3(20,0.001,20),3,h);
             plane(o,d,vec3(0,1,wallDepth),vec3(0,0,1),vec3(24,24,0.001),4,h);
@@ -1132,13 +1154,24 @@
             plane(o,d,vec3(-1.3,1.2,0.65),vec3(1,0,0),vec3(0.001,2,0.08),6,h);
             plane(o,d,vec3(1.3,1.2,0.65),vec3(-1,0,0),vec3(0.001,2,0.06),6,h);
             intersectBank(o,d,h);
-            return weight*surfaceColor(h,o+d*h.t,d);
+            return surfaceColor(h,o+d*h.t,d);
+          }
+          vec3 rayColor(vec4 origin,vec4 data,float variance){
+            vec3 weight=data.yzw;if(max(weight.r,max(weight.g,weight.b))<0.00001)return vec3(0);
+            vec3 o=origin.xyz,d=decodeDirection(vec2(origin.w,data.x));
+            // Наружное отражение и прозрачные пресеты сохраняют одну чёткую выборку.
+            if(variance<0.000001)return weight*terminalRayColor(o,d);
+            vec3 color=vec3(0);
+            for(int i=0;i<8;i++)color+=terminalRayColor(o,spreadDirection(d,variance,i));
+            return weight*color/8.0;
           }
           vec3 toSRGB(vec3 c){return mix(12.92*c,1.055*pow(max(c,vec3(0)),vec3(1.0/2.4))-0.055,step(vec3(0.0031308),c));}
           void main(){
             vec4 base=texture(cache0,cacheUV);if(base.a<0.00001){fragmentColor=vec4(0);return;}
-            vec3 color=base.rgb+rayColor(texture(cache1,cacheUV),texture(cache2,cacheUV))
-              +rayColor(texture(cache3,cacheUV),texture(cache4,cacheUV))+rayColor(texture(cache5,cacheUV),texture(cache6,cacheUV));
+            vec3 variance=texture(cache7,cacheUV).xyz;
+            vec3 color=base.rgb+rayColor(texture(cache1,cacheUV),texture(cache2,cacheUV),variance.x)
+              +rayColor(texture(cache3,cacheUV),texture(cache4,cacheUV),variance.y)
+              +rayColor(texture(cache5,cacheUV),texture(cache6,cacheUV),variance.z);
             fragmentColor=vec4(toSRGB(bubbleColor(color/base.a))*base.a,base.a);
           }
         `,
@@ -1507,16 +1540,25 @@
               const dx = (tip.x - base.x) * width / 2
               const dy = (base.y - tip.y) * height / 2
               const length = Math.hypot(dx, dy)
+              // Небольшое перекрытие с основанием связывает падающую и контактную тени.
+              const castLength = length + shadowWidth * 0.8
+              const castOffset = castLength / 2 - shadowWidth * 0.2
+              const shadowAngle = Math.atan2(dy, dx)
               slot.shadowStyle.value = {
-                left: `${baseX + dx / 2 + shadowOriginX}px`, top: `${baseY + dy / 2 + shadowOriginY}px`,
-                width: `${length + shadowWidth}px`, height: `${shadowWidth * 0.35}px`,
-                transform: `translate(-50%, -50%) rotate(${Math.atan2(dy, dx)}rad)`,
-                background: 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.25) 60%, transparent)',
+                left: `${baseX + Math.cos(shadowAngle) * castOffset + shadowOriginX}px`,
+                top: `${baseY + Math.sin(shadowAngle) * castOffset + shadowOriginY}px`,
+                width: `${castLength}px`, height: `${shadowWidth * 0.6}px`,
+                transform: `translate(-50%, -50%) rotate(${shadowAngle}rad)`,
+                background: hasGlass
+                  ? 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.45), rgb(0 0 0 / 0.22) 60%, transparent)'
+                  : 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.25) 60%, transparent)',
               }
               slot.contactStyle.value = {
-                left: `${baseX + shadowOriginX}px`, top: `${baseY + shadowWidth * 0.025 + shadowOriginY}px`,
-                width: `${shadowWidth * 1.65}px`, height: `${shadowWidth * 0.25}px`,
-                background: 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.42) 45%, transparent)',
+                left: `${baseX + shadowOriginX}px`, top: `${baseY + shadowOriginY}px`,
+                width: `${shadowWidth * 1.12}px`, height: `${shadowWidth * 0.16}px`,
+                background: hasGlass
+                  ? 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.36) 45%, transparent)'
+                  : 'radial-gradient(ellipse closest-side, rgb(0 0 0 / 0.82), rgb(0 0 0 / 0.42) 45%, transparent)',
               }
 
         }

@@ -11,7 +11,7 @@ export const drinkPresets = {
   mead: {
     label: 'Медовуха',
     absorption: [0.35, 1.35, 3.4],
-    scattering: 1.7,
+    scattering: 2.4,
     scatteringColor: [0.60, 0.30, 0.07],
     foamAllowed: true,
   },
