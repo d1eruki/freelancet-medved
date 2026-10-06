@@ -84,9 +84,7 @@
     .lab-scene-canvas { position: absolute; z-index: 1; pointer-events: none; display: block; }
     .lab-model .lab-transform {
       transform-origin: var(--model-origin, 50% 90%);
-      transition: rotate 500ms;
     }
-    .lab-model.is-hovered .lab-transform { rotate: var(--hover-angle); }
     .lab-zoom {
       position: fixed;
       right: 1rem;
@@ -100,6 +98,15 @@
       background: #fff;
       color: #3d5a45;
       font: 16px system-ui, sans-serif;
+    }
+    .lab-zoom select {
+      min-height: 44px;
+      max-width: 10rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      color: inherit;
+      background: #fff;
+      font: inherit;
     }
     .lab-zoom button {
       min-width: 44px;
@@ -129,6 +136,7 @@
     import barCounterTexture from '../../src/assets/home/bar-counter-texture.png'
     import glassModelUrl from '../../src/assets/models/glass.glb?url'
     import canModelUrl from '../../src/assets/models/can.glb?url'
+    import { drinkPresets } from '../../src/data/drink-presets.js'
 
     function profile(THREE, mesh) {
       const position = mesh.geometry.attributes.position
@@ -394,7 +402,93 @@
       })
       if (!glass || !liquid) throw new Error('Glass and drink meshes are required')
       const glassProfile = profile(THREE, glass)
-      const tree = profileTree(THREE, glassProfile, fittedLiquidProfile(THREE, glassProfile, profile(THREE, liquid)))
+      const liquidProfile = fittedLiquidProfile(THREE, glassProfile, profile(THREE, liquid))
+      const tree = profileTree(THREE, glassProfile, liquidProfile)
+      // Координаты пузырьков локальны для стакана: общий наклон слайдера
+      // применяется к готовому изображению через lab-transform/canvasToScreen.
+      const liquidBottom = Math.min(...liquidProfile.map(point => point.y)) + 0.015
+      const liquidTop = liquidProfile.at(-1).y - 0.018
+      const liquidHeight = liquidTop - liquidBottom
+      function profileRadiusAt(points, y) {
+        let radius = Infinity
+        for (let i = 0; i < points.length - 1; i++) {
+          const a = points[i], b = points[i + 1]
+          if (Math.abs(b.y - a.y) < 0.000001 || y < Math.min(a.y, b.y) || y > Math.max(a.y, b.y)) continue
+          const r = THREE.MathUtils.lerp(a.x, b.x, (y - a.y) / (b.y - a.y))
+          if (r > 0) radius = Math.min(radius, r)
+        }
+        if (!Number.isFinite(radius)) throw new Error('Не определена стенка напитка на высоте пузырька')
+        return radius
+      }
+      const liquidRadiusAt = y => profileRadiusAt(liquidProfile, y)
+      // Край пены на уровне ободка, небольшой плавный подъём только к центру.
+      const foamBottom = liquidProfile.at(-1).y - 0.004
+      const foamTop = Math.max(...glassProfile.map(point => point.y)) - 0.002
+      if (!(foamTop > foamBottom)) throw new Error('Нет места для слоя пены')
+      const foamWall = Array.from({ length: 8 }, (_, i) => {
+        const y = THREE.MathUtils.lerp(foamBottom - 0.01, foamTop, i / 7)
+        return new THREE.Vector2(y, profileRadiusAt(glassProfile, y) - 0.0005)
+      })
+      const foamShape = new THREE.Vector4(foamBottom, foamTop, Math.max(...foamWall.map(point => point.y)), 0.08)
+      if (!(liquidHeight > 0)) throw new Error('Не определён объём для пузырьков')
+      const bubbleCount = 288
+      const bubbles = Array.from({ length: bubbleCount }, () => new THREE.Vector4())
+      // Текстура снимает ограничение uniform-массива при увеличении плотности.
+      const bubbleData = new Float32Array(bubbleCount * 4)
+      const bubblePositions = new THREE.DataTexture(bubbleData, bubbleCount, 1, THREE.RGBAFormat, THREE.FloatType)
+      bubblePositions.minFilter = THREE.NearestFilter
+      bubblePositions.magFilter = THREE.NearestFilter
+      const randomBubble = (index, salt) => {
+        const value = Math.sin((index + 1) * 127.1 + salt * 311.7) * 43758.5453
+        return value - Math.floor(value)
+      }
+      // Большинство пузырьков растёт на стенках; отдельные отрываются.
+      // Источники собраны в неровные пятна, без общих фаз и шага цепочки.
+      const bubbleSites = Array.from({ length: bubbleCount }, (_, i) => {
+        const attached = i < 216
+        const cluster = Math.floor(i / 12)
+        const clusterAngle = cluster * 2.399963 + randomBubble(cluster, 1) * 0.4
+        const clusterHeight = 0.07 + randomBubble(cluster, 2) * 0.82
+        return {
+          attached,
+          angle: attached ? clusterAngle + (randomBubble(i, 3) - 0.5) * 0.38 : randomBubble(i, 3) * Math.PI * 2,
+          startY: liquidBottom + liquidHeight * (attached
+            ? THREE.MathUtils.clamp(clusterHeight + (randomBubble(i, 4) - 0.5) * 0.12, 0.025, 0.94)
+            : randomBubble(i, 4) * 0.20),
+          spread: Math.sqrt(randomBubble(i, 5)) * 0.93,
+          phase: randomBubble(i, 6),
+          period: attached ? 18 + randomBubble(i, 7) * 24 : 7 + randomBubble(i, 7) * 8,
+          hold: attached ? 0.72 + randomBubble(i, 8) * 0.16 : 0,
+          maxRadius: 0.006 + Math.pow(randomBubble(i, 9), 2) * 0.006,
+          wobblePhase: randomBubble(i, 10) * Math.PI * 2,
+        }
+      })
+      let bubbleTime = 0
+      function updateBubbles(elapsed = 0) {
+        bubbleTime += elapsed
+        for (let i = 0; i < bubbleCount; i++) {
+          const site = bubbleSites[i]
+          const phase = (bubbleTime / site.period + site.phase) % 1
+          const rising = phase >= site.hold
+          const progress = rising ? (phase - site.hold) / (1 - site.hold) : 0
+          const ascent = progress * (0.65 + 0.35 * progress)
+          const y = THREE.MathUtils.lerp(site.startY, liquidTop, ascent)
+          const growth = rising ? 1 + progress * 0.15 : THREE.MathUtils.lerp(0.65, 1, phase / site.hold)
+          const fade = rising ? Math.min(1, (1 - progress) / 0.04, site.attached ? 1 : progress / 0.04) : 1
+          const radius = Math.max(0, Math.min(site.maxRadius * growth * fade, y - liquidBottom, liquidTop - y))
+          // Учитываем весь диаметр сферы на сужениях стенки.
+          const wallRadius = Math.min(liquidRadiusAt(y), liquidRadiusAt(y - radius), liquidRadiusAt(y + radius))
+          const wallDistance = Math.max(0, wallRadius - radius - 0.0005)
+          const wobble = rising ? Math.sin(progress * 9 + site.wobblePhase) * 0.008 * progress : 0
+          const spread = site.attached ? 1 - ascent * 0.10 : site.spread
+          const distance = Math.max(0, Math.min(wallDistance, wallDistance * spread + wobble))
+          const angle = site.angle + (rising ? Math.sin(progress * 7 + site.wobblePhase) * 0.025 * progress : 0)
+          bubbles[i].set(Math.cos(angle) * distance, y, Math.sin(angle) * distance, radius)
+          bubbles[i].toArray(bubbleData, i * 4)
+        }
+        bubblePositions.needsUpdate = true
+      }
+      updateBubbles()
       scene.updateMatrixWorld(true)
       const modelScale = glass.getWorldScale(new THREE.Vector3()).x
       const modelOrigin = glass.getWorldPosition(new THREE.Vector3())
@@ -411,6 +505,10 @@
         bankInverse: { value: new THREE.Matrix4() }, bankSize: { value: new THREE.Vector3() },
         bankFrame: { value: backdrop.texture }, bankExposure: { value: 1 },
         backdropTexture: { value: texture }, screenToBackdrop: { value: screenToBackdrop },
+        liquidAbsorption: { value: new THREE.Vector3(...drinkPresets.cider.absorption) },
+        liquidScattering: { value: drinkPresets.cider.scattering },
+        liquidScatteringColor: { value: new THREE.Vector3(...drinkPresets.cider.scatteringColor) },
+        foamShape: { value: foamShape }, foamWall: { value: foamWall }, foamEnabled: { value: false },
         wallDepth: { value: -2 }, hasLiquid: { value: true }, perspective: { value: false },
         keyLight: { value: new THREE.Vector3(...sceneSettings.light).add(new THREE.Vector3(0, 0.9, 0)) },
         resolution: { value: dimensions }, labProjection: { value: new THREE.Matrix4() },
@@ -422,7 +520,11 @@
       const optics = /* glsl */ `    precision highp float;
         uniform sampler2D profileTree;
         uniform int treeCount,traceSteps,reflectionSteps,bodySamples,baseSamples;
-        uniform bool hasLiquid, perspective;
+        uniform bool hasLiquid, perspective, foamEnabled;
+        uniform vec3 liquidAbsorption, liquidScatteringColor;
+        uniform float liquidScattering;
+        uniform vec4 foamShape;
+        uniform vec2 foamWall[8];
         uniform vec2 resolution;
         uniform sampler2D backdropTexture;
         uniform mat4 labProjection;
@@ -596,9 +698,16 @@
           return 0.5*(rs*rs+rp*rp);
         }
         vec3 absorption(int medium,float distance){
-          if(medium==2)return exp(-vec3(0.07,0.8,2.8)*distance);
+          if(medium==2)return exp(-(liquidAbsorption+vec3(liquidScattering))*distance);
           if(medium==1)return exp(-vec3(0.012,0.007,0.004)*distance);
           return vec3(1.0);
+        }
+        // Приближение рассеянного света в мутной жидкости по длине сегмента.
+        vec3 scattering(int medium,float distance){
+          if(medium!=2||liquidScattering<=0.0)return vec3(0);
+          vec3 extinction=liquidAbsorption+vec3(liquidScattering);
+          return liquidScatteringColor*(vec3(liquidScattering)/max(extinction,vec3(0.000001)))
+            *(vec3(1)-absorption(medium,distance));
         }
         bool inGlass(vec3 p){
           return inVolume(p,1);
@@ -625,6 +734,117 @@
         vec3 offsetOrigin(vec3 p,Hit h,vec3 outgoing){
           float side=dot(outgoing,h.geometricNormal)<0.0?-1.0:1.0;
           return p+h.geometricNormal*(side*0.00008);
+        }
+        // Слабые плавные перепады снизу согласованы с геометрией и затенением.
+        float foamLowerHeight(vec2 position){
+          vec2 q=position/foamShape.z;
+          return foamShape.x+0.006*sin(q.x*4.8+q.y*2.1+0.9)
+            +0.003*sin(q.y*7.3-q.x*3.4-0.5);
+        }
+        // Единый объём внутри стакана с низкой выпуклостью над уровнем ободка.
+        float foamDistance(vec3 p){
+          float radius=foamWall[7].y;
+          for(int i=0;i<7;i++){
+            if(p.y<=foamWall[i+1].x){
+              float t=clamp((p.y-foamWall[i].x)/(foamWall[i+1].x-foamWall[i].x),0.0,1.0);
+              radius=mix(foamWall[i].y,foamWall[i+1].y,t);break;
+            }
+          }
+          // Высота плавно убывает от центра до нуля у внутреннего края.
+          // Поэтому над ободком нет ни цилиндрического бортика, ни перелива.
+          float radial=clamp(length(p.xz)/foamWall[7].y,0.0,1.0);
+          float dome=foamShape.w*(1.0-radial*radial);
+          float wall=length(p.xz)-radius;
+          float upper=p.y-foamShape.y-dome;
+          return max(max(wall,upper),foamLowerHeight(p.xz)-p.y);
+        }
+        float intersectFoam(vec3 o,vec3 d,float limit){
+          if(!foamEnabled)return -1.0;
+          float lower=foamShape.x-0.01;
+          float nearY=0.0,farY=limit;
+          if(abs(d.y)<0.000001){if(o.y<lower||o.y>foamShape.y+foamShape.w)return -1.0;}
+          else{
+            float a=(lower-o.y)/d.y,b=(foamShape.y+foamShape.w-o.y)/d.y;
+            nearY=max(nearY,min(a,b));farY=min(farY,max(a,b));
+          }
+          float boundRadius=foamShape.z;
+          float a=dot(d.xz,d.xz),b=dot(o.xz,d.xz),c=dot(o.xz,o.xz)-boundRadius*boundRadius;
+          if(a<0.000001){if(c>0.0)return -1.0;}
+          else{
+            float discriminant=b*b-a*c;if(discriminant<0.0)return -1.0;
+            float root=sqrt(discriminant);
+            nearY=max(nearY,(-b-root)/a);farY=min(farY,(-b+root)/a);
+          }
+          if(farY<=nearY)return -1.0;
+          float t=max(0.00001,nearY);
+          for(int i=0;i<40;i++){
+            if(t>farY)return -1.0;
+            float distanceToFoam=foamDistance(o+d*t);
+            if(distanceToFoam<0.00012)return t;
+            t+=max(0.00008,distanceToFoam*0.75);
+          }
+          // Скользящий луч может медленно сходиться над неровным верхом.
+          // Ограниченный запасной поиск уточняет первое пересечение.
+          float start=t,previous=t;
+          for(int i=1;i<=32;i++){
+            float next=mix(start,farY,float(i)/32.0);
+            if(foamDistance(o+d*next)<0.00012){
+              float low=previous,high=next;
+              for(int j=0;j<8;j++){
+                float middle=(low+high)*0.5;
+                if(foamDistance(o+d*middle)<0.00012)high=middle;else low=middle;
+              }
+              return high;
+            }
+            previous=next;
+          }
+          return -1.0;
+        }
+        vec2 foamHash(vec2 p){
+          return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
+        }
+        float foamCells(vec2 uv,float frequency,float pixelSize,float density){
+          vec2 p=uv*frequency,cell=floor(p),local=fract(p),delta=vec2(0);
+          float nearest=10.0,radius=1.0;
+          for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){
+            vec2 offset=vec2(float(x),float(y)),random=foamHash(cell+offset);
+            if(random.x>density)continue;
+            float r=0.16+random.y*0.34;
+            vec2 v=offset+0.15+random*0.7-local;
+            float distanceToCell=length(v)/r;
+            if(distanceToCell<nearest){nearest=distanceToCell;delta=v/r;radius=r;}
+          }
+          // Фильтрация задаётся размером пикселя, без производных в ветках луча.
+          float aa=clamp(pixelSize*frequency/radius,0.025,1.5);
+          float mask=1.0-smoothstep(1.0-aa,1.0+aa,nearest);
+          float edge=smoothstep(0.48-aa,0.90+aa,nearest)*mask;
+          float side=dot(delta,normalize(vec2(-0.6,0.8)));
+          float shadow=mask*(0.04+0.08*max(side,0.0))+edge*0.04;
+          float highlight=edge*max(-side,0.0)*0.10;
+          float resolved=1.0-smoothstep(0.5,1.5,pixelSize*frequency);
+          return (highlight-shadow)*resolved;
+        }
+        vec3 foamSurfaceColor(vec3 p){
+          float e=0.0006;
+          vec3 gradient=vec3(
+            foamDistance(p+vec3(e,0,0))-foamDistance(p-vec3(e,0,0)),
+            foamDistance(p+vec3(0,e,0))-foamDistance(p-vec3(0,e,0)),
+            foamDistance(p+vec3(0,0,e))-foamDistance(p-vec3(0,0,e)));
+          vec3 normal=gradient/max(length(gradient),0.000001);
+          float top=smoothstep(0.3,0.8,normal.y);
+          vec2 side=vec2((length(p.xz)>0.000001?atan(p.z,p.x):0.0)*foamShape.z,p.y);
+          // Раздельные проекции не растягивают поры на переходе верх/стенка.
+          float pixelSize=max(halfSize.y*2.0/resolution.y,0.0001);
+          // Редкие крупные ячейки и слабая мелкая фактура не создают сетку.
+          float sidePores=foamCells(side,34.0,pixelSize,0.28)+0.14*foamCells(side,145.0,pixelSize,0.65);
+          float topPores=foamCells(p.xz,34.0,pixelSize,0.28)+0.14*foamCells(p.xz,145.0,pixelSize,0.65);
+          float pores=mix(sidePores,topPores,top);
+          float light=max(dot(normal,normalize(keyLight-p)),0.0);
+          float bottom=foamLowerHeight(p.xz);
+          float lower=1.0-smoothstep(bottom,bottom+0.025,p.y);
+          vec3 cream=mix(vec3(0.93,0.875,0.74),vec3(0.995,0.975,0.90),0.50+0.50*top);
+          cream*=0.90+0.10*light;
+          return max(vec3(0),cream*(1.0+pores-0.05*lower));
         }
         vec3 cachedOrigin[3],cachedDirection[3],cachedWeight[3];
         vec3 pathWeight,discardedColor;
@@ -712,7 +932,14 @@
           vec3 color=vec3(0);
           for(int step=0;step<reflectionSteps;step++){
             Hit h=intersect(o,d,medium);vec3 p=o+d*h.t;
+            // Непрозрачная пена завершает эту ветвь: луч к банке за ней
+            // не попадает в кэш. Отражённые ветви стекла считаются отдельно.
+            if(medium!=1){
+              float foamT=intersectFoam(o,d,h.t);
+              if(foamT>0.0)return color+weight*(scattering(medium,foamT)+absorption(medium,foamT)*foamSurfaceColor(o+d*foamT));
+            }
             if(h.object==-1){recordRay(o,d,weight);return color;}
+            color+=weight*scattering(medium,h.t);
             weight*=absorption(medium,h.t);
             if(h.object!=1&&h.object!=2){recordRay(o,d,weight);return color;}
             int next=nextMedium(h,p,d);float from=ior(medium),to=ior(next);
@@ -728,7 +955,14 @@
           int medium=0;vec3 color=vec3(0),weight=vec3(sampleWeight);
           for(int step=0;step<traceSteps;step++){
             Hit h=intersect(o,d,medium);vec3 p=o+d*h.t;
+            // Непрозрачная пена завершает эту ветвь: луч к банке за ней
+            // не попадает в кэш. Отражённые ветви стекла считаются отдельно.
+            if(medium!=1){
+              float foamT=intersectFoam(o,d,h.t);
+              if(foamT>0.0)return color+weight*(scattering(medium,foamT)+absorption(medium,foamT)*foamSurfaceColor(o+d*foamT));
+            }
             if(h.object==-1){recordRay(o,d,weight);return color;}
+            color+=weight*scattering(medium,h.t);
             weight*=absorption(medium,h.t);
             if(h.object!=1&&h.object!=2){recordRay(o,d,weight);return color;}
             int next=nextMedium(h,p,d);float from=ior(medium),to=ior(next);
@@ -789,7 +1023,44 @@
         minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
       })
       if (renderer.getContext().getParameter(renderer.getContext().MAX_DRAW_BUFFERS) < 7) throw new Error('Seven optical cache attachments are required')
+      // Кэш только прямой преломлённой ветви внутри напитка. Пузырьки —
+      // приближение с контуром и бликом, без вторичной трассировки каждой сферы.
+      const bubbleCache = new THREE.WebGLRenderTarget(1, 1, {
+        count: 2, type: THREE.FloatType, depthBuffer: false,
+        minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
+      })
+      const bubblePathMaterial = new THREE.ShaderMaterial({
+        glslVersion: THREE.GLSL3, uniforms, toneMapped: false, depthTest: false, depthWrite: false,
+        vertexShader: 'void main(){gl_Position=vec4(position.xy,0.0,1.0);}',
+        fragmentShader: optics.slice(0, optics.indexOf('        vec3 cachedOrigin')) + /* glsl */ `
+          layout(location=0) out vec4 liquidEntry;
+          layout(location=1) out vec4 liquidDirection;
+          void main(){
+            liquidEntry=vec4(0);liquidDirection=vec4(0);
+            vec2 uv=gl_FragCoord.xy/resolution;
+            vec3 o=rayOrigin+(uv.x*2.0-1.0)*halfSize.x*rayRight+(uv.y*2.0-1.0)*halfSize.y*rayUp;
+            vec3 d=rayDirection;int medium=0;float visibility=1.0;
+            for(int step=0;step<traceSteps;step++){
+              Hit h=intersect(o,d,medium);
+              float foamT=medium!=1?intersectFoam(o,d,h.t):-1.0;
+              if(h.object!=1&&h.object!=2)return;
+              if(medium==2){
+                liquidEntry=vec4(o,foamT>0.0?foamT:h.t);liquidDirection=vec4(d,visibility);return;
+              }
+              // Пузырьки позади шапки не рисуются поверх неё.
+              if(foamT>0.0)return;
+              vec3 p=o+d*h.t;int next=nextMedium(h,p,d);
+              float eta=ior(medium)/ior(next);vec3 n=interfaceNormal(h,d,eta);
+              float f=fresnel(clamp(dot(-d,n),0.0,1.0),ior(medium),ior(next));
+              if(f>=0.9999)return;
+              visibility*=1.0-f;d=refract(d,n,eta);medium=next;o=offsetOrigin(p,h,d);
+            }
+          }
+        `,
+      })
       const displayUniforms = {
+        bubbleEntry: { value: bubbleCache.textures[0] }, bubbleDirection: { value: bubbleCache.textures[1] },
+        bubblePositions: { value: bubblePositions },
         bankFrame: { value: backdrop.texture }, bankExposure: { value: 1 }, resolution: { value: dimensions },
         glassToCanvas: { value: new THREE.Matrix3() },
       }
@@ -807,6 +1078,42 @@
         fragmentShader: terminalOptics + /* glsl */ `
           varying vec2 cacheUV;
           uniform sampler2D cache0,cache1,cache2,cache3,cache4,cache5,cache6;
+          uniform sampler2D bubbleEntry,bubbleDirection;
+          uniform sampler2D bubblePositions;
+          vec3 bubbleColor(vec3 color){
+            vec4 entry=texture(bubbleEntry,cacheUV),ray=texture(bubbleDirection,cacheUV);
+            if(entry.w<=0.0||ray.w<=0.0)return color;
+            float nearest=entry.w;vec3 result=color;
+            float footprint=max(halfSize.y*2.0/resolution.y,0.0001);
+            for(int i=0;i<${bubbleCount};i++){
+              vec4 bubble=texelFetch(bubblePositions,ivec2(i,0),0);if(bubble.w<=0.00001)continue;
+              vec3 offset=bubble.xyz-entry.xyz;
+              float along=dot(offset,ray.xyz);
+              if(along<=0.0||along>=entry.w)continue;
+              vec3 radial=ray.xyz*along-offset;
+              float distanceToRay=length(radial);
+              float coverage=1.0-smoothstep(bubble.w-footprint*0.5,bubble.w+footprint*0.5,distanceToRay);
+              if(coverage<=0.0)continue;
+              float depth=sqrt(max(0.0,bubble.w*bubble.w-distanceToRay*distanceToRay));
+              if(along-depth>=nearest)continue;
+              nearest=along-depth;
+              vec3 normal=normalize(radial-ray.xyz*max(depth,0.00001));
+              // Сглаживаем внешнюю и внутреннюю границы кольца отдельно:
+              // тонкий край сохраняет вклад, даже когда он меньше пикселя.
+              float innerRadius=bubble.w*0.66;
+              float interior=1.0-smoothstep(innerRadius-footprint*0.5,innerRadius+footprint*0.5,distanceToRay);
+              float rim=clamp((coverage-interior)/max(coverage,0.0001),0.0,1.0);
+              vec3 lightDirection=normalize(keyLight-bubble.xyz);
+              vec3 halfway=normalize(lightDirection-ray.xyz);
+              float highlight=pow(max(dot(normal,halfway),0.0),32.0);
+              float litEdge=max(dot(normal,lightDirection),0.0);
+              vec3 tint=absorption(2,along);
+              vec3 shaded=color*(1.0-0.52*rim)+tint*(0.22*rim*litEdge+1.2*highlight);
+              float pixelCoverage=min(1.0,bubble.w/footprint);
+              result=mix(color,shaded,coverage*ray.w*pixelCoverage);
+            }
+            return result;
+          }
           out vec4 fragmentColor;
           vec3 decodeDirection(vec2 encoded){
             vec3 n=vec3(encoded,1.0-abs(encoded.x)-abs(encoded.y));
@@ -832,7 +1139,7 @@
             vec4 base=texture(cache0,cacheUV);if(base.a<0.00001){fragmentColor=vec4(0);return;}
             vec3 color=base.rgb+rayColor(texture(cache1,cacheUV),texture(cache2,cacheUV))
               +rayColor(texture(cache3,cacheUV),texture(cache4,cacheUV))+rayColor(texture(cache5,cacheUV),texture(cache6,cacheUV));
-            fragmentColor=vec4(toSRGB(color/base.a)*base.a,base.a);
+            fragmentColor=vec4(toSRGB(bubbleColor(color/base.a))*base.a,base.a);
           }
         `,
       })
@@ -910,6 +1217,7 @@
           dimensions.copy(next)
           backdrop.setSize(dimensions.x, dimensions.y)
           opticsCache.setSize(dimensions.x, dimensions.y)
+          bubbleCache.setSize(dimensions.x, dimensions.y)
           opticsSignature = ''
         }
         signature = ''
@@ -920,6 +1228,11 @@
         const toneMapping = renderer.toneMapping
         try {
           shared.setView(true)
+          const drink = shared.drinkPreset()
+          uniforms.liquidAbsorption.value.fromArray(drink.absorption)
+          uniforms.liquidScattering.value = drink.scattering
+          uniforms.liquidScatteringColor.value.fromArray(drink.scatteringColor)
+          uniforms.foamEnabled.value = drink.foamAllowed && shared.foamEnabled()
           camera.updateMatrixWorld(true)
           updateBackground()
           uniforms.labProjection.value.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse).multiply(labToWorld)
@@ -946,12 +1259,16 @@
           background.visible = false
           screenMesh.visible = true
           const nextSignature = JSON.stringify([
-            patternVersion, counter?.complete, dimensions.toArray(), uniforms.labProjection.value.toArray(), uniforms.rayOrigin.value.toArray(),
+            uniforms.foamEnabled.value, uniforms.liquidAbsorption.value.toArray(),
+            uniforms.liquidScattering.value, uniforms.liquidScatteringColor.value.toArray(), patternVersion, counter?.complete, dimensions.toArray(), uniforms.labProjection.value.toArray(), uniforms.rayOrigin.value.toArray(),
             uniforms.rayDirection.value.toArray(), uniforms.halfSize.value.toArray(),
           ].flat(2).map(value => typeof value === 'number' ? Math.round(value * 100000) : value))
           if (nextSignature !== opticsSignature) {
             screenMesh.material = opticsMaterial
             renderer.setRenderTarget(opticsCache)
+            renderer.render(screenScene, camera)
+            screenMesh.material = bubblePathMaterial
+            renderer.setRenderTarget(bubbleCache)
             renderer.render(screenScene, camera)
             opticsSignature = nextSignature
           }
@@ -973,6 +1290,7 @@
       return {
         resize,
         render: draw,
+        updateBubbles,
         dispose() {
           disposed = true
           section.removeEventListener('lab-can-ready', backgroundReady)
@@ -980,6 +1298,7 @@
           requestVersion++
           backdrop.dispose(); texture.dispose(); tree.texture.dispose(); emptyBankTree.dispose()
           screenMesh.geometry.dispose(); opticsMaterial.dispose(); displayMaterial.dispose(); opticsCache.dispose()
+          bubbleCache.dispose(); bubblePathMaterial.dispose(); bubblePositions.dispose()
           background.geometry.dispose(); backgroundMaterial.dispose()
           scene.remove(background, screenMesh)
         },
@@ -1252,13 +1571,14 @@
           frame = 0
           if (disposed || !visible || document.hidden) { lastTime = null; return }
           try {
-            if (!motion.matches && canSlot.props.active && !canSlot.props.paused && lastTime !== null) {
-              const elapsed = Math.min(time - lastTime, 100)
-              canItem.product.rotation.y = (canItem.product.rotation.y + elapsed * Math.PI / 10000) % (Math.PI * 2)
-            }
+            const canMoving = !motion.matches && canSlot.props.active && !canSlot.props.paused
+            const bubblesMoving = !motion.matches && glassSlot.props.active && !glassSlot.props.paused
+            const elapsed = lastTime === null ? 0 : Math.min(time - lastTime, 100)
+            if (canMoving) canItem.product.rotation.y = (canItem.product.rotation.y + elapsed * Math.PI / 10000) % (Math.PI * 2)
+            if (bubblesMoving) optics.updateBubbles(elapsed / 1000)
             lastTime = time
             optics.render()
-            if ((!motion.matches && canSlot.props.active && !canSlot.props.paused) || performance.now() < interactionUntil) frame = requestAnimationFrame(tick)
+            if (canMoving || bubblesMoving || performance.now() < interactionUntil) frame = requestAnimationFrame(tick)
             else lastTime = null
           } catch (error) {
             console.error('Лаборатория: общая сцена', error)
@@ -1267,10 +1587,11 @@
           }
         }
         function sync(interaction) {
+          if (document.hidden) lastTime = null
           if (interaction === true) interactionUntil = performance.now() + 650
           if (!disposed && !frame && visible && !document.hidden && optics) frame = requestAnimationFrame(tick)
         }
-        const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync() })
+        const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) lastTime = null; sync() })
         observer.observe(renderer.domElement)
         const resizeObserver = new ResizeObserver(resize)
         items.forEach(item => resizeObserver.observe(item.slot.host))
@@ -1296,6 +1617,8 @@
         optics = await createGlassRenderer(THREE, renderer, scene, camera, glassSlot.host, sync,
           () => items.forEach(item => { item.slot.ready.value = true }), {
             glassProxy: glassSlot.proxy, canPlacement, bankDisplay, setView, placeBank,
+            foamEnabled: () => glassSlot.props.foam,
+            drinkPreset: () => drinkPresets[glassSlot.props.drink] || drinkPresets.cider,
             glassBufferSize: () => new THREE.Vector2(Math.max(1, Math.round(glassRect.width * pixelRatio)), Math.max(1, Math.round(glassRect.height * pixelRatio))),
             beginFinal(matrix) {
               setView(false); placeBank(false)
@@ -1324,7 +1647,7 @@
     }
 
     const LabProductModel = defineComponent({
-      props: { source: { type: String, required: true }, bank: { type: Boolean, default: false }, active: { type: Boolean, default: false }, paused: { type: Boolean, default: false } },
+      props: { source: { type: String, required: true }, bank: { type: Boolean, default: false }, active: { type: Boolean, default: false }, paused: { type: Boolean, default: false }, foam: { type: Boolean, default: false }, drink: { type: String, default: 'cider', validator: value => Object.hasOwn(drinkPresets, value) } },
       emits: ['ready', 'error'],
       setup(props, { emit }) {
         const host = ref(null), proxy = ref(null), ready = ref(false)
@@ -1335,7 +1658,7 @@
           sceneSlots.set(key, { props, emit, host: host.value, proxy: proxy.value, ready, shadowStyle, contactStyle, shadowClipStyle, hitStyle })
           void nextTick(startSharedScene)
         })
-        watch(() => [props.active, props.paused], () => sharedScene?.sync(true))
+        watch(() => [props.active, props.paused, props.foam, props.drink], () => sharedScene?.sync(true))
         onBeforeUnmount(() => { sharedScene?.dispose(); sceneSlots.delete(key) })
         return () => h('span', { ref: host, class: 'product-model', 'aria-hidden': 'true' }, [
           h('span', { ref: proxy, class: 'lab-transform' }),
@@ -1348,43 +1671,31 @@
       },
     })
 
-    const hovered = ref(false)
-    const canHovered = ref(false)
-    const canHoverAngle = ref(3)
     const modelReady = ref({ glass: false, can: false })
     const loadingError = ref('')
     const bothReady = () => modelReady.value.glass && modelReady.value.can
     const readyHandler = kind => value => { modelReady.value[kind] = value }
-    const hoverAngle = ref(3)
+    const drink = ref('cider')
+    const foam = ref(true)
     const zoom = ref(1)
     const viewport = ref({ width: window.innerWidth, height: window.innerHeight })
-    watch([hovered, canHovered, hoverAngle, canHoverAngle, zoom], () => sharedScene?.sync(true))
+    watch(zoom, () => sharedScene?.sync(true))
     const updateViewport = () => {
       viewport.value = { width: window.innerWidth, height: window.innerHeight }
     }
     async function setZoom(value) {
-      resetHover()
       zoom.value = Math.max(0.5, Math.min(4, value))
       if (zoom.value === 1) {
         await nextTick()
         window.scrollTo(0, 0)
       }
     }
-    function updateHover(event) {
-      if (event.pointerType === 'touch') return
-      hovered.value = true
-      const bounds = event.currentTarget.getBoundingClientRect()
-      hoverAngle.value = event.clientX < bounds.left + bounds.width / 2 ? 3 : -3
-    }
-    function resetHover() {
-      hovered.value = false
-      canHovered.value = false
-      hoverAngle.value = 3
-    }
-
     const app = createApp({
       render: () => h('div', [
-        h('div', { class: 'lab-zoom', role: 'group', 'aria-label': 'Масштаб страницы' }, [
+        h('div', { class: 'lab-zoom', role: 'group', 'aria-label': 'Настройки сцены' }, [
+          h('select', { 'aria-label': 'Напиток', value: drink.value, onChange: event => { drink.value = event.target.value } },
+            Object.entries(drinkPresets).map(([value, preset]) => h('option', { value }, preset.label))),
+          drinkPresets[drink.value].foamAllowed && h('button', { type: 'button', 'aria-pressed': foam.value, onClick: () => { foam.value = !foam.value } }, 'Пена'),
           h('button', { type: 'button', 'aria-label': 'Уменьшить масштаб', disabled: zoom.value <= 0.5, onClick: () => setZoom(zoom.value - 0.25) }, '−'),
           h('button', { type: 'button', 'aria-label': 'Сбросить масштаб до 100%', onClick: () => setZoom(1) }, `${Math.round(zoom.value * 100)}%`),
           h('button', { type: 'button', 'aria-label': 'Увеличить масштаб', disabled: zoom.value >= 4, onClick: () => setZoom(zoom.value + 0.25) }, '+'),
@@ -1402,23 +1713,14 @@
         !bothReady() && h('div', { class: 'lab-loader', role: 'status', 'aria-label': loadingError.value || 'Загрузка моделей', 'aria-live': 'polite' }, loadingError.value || h('span', { class: 'lab-spinner', 'aria-hidden': 'true' })),
         h('div', { class: ['lab-stage', { 'is-loading': !bothReady() }] }, [
           h('article', { 'aria-label': 'Стакан и банка на стойке' }, [
-            h('div', { class: ['lab-model lab-can', { 'is-hovered': canHovered.value }], 'data-lab-can': '',
-              style: { '--hover-angle': `${canHoverAngle.value}deg` },
-              onPointerenter: event => { if (event.pointerType !== 'touch') canHovered.value = true },
-              onPointermove: event => { if (event.pointerType !== 'touch') { canHovered.value = true; const rect = event.currentTarget.getBoundingClientRect(); canHoverAngle.value = event.clientX < rect.left + rect.width / 2 ? 3 : -3 } },
-              onPointerleave: () => { canHovered.value = false }, onPointercancel: () => { canHovered.value = false },
+            h('div', { class: 'lab-model lab-can', 'data-lab-can': '',
             }, [
               h(LabProductModel, { source: canModelUrl, bank: true, active: true, paused: false, onReady: readyHandler('can'), onError: message => { loadingError.value = message } }),
             ]),
             h('div', {
-              class: ['lab-model', { 'is-hovered': hovered.value }],
-              style: { '--hover-angle': `${hoverAngle.value}deg` },
-              onPointerenter: updateHover,
-              onPointermove: updateHover,
-              onPointerleave: resetHover,
-              onPointercancel: resetHover,
+              class: 'lab-model',
             }, [
-              h(LabProductModel, { source: glassModelUrl, active: true, paused: hovered.value, onReady: readyHandler('glass'), onError: message => { loadingError.value = message } }),
+              h(LabProductModel, { source: glassModelUrl, active: true, paused: false, drink: drink.value, foam: foam.value, onReady: readyHandler('glass'), onError: message => { loadingError.value = message } }),
             ]),
           ]),
         ]),
