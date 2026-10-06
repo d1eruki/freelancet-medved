@@ -276,6 +276,90 @@
     
     // Оптика банки использует её объём и развёртку этикетки, а не снимок фона.
     let bankOptics = null
+    function createBankProfile(THREE, product, bounds) {
+      const height = bounds.max.y - bounds.min.y, center = bounds.getCenter(new THREE.Vector3())
+      const rings = Array.from({ length: 129 }, (_, i) => ({ y: bounds.min.y + height * i / 128, r: 0, nr: 1, ny: 0 }))
+      product.updateMatrixWorld(true)
+      product.traverse(mesh => {
+        if (!mesh.isMesh) return
+        const geometry = mesh.geometry, normalMatrix = new THREE.Matrix3().getNormalMatrix(mesh.matrixWorld)
+        const positions = [], normals = []
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+          positions.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i).applyMatrix4(mesh.matrixWorld))
+          normals.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.normal, i).applyMatrix3(normalMatrix).normalize())
+        }
+        const index = geometry.index, count = index?.count ?? positions.length
+        for (let i = 0; i < count; i += 3) for (let edge = 0; edge < 3; edge++) {
+          const a = index ? index.getX(i + edge) : i + edge, b = index ? index.getX(i + (edge + 1) % 3) : i + (edge + 1) % 3
+          const p = positions[a], q = positions[b], dy = q.y - p.y
+          const first = Math.max(0, Math.ceil((Math.min(p.y, q.y) - bounds.min.y) / height * 128 - 1e-7))
+          const last = Math.min(128, Math.floor((Math.max(p.y, q.y) - bounds.min.y) / height * 128 + 1e-7))
+          for (let row = first; row <= last; row++) {
+            const ring = rings[row], u = Math.abs(dy) < 1e-10 ? 0 : THREE.MathUtils.clamp((ring.y - p.y) / dy, 0, 1)
+            const point = p.clone().lerp(q, u), x = point.x - center.x, z = point.z - center.z, r = Math.hypot(x, z)
+            if (r < ring.r) continue
+            const n = normals[a].clone().lerp(normals[b], u).normalize()
+            Object.assign(ring, { r, nr: r > 1e-8 ? (n.x * x + n.z * z) / r : 0, ny: n.y })
+          }
+        }
+      })
+      if (rings.some(ring => ring.r <= 0)) throw new Error('Не восстановлен внешний профиль банки')
+      const points = rings.map(p => new THREE.Vector4(p.r / height, (p.y - center.y) / height, p.nr, p.ny))
+      // Сохраняем шейку и основание; прямые участки не требуют отдельных узлов.
+      const retained = new Set([0, points.length - 1])
+      function simplify(first, last) {
+        let best = -1, error = 1
+        for (let i = first + 1; i < last; i++) {
+          const u = (points[i].y - points[first].y) / (points[last].y - points[first].y)
+          const r = THREE.MathUtils.lerp(points[first].x, points[last].x, u)
+          const angle = Math.atan2(points[i].w, points[i].z)
+          const expected = THREE.MathUtils.lerp(Math.atan2(points[first].w, points[first].z), Math.atan2(points[last].w, points[last].z), u)
+          const current = Math.max(Math.abs(points[i].x - r) / 0.0001, Math.abs(angle - expected) / 0.01)
+          if (current > error) { best = i; error = current }
+        }
+        if (best >= 0) { retained.add(best); simplify(first, best); simplify(best, last) }
+      }
+      simplify(0, points.length - 1)
+      const profile = [new THREE.Vector4(0, -0.5, 0, -1), ...[...retained].sort((a, b) => a - b).map(i => points[i]), new THREE.Vector4(0, 0.5, 0, 1)]
+      return { tree: profileTree(THREE, profile, []), points: profile, samples: points }
+    }
+
+    async function createBankEnvironment(THREE, renderer, environment, materials) {
+      // Однократное чтение того же PMREM в три компактные HDR-панорамы:
+      // алюминий, этикетка, диффузное освещение. Между WebGL-контекстами
+      // передаются данные, а не текстура render target другого renderer.
+      const width = 256, bandHeight = 128, height = bandHeight * 3
+      const target = new THREE.WebGLRenderTarget(width, height, { type: THREE.FloatType, depthBuffer: false })
+      const image = environment.texture.image, cubeSize = image.height / 4
+      const cubeUV = THREE.ShaderChunk.cube_uv_reflection_fragment.replace(/#ifdef texture2DGradEXT[\s\S]*?#endif/, 'return textureLod( envMap, uv, 0.0 ).rgb;')
+      const material = new THREE.ShaderMaterial({
+        glslVersion: THREE.GLSL3, toneMapped: false,
+        defines: { ENVMAP_TYPE_CUBE_UV: 1, CUBEUV_MAX_MIP: Math.log2(cubeSize).toFixed(1), CUBEUV_TEXEL_WIDTH: (1 / image.width).toPrecision(12), CUBEUV_TEXEL_HEIGHT: (1 / image.height).toPrecision(12) },
+        uniforms: { roomEnvironment: { value: environment.texture }, roughnesses: { value: new THREE.Vector3(materials.metal.roughness, materials.label.roughness, 1) } },
+        vertexShader: 'void main(){gl_Position=vec4(position.xy,0.0,1.0);}',
+        fragmentShader: `precision highp float;uniform sampler2D roomEnvironment;uniform vec3 roughnesses;out vec4 result;
+          ${cubeUV}
+          void main(){int band=int(gl_FragCoord.y)/128;float phi=gl_FragCoord.x/256.0*6.28318530718;
+            float theta=(gl_FragCoord.y-float(band*128)-0.5)/127.0*3.14159265359;
+            vec3 direction=vec3(cos(phi)*sin(theta),cos(theta),sin(phi)*sin(theta));
+            result=textureCubeUV(roomEnvironment,direction,roughnesses[band]);}`,
+      })
+      const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material), scene = new THREE.Scene()
+      scene.add(quad)
+      const previousTarget = renderer.getRenderTarget()
+      try {
+        renderer.setRenderTarget(target); renderer.render(scene, new THREE.Camera())
+        const pixels = new Float32Array(width * height * 4)
+        await renderer.readRenderTargetPixelsAsync(target, 0, 0, width, height, pixels)
+        if (renderer.getContext().getError() !== 0 || !pixels.some(p => p > 0) || pixels.some(p => !Number.isFinite(p))) throw new Error('Не удалось передать окружение банки')
+        const half = Uint16Array.from(pixels, p => THREE.DataUtils.toHalfFloat(Math.max(0, Math.min(p, 65504))))
+        return { data: half, width, height, exposure: renderer.toneMappingExposure }
+      } finally {
+        renderer.setRenderTarget(previousTarget)
+        target.dispose(); material.dispose(); quad.geometry.dispose()
+      }
+    }
+
     function createBankSurface(THREE, product, bounds) {
       const canvas = document.createElement('canvas')
       canvas.width = 1024; canvas.height = 1024
@@ -326,7 +410,14 @@
           }
         }
       })
-      return { canvas, height, radius }
+      const materials = {}
+      product.traverse(mesh => {
+        const material = mesh.material
+        const key = material?.name === 'aluminium' ? 'metal' : material?.name === 'marion-printed-label' ? 'label' : null
+        if (key) materials[key] = { color: material.color.clone(), metalness: material.metalness, roughness: material.roughness, intensity: material.envMapIntensity }
+      })
+      if (!materials.metal || !materials.label) throw new Error('Не найдены материалы банки')
+      return { canvas, height, radius, materials, profile: createBankProfile(THREE, product, bounds) }
     }
 
     function fittedLiquidProfile(THREE, glass, liquid) {
@@ -350,6 +441,211 @@
       }
       if (fitted.length < 3) throw new Error('Не определён контакт напитка со стеклом')
       return [...fitted, ...surface]
+    }
+
+    // Только числовая диагностика: ?optics-diagnostics=1, затем в консоли
+    // glassOpticsDiagnostics.scan() или .trace(x, y), координаты от низа холста.
+    // Не запускается автоматически и не создаёт GPU-ресурсов. CPU использует
+    // Float32-профиль шейдера, но арифметику JS (не доказывает точность GPU).
+    function createOpticsDiagnostics(THREE, tree, uniforms, glassProfile) {
+      const data = tree.texture.image.data
+      const value = name => uniforms[name].value
+      const vector = (x, y, z) => new THREE.Vector3(x, y, z)
+      const clamp = THREE.MathUtils.clamp
+      const reflect = (d, n) => d.clone().addScaledVector(n, -2 * d.dot(n))
+      function refract(d, n, eta) {
+        const cosine = d.dot(n), k = 1 - eta * eta * (1 - cosine * cosine)
+        return k < 0 ? vector(0, 0, 0) : d.clone().multiplyScalar(eta).addScaledVector(n, -eta * cosine - Math.sqrt(k))
+      }
+      const ior = medium => medium === 1 ? 1.52 : medium === 2 ? 1.333 : 1
+      function inVolume(p, object) {
+        const r = Math.hypot(p.x, p.z)
+        let inside = false
+        for (let i = 0; i < tree.count;) {
+          const j = i * 16
+          if (p.y < data[j] || p.y > data[j + 1] || r > data[j + 3] || (data[j + 5] > 0 && data[j + 5] !== object)) { i = data[j + 4]; continue }
+          if (data[j + 6] && (data[j + 9] > p.y) !== (data[j + 13] > p.y)) {
+            const radius = data[j + 8] + (p.y - data[j + 9]) * (data[j + 12] - data[j + 8]) / (data[j + 13] - data[j + 9])
+            if (r < radius) inside = !inside
+          }
+          i++
+        }
+        return inside
+      }
+      const physicalMedium = p => inVolume(p, 1) ? 1 : value('hasLiquid') && inVolume(p, 2) ? 2 : 0
+      function meetsNode(j, o, d, limit, nodes = data) {
+        let near = 0, far = limit
+        if (Math.abs(d.y) > 1e-9) {
+          const a = (nodes[j] - o.y) / d.y, b = (nodes[j + 1] - o.y) / d.y
+          near = Math.max(near, Math.min(a, b)); far = Math.min(far, Math.max(a, b))
+        } else if (o.y < nodes[j] || o.y > nodes[j + 1]) return false
+        if (far < near) return false
+        const radial = d.x * d.x + d.z * d.z
+        const closest = radial > 1e-12 ? clamp(-(o.x * d.x + o.z * d.z) / radial, near, far) : near
+        const squared = t => (o.x + d.x * t) ** 2 + (o.z + d.z * t) ** 2
+        return squared(closest) <= nodes[j + 3] ** 2 && Math.max(squared(near), squared(far)) >= nodes[j + 2] ** 2
+      }
+      function segment(j, o, d, hit, nodes = data, object = nodes[j + 5]) {
+        const ax = nodes[j + 8], ay = nodes[j + 9], bx = nodes[j + 12], by = nodes[j + 13], dy = by - ay
+        const accept = (t, n, geometricNormal) => ({ t, n, geometricNormal: geometricNormal.clone(), object, segment: j / 16 })
+        if (Math.abs(dy) < 1e-6) {
+          if (Math.abs(d.y) < 1e-6) return hit
+          const t = (ay - o.y) / d.y, p = o.clone().addScaledVector(d, t), r = Math.hypot(p.x, p.z)
+          const n = vector(0, Math.sign(Math.sin(nodes[j + 10]) + Math.sin(nodes[j + 14])), 0)
+          return t > 0.00005 && t < hit.t && r >= Math.min(ax, bx) - 1e-6 && r <= Math.max(ax, bx) + 1e-6 ? accept(t, n, n) : hit
+        }
+        const radial = d.x * d.x + d.z * d.z
+        const reference = radial > 1e-8 ? -(o.x * d.x + o.z * d.z) / radial : 0
+        const local = o.clone().addScaledVector(d, reference), length = Math.hypot(dy, bx - ax)
+        const sx = dy / length, sy = (bx - ax) / length, verticalSquared = sx * sx
+        const r = ax * sx + sy * (local.y - ay)
+        const aa = verticalSquared * radial - sy * sy * d.y * d.y
+        const bb = 2 * (verticalSquared * (local.x * d.x + local.z * d.z) - r * sy * d.y)
+        const cc = verticalSquared * (local.x * local.x + local.z * local.z) - r * r
+        const px = r * d.x - sy * d.y * local.x, pz = r * d.z - sy * d.y * local.z
+        const cross = local.x * d.z - local.z * d.x
+        const discriminant = 4 * verticalSquared * (px * px + pz * pz - verticalSquared * cross * cross)
+        if (discriminant < 0 || (Math.abs(aa) < 1e-8 && Math.abs(bb) < 1e-8)) return hit
+        const q = -0.5 * (bb + (bb >= 0 ? Math.sqrt(discriminant) : -Math.sqrt(discriminant)))
+        const roots = Math.abs(aa) < 1e-8 ? [-cc / bb, -cc / bb] : Math.abs(q) > 1e-10 ? [q / aa, cc / q] : [-bb / (2 * aa), -bb / (2 * aa)]
+        for (const root of roots) {
+          const t = root + reference, p = local.clone().addScaledVector(d, root)
+          if (t <= 0.00005 || t >= hit.t || p.y < Math.min(ay, by) - 1e-6 || p.y > Math.max(ay, by) + 1e-6) continue
+          const u = clamp((p.y - ay) / dy, 0, 1), u2 = u * u, u3 = u2 * u
+          const delta = Math.atan2(Math.sin(nodes[j + 14] - nodes[j + 10]), Math.cos(nodes[j + 14] - nodes[j + 10]))
+          const angle = nodes[j + 10] + (-2 * u3 + 3 * u2) * delta + (u3 - 2 * u2 + u) * dy * nodes[j + 11] + (u3 - u2) * dy * nodes[j + 15]
+          const radius = Math.max(Math.hypot(p.x, p.z), 1e-6)
+          const n = vector(p.x / radius * Math.cos(angle), Math.sin(angle), p.z / radius * Math.cos(angle)).normalize()
+          const geometric = vector(p.x / radius * dy, ax - bx, p.z / radius * dy).normalize()
+          if (geometric.dot(n) < 0) geometric.negate()
+          hit = accept(t, n, geometric)
+        }
+        return hit
+      }
+      function intersect(o, d, medium) {
+        let hit = { t: 10000, object: -1, segment: -1 }
+        // Пропуск общего AABB допустим здесь: BVH отсекает те же поверхности.
+        for (let i = 0; i < tree.count;) {
+          const j = i * 16
+          if ((data[j + 5] === 2 && (!value('hasLiquid') || medium === 1)) || !meetsNode(j, o, d, hit.t)) { i = data[j + 4]; continue }
+          if (data[j + 6] && !data[j + 7]) hit = segment(j, o, d, hit)
+          i++
+        }
+        const key = value('keyLight')
+        for (const [center, normal, extent, object] of [
+          [vector(0, -0.015, 0), vector(0, 1, 0), vector(20, 0.001, 20), 3],
+          [vector(0, 1, value('wallDepth')), vector(0, 0, 1), vector(24, 24, 0.001), 4],
+          [key, vector(1, 0, 0), vector(0.001, 1.8, 0.75), 5],
+          [vector(1.8, 1.8, 0.2), vector(-1, 0, 0), vector(0.001, 1.9, 0.4), 5],
+          [vector(-1.3, 1.2, 0.65), vector(1, 0, 0), vector(0.001, 2, 0.08), 6],
+          [vector(1.3, 1.2, 0.65), vector(-1, 0, 0), vector(0.001, 2, 0.06), 6],
+        ]) {
+          const denominator = d.dot(normal)
+          if (Math.abs(denominator) < 1e-6) continue
+          const t = center.clone().sub(o).dot(normal) / denominator, p = o.clone().addScaledVector(d, t).sub(center)
+          if (t > 0.00005 && t < hit.t && Math.abs(p.x) <= extent.x && Math.abs(p.y) <= extent.y && Math.abs(p.z) <= extent.z) hit = { t, n: normal, geometricNormal: normal, object, segment: -1 }
+        }
+        // Тот же профиль и BVH банки, что в GLSL; t остаётся в единицах сцены.
+        const bankSize = value('bankSize'), bankTree = value('bankProfileTree').image.data
+        if (bankSize.y > 0 && value('bankTreeCount') > 0) {
+          const matrix = new THREE.Matrix3().setFromMatrix4(value('bankInverse')), normalMatrix = matrix.clone().transpose()
+          const scale = 2 * bankSize.y
+          const local = o.clone().applyMatrix4(value('bankInverse')).divideScalar(scale), direction = d.clone().applyMatrix3(matrix).divideScalar(scale)
+          for (let i = 0; i < value('bankTreeCount');) {
+            const j = i * 16
+            if (!meetsNode(j, local, direction, hit.t, bankTree)) { i = bankTree[j + 4]; continue }
+            if (bankTree[j + 6] && !bankTree[j + 7]) {
+              const candidate = segment(j, local, direction, hit, bankTree, 7)
+              if (candidate !== hit) {
+                candidate.n.applyMatrix3(normalMatrix).normalize(); candidate.geometricNormal.applyMatrix3(normalMatrix).normalize()
+                hit = candidate
+              }
+            }
+            i++
+          }
+        }
+        return hit
+      }
+      function primaryRay(x, y) {
+        const size = value('resolution'), half = value('halfSize')
+        if (!size.x || !size.y || !half.x || !half.y) throw new Error('Параметры камеры ещё не подготовлены')
+        if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x >= size.x || y < 0 || y >= size.y) throw new Error('Координаты должны лежать внутри холста')
+        const offset = value('rayRight').clone().multiplyScalar((x / size.x * 2 - 1) * half.x).addScaledVector(value('rayUp'), (y / size.y * 2 - 1) * half.y)
+        return { o: value('rayOrigin').clone().add(value('perspective') ? vector(0, 0, 0) : offset), d: value('rayDirection').clone().add(value('perspective') ? offset : vector(0, 0, 0)).normalize() }
+      }
+      function trace(x, y) {
+        const primary = primaryRay(x, y), first = intersect(primary.o, primary.d, 0)
+        const result = { pixel: [x, y], covered: first.object === 1 || first.object === 2, base: false, events: [], endings: [] }
+        if (!result.covered) return result
+        result.base = primary.o.clone().addScaledVector(primary.d, first.t).y < 0.2
+        // Основание использует отдельный MC-алгоритм; здесь анализируется корпус.
+        if (result.base) return result
+        function walk(o, d, medium, weight, branch) {
+          const limit = branch === 'main' ? 12 : 6
+          for (let step = 0; step < limit; step++) {
+            const hit = intersect(o, d, medium), p = o.clone().addScaledVector(d, hit.t)
+            if (hit.object !== 1 && hit.object !== 2) {
+              const projected = p.clone().applyMatrix4(value('labProjection')), size = value('resolution')
+              result.endings.push({ branch, reason: 'surface', object: hit.object, point: hit.object === -1 ? null : p.toArray(), weight: weight.toArray(), direction: d.toArray(),
+                screenDisplacement: hit.object === -1 ? null : [(projected.x + 1) * size.x / 2 - x, (projected.y + 1) * size.y / 2 - y] })
+              return
+            }
+            const attenuation = medium === 2 ? [0.07, 0.8, 2.8] : medium === 1 ? [0.012, 0.007, 0.004] : [0, 0, 0]
+            weight.multiply(vector(...attenuation.map(a => Math.exp(-a * hit.t))))
+            const entering = d.dot(hit.geometricNormal) < 0
+            const beyond = p.clone().addScaledVector(hit.geometricNormal, entering ? -0.0001 : 0.0001)
+            const next = hit.object === 1 ? entering ? 1 : value('hasLiquid') && inVolume(beyond, 2) ? 2 : 0 : entering ? 2 : inVolume(beyond, 1) ? 1 : 0
+            const from = ior(medium), to = ior(next), eta = from / to
+            const geometric = hit.geometricNormal.clone().multiplyScalar(entering ? 1 : -1), optical = hit.n.clone().multiplyScalar(entering ? 1 : -1)
+            const reflected = reflect(d, optical), transmitted = refract(d, optical, eta)
+            const fallback = d.dot(optical) >= 0 || reflected.dot(geometric) <= 0 || (transmitted.lengthSq() > 0 && transmitted.dot(geometric) >= 0)
+            const n = fallback ? geometric : optical, cosine = clamp(-d.dot(n), 0, 1), sinT2 = eta * eta * (1 - cosine * cosine)
+            const ct = Math.sqrt(Math.max(0, 1 - sinT2))
+            const f = sinT2 >= 1 ? 1 : 0.5 * (((from * cosine - to * ct) / (from * cosine + to * ct)) ** 2 + ((to * cosine - from * ct) / (to * cosine + from * ct)) ** 2)
+            const outgoing = f >= 0.9999 ? reflect(d, n) : refract(d, n, eta)
+            const offset = direction => p.clone().addScaledVector(hit.geometricNormal, direction.dot(hit.geometricNormal) < 0 ? -0.00008 : 0.00008)
+            const after = f >= 0.9999 ? medium : next, nextOrigin = offset(outgoing)
+            result.events.push({ branch, step, segment: hit.segment, object: hit.object, point: p.toArray(), from: medium, to: after, fallback, fresnel: f,
+              beforeMismatch: physicalMedium(o) !== medium, afterMismatch: physicalMedium(nextOrigin) !== after })
+            if (branch === 'main' && f > 0.001 && f < 0.9999) walk(offset(reflect(d, n)), reflect(d, n), medium, weight.clone().multiplyScalar(f), 'reflection')
+            if (f < 0.9999) weight.multiplyScalar(1 - f)
+            o = nextOrigin; d = outgoing; medium = after
+            if (branch === 'main' && Math.max(...weight.toArray()) < 0.001) { result.endings.push({ branch, reason: 'weight', weight: weight.toArray() }); return }
+          }
+          result.endings.push({ branch, reason: 'limit', medium, weight: weight.toArray() })
+        }
+        walk(primary.o, primary.d, 0, vector(1, 1, 1), 'main')
+        return result
+      }
+      function scan() {
+        const size = value('resolution'), rim = glassProfile.reduce((best, p, i) => p.y > glassProfile[best].y ? i : best, 0)
+        const bulge = glassProfile.slice(0, rim + 1).reduce((best, p) => p.x > best.x ? p : best)
+        const project = (x, y) => vector(x, y, 0).applyMatrix4(value('labProjection'))
+        const low = project(-data[3], data[0]), high = project(data[3], data[1])
+        const rows = []
+        for (let row = 0; row < 97; row++) {
+          const y = clamp((low.y + (high.y - low.y) * row / 96 + 1) * size.y / 2, 0.5, size.y - 0.5)
+          const counts = { y, rays: 0, base: 0, fallback: 0, mismatch: 0, limit: 0, mainLimit: 0, reflectionLimit: 0, maxLostWeight: 0, terminalObjects: {}, examples: {} }
+          for (let column = 0; column < 33; column++) {
+            const x = clamp((low.x + (high.x - low.x) * column / 32 + 1) * size.x / 2, 0.5, size.x - 0.5), ray = trace(x, y)
+            if (!ray.covered) continue
+            if (ray.base) { counts.base++; continue }
+            counts.rays++
+            for (const [name, present] of [['fallback', ray.events.some(e => e.fallback)], ['mismatch', ray.events.some(e => e.beforeMismatch || e.afterMismatch)], ['limit', ray.endings.some(e => e.reason === 'limit')]]) {
+              if (present) { counts[name]++; counts.examples[name] ??= [x, y] }
+            }
+            for (const branch of ['main', 'reflection']) if (ray.endings.some(e => e.reason === 'limit' && e.branch === branch)) counts[branch + 'Limit']++
+            for (const ending of ray.endings) {
+              if (ending.reason === 'limit') counts.maxLostWeight = Math.max(counts.maxLostWeight, ...ending.weight)
+              if (ending.branch === 'main' && ending.reason === 'surface') counts.terminalObjects[ending.object] = (counts.terminalObjects[ending.object] ?? 0) + 1
+            }
+          }
+          rows.push(counts)
+        }
+        return { arithmetic: 'JS Float64, BVH Float32; не GPU-проверка', sampledRays: 33 * 97,
+          bulgePixelY: (project(0, bulge.y).y + 1) * size.y / 2, rows }
+      }
+      return { scan, trace }
     }
 
     const sceneSettings = { camera: [0, 0.88, 5], light: [-1.8, 2.5, 1.2] }
@@ -388,12 +684,26 @@
       const worldToLab = labToWorld.clone().invert()
       const bankTexture = new THREE.CanvasTexture(bankOptics?.canvas ?? document.createElement('canvas'))
       bankTexture.wrapS = THREE.RepeatWrapping
-      const bankCenter = new THREE.Vector3(), bankSize = new THREE.Vector3()
+      const bankSize = new THREE.Vector3()
       const bankInverse = new THREE.Matrix4()
       function updateBankGeometry() {
         const bank = section.querySelector('[data-lab-can]')
         if (!bank || !bankOptics) { bankSize.set(0, 0, 0); return }
         if (bankTexture.image !== bankOptics.canvas) { bankTexture.image = bankOptics.canvas; bankTexture.needsUpdate = true }
+        if (bankProfileTexture.image.data !== bankOptics.profile.tree.texture.image.data) {
+          bankProfileTexture.image = bankOptics.profile.tree.texture.image
+          bankProfileTexture.needsUpdate = true
+        }
+        uniforms.bankTreeCount.value = bankOptics.profile.tree.count
+        if (bankEnvironmentTexture.image.data !== bankOptics.environment.data) {
+          bankEnvironmentTexture.image = bankOptics.environment
+          bankEnvironmentTexture.needsUpdate = true
+        }
+        uniforms.bankMetalColor.value.copy(bankOptics.materials.metal.color)
+        uniforms.bankLabelColor.value.copy(bankOptics.materials.label.color)
+        uniforms.bankMaterials.value.set(bankOptics.materials.metal.metalness, bankOptics.materials.metal.roughness, bankOptics.materials.label.metalness, bankOptics.materials.label.roughness)
+        uniforms.bankEnvironmentIntensity.value.set(bankOptics.materials.metal.intensity, bankOptics.materials.label.intensity)
+        uniforms.bankExposure.value = bankOptics.environment.exposure
         const bankRect = bank.getBoundingClientRect(), rect = element.getBoundingClientRect()
         const factor = bankRect.width / rect.width
         const base = new THREE.Vector3(0, -bankOptics.height / 2, 0).project(camera)
@@ -404,7 +714,6 @@
         const ground = origin.addScaledVector(direction, -origin.y / direction.y)
         const scale = factor * 10 / modelScale
         bankSize.set(bankOptics.radius * scale, bankOptics.height * scale / 2, bankOptics.radius * scale)
-        bankCenter.copy(ground).add(new THREE.Vector3(0, bankSize.y, 0))
         const rotate = getComputedStyle(bank.querySelector('canvas')).rotate
         const angle = rotate === 'none' ? 0 : parseFloat(rotate) * Math.PI / 180
         const transform = new THREE.Matrix4().makeTranslation(...ground.toArray())
@@ -419,9 +728,18 @@
         throw new Error('Floating-point ray state buffers are not supported')
       }
       const workWidth = 256
+      const bankProfileTexture = new THREE.DataTexture(new Float32Array(16), 4, 1, THREE.RGBAFormat, THREE.FloatType)
+      const bankEnvironmentTexture = new THREE.DataTexture(new Uint16Array(4), 1, 1, THREE.RGBAFormat, THREE.HalfFloatType)
+      bankEnvironmentTexture.minFilter = bankEnvironmentTexture.magFilter = THREE.LinearFilter
+      bankEnvironmentTexture.wrapS = THREE.RepeatWrapping
+      bankProfileTexture.needsUpdate = bankEnvironmentTexture.needsUpdate = true
       const uniforms = {
         wallDepth: { value: -2 },
         bankTexture: { value: bankTexture }, bankSize: { value: bankSize }, bankInverse: { value: bankInverse },
+        bankProfileTree: { value: bankProfileTexture }, bankTreeCount: { value: 0 }, bankEnvironment: { value: bankEnvironmentTexture },
+        bankMetalColor: { value: new THREE.Color() }, bankLabelColor: { value: new THREE.Color() }, bankMaterials: { value: new THREE.Vector4() },
+        bankEnvironmentIntensity: { value: new THREE.Vector2() }, bankExposure: { value: 1 }, dfgLUT: { value: null },
+        bankLightDirection: { value: new THREE.Vector3(...sceneSettings.light).normalize() },
         profileTree: { value: tree.texture }, treeCount: { value: tree.count },
         hasLiquid: { value: true }, perspective: { value: camera.isPerspectiveCamera },
         keyLight: { value: new THREE.Vector3(...sceneSettings.light).add(new THREE.Vector3(0, 0.9, 0)) },
@@ -435,7 +753,12 @@
         state0: { value: null }, state1: { value: null }, state2: { value: null },
         state3: { value: null }, state4: { value: null }, state5: { value: null }, state6: { value: null },
       }
+      const diagnostics = new URLSearchParams(window.location.search).get('optics-diagnostics') === '1'
+        ? createOpticsDiagnostics(THREE, tree, uniforms, glassProfile) : null
       const vertex = 'void main(){gl_Position=vec4(position.xy,0.0,1.0);}'
+      // Та же ACES-функция, что у банки снаружи; фон и стекло не меняются.
+      const toneChunk = THREE.ShaderChunk.tonemapping_pars_fragment
+      const bankToneMapping = toneChunk.slice(toneChunk.indexOf('vec3 RRTAndODTFit'), toneChunk.indexOf('const mat3 LINEAR_REC2020_TO_LINEAR_SRGB')).replaceAll('toneMappingExposure', 'bankExposure')
       const optics = /* glsl */ `    precision highp float;
         uniform sampler2D profileTree;
         uniform int treeCount;
@@ -449,6 +772,14 @@
         uniform float wallDepth;
         uniform mat4 bankInverse;
         uniform sampler2D bankTexture;
+        uniform sampler2D bankProfileTree, bankEnvironment, dfgLUT;
+        uniform int bankTreeCount;
+        uniform vec3 bankMetalColor,bankLabelColor,bankLightDirection;
+        uniform vec4 bankMaterials;
+        uniform vec2 bankEnvironmentIntensity;
+        uniform float bankExposure;
+        #define saturate(a) clamp(a,0.0,1.0)
+        ${bankToneMapping}
         vec2 backdropUV(vec3 p){
           vec4 clip=labProjection*vec4(p,1.0);
           return clamp((clip.xy/clip.w*0.5+0.5)*backdropScale+backdropOffset,vec2(0.001),vec2(0.999));
@@ -567,27 +898,25 @@
           return low<=bounds.w*bounds.w&&high>=bounds.z*bounds.z;
         }
         void intersectBank(vec3 o,vec3 d,inout Hit h){
-          if(bankSize.y<=0.0)return;
-          vec3 local=(bankInverse*vec4(o,1.0)).xyz;
-          vec3 direction=(bankInverse*vec4(d,0.0)).xyz;
-          float radius=bankSize.x;
-          float a=dot(direction.xz,direction.xz),b=dot(local.xz,direction.xz),c=dot(local.xz,local.xz)-radius*radius;
-          float disc=b*b-a*c;
-          if(a>0.000001&&disc>=0.0){
-            vec2 roots=vec2(-b-sqrt(disc),-b+sqrt(disc))/a;
-            for(int i=0;i<2;i++){
-              float t=roots[i];vec3 p=local+direction*t;
-              if(t>0.00005&&t<h.t&&abs(p.y)<=bankSize.y){
-                vec3 n=normalize(transpose(mat3(bankInverse))*vec3(p.x,0,p.z));h=Hit(t,n,n,7);
+          if(bankSize.y<=0.0||bankTreeCount==0)return;
+          float scale=2.0*bankSize.y;
+          vec3 local=(bankInverse*vec4(o,1.0)).xyz/scale;
+          vec3 direction=(bankInverse*vec4(d,0.0)).xyz/scale;
+          int i=0;
+          while(i<bankTreeCount){
+            vec4 bounds=texelFetch(bankProfileTree,ivec2(0,i),0);
+            vec4 meta=texelFetch(bankProfileTree,ivec2(1,i),0);
+            if(!meetsNode(bounds,local,direction,h.t)){i=int(meta.x);continue;}
+            if(meta.z>0.5&&meta.w<0.5){
+              Hit bank=h;
+              segment(texelFetch(bankProfileTree,ivec2(2,i),0),texelFetch(bankProfileTree,ivec2(3,i),0),local,direction,7,bank);
+              if(bank.t<h.t){
+                bank.n=normalize(transpose(mat3(bankInverse))*bank.n);
+                bank.geometricNormal=normalize(transpose(mat3(bankInverse))*bank.geometricNormal);
+                h=bank;
               }
             }
-          }
-          if(abs(direction.y)>0.000001)for(int i=0;i<2;i++){
-            float signY=i==0?-1.0:1.0,t=(signY*bankSize.y-local.y)/direction.y;
-            vec3 p=local+direction*t;
-            if(t>0.00005&&t<h.t&&dot(p.xz,p.xz)<=radius*radius){
-              vec3 n=normalize(transpose(mat3(bankInverse))*vec3(0,signY,0));h=Hit(t,n,n,7);
-            }
+            i++;
           }
         }
         Hit intersect(vec3 o,vec3 d,int medium){
@@ -660,15 +989,49 @@
           float side=dot(outgoing,h.geometricNormal)<0.0?-1.0:1.0;
           return p+h.geometricNormal*(side*0.00008);
         }
+        vec3 bankEnvironmentColor(vec3 direction,float band){
+          vec3 n=normalize(direction);
+          float u=fract(atan(n.z,n.x)/6.28318530718+1.0);
+          float v=acos(clamp(n.y,-1.0,1.0))/3.14159265359;
+          return textureLod(bankEnvironment,vec2(u,(band*128.0+0.5+v*127.0)/384.0),0.0).rgb;
+        }
         vec3 bankColor(Hit h,vec3 p,vec3 d){
-            vec3 local=(bankInverse*vec4(p,1.0)).xyz;
-            vec2 uv=vec2(atan(local.z,local.x)/6.2831853+0.5,local.y/(2.0*bankSize.y)+0.5);
-            vec4 label=textureLod(bankTexture,uv,0.0);
-            float diffuse=max(0.0,dot(h.n,normalize(keyLight-vec3(0,0.9,0))));
-            if(label.a>0.5)return pow(label.rgb,vec3(2.2))*(0.55+diffuse*0.8);
-            vec3 reflection=reflect(d,h.n);
-            float sheen=pow(max(0.0,dot(reflection,normalize(keyLight-p))),24.0);
-            return vec3(0.8)*(environment(reflection)*0.65+sheen*3.5);
+          vec3 local=(bankInverse*vec4(p,1.0)).xyz;
+          vec2 uv=vec2(atan(local.z,local.x)/6.28318530718+0.5,local.y/(2.0*bankSize.y)+0.5);
+          vec4 label=textureLod(bankTexture,uv,0.0);
+          bool printed=label.a>0.5;
+          vec3 labelLinear=mix(label.rgb/12.92,pow((label.rgb+0.055)/1.055,vec3(2.4)),step(vec3(0.04045),label.rgb));
+          vec3 base=printed?labelLinear*bankLabelColor:bankMetalColor;
+          float metallic=printed?bankMaterials.z:bankMaterials.x;
+          float roughness=max(printed?bankMaterials.w:bankMaterials.y,0.0525);
+          float intensity=printed?bankEnvironmentIntensity.y:bankEnvironmentIntensity.x;
+          vec3 v=normalize(-d),n=dot(h.n,v)<0.0?-h.n:h.n,l=bankLightDirection;
+          float nv=max(dot(n,v),0.0001),nl=max(dot(n,l),0.0);
+          vec3 f0=mix(vec3(0.04),base,metallic),diffuse=base*(1.0-metallic);
+          // GGX и DFG LUT из того же Three.js, включая многократное рассеяние.
+          vec2 fab=textureLod(dfgLUT,vec2(roughness,nv),0.0).rg;
+          vec3 single=f0*fab.x+fab.y,favg=f0+(1.0-f0)/21.0;
+          vec3 multi=single*favg/(1.0-(1.0-fab.x-fab.y)*favg)*(1.0-fab.x-fab.y);
+          vec3 remaining=diffuse*(1.0-max(max(single.r+multi.r,single.g+multi.g),single.b+multi.b));
+          vec3 reflection=normalize(mix(reflect(d,n),n,roughness*roughness));
+          vec3 irradiance=bankEnvironmentColor(n,2.0);
+          vec3 color=intensity*(bankEnvironmentColor(reflection,printed?1.0:0.0)*single+irradiance*(multi+remaining));
+          // Те же hemisphere и directional light, что освещают модель снаружи.
+          vec3 hemi=mix(vec3(0.1844749945),vec3(1.0),n.y*0.5+0.5)*0.65;
+          color+=hemi*diffuse/3.14159265359;
+          if(nl>0.0){
+            vec3 halfDirection=normalize(l+v);
+            float nh=max(dot(n,halfDirection),0.0),vh=max(dot(v,halfDirection),0.0);
+            float alpha=roughness*roughness,a2=alpha*alpha,denom=nh*nh*(a2-1.0)+1.0;
+            float distribution=a2/(3.14159265359*denom*denom);
+            float visibility=0.5/max(nl*sqrt(a2+(1.0-a2)*nv*nv)+nv*sqrt(a2+(1.0-a2)*nl*nl),0.000001);
+            vec3 fresnelColor=f0+(1.0-f0)*exp2((-5.55473*vh-6.98316)*vh);
+            vec2 dfgLight=textureLod(dfgLUT,vec2(roughness,nl),0.0).rg;
+            float lostView=1.0-fab.x-fab.y,lostLight=1.0-dfgLight.x-dfgLight.y;
+            vec3 multiple=single*(f0*dfgLight.x+dfgLight.y)*favg/(1.0-lostView*lostLight*favg+0.000001)*lostView*lostLight;
+            color+=3.0*nl*(diffuse/3.14159265359+fresnelColor*distribution*visibility+multiple);
+          }
+          return ACESFilmicToneMapping(color);
         }
         vec3 backdropColor(Hit h,vec3 p,vec3 d){
           if(h.object==-1)return environment(d);
@@ -774,7 +1137,7 @@
           if(detailedBase){
             stratified=true;sampleStratum=uint((coord.y*workWidth+coord.x)%sampleCount);
             seed=uint(s4.x)|(uint(s4.y)<<16u);
-            if(h.object==-1){s3.rgb+=s2.rgb*environment(d);s2.w=2.0;}
+            if(h.object==-1){s3.rgb+=s2.rgb*backdropColor(h,p,d);s2.w=2.0;}
             else{
               s2.rgb*=absorption(medium,h.t);
               // Стойка и фон уже освещены: дно использует тот же цвет, что корпус.
@@ -799,7 +1162,7 @@
           }
           if(s2.w>0.5){
             // Вторичная ветвь: прежние 6 шагов без дальнейшего расщепления.
-            if(h.object==-1){s3.rgb+=s2.rgb*environment(d);resumeMain();}
+            if(h.object==-1){s3.rgb+=s2.rgb*backdropColor(h,p,d);resumeMain();}
             else{
               s2.rgb*=absorption(medium,h.t);
               if(h.object!=1&&h.object!=2){s3.rgb+=s2.rgb*surfaceColor(h,p,d);resumeMain();}
@@ -815,7 +1178,7 @@
             }
             store();return;
           }
-          if(h.object==-1){s3.rgb+=s2.rgb*environment(d);s2.w=2.0;store();return;}
+          if(h.object==-1){s3.rgb+=s2.rgb*backdropColor(h,p,d);s2.w=2.0;store();return;}
           s2.rgb*=absorption(medium,h.t);
           if(h.object!=1&&h.object!=2){s3.rgb+=s2.rgb*surfaceColor(h,p,d);s2.w=2.0;store();return;}
           int next=nextMedium(h,p,d);
@@ -859,7 +1222,7 @@
         }
       `
       const makeMaterial = fragmentShader => new THREE.ShaderMaterial({
-        glslVersion: THREE.GLSL3, uniforms, vertexShader: vertex, fragmentShader,
+        glslVersion: THREE.GLSL3, uniforms, vertexShader: vertex, fragmentShader, toneMapped: false,
         depthTest: false, depthWrite: false,
       })
       const initialize = makeMaterial(initializeFragment)
@@ -1155,9 +1518,11 @@
         schedule()
       }
       await preparePattern()
+      if (diagnostics) window.glassOpticsDiagnostics = diagnostics
       return {
         resize, render,
         dispose() {
+          if (diagnostics && window.glassOpticsDiagnostics === diagnostics) delete window.glassOpticsDiagnostics
           disposed = true; requestVersion++
           clearTimeout(frame)
           releaseFence()
@@ -1166,6 +1531,7 @@
           section.removeEventListener('lab-can-ready', counterReady)
           backdropTexture.dispose()
           bankTexture.dispose()
+          bankProfileTexture.dispose(); bankEnvironmentTexture.dispose()
           tree.texture.dispose()
           initialize.dispose(); stepMaterial.dispose(); resolveMaterial.dispose()
           for (const state of states) state.dispose()
@@ -1256,6 +1622,7 @@
             const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
             let model
             let environment
+            let preparedBank
             let glassRenderer
             let resize
             let disposed = false
@@ -1280,6 +1647,8 @@
               glassRenderer?.dispose()
               if (model) disposeModel(model)
               environment?.dispose()
+              preparedBank?.profile.tree.texture.dispose()
+              if (bankOptics === preparedBank) bankOptics = null
               renderer.dispose()
               renderer.domElement.remove()
             }
@@ -1341,7 +1710,12 @@
             scene.add(light)
         
             const productBounds = new THREE.Box3().setFromObject(product)
-            if (props.bank) bankOptics = createBankSurface(THREE, product, productBounds)
+            if (props.bank) {
+              preparedBank = createBankSurface(THREE, product, productBounds)
+              preparedBank.environment = await createBankEnvironment(THREE, renderer, environment, preparedBank.materials)
+              if (disposed || unmounted) { preparedBank.profile.tree.texture.dispose(); return }
+              bankOptics = preparedBank
+            }
             const baseWidth = Math.max(size.x, size.z) * product.scale.x
         
             const camera = new THREE.OrthographicCamera(-1.28, 1.28, 1.28, -1.28, 0.1, 20)
@@ -1571,7 +1945,7 @@
               onPointermove: event => { if (event.pointerType !== 'touch') { canHovered.value = true; const rect = event.currentTarget.getBoundingClientRect(); canHoverAngle.value = event.clientX < rect.left + rect.width / 2 ? 3 : -3 } },
               onPointerleave: () => { canHovered.value = false }, onPointercancel: () => { canHovered.value = false },
             }, [
-              h(LabProductModel, { source: canModelUrl, bank: true, active: false, paused: true, onReady: readyHandler('can'), onError: message => { loadingError.value = message } }),
+              h(LabProductModel, { source: canModelUrl, bank: true, active: true, paused: false, onReady: readyHandler('can'), onError: message => { loadingError.value = message } }),
             ]),
             h('div', {
               class: ['lab-model', { 'is-hovered': hovered.value }],
