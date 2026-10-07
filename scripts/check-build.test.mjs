@@ -156,7 +156,9 @@ test('deployment environment preserves redirects and indexing policy', async () 
   if (staging) {
     assert.match(config, /^DirectoryIndex index\.html$/m)
     assert.match(config, /^Header always set X-Robots-Tag "noindex, nofollow"$/m)
-    assert.ok(redirects.every((target) => target.startsWith('/') && !target.startsWith('//')))
+    const stagingOrigin = new URL(origin)
+    stagingOrigin.hostname = `test.${stagingOrigin.hostname}`
+    assert.ok(redirects.every((target) => target.startsWith(`${stagingOrigin.origin}/`)))
     assert.doesNotMatch(robots, /Sitemap:/)
     assert.doesNotMatch(robots, /^Disallow:\s*\/$/m)
   } else {

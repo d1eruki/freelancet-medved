@@ -118,10 +118,12 @@ try {
     .replace('# @active-route-redirects@', redirects)
     .replace('# @active-route-rewrites@', rewrites)
   if (staging) {
-    // Относительные перенаправления сохраняют тестовый хост; canonical остаётся рабочим.
+    // Явный HTTPS нужен за прокси Timeweb: относительный редирект Apache может вести на HTTP.
+    const stagingOrigin = new URL(canonicalOrigin)
+    stagingOrigin.hostname = `test.${stagingOrigin.hostname}`
     generatedConfig = generatedConfig
       .replace(/^RewriteCond %\{HTTP_HOST\} [^\n]+\nRewriteRule \^ [^\n]+%\{REQUEST_URI\} \[R=301,L,NE\]\n/m, '')
-      .replaceAll(`${canonicalOrigin}/`, '/')
+      .replaceAll(canonicalOrigin, stagingOrigin.origin)
     // HTTP-заголовок действует также после клиентской навигации и для файлов без HTML.
     // Заглушка Timeweb index.htm может иметь приоритет по умолчанию; оставляем её на диске.
     generatedConfig = `DirectoryIndex index.html\nHeader always set X-Robots-Tag "noindex, nofollow"\n${generatedConfig}`
