@@ -45,8 +45,9 @@ function setMetadata(template, page) {
 }
 
 try {
-  await build({ build: { outDir: output, emptyOutDir: true } })
+  await build({ build: { outDir: output, emptyOutDir: true, manifest: true } })
   const template = await readFile(path.join(output, 'index.html'), 'utf8')
+  const manifest = JSON.parse(await readFile(path.join(output, '.vite', 'manifest.json'), 'utf8'))
   if (!template.includes('<div id="app"></div>')) throw new Error('Client HTML template has no empty app container')
   await build({
     build: { ssr: 'src/entry-server.js', outDir: serverOutput, emptyOutDir: true, sourcemap: false },
@@ -57,12 +58,37 @@ try {
   const publicAssetPrefix = `${process.env.SITE_BASE || '/freelancet-medved/'}assets/`
 
   async function renderHtml(page, routePath) {
-    const rendered = (await render(routePath)).replaceAll(serverAssetPrefix, publicAssetPrefix)
+    const { html, modules } = await render(routePath)
+    const rendered = html.replaceAll(serverAssetPrefix, publicAssetPrefix)
     for (const [, file] of rendered.matchAll(/(?:src|srcset)="[^"]*?assets\/([^\s,"<>]+)/g)) {
       await access(path.join(output, 'assets', file))
     }
     if (!rendered.includes('<main>')) throw new Error(`Could not render ${routePath}`)
-    return setMetadata(template, page).replace('<div id="app"></div>', `<div id="app">${rendered}</div>`)
+    const files = new Set()
+    const visited = new Set()
+    function collectResources(id) {
+      if (visited.has(id)) return
+      visited.add(id)
+      const chunk = manifest[id]
+      if (!chunk) return
+      for (const dependency of chunk.imports || []) collectResources(dependency)
+      files.add(chunk.file)
+      for (const css of chunk.css || []) files.add(css)
+    }
+    for (const id of modules) collectResources(id)
+
+    const base = process.env.SITE_BASE || '/freelancet-medved/'
+    const links = [...files].map((file) => {
+      const url = `${base}${file}`
+      if (template.includes(`href="${url}"`) || template.includes(`src="${url}"`)) return ''
+      if (file.endsWith('.css')) return `<link rel="stylesheet" crossorigin href="${escapeHtml(url)}">`
+      if (file.endsWith('.js')) return `<link rel="modulepreload" crossorigin href="${escapeHtml(url)}">`
+      return ''
+    }).filter(Boolean).join('\n    ')
+
+    return setMetadata(template, page)
+      .replace('</head>', `${links}\n  </head>`)
+      .replace('<div id="app"></div>', `<div id="app">${rendered}</div>`)
   }
 
   for (const page of pageRoutes) {

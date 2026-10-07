@@ -5,9 +5,55 @@ import test from 'node:test'
 
 const output = path.resolve('dist')
 const origin = 'https://medved.beer'
-const basePath = (process.env.SITE_BASE || '/freelancet-medved/').replace(/\/$/, '')
 const sitemap = await readFile(path.join(output, 'sitemap.xml'), 'utf8')
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+const manifest = JSON.parse(await readFile(path.join(output, '.vite', 'manifest.json'), 'utf8'))
+const entry = Object.keys(manifest).find((id) => manifest[id].isEntry)
+assert.ok(entry, 'missing client entry')
+const homeHtml = await readFile(path.join(output, 'index.html'), 'utf8')
+const entryUrl = [...homeHtml.matchAll(/<script\b[^>]*src="([^"]+)"/g)]
+  .map((match) => match[1]).find((url) => url.endsWith(manifest[entry].file))
+assert.ok(entryUrl, 'missing client script in HTML')
+const basePath = entryUrl.slice(0, -manifest[entry].file.length).replace(/\/$/, '')
+
+function collectChunks(id, collected = new Set()) {
+  if (collected.has(id)) return collected
+  assert.ok(manifest[id], `missing manifest entry: ${id}`)
+  collected.add(id)
+  for (const dependency of manifest[id].imports || []) collectChunks(dependency, collected)
+  return collected
+}
+
+test('page code is separate from the shared client entry', () => {
+  const initialChunks = collectChunks(entry)
+  const pageChunks = Object.keys(manifest).filter((id) => /Page\.vue$/.test(id))
+  assert.ok(pageChunks.length > 1, 'pages were bundled together')
+  for (const id of pageChunks) {
+    assert.ok(manifest[id].isDynamicEntry, `${id} is not loaded dynamically`)
+    assert.ok(!initialChunks.has(id), `${id} is loaded on every page`)
+  }
+})
+
+test('each HTML preloads only its page and includes all required scripts and styles', async () => {
+  const pageChunks = Object.keys(manifest).filter((id) => /Page\.vue$/.test(id))
+  for (const url of [...urls, `${origin}/404.html`]) {
+    const pathname = new URL(url).pathname
+    const filePath = pathname === '/404.html' ? '404.html' : `${pathname.slice(1)}index.html`
+    const html = await readFile(path.join(output, filePath), 'utf8')
+    const preloads = [...html.matchAll(/<link\b[^>]*rel="modulepreload"[^>]*href="([^"]+)"/g)].map((match) => match[1])
+    const selected = pageChunks.filter((id) => preloads.includes(`${basePath}/${manifest[id].file}`))
+    assert.equal(selected.length, 1, `${url} must preload exactly one page component`)
+
+    for (const id of collectChunks(selected[0])) {
+      const chunk = manifest[id]
+      const assetUrl = `${basePath}/${chunk.file}`
+      assert.ok(preloads.includes(assetUrl) || html.includes(`src="${assetUrl}"`), `${url} -> ${assetUrl}`)
+      for (const css of chunk.css || []) {
+        assert.ok(html.includes(`rel="stylesheet" crossorigin href="${basePath}/${css}"`), `${url} -> ${css}`)
+      }
+    }
+  }
+})
 
 test('every published URL has its own HTML and metadata', async () => {
   assert.equal(urls.length, 11)
