@@ -123,7 +123,8 @@ try {
       .replace(/^RewriteCond %\{HTTP_HOST\} [^\n]+\nRewriteRule \^ [^\n]+%\{REQUEST_URI\} \[R=301,L,NE\]\n/m, '')
       .replaceAll(`${canonicalOrigin}/`, '/')
     // HTTP-заголовок действует также после клиентской навигации и для файлов без HTML.
-    generatedConfig = `Header always set X-Robots-Tag "noindex, nofollow"\n${generatedConfig}`
+    // Заглушка Timeweb index.htm может иметь приоритет по умолчанию; оставляем её на диске.
+    generatedConfig = `DirectoryIndex index.html\nHeader always set X-Robots-Tag "noindex, nofollow"\n${generatedConfig}`
     // Разрешаем роботам прочитать noindex, но не рекламируем карту рабочего сайта.
     await writeFile(path.join(output, 'robots.txt'), 'User-agent: *\nAllow: /\nDisallow: /api/\n')
   }
