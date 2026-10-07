@@ -4,6 +4,9 @@ import { pathToFileURL } from 'node:url'
 import { build } from 'vite'
 
 const root = process.cwd()
+const siteEnvironment = process.env.SITE_ENV || 'production'
+if (!['production', 'staging'].includes(siteEnvironment)) throw new Error('SITE_ENV must be production or staging')
+const staging = siteEnvironment === 'staging'
 const output = path.join(root, 'dist')
 const serverOutput = await mkdtemp(path.join(root, 'node_modules', '.medved-ssr-'))
 
@@ -21,7 +24,7 @@ function setMetadata(template, page) {
   const values = [
     [/<title>[^<]*<\/title>/, `<title>${escapeHtml(page.title)}</title>`],
     [/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeHtml(page.description)}">`],
-    [/<meta name="robots" content="[^"]*">/, `<meta name="robots" content="${page.robots || 'index, follow'}">`],
+    [/<meta name="robots" content="[^"]*">/, `<meta name="robots" content="${staging ? 'noindex, nofollow' : page.robots || 'index, follow'}">`],
     [/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeHtml(page.title)}">`],
     [/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeHtml(page.description)}">`],
     [/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeHtml(page.title)}">`],
@@ -111,9 +114,20 @@ try {
   if (!config.includes('# @active-route-redirects@') || !config.includes('# @active-route-rewrites@')) {
     throw new Error('Missing Apache route markers')
   }
-  await writeFile(configPath, config
+  let generatedConfig = config
     .replace('# @active-route-redirects@', redirects)
-    .replace('# @active-route-rewrites@', rewrites))
+    .replace('# @active-route-rewrites@', rewrites)
+  if (staging) {
+    // Относительные перенаправления сохраняют тестовый хост; canonical остаётся рабочим.
+    generatedConfig = generatedConfig
+      .replace(/^RewriteCond %\{HTTP_HOST\} [^\n]+\nRewriteRule \^ [^\n]+%\{REQUEST_URI\} \[R=301,L,NE\]\n/m, '')
+      .replaceAll(`${canonicalOrigin}/`, '/')
+    // HTTP-заголовок действует также после клиентской навигации и для файлов без HTML.
+    generatedConfig = `Header always set X-Robots-Tag "noindex, nofollow"\n${generatedConfig}`
+    // Разрешаем роботам прочитать noindex, но не рекламируем карту рабочего сайта.
+    await writeFile(path.join(output, 'robots.txt'), 'User-agent: *\nAllow: /\nDisallow: /api/\n')
+  }
+  await writeFile(configPath, generatedConfig)
 } finally {
   await rm(serverOutput, { recursive: true, force: true })
 }

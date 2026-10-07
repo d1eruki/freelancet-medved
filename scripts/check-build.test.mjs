@@ -5,6 +5,7 @@ import test from 'node:test'
 import sharp from 'sharp'
 
 const output = path.resolve('dist')
+const staging = process.env.SITE_ENV === 'staging'
 const origin = 'https://medved.beer'
 const sitemap = await readFile(path.join(output, 'sitemap.xml'), 'utf8')
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
@@ -68,6 +69,7 @@ test('every published URL has its own HTML and metadata', async () => {
     assert.match(html, /<title>[^<]+<\/title>/, url)
     assert.ok(html.includes(`<link rel="canonical" href="${url}">`), url)
     assert.ok(html.includes(`<meta property="og:url" content="${url}">`), url)
+    assert.ok(html.includes(`<meta name="robots" content="${staging ? 'noindex, nofollow' : 'index, follow'}">`), url)
     assert.ok(!html.includes('file://'), url)
     assert.ok(!html.includes('/src/assets/'), url)
   }
@@ -122,7 +124,7 @@ test('unknown URLs use a non-indexable 404 page', async () => {
   const config = await readFile(path.join(output, '.htaccess'), 'utf8')
 
   assert.match(html, /<main>[\s\S]*?<h1\b[^>]*>[\s\S]*?404[\s\S]*?<\/h1>/)
-  assert.match(html, /<meta name="robots" content="noindex, follow">/)
+  assert.ok(html.includes(`<meta name="robots" content="${staging ? 'noindex, nofollow' : 'noindex, follow'}">`))
   assert.doesNotMatch(html, /<link rel="canonical"/)
   assert.doesNotMatch(html, /<meta property="og:url"/)
   assert.ok(!urls.some((url) => new URL(url).pathname === '/404.html'))
@@ -143,6 +145,24 @@ test('Apache route rules cover every published page', async () => {
     assert.ok(routePattern.test(route), `Apache cannot serve ${url}`)
   }
   assert.ok(!routePattern.test('missing-page/'))
+})
+
+test('deployment environment preserves redirects and indexing policy', async () => {
+  const config = await readFile(path.join(output, '.htaccess'), 'utf8')
+  const robots = await readFile(path.join(output, 'robots.txt'), 'utf8')
+  const redirects = [...config.matchAll(/^RewriteRule\s+\S+\s+(\S+)\s+\[[^\]]*R=301[^\]]*\]$/gm)]
+    .map((match) => match[1])
+  assert.ok(redirects.length > 0)
+  if (staging) {
+    assert.match(config, /^Header always set X-Robots-Tag "noindex, nofollow"$/m)
+    assert.ok(redirects.every((target) => target.startsWith('/') && !target.startsWith('//')))
+    assert.doesNotMatch(robots, /Sitemap:/)
+    assert.doesNotMatch(robots, /^Disallow:\s*\/$/m)
+  } else {
+    assert.doesNotMatch(config, /X-Robots-Tag/)
+    assert.ok(redirects.every((target) => target.startsWith(`${origin}/`) || target === `${origin}%{REQUEST_URI}`))
+    assert.ok(robots.includes(`Sitemap: ${origin}/sitemap.xml`))
+  }
 })
 
 test('image and script URLs resolve and srcset widths match the built images', async () => {

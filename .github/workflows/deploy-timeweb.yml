@@ -2,20 +2,22 @@ name: Deploy to Timeweb
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: timeweb
+  group: timeweb-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   deploy:
-    if: ${{ vars.TIMEWEB_ENABLED == 'true' }}
+    if: ${{ vars.TIMEWEB_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
     runs-on: ubuntu-latest
+    env:
+      SITE_ENV: ${{ github.ref == 'refs/heads/develop' && 'staging' || 'production' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -26,6 +28,31 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Select deployment directory
+        env:
+          PRODUCTION_PATH: ${{ vars.TIMEWEB_PATH }}
+          STAGING_PATH: ${{ vars.TIMEWEB_TEST_PATH }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs'
+          import path from 'node:path'
+          const { PRODUCTION_PATH: production, STAGING_PATH: staging, SITE_ENV: environment } = process.env
+          function validate(value) {
+            return typeof value === 'string' && /^\/(?:[A-Za-z0-9_-][A-Za-z0-9_.-]*\/)*public_html$/.test(value)
+              && path.posix.normalize(value) === value
+          }
+          if (!validate(production)) throw new Error('Invalid production directory')
+          if (environment === 'staging') {
+            if (!validate(staging)) throw new Error('Invalid staging directory')
+            const productionRoot = path.posix.dirname(production)
+            const stagingRoot = path.posix.dirname(staging)
+            if (stagingRoot === productionRoot || stagingRoot.startsWith(`${production}/`)
+              || productionRoot.startsWith(`${staging}/`)) {
+              throw new Error('Production and staging directories must be separate')
+            }
+          }
+          appendFileSync(process.env.GITHUB_ENV, `TIMEWEB_PATH=${environment === 'staging' ? staging : production}\n`)
+          NODE
       - name: Build for domain root
         run: npm run build
         env:
@@ -54,5 +81,39 @@ jobs:
         env:
           TIMEWEB_HOST: ${{ vars.TIMEWEB_HOST }}
           TIMEWEB_USER: ${{ vars.TIMEWEB_USER }}
-          TIMEWEB_PATH: ${{ vars.TIMEWEB_PATH }}
         run: node scripts/deploy-timeweb.mjs
+      - name: Verify staging HTTP responses
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          const origin = 'https://test.medved.beer'
+          async function request(path, options = {}) {
+            return fetch(new URL(path, origin), { redirect: 'manual', signal: AbortSignal.timeout(15000), ...options })
+          }
+          for (const path of ['/', '/kontakty/']) {
+            const response = await request(path)
+            assert.equal(response.status, 200, path)
+            assert.match(response.headers.get('x-robots-tag') || '', /noindex/)
+            const html = await response.text()
+            assert.match(html, /<main>[\s\S]*<h1\b/)
+            assert.match(html, /<meta name="robots" content="noindex, nofollow">/)
+            const script = html.match(/<script\b[^>]*src="([^"]+)"/)
+            assert.ok(script, 'Missing client script')
+            const asset = new URL(script[1], origin)
+            assert.equal(asset.origin, origin)
+            assert.equal((await request(asset, { method: 'HEAD' })).status, 200)
+          }
+          for (const path of ['/kontakty', '/proizvodstvo/etap-1/']) {
+            const response = await request(path)
+            assert.equal(response.status, 301, path)
+            const location = response.headers.get('location')
+            assert.ok(location)
+            assert.equal(new URL(location, origin).origin, origin)
+            await response.body?.cancel()
+          }
+          const api = await request('/api/contact.php')
+          assert.equal(api.status, 405)
+          assert.ok((await api.json()).message)
+          console.log('Staging HTML, assets, noindex, redirects and PHP endpoint verified; no mail sent.')
+          NODE
