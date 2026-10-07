@@ -105,13 +105,15 @@ try {
   assert.ok(firstMail.includes('Имя: Тест'))
   assert.ok(firstMail.includes('Телефон: 71234567890'))
   assert.ok(firstMail.includes('Reply-To: test@example.com'))
+  assert.ok(firstMail.includes('To: info@medved.beer'))
+  assert.ok(firstMail.includes('Сообщение:\nПроверка формы'))
   assert.equal((await stat(limiterFile)).mode & 0o777, 0o600)
   assert.ok(!(await readFile(limiterFile, 'utf8')).includes('127.0.0.1'))
 
   for (const cookie of [undefined, 'PHPSESSID=first-session', 'PHPSESSID=second-session']) {
     const headers = cookie ? { Cookie: cookie } : {}
     const response = await expectStatus(valid, 429, { headers })
-    assert.ok(Number(response.headers.get('retry-after')) > 0)
+    assert.ok(Number(response.headers.get('retry-after')) > 0 && Number(response.headers.get('retry-after')) <= 10)
   }
   await expectStatus(valid, 429, { headers: { 'X-Forwarded-For': '192.0.2.1', 'X-Real-IP': '192.0.2.2' } })
   assert.equal(await readFile(mailFile, 'utf8'), firstMail)
@@ -125,6 +127,7 @@ try {
   const concurrent = await Promise.all(Array.from({ length: 6 }, (_, index) => request(valid, { target: endpoints[index % endpoints.length] })))
   assert.deepEqual(concurrent.map(response => response.status).sort(), [200, 429, 429, 429, 429, 429])
   for (const response of concurrent) await response.json()
+  assert.equal(Object.keys(JSON.parse(await readFile(limiterFile, 'utf8'))).length, 1)
 
   await writeFile(limiterFile, '{}')
   await expectStatus({ ...valid, phone: '8 (123) 456-78-90', email: '', message: '' }, 200)
@@ -145,6 +148,8 @@ try {
   await expectStatus(valid, 503)
   const diagnostics = await readFile(errorLog, 'utf8')
   assert.ok(diagnostics.includes('fopen('))
+  assert.ok(diagnostics.includes('rate limit storage failure (read)'))
+  assert.ok(diagnostics.includes('rate limit storage failure (open)'))
   for (const value of [valid.name, valid.phone, valid.email, valid.message]) {
     assert.ok(!diagnostics.includes(value), 'Журнал не должен содержать данные формы')
   }
