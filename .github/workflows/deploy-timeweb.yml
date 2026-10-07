@@ -31,7 +31,9 @@ jobs:
         env:
           SITE_BASE: /
       - name: Check published pages and links
-        run: npm test
+        run: |
+          npm test
+          node --test scripts/deploy-timeweb.test.mjs
       - name: Check contact API
         run: |
           php -l public/api/contact.php
@@ -53,13 +55,4 @@ jobs:
           TIMEWEB_HOST: ${{ vars.TIMEWEB_HOST }}
           TIMEWEB_USER: ${{ vars.TIMEWEB_USER }}
           TIMEWEB_PATH: ${{ vars.TIMEWEB_PATH }}
-        run: |
-          test -n "$TIMEWEB_HOST" || { echo 'Missing TIMEWEB_HOST variable'; exit 1; }
-          test -n "$TIMEWEB_USER" || { echo 'Missing TIMEWEB_USER variable'; exit 1; }
-          case "$TIMEWEB_PATH" in
-            */public_html) ;;
-            *) echo 'TIMEWEB_PATH must point to the site public_html directory'; exit 1 ;;
-          esac
-          rsync -az --delay-updates \
-            -e "ssh -i $HOME/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
-            dist/ "$TIMEWEB_USER@$TIMEWEB_HOST:$TIMEWEB_PATH/"
+        run: node scripts/deploy-timeweb.mjs
