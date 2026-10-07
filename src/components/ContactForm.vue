@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import { sitePath } from '../utils/site-path'
 
 const props = defineProps({
@@ -28,6 +28,9 @@ const status = ref('idle')
 const feedback = ref('')
 const phoneError = ref('')
 const phoneInput = ref(null)
+let submissionController = null
+
+onBeforeUnmount(() => submissionController?.abort())
 
 const isDark = computed(() => props.tone === 'dark')
 const labelClass = computed(() => isDark.value ? 'text-surface' : 'text-foreground')
@@ -115,21 +118,29 @@ async function submitForm() {
 
   phoneError.value = ''
   status.value = 'sending'
+  const controller = new AbortController()
+  submissionController = controller
+  let timedOut = false
+  const timeout = window.setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, 15000)
 
   try {
     const phoneDigits = `7${fields.phone}`
     const response = await fetch(sitePath('/api/contact.php'), {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ...fields, phone: phoneDigits }),
     })
-    const result = await response.json().catch(() => ({}))
-    const serverMessage = typeof result.message === 'string' ? result.message.trim() : ''
+    const result = await response.json()
+    const serverMessage = typeof result?.message === 'string' ? result.message.trim() : ''
 
-    if (!response.ok || result.ok !== true) {
+    if (!response.ok || result?.ok !== true) {
       status.value = 'error'
       feedback.value = serverMessage || 'Не удалось отправить сообщение. Попробуйте ещё раз.'
       return
@@ -139,11 +150,15 @@ async function submitForm() {
     feedback.value = serverMessage || 'Спасибо! Сообщение отправлено.'
     resetFields()
     emit('success')
-  } catch (error) {
+  } catch {
+    if (controller.signal.aborted && !timedOut) return
     status.value = 'error'
-    feedback.value = error instanceof Error
-      ? error.message
-      : 'Не удалось отправить сообщение. Попробуйте ещё раз.'
+    feedback.value = timedOut
+      ? 'Сервер не ответил вовремя. Сообщение могло быть отправлено — повторите попытку чуть позже.'
+      : 'Не удалось отправить сообщение. Проверьте соединение и попробуйте ещё раз.'
+  } finally {
+    window.clearTimeout(timeout)
+    if (submissionController === controller) submissionController = null
   }
 }
 </script>

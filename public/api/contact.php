@@ -1,5 +1,9 @@
 <?php
 
+// Диагностика остаётся в журнале PHP и не нарушает формат JSON-ответа.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 
@@ -15,13 +19,31 @@ function text_length($value)
     return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
 }
 
+// Временная проверка записи из веб-процесса в изоляции тестового сайта.
+// Удаляется перед включением ограничения отправки; пути и данные не выдаются.
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_SERVER['HTTP_HOST'] ?? '') === 'test.medved.beer') {
+    $probePath = dirname(__DIR__, 2) . '/.medved-contact-probe-' . bin2hex(random_bytes(8));
+    $previousMask = umask(0077);
+    $probe = fopen($probePath, 'x+');
+    umask($previousMask);
+    $ready = false;
+    if ($probe !== false) {
+        $ready = flock($probe, LOCK_EX) && fwrite($probe, 'ready') === 5
+            && fflush($probe) && rewind($probe) && stream_get_contents($probe) === 'ready';
+        fclose($probe);
+        $ready = unlink($probePath) && $ready;
+    }
+    if (!$ready) respond(503, array('message' => 'Проверка хранилища тестового сайта не пройдена.'));
+    header('X-Contact-Storage-Ready: 1');
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Allow: POST');
     respond(405, array('message' => 'Метод не поддерживается.'));
 }
 
 $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
-if (strpos($contentType, 'application/json') !== 0) {
+if (strtolower(trim(explode(';', $contentType)[0])) !== 'application/json') {
     respond(415, array('message' => 'Неверный формат запроса.'));
 }
 
@@ -30,9 +52,16 @@ if ($rawBody === false || strlen($rawBody) > 16384) {
     respond(400, array('message' => 'Неверный размер запроса.'));
 }
 
-$data = json_decode($rawBody, true);
-if (!is_array($data)) {
+$decoded = json_decode($rawBody);
+if (!is_object($decoded)) {
     respond(400, array('message' => 'Не удалось прочитать данные формы.'));
+}
+$data = get_object_vars($decoded);
+
+foreach (array('name', 'phone', 'email', 'message', 'website') as $field) {
+    if (array_key_exists($field, $data) && !is_string($data[$field])) {
+        respond(422, array('message' => 'Поля формы должны содержать текст.'));
+    }
 }
 
 $name = isset($data['name']) ? trim((string) $data['name']) : '';
@@ -50,9 +79,14 @@ if ($name === '' || text_length($name) > 120) {
     respond(422, array('message' => 'Укажите ваше имя.'));
 }
 
-if ($phone === '' || text_length($phone) > 60 || !preg_match('/^[0-9+()\-\s.]+$/', $phone)) {
+if (text_length($phone) > 60 || !preg_match('/^\+?[0-9() .-]+$/D', $phone)) {
     respond(422, array('message' => 'Укажите корректный телефон.'));
 }
+$phone = preg_replace('/[+() .-]/', '', $phone);
+if (!preg_match('/^[78][0-9]{10}$/D', $phone)) {
+    respond(422, array('message' => 'Укажите корректный телефон.'));
+}
+$phone = '7' . substr($phone, 1);
 
 if ($email !== '' && (text_length($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL))) {
     respond(422, array('message' => 'Укажите корректную электронную почту.'));
@@ -91,6 +125,7 @@ if ($email !== '') {
 }
 
 if (!mail($recipient, $subject, $body, implode("\r\n", $headers))) {
+    error_log('Contact API: mail() failed to accept the message for delivery.');
     respond(500, array('message' => 'Не удалось отправить сообщение. Попробуйте ещё раз.'));
 }
 
