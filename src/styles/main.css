@@ -19,6 +19,8 @@
   --leading-none: 1;
   --text-h1: clamp(2rem, 8vw, 7rem);
   --text-h1--line-height: var(--leading-none);
+  --text-product-title: clamp(2.5rem, 10vw, 9rem);
+  --text-product-title--line-height: var(--leading-none);
   --text-404: clamp(8rem, 26vw, 22rem);
   --text-404--line-height: var(--leading-none);
   --text-h2: clamp(1.75rem, 5vw, 4.5rem);
