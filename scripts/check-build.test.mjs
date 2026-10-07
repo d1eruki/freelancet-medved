@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
+import sharp from 'sharp'
 
 const output = path.resolve('dist')
 const origin = 'https://medved.beer'
@@ -144,7 +145,8 @@ test('Apache route rules cover every published page', async () => {
   assert.ok(!routePattern.test('missing-page/'))
 })
 
-test('image and script URLs in published HTML point to built files', async () => {
+test('image and script URLs resolve and srcset widths match the built images', async () => {
+  const imageWidths = new Map()
   for (const url of [...urls, `${origin}/404.html`]) {
     const filePath = url.endsWith('/404.html')
       ? path.join(output, '404.html')
@@ -153,13 +155,18 @@ test('image and script URLs in published HTML point to built files', async () =>
     for (const [, attribute, value] of html.matchAll(/\b(src|srcset)="([^"]+)"/g)) {
       const candidates = attribute === 'srcset' ? value.split(',') : [value]
       for (const candidate of candidates) {
-        const asset = candidate.trim().split(/\s+/)[0]
+        const [asset, descriptor] = candidate.trim().split(/\s+/)
         const target = new URL(asset, origin)
         if (target.origin !== origin) continue
         const pathname = basePath && target.pathname.startsWith(`${basePath}/`)
           ? target.pathname.slice(basePath.length)
           : target.pathname
-        assert.ok((await stat(path.join(output, pathname.slice(1))).catch(() => null))?.isFile(), `${url} -> ${asset}`)
+        const file = path.join(output, pathname.slice(1))
+        assert.ok((await stat(file).catch(() => null))?.isFile(), `${url} -> ${asset}`)
+        if (attribute === 'srcset' && /^\d+w$/.test(descriptor)) {
+          if (!imageWidths.has(file)) imageWidths.set(file, (await sharp(file).metadata()).width)
+          assert.equal(imageWidths.get(file), Number.parseInt(descriptor, 10), `${url} -> ${asset}: ${descriptor}`)
+        }
       }
     }
   }

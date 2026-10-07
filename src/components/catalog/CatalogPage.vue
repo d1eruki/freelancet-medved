@@ -1,28 +1,13 @@
 <script setup>
+import catalogHeroForeground from '../../assets/heroes/catalog/foreground.png?responsive'
+import catalogHeroMiddle from '../../assets/heroes/catalog/middle.png?responsive'
+import catalogHeroBackground from '../../assets/heroes/catalog/background.png?responsive'
 import CatalogCategoryCard from './CatalogCategoryCard.vue'
 import PageHero from '../PageHero.vue'
 import HeroDivider from '../HeroDivider.vue'
 import SectionLink from '../SectionLink.vue'
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'
-import catalogHeroBackgroundUrl from '../../assets/heroes/catalog/background.png'
-import catalogHeroBackground640Url from '../../assets/heroes/catalog/background.png?width=640'
-import catalogHeroBackground960Url from '../../assets/heroes/catalog/background.png?width=960'
-import catalogHeroBackgroundAvifUrl from '../../assets/heroes/catalog/background.png?format=avif'
-import catalogHeroBackgroundAvif640Url from '../../assets/heroes/catalog/background.png?format=avif&width=640'
-import catalogHeroBackgroundAvif960Url from '../../assets/heroes/catalog/background.png?format=avif&width=960'
-import catalogHeroMiddleUrl from '../../assets/heroes/catalog/middle.png'
-import catalogHeroMiddle640Url from '../../assets/heroes/catalog/middle.png?width=640'
-import catalogHeroMiddle960Url from '../../assets/heroes/catalog/middle.png?width=960'
-import catalogHeroMiddleAvifUrl from '../../assets/heroes/catalog/middle.png?format=avif'
-import catalogHeroMiddleAvif640Url from '../../assets/heroes/catalog/middle.png?format=avif&width=640'
-import catalogHeroMiddleAvif960Url from '../../assets/heroes/catalog/middle.png?format=avif&width=960'
-import catalogHeroForegroundUrl from '../../assets/heroes/catalog/foreground.png'
-import catalogHeroForeground640Url from '../../assets/heroes/catalog/foreground.png?width=640'
-import catalogHeroForeground960Url from '../../assets/heroes/catalog/foreground.png?width=960'
-import catalogHeroForegroundAvifUrl from '../../assets/heroes/catalog/foreground.png?format=avif'
-import catalogHeroForegroundAvif640Url from '../../assets/heroes/catalog/foreground.png?format=avif&width=640'
-import catalogHeroForegroundAvif960Url from '../../assets/heroes/catalog/foreground.png?format=avif&width=960'
 import catalogDividerUrl from '../../assets/heroes/catalog/divider.png'
 
 const catalogHeroLayout = {
@@ -33,24 +18,18 @@ const catalogHeroLayout = {
 
 const catalogHeroLayers = {
   background: {
-    src: catalogHeroBackgroundUrl,
-    srcset: `${catalogHeroBackground640Url} 640w, ${catalogHeroBackground960Url} 960w, ${catalogHeroBackgroundUrl} 1672w`,
-    avifSrcset: `${catalogHeroBackgroundAvif640Url} 640w, ${catalogHeroBackgroundAvif960Url} 960w, ${catalogHeroBackgroundAvifUrl} 1672w`,
+    ...catalogHeroBackground,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Старинная иллюстрация: цветущие деревья у реки и город на дальнем берегу',
   },
   middle: {
-    src: catalogHeroMiddleUrl,
-    srcset: `${catalogHeroMiddle640Url} 640w, ${catalogHeroMiddle960Url} 960w, ${catalogHeroMiddleUrl} 1672w`,
-    avifSrcset: `${catalogHeroMiddleAvif640Url} 640w, ${catalogHeroMiddleAvif960Url} 960w, ${catalogHeroMiddleAvifUrl} 1672w`,
+    ...catalogHeroMiddle,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
   },
   foreground: {
-    src: catalogHeroForegroundUrl,
-    srcset: `${catalogHeroForeground640Url} 640w, ${catalogHeroForeground960Url} 960w, ${catalogHeroForegroundUrl} 1672w`,
-    avifSrcset: `${catalogHeroForegroundAvif640Url} 640w, ${catalogHeroForegroundAvif960Url} 960w, ${catalogHeroForegroundAvifUrl} 1672w`,
+    ...catalogHeroForeground,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
   },

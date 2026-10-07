@@ -1,26 +1,11 @@
 <script setup>
+import aboutHeroForeground from '../../assets/heroes/about/foreground.png?responsive'
+import aboutHeroMiddle from '../../assets/heroes/about/middle.png?responsive'
+import aboutHeroBackground from '../../assets/heroes/about/background.png?responsive'
 import SectionWatermark from '../SectionWatermark.vue'
 import { sitePath } from '../../utils/site-path'
 import aboutCompanyImageUrl from '../../assets/about/about-company-enhanced.png'
 import aboutDividerUrl from '../../assets/heroes/about/divider.png'
-import aboutHeroBackgroundUrl from '../../assets/heroes/about/background.png'
-import aboutHeroBackground640Url from '../../assets/heroes/about/background.png?width=640'
-import aboutHeroBackground960Url from '../../assets/heroes/about/background.png?width=960'
-import aboutHeroBackgroundAvifUrl from '../../assets/heroes/about/background.png?format=avif'
-import aboutHeroBackgroundAvif640Url from '../../assets/heroes/about/background.png?format=avif&width=640'
-import aboutHeroBackgroundAvif960Url from '../../assets/heroes/about/background.png?format=avif&width=960'
-import aboutHeroMiddleUrl from '../../assets/heroes/about/middle.png'
-import aboutHeroMiddle640Url from '../../assets/heroes/about/middle.png?width=640'
-import aboutHeroMiddle960Url from '../../assets/heroes/about/middle.png?width=960'
-import aboutHeroMiddleAvifUrl from '../../assets/heroes/about/middle.png?format=avif'
-import aboutHeroMiddleAvif640Url from '../../assets/heroes/about/middle.png?format=avif&width=640'
-import aboutHeroMiddleAvif960Url from '../../assets/heroes/about/middle.png?format=avif&width=960'
-import aboutHeroForegroundUrl from '../../assets/heroes/about/foreground.png'
-import aboutHeroForeground640Url from '../../assets/heroes/about/foreground.png?width=640'
-import aboutHeroForeground960Url from '../../assets/heroes/about/foreground.png?width=960'
-import aboutHeroForegroundAvifUrl from '../../assets/heroes/about/foreground.png?format=avif'
-import aboutHeroForegroundAvif640Url from '../../assets/heroes/about/foreground.png?format=avif&width=640'
-import aboutHeroForegroundAvif960Url from '../../assets/heroes/about/foreground.png?format=avif&width=960'
 import durdinPortraitUrl from '../../assets/about/durdin-portrait.png'
 import awardInterfood2007Url from '../../assets/awards/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../../assets/awards/award-medovukha-fest-2016.jpg'
@@ -43,24 +28,18 @@ const aboutHeroLayout = {
 
 const aboutHeroLayers = {
   background: {
-    src: aboutHeroBackgroundUrl,
-    srcset: `${aboutHeroBackground640Url} 640w, ${aboutHeroBackground960Url} 960w, ${aboutHeroBackgroundUrl} 1672w`,
-    avifSrcset: `${aboutHeroBackgroundAvif640Url} 640w, ${aboutHeroBackgroundAvif960Url} 960w, ${aboutHeroBackgroundAvifUrl} 1672w`,
+    ...aboutHeroBackground,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Старинная иллюстрация: мастер работает с медовыми сотами у окна с видом на Петербург',
   },
   middle: {
-    src: aboutHeroMiddleUrl,
-    srcset: `${aboutHeroMiddle640Url} 640w, ${aboutHeroMiddle960Url} 960w, ${aboutHeroMiddleUrl} 1672w`,
-    avifSrcset: `${aboutHeroMiddleAvif640Url} 640w, ${aboutHeroMiddleAvif960Url} 960w, ${aboutHeroMiddleAvifUrl} 1672w`,
+    ...aboutHeroMiddle,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
   },
   foreground: {
-    src: aboutHeroForegroundUrl,
-    srcset: `${aboutHeroForeground640Url} 640w, ${aboutHeroForeground960Url} 960w, ${aboutHeroForegroundUrl} 1672w`,
-    avifSrcset: `${aboutHeroForegroundAvif640Url} 640w, ${aboutHeroForegroundAvif960Url} 960w, ${aboutHeroForegroundAvifUrl} 1672w`,
+    ...aboutHeroForeground,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
   },

@@ -6,11 +6,36 @@ import sharp from 'sharp'
 const rasterExtensions = new Set(['.png', '.jpg', '.jpeg'])
 const assetsRoot = fileURLToPath(new URL('../../src/assets/', import.meta.url))
 
+function responsiveModule(resourcePath, originalWidth) {
+  const widths = [...[640, 960].filter((width) => width < originalWidth), originalWidth]
+  const imports = []
+  const srcsets = []
+  for (const [prefix, formatQuery] of [['image', ''], ['avif', 'format=avif']]) {
+    const candidates = widths.map((width, index) => {
+      const query = [formatQuery, width === originalWidth ? '' : `width=${width}`].filter(Boolean).join('&')
+      const name = `${prefix}${index}`
+      imports.push(`import ${name} from ${JSON.stringify(`${resourcePath}${query ? `?${query}` : ''}`)};`)
+      return `${name} + ${JSON.stringify(` ${width}w`)}`
+    })
+    srcsets.push(`[${candidates.join(', ')}].join(', ')`)
+  }
+  return `${imports.join('\n')}
+export default {
+  src: image${widths.length - 1},
+  avifSrc: avif${widths.length - 1},
+  srcset: ${srcsets[0]},
+  avifSrcset: ${srcsets[1]},
+};`
+}
+
 export function optimizeImagesPlugin() {
+  let isBuild = false
   return {
     name: 'optimize-images',
-    apply: 'build',
     enforce: 'pre',
+    configResolved(config) {
+      isBuild = config.command === 'build'
+    },
     async load(id) {
       const [resourcePath, query = ''] = id.split('?', 2)
       const extension = path.extname(resourcePath).toLowerCase()
@@ -20,6 +45,14 @@ export function optimizeImagesPlugin() {
       }
 
       const params = new URLSearchParams(query)
+      if (params.has('responsive')) {
+        this.addWatchFile(resourcePath)
+        const { width } = await sharp(resourcePath).metadata()
+        return responsiveModule(resourcePath, width)
+      }
+
+      if (!isBuild) return null
+
       const widthParam = params.get('width')
       const width = widthParam === null ? null : Number(widthParam)
       if (widthParam !== null && (!Number.isInteger(width) || width < 1)) {

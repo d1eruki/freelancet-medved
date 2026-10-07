@@ -1,4 +1,7 @@
 <script setup>
+import horecaHeroForeground from '../../assets/heroes/horeca/foreground.png?responsive'
+import horecaHeroMiddle from '../../assets/heroes/horeca/middle.png?responsive'
+import horecaHeroBackground from '../../assets/heroes/horeca/background.png?responsive'
 import PageHero from '../PageHero.vue'
 import HeroDivider from '../HeroDivider.vue'
 import ActionTile from '../ActionTile.vue'
@@ -6,25 +9,7 @@ import NumberedInfoCard from '../NumberedInfoCard.vue'
 import CatalogCategoryCard from '../catalog/CatalogCategoryCard.vue'
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'
-import horecaHeroBackgroundUrl from '../../assets/heroes/horeca/background.png'
 import horecaDividerUrl from '../../assets/heroes/horeca/divider.png'
-import horecaHeroBackground640Url from '../../assets/heroes/horeca/background.png?width=640'
-import horecaHeroBackground960Url from '../../assets/heroes/horeca/background.png?width=960'
-import horecaHeroBackgroundAvifUrl from '../../assets/heroes/horeca/background.png?format=avif'
-import horecaHeroBackgroundAvif640Url from '../../assets/heroes/horeca/background.png?format=avif&width=640'
-import horecaHeroBackgroundAvif960Url from '../../assets/heroes/horeca/background.png?format=avif&width=960'
-import horecaHeroMiddleUrl from '../../assets/heroes/horeca/middle.png'
-import horecaHeroMiddle640Url from '../../assets/heroes/horeca/middle.png?width=640'
-import horecaHeroMiddle960Url from '../../assets/heroes/horeca/middle.png?width=960'
-import horecaHeroMiddleAvifUrl from '../../assets/heroes/horeca/middle.png?format=avif'
-import horecaHeroMiddleAvif640Url from '../../assets/heroes/horeca/middle.png?format=avif&width=640'
-import horecaHeroMiddleAvif960Url from '../../assets/heroes/horeca/middle.png?format=avif&width=960'
-import horecaHeroForegroundUrl from '../../assets/heroes/horeca/foreground.png'
-import horecaHeroForeground640Url from '../../assets/heroes/horeca/foreground.png?width=640'
-import horecaHeroForeground960Url from '../../assets/heroes/horeca/foreground.png?width=960'
-import horecaHeroForegroundAvifUrl from '../../assets/heroes/horeca/foreground.png?format=avif'
-import horecaHeroForegroundAvif640Url from '../../assets/heroes/horeca/foreground.png?format=avif&width=640'
-import horecaHeroForegroundAvif960Url from '../../assets/heroes/horeca/foreground.png?format=avif&width=960'
 
 const horecaHeroLayout = {
   background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
@@ -35,24 +20,18 @@ const horecaHeroSteam = { fit: 'cover', anchorX: 0.71, anchorY: 0.2, scaleDiviso
 
 const horecaHeroLayers = {
   background: {
-    src: horecaHeroBackgroundUrl,
-    srcset: `${horecaHeroBackground640Url} 640w, ${horecaHeroBackground960Url} 960w, ${horecaHeroBackgroundUrl} 1672w`,
-    avifSrcset: `${horecaHeroBackgroundAvif640Url} 640w, ${horecaHeroBackgroundAvif960Url} 960w, ${horecaHeroBackgroundAvifUrl} 1672w`,
+    ...horecaHeroBackground,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
     alt: 'Старинный бар с деревянными полками, бутылками и хмелем',
   },
   middle: {
-    src: horecaHeroMiddleUrl,
-    srcset: `${horecaHeroMiddle640Url} 640w, ${horecaHeroMiddle960Url} 960w, ${horecaHeroMiddleUrl} 1672w`,
-    avifSrcset: `${horecaHeroMiddleAvif640Url} 640w, ${horecaHeroMiddleAvif960Url} 960w, ${horecaHeroMiddleAvifUrl} 1672w`,
+    ...horecaHeroMiddle,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
   },
   foreground: {
-    src: horecaHeroForegroundUrl,
-    srcset: `${horecaHeroForeground640Url} 640w, ${horecaHeroForeground960Url} 960w, ${horecaHeroForegroundUrl} 1672w`,
-    avifSrcset: `${horecaHeroForegroundAvif640Url} 640w, ${horecaHeroForegroundAvif960Url} 960w, ${horecaHeroForegroundAvifUrl} 1672w`,
+    ...horecaHeroForeground,
     sizes: '100vw',
     className: 'absolute inset-0 size-full object-cover object-center',
   },
