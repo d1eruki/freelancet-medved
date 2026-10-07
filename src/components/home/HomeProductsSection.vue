@@ -1,6 +1,6 @@
 <script setup>
 import { sitePath } from '../../utils/site-path'
-import { computed, onBeforeUnmount, provide, ref } from 'vue'
+import { computed, onBeforeUnmount, provide, ref, watch } from 'vue'
 import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { catalogCategories } from '../../data/catalog'
@@ -29,6 +29,7 @@ const products = catalogCategories.map((category) => ({
 }))
 
 const activeIndex = ref(0)
+const tabList = ref(null)
 const isTransitioning = ref(false)
 const isTextHidden = ref(false)
 const motionDirection = ref('')
@@ -42,6 +43,25 @@ const textFadeDuration = 360
 const imageMotionDuration = 820
 let slideTimer
 let revealTimer
+
+watch(activeIndex, () => {
+  if (tabList.value?.contains(document.activeElement)) {
+    tabList.value.querySelector('[aria-selected="true"]')?.focus({ preventScroll: true })
+  }
+}, { flush: 'post' })
+
+function handleTabKeydown(event, index) {
+  if (event.altKey || event.ctrlKey || event.metaKey) return
+  const targets = {
+    ArrowLeft: (index - 1 + products.length) % products.length,
+    ArrowRight: (index + 1) % products.length,
+    Home: 0,
+    End: products.length - 1,
+  }
+  if (!Object.hasOwn(targets, event.key)) return
+  event.preventDefault()
+  showProduct(targets[event.key])
+}
 
 function clearTransitionTimers() {
   window.clearTimeout(slideTimer)
@@ -206,6 +226,10 @@ onBeforeUnmount(() => {
           <ProductCard
             v-for="(product, index) in products"
             :key="product.href"
+            :id="`home-product-panel-${product.slug}`"
+            role="tabpanel"
+            :aria-labelledby="`home-product-tab-${product.slug}`"
+            :inert="index !== activeIndex || undefined"
             class="w-full shrink-0 nav:h-full"
             :product="product"
             :active="index === activeIndex"
@@ -234,24 +258,26 @@ onBeforeUnmount(() => {
           </button>
 
           <div
+            ref="tabList"
             class="hidden flex-wrap items-center justify-center gap-3 nav:flex"
             role="tablist"
             aria-label="Выбор напитка"
-            @keydown.left.prevent="showPrevious"
-            @keydown.right.prevent="showNext"
           >
             <button
               v-for="(product, index) in products"
               :key="product.href"
+              :id="`home-product-tab-${product.slug}`"
               class="rounded-full px-5 py-3 text-label font-bold uppercase transition focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
               :class="index === activeIndex
                 ? 'bg-brand text-surface'
                 : 'bg-surface text-foreground hover:bg-brand/10'"
               type="button"
               role="tab"
+              :aria-controls="`home-product-panel-${product.slug}`"
               :aria-selected="index === activeIndex"
               :tabindex="index === activeIndex ? 0 : -1"
               @click="showProduct(index)"
+              @keydown="handleTabKeydown($event, index)"
             >
               {{ product.name }}
             </button>
