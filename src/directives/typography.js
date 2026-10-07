@@ -92,7 +92,6 @@ export const vTypography = {
     formatTextNodes(element)
     observeTextNodes(element)
   },
-  updated: formatTextNodes,
   unmounted(element) {
     observers.get(element)?.disconnect()
     observers.delete(element)
