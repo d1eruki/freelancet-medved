@@ -1,19 +1,20 @@
 <script setup>
 import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, provide, ref } from 'vue'
-import CategoryPattern from '../CategoryPattern.vue'
 import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { catalogCategories } from '../../data/catalog'
 import { createProductScene, productSceneKey } from '../../utils/product-scene.js'
+import lightMeadLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/light-mead.png?url'
 import antonovkaLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/antonovka.png?url'
 import williamsLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/poiret-pear.png?url'
 import barCounterTexture from '../../assets/home/bar-counter-texture.png'
+import productSliderBackground from '../../assets/home/product-slider-background.png'
 
 const productScene = createProductScene()
 provide(productSceneKey, productScene)
 
-const canLabels = { sidr: antonovkaLabel, puare: williamsLabel }
+const canLabels = { medovuha: lightMeadLabel, sidr: antonovkaLabel, puare: williamsLabel }
 
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
@@ -160,7 +161,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" data-header-theme="dark" aria-labelledby="products-title">
+  <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-surface nav:h-svh" data-header-theme="dark" aria-labelledby="products-title">
     <img
       :src="barCounterTexture"
       data-product-counter
@@ -169,21 +170,17 @@ onBeforeUnmount(() => {
       class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] w-full object-fill"
     />
     <div class="pointer-events-none absolute inset-x-0 top-0 bottom-[30svh] z-1 overflow-hidden" aria-hidden="true">
-      <div class="product-track flex h-full" :class="{ 'is-dragging': isDragging }" :style="{ transform: trackTransform }">
-        <CategoryPattern
-          v-for="product in products"
-          :key="product.slug"
-          :slug="product.slug"
-          :data-product-pattern="product.slug"
-          id-prefix="slider"
-          class="h-full w-full shrink-0 text-brand opacity-[0.07]"
-        />
-      </div>
+      <img
+        :src="productSliderBackground"
+        data-product-background
+        alt=""
+        class="h-full w-full object-cover brightness-15"
+      />
     </div>
 
     <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-28">
       <div class="grid items-end gap-6 pb-8 wide:grid-cols-3 wide:gap-12 wide:pb-10">
-        <h2 id="products-title" class="min-w-0 font-display text-h2 text-center text-brand uppercase nav:text-left wide:col-span-2">
+        <h2 id="products-title" class="min-w-0 font-display text-h2 text-center text-surface uppercase nav:text-left wide:col-span-2">
           Продукция
         </h2>
 

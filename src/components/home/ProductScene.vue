@@ -2,11 +2,11 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createProductScene, productSceneKey } from '../../utils/product-scene.js'
 import { drinkPresets } from '../../data/drink-presets.js'
-import glassModelUrl from '../../assets/models/glass.glb?url'
 import canModelUrl from '../../assets/models/can.glb?url'
 
 const props = defineProps({
   canOnly: { type: Boolean, default: false },
+  loadGlassOptics: { type: Function, default: null },
   active: { type: Boolean, default: false },
   paused: { type: Boolean, default: false },
   drink: { type: String, default: 'cider', validator: value => Object.hasOwn(drinkPresets, value) },
@@ -17,7 +17,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['ready', 'error'])
 const sharedOwner = inject(productSceneKey, null)
-const owner = sharedOwner || createProductScene()
+const owner = sharedOwner || createProductScene({ loadGlassOptics: props.loadGlassOptics })
 const root = ref(null)
 const snapshot = ref(null)
 const error = ref('')
@@ -28,9 +28,9 @@ let mayActivate = false
 function model(bank) {
   return {
     host: ref(null), proxy: ref(null), ready: ref(false),
-    shadowStyle: ref({}), contactStyle: ref({}), shadowClipStyle: ref({}), hitStyle: ref({}),
+    hitStyle: ref({}),
     props: {
-      bank, source: bank ? canModelUrl : glassModelUrl,
+      bank, source: bank ? canModelUrl : '',
       get active() { return props.active },
       get paused() { return props.paused },
       get drink() { return props.drink },
@@ -59,6 +59,7 @@ onMounted(() => {
   view = {
     root: root.value, section, snapshot: snapshot.value,
     counter: section.querySelector('[data-product-counter]'),
+    background: section.querySelector('[data-product-background]'),
     pattern: section.querySelector(`[data-product-pattern="${props.patternSlug}"]`),
     glass: props.canOnly ? null : { ...glass, host: glass.host.value, proxy: glass.proxy.value },
     can: { ...can, host: can.host.value, proxy: can.proxy.value },
@@ -97,10 +98,6 @@ onBeforeUnmount(() => {
     >
       <span :ref="element => { item.proxy.value = element }" class="product-scene-transform" />
       <span class="product-scene-hit" :style="{ ...item.hitStyle.value, display: ready && !error ? undefined : 'none' }" />
-      <span class="product-model-shadows" :style="{ ...item.shadowClipStyle.value, display: ready && !error ? undefined : 'none' }">
-        <span class="product-model-shadow" :style="item.contactStyle.value" />
-        <span class="product-model-shadow" :style="item.shadowStyle.value" />
-      </span>
     </span>
   </span>
 </template>
@@ -143,8 +140,6 @@ onBeforeUnmount(() => {
 }
 
 .product-scene-hit { position: absolute; z-index: 2; pointer-events: auto; }
-.product-model-shadows { position: absolute; z-index: 0; overflow: hidden; pointer-events: none; }
-.product-model-shadow { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; }
 
 .product-scene-snapshot,
 .product-scene :deep(.product-scene-canvas) {
