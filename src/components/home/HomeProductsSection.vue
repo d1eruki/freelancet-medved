@@ -3,18 +3,16 @@ import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, provide, ref, watch } from 'vue'
 import CircleArrow from '../CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
+import { productLabels } from '../../data/product-labels.js'
 import { catalogCategories } from '../../data/catalog'
 import { createProductScene, productSceneKey } from '../../utils/product-scene.js'
-import lightMeadLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/light-mead.png?url'
-import antonovkaLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/antonovka.png?url'
-import williamsLabel from '../../../materials/customer-design/labels/cans-330ml-500ml/poiret-pear.png?url'
 import barCounterTexture from '../../assets/home/bar-counter-texture.png'
 import productSliderBackground from '../../assets/home/product-slider-background.png'
 
 const productScene = createProductScene()
 provide(productSceneKey, productScene)
 
-const canLabels = { medovuha: lightMeadLabel, sidr: antonovkaLabel, puare: williamsLabel }
+
 
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
@@ -25,7 +23,7 @@ const products = catalogCategories.map((category) => ({
   href: sitePath(`/katalog/${category.slug}/`),
   image: category.image,
   drink: category.slug === 'medovuha' ? 'mead' : 'cider',
-  canLabel: canLabels[category.slug] || '',
+  canLabel: productLabels[category.slug] || '',
 }))
 
 const activeIndex = ref(0)

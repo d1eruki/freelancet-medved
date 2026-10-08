@@ -268,7 +268,7 @@ const qualityPoints = [
     <div ref="processScrollSection" class="nav:h-[400svh]">
       <div class="nav:sticky nav:top-0 nav:h-svh">
         <section
-          class="bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:py-8"
+          class="section-decorated bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:py-8"
           data-header-theme="dark"
           aria-labelledby="production-process-title"
           @keydown="handleProcessKeydown"

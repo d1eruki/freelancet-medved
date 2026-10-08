@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { usePointerParallax } from '../composables/use-pointer-parallax.js'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
 import { layerEntranceTimings, imageCopyTiming } from '../utils/hero-entrance'
 
@@ -18,36 +18,9 @@ const props = defineProps({
   steam: { type: Object, default: null },
 })
 
-const parallaxOffset = ref({ x: 0, y: 0 })
-let parallaxMedia
-
-function resetParallax() {
-  parallaxOffset.value = { x: 0, y: 0 }
-}
-
-function updateParallax(event) {
-  if (!props.pointerParallax || !parallaxMedia?.matches || event.pointerType === 'touch') return
-
-  const bounds = event.currentTarget.getBoundingClientRect()
-  if (!bounds.width || !bounds.height) return
-
-  const normalize = (position, size) => Math.max(-1, Math.min(1, position / size * 2 - 1))
-  parallaxOffset.value = {
-    x: normalize(event.clientX - bounds.left, bounds.width) * 40,
-    y: normalize(event.clientY - bounds.top, bounds.height) * 28,
-  }
-}
-
-onMounted(() => {
-  if (props.layers || !props.pointerParallax) return
-  parallaxMedia = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)')
-  parallaxMedia.addEventListener('change', resetParallax)
-  window.addEventListener('blur', resetParallax)
-})
-
-onBeforeUnmount(() => {
-  parallaxMedia?.removeEventListener('change', resetParallax)
-  if (!props.layers && props.pointerParallax) window.removeEventListener('blur', resetParallax)
+const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } = usePointerParallax({
+  range: { x: 40, y: 28 },
+  enabled: () => props.pointerParallax && !props.layers,
 })
 </script>
 

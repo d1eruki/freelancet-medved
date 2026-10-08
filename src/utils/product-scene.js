@@ -1,12 +1,9 @@
+import { preloadLabelUrls } from '../data/product-labels.js'
+import { disposeProductModel, loadProductModels, prepareProductModels } from './product-models.js'
+import { createProductPostprocess, prepareProductMaterials } from './product-materials.js'
+import { createProductLabels } from './product-labels.js'
 import { createProductEnvironment } from './product-environment.js'
 import { createProductLight } from './product-light.js'
-
-// Подготовка сменных этикеток не должна начинаться только по нажатию стрелки.
-const preloadLabelUrls = Object.values(import.meta.glob([
-  '../../materials/customer-design/labels/cans-330ml-500ml/light-mead.png',
-  '../../materials/customer-design/labels/cans-330ml-500ml/antonovka.png',
-  '../../materials/customer-design/labels/cans-330ml-500ml/poiret-pear.png',
-], { eager: true, query: '?url', import: 'default' }))
 
 export const productSceneKey = Symbol('product-scene')
 
@@ -38,23 +35,6 @@ export function createProductScene({ loadGlassOptics } = {}) {
   let sharedScene = null
   let sceneStarting = false
   const sceneQuality = Object.freeze({ maxModelPixels: 720, maxPixelRatio: 1.5, samples: 4 })
-  // Метры: высота стакана — по Nonic 570 мл, форма остаётся нашей;
-  // банка — стандартные размеры 0,5 л. Стакан задаёт общий масштаб сцены.
-  const modelDimensions = Object.freeze({ glass: { height: 0.1495 }, can: { height: 0.168, diameter: 0.066 } })
-
-  function disposeModel(model) {
-    const resources = new Set()
-    model.traverse(node => {
-      if (node.geometry) resources.add(node.geometry)
-      for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
-        if (!material) continue
-        resources.add(material)
-        for (const value of Object.values(material)) if (value?.isTexture) resources.add(value)
-      }
-    })
-    for (const resource of resources) resource.dispose()
-  }
-
   async function startSharedScene() {
     if (closed || failed || sharedScene || sceneStarting || !currentView) return
     sceneStarting = true
@@ -110,53 +90,16 @@ export function createProductScene({ loadGlassOptics } = {}) {
       scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
       const loader = new GLTFLoader()
       const slots = hasGlass ? [glassSlot, canSlot] : [canSlot]
-      const results = await Promise.allSettled(slots.map(slot => loader.loadAsync(slot.props.bank ? slot.props.source : glassOptics.glassModelUrl)))
-      if (results.some(result => result.status === 'rejected')) {
-        for (const result of results) if (result.status === 'fulfilled') disposeModel(result.value.scene)
-        throw results.find(result => result.status === 'rejected').reason
-      }
-      const models = results.map(result => result.value)
+      const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl)
       canSlot = currentView?.can || canSlot; glassSlot = currentView?.glass || canSlot
       article = currentView?.root || article
       article.appendChild(renderer.domElement)
-      if (aborted || closed || !currentView) { models.forEach(model => disposeModel(model.scene)); cleanup(); return }
+      if (aborted || closed || !currentView) { models.forEach(model => disposeProductModel(model.scene)); cleanup(); return }
       let optics, disposed = false, frame = 0, lastTime = null, interactionUntil = 0, visible = true, renderedSize = ''
       const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-      const finalTarget = new THREE.WebGLRenderTarget(1, 1, { samples: sceneQuality.samples, depthBuffer: true })
-      const fxaaUniforms = THREE.UniformsUtils.clone(FXAAShader.uniforms)
-      fxaaUniforms.tDiffuse.value = finalTarget.texture
-      const fxaa = new THREE.ShaderMaterial({ uniforms: fxaaUniforms,
-        vertexShader: 'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-        fragmentShader: FXAAShader.fragmentShader, toneMapped: false, depthWrite: false, depthTest: false,
-      })
+      const { finalTarget, fxaaUniforms, fxaa } = createProductPostprocess(THREE, FXAAShader, sceneQuality.samples)
       const bankDisplay = { value: false }
-      const toneChunk = THREE.ShaderChunk.tonemapping_pars_fragment
-      const bankTone = toneChunk.slice(toneChunk.indexOf('vec3 RRTAndODTFit'), toneChunk.indexOf('const mat3 LINEAR_REC2020_TO_LINEAR_SRGB')).replaceAll('toneMappingExposure', 'labExposure')
-      const bankExposure = { value: 1 }
-      const items = (hasGlass ? [glassSlot, canSlot] : [canSlot]).map((slot, index) => {
-        const model = models[index].scene
-        const bounds = new THREE.Box3().setFromObject(model)
-        const size = bounds.getSize(new THREE.Vector3())
-        const product = new THREE.Group()
-        product.add(model)
-        const dimensions = slot.props.bank ? modelDimensions.can : modelDimensions.glass
-        const unitsPerMeter = 2 / modelDimensions.glass.height
-        const height = dimensions.height * unitsPerMeter
-        const radialScale = dimensions.diameter
-          ? dimensions.diameter * unitsPerMeter / Math.max(size.x, size.z)
-          : height / size.y
-        product.scale.set(radialScale, height / size.y, radialScale)
-        model.position.sub(bounds.getCenter(new THREE.Vector3()))
-        // При изменении высоты основание остаётся на прежнем уровне.
-        product.position.y = (height - 2) / 2
-        product.rotation.y = 0.35
-        product.updateMatrixWorld(true)
-        const productBounds = new THREE.Box3().setFromObject(product)
-        // Фиксируем границы реальной геометрии: вращение и наведение
-        // не должны постоянно менять положение всей композиции.
-        const compositionBounds = new THREE.Box3().setFromObject(product, true)
-        return { slot, model, product, productBounds, compositionBounds }
-      })
+      const items = prepareProductModels(THREE, models, hasGlass ? [glassSlot, canSlot] : [canSlot])
       const glassItem = hasGlass ? items[0] : null, canItem = items[items.length - 1]
       const canPlacement = new THREE.Group()
       canPlacement.matrixAutoUpdate = false
@@ -181,98 +124,18 @@ export function createProductScene({ loadGlassOptics } = {}) {
         height: canItem.productBounds.max.y - canItem.productBounds.min.y,
         center: canItem.productBounds.getCenter(new THREE.Vector3()),
       } : null
-      const labelMaterials = new Map(), labelTextures = new Map()
-      let labelUrl = null, labelVersion = 0, labelPending = false
-      let preloadHandle = null
-      const schedulePreload = window.requestIdleCallback
-        ? callback => window.requestIdleCallback(callback)
-        : callback => window.setTimeout(callback, 100)
-      const cancelPreload = window.cancelIdleCallback
-        ? handle => window.cancelIdleCallback(handle)
-        : handle => window.clearTimeout(handle)
-      canItem.model.traverse(node => {
-        for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
-          if (!material) continue
-          if (material.name.endsWith('-printed-label')) {
-            labelMaterials.set(material, material.map)
-            material.envMap = environment.texture
-            material.envMapIntensity = 0.25
-          }
-          material.toneMapped = false
-          material.onBeforeCompile = shader => {
-            lightSource.patchShadow(shader)
-            shader.uniforms.labDisplayPass = bankDisplay
-            shader.uniforms.labExposure = bankExposure
-            shader.fragmentShader = 'uniform bool labDisplayPass;uniform float labExposure;\n#define saturate(a) clamp(a,0.0,1.0)\n' + bankTone + '\n' + shader.fragmentShader
-              .replace('#include <tonemapping_fragment>', 'if(labDisplayPass){vec3 c=ACESFilmicToneMapping(gl_FragColor.rgb);gl_FragColor.rgb=mix(12.92*c,1.055*pow(max(c,vec3(0)),vec3(1./2.4))-0.055,step(vec3(0.0031308),c));}')
-          }
-          material.customProgramCacheKey = () => 'lab-shared-bank-pcss-v1'
-          material.needsUpdate = true
-        }
-      })
-      function loadLabel(url) {
-        if (labelTextures.has(url)) return labelTextures.get(url).promise
-        const entry = { texture: null, promise: null }
-        entry.promise = new THREE.ImageLoader().loadAsync(url).then(image => {
-          if (disposed) return null
-          const original = labelMaterials.values().next().value
-          if (!original) throw new Error('Не найден материал печатной этикетки банки')
-          const canvas = document.createElement('canvas')
-          canvas.width = original.image.width; canvas.height = original.image.height
-          const context = canvas.getContext('2d')
-          if (!context) throw new Error('Не удалось подготовить текстуру этикетки')
-          // Та же печатная область, что у встроенного макета: 2376 из 2696 px.
-          const scale = Math.min(canvas.width * 2376 / 2696 / image.width, canvas.height / image.height)
-          const width = image.width * scale, height = image.height * scale
-          context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height)
-          const texture = original.clone()
-          // Texture.clone разделяет Source; новый Source сохраняет встроенный макет.
-          texture.source = new THREE.Source(canvas)
-          texture.needsUpdate = true
-          entry.texture = texture
-          renderer.initTexture(texture)
-          return texture
-        }).catch(error => {
-          // Фоновая ошибка не блокирует текущий слайд; выбор повторит загрузку.
-          labelTextures.delete(url)
-          throw error
-        })
-        labelTextures.set(url, entry)
-        return entry.promise
-      }
-      function preloadLabels(index = 0) {
-        if (disposed || index >= preloadLabelUrls.length) return
-        preloadHandle = schedulePreload(() => {
-          preloadHandle = null
-          if (disposed) return
-          void loadLabel(preloadLabelUrls[index]).catch(() => {}).finally(() => preloadLabels(index + 1))
-        })
-      }
-      function updateLabel() {
-        const url = canSlot.props.label || ''
-        if (url === labelUrl) return
-        labelUrl = url
-        const version = ++labelVersion
-        labelPending = true
-        items.forEach(item => { item.slot.ready.value = false })
-        const apply = texture => {
-          if (disposed || version !== labelVersion) return
-          for (const [material, original] of labelMaterials) {
-            material.map = texture || original
-            material.needsUpdate = true
-          }
-          labelPending = false
-          sync(true)
-        }
-        if (!url) { apply(null); return }
-        void loadLabel(url).then(apply).catch(error => {
-          if (disposed || version !== labelVersion) return
+      const labelMaterials = prepareProductMaterials(THREE, canItem.model, environment.texture, lightSource, bankDisplay)
+      const labels = createProductLabels({
+        THREE, renderer, labelMaterials, preloadLabelUrls,
+        onPending() { items.forEach(item => { item.slot.ready.value = false }) },
+        onReady() { sync(true) },
+        onError(error) {
           failed = true
           console.error('Сцена продукции: загрузка этикетки', error)
           items.forEach(item => item.slot.emit('error', 'Не удалось загрузить этикетку. Обновите страницу.'))
           cleanup()
-        })
-      }
+        },
+      })
       let glassRect, unionRect, pixelRatio = 1, compositionOffset = 0, layoutSignature = ''
       function layoutKey(articleRect, glassRect, canRect) {
         return JSON.stringify([
@@ -448,7 +311,7 @@ export function createProductScene({ loadGlassOptics } = {}) {
       }
       function tick(time) {
         frame = 0
-        if (disposed || labelPending || !visible || document.hidden) { lastTime = null; return }
+        if (disposed || labels.pending || !visible || document.hidden) { lastTime = null; return }
         try {
           resize()
           const canMoving = !motion.matches && canSlot.props.active && !canSlot.props.paused
@@ -468,7 +331,7 @@ export function createProductScene({ loadGlassOptics } = {}) {
         }
       }
       function sync(interaction) {
-        if (!disposed && optics) updateLabel()
+        if (!disposed && optics) labels.update(canSlot.props.label || '')
         if (document.hidden) lastTime = null
         if (interaction === true) interactionUntil = performance.now() + 900
         if (!disposed && !frame && visible && !document.hidden && optics) frame = requestAnimationFrame(tick)
@@ -482,7 +345,6 @@ export function createProductScene({ loadGlassOptics } = {}) {
         if (disposed) return
         disposed = true
         cancelAnimationFrame(frame)
-        if (preloadHandle !== null) cancelPreload(preloadHandle)
         observer.disconnect(); resizeObserver.disconnect()
         document.removeEventListener('visibilitychange', sync)
         window.removeEventListener('scroll', onLayout)
@@ -494,10 +356,8 @@ export function createProductScene({ loadGlassOptics } = {}) {
         optics?.dispose(); profile?.tree.texture.dispose(); finalTarget.dispose(); fxaa.dispose(); lightSource.dispose(); environment.dispose()
         if (glassShadowPlacement) scene.remove(glassShadowPlacement)
         glassShadowMaterial?.dispose()
-        for (const [material, original] of labelMaterials) material.map = original
-        for (const entry of labelTextures.values()) entry.texture?.dispose()
-        labelTextures.clear()
-        items.forEach(item => disposeModel(item.model))
+        labels.dispose()
+        items.forEach(item => disposeProductModel(item.model))
         renderer.dispose(); renderer.domElement.remove()
         bankOptics = null
         sharedScene = null
@@ -598,7 +458,7 @@ export function createProductScene({ loadGlassOptics } = {}) {
         },
       }
       sharedScene.retarget()
-      preloadLabels()
+      labels.preload()
     } catch (error) {
       console.error('Сцена продукции: инициализация общей сцены', error)
       failed = true

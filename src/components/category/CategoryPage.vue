@@ -13,7 +13,7 @@ defineProps({
   <div>
     <CategoryHero :category="category" />
 
-    <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" :aria-labelledby="`${category.slug}-range-title`">
+    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" :aria-labelledby="`${category.slug}-range-title`">
       <div class="site-container">
         <div class="flex flex-wrap items-end justify-between gap-6">
           <div>

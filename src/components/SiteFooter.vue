@@ -1,8 +1,8 @@
 <script setup>
+import { contacts } from '../data/contacts.js'
 import { sitePath } from '../utils/site-path'
 import logoUrl from '../assets/branding/brand-logo.svg'
 
-const addressMapUrl = `https://yandex.ru/maps/?text=${encodeURIComponent('Санкт-Петербург, Курляндская улица, 28Г')}`
 const showSocialLinks = false
 
 const socialLinks = [
@@ -35,8 +35,8 @@ const socialLinks = [
         <div>
           <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Адрес</span>
           <address class="max-w-xl text-body-large font-semibold not-italic">
-            <a class="border-b border-surface/60" :href="addressMapUrl" target="_blank" rel="noopener noreferrer">
-              г. Санкт-Петербург, Курляндская улица, д. 28Г, пом. 75
+            <a class="border-b border-surface/60" :href="contacts.addressMapUrl" target="_blank" rel="noopener noreferrer">
+              {{ contacts.footerAddress }}
             </a>
           </address>
         </div>
@@ -45,13 +45,13 @@ const socialLinks = [
           <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Контакты</span>
           <ul class="grid gap-3">
             <li>
-              <a class="border-b border-surface/60 text-body-large font-semibold" href="tel:+78129408427">
-                +7 (812) 940-84-27
+              <a class="border-b border-surface/60 text-body-large font-semibold" :href="contacts.general.phoneHref">
+                {{ contacts.general.phone }}
               </a>
             </li>
             <li>
-              <a class="border-b border-surface/60 text-body-large font-semibold" href="mailto:info@medved.beer">
-                info@medved.beer
+              <a class="border-b border-surface/60 text-body-large font-semibold" :href="contacts.general.emailHref">
+                {{ contacts.general.email }}
               </a>
             </li>
           </ul>

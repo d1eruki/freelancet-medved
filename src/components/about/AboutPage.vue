@@ -165,7 +165,7 @@ const awards = [
       </div>
     </section>
 
-    <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="today-title">
+    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="today-title">
       <div class="site-container grid gap-4 site-grid">
         <figure class="relative min-h-120 overflow-hidden rounded-3xl nav:col-span-5 nav:min-h-160">
           <img

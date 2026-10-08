@@ -54,7 +54,7 @@ const catalogHeroLayers = {
 
     <HeroDivider :image-url="catalogDividerUrl" />
 
-    <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
+    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="catalog-categories-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="catalog-categories-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Три истории вкуса</h2>

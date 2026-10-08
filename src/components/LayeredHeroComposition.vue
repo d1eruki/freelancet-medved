@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { usePointerParallax } from '../composables/use-pointer-parallax.js'
 import HeroSteam from './HeroSteam.vue'
 import { heroLayerStyle } from '../utils/hero-layer-layout'
 import { entranceMotions } from '../utils/hero-entrance'
@@ -33,11 +34,10 @@ const props = defineProps({
 
 const host = ref(null)
 const middleImage = ref(null)
-const parallaxOffset = ref({ x: 0, y: 0 })
+const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } = usePointerParallax({ range: pointerRange })
 const scrollProgress = ref(0)
 const layersVisible = ref(true)
 let section
-let parallaxMedia
 let scrollMotionMedia
 let visibilityObserver
 let inViewport = true
@@ -49,23 +49,6 @@ function setMiddleImage(element) {
 
 function syncLayerMotion() {
   layersVisible.value = inViewport && !document.hidden
-}
-
-function resetParallax() {
-  parallaxOffset.value = { x: 0, y: 0 }
-}
-
-function updateParallax(event) {
-  if (!parallaxMedia?.matches || event.pointerType === 'touch') return
-
-  const bounds = section.getBoundingClientRect()
-  if (!bounds.width || !bounds.height) return
-
-  const normalize = (position, size) => Math.max(-1, Math.min(1, position / size * 2 - 1))
-  parallaxOffset.value = {
-    x: normalize(event.clientX - bounds.left, bounds.width) * pointerRange.x,
-    y: normalize(event.clientY - bounds.top, bounds.height) * pointerRange.y,
-  }
 }
 
 function updateScrollProgress() {
@@ -111,14 +94,11 @@ onMounted(() => {
   section.addEventListener('pointermove', updateParallax)
   section.addEventListener('pointerleave', resetParallax)
   section.addEventListener('pointercancel', resetParallax)
-  parallaxMedia = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)')
-  parallaxMedia.addEventListener('change', resetParallax)
   scrollMotionMedia = window.matchMedia('(prefers-reduced-motion: no-preference)')
   scrollMotionMedia.addEventListener('change', scheduleScrollProgress)
   window.addEventListener('scroll', scheduleScrollProgress, { passive: true })
   window.addEventListener('resize', scheduleScrollProgress)
   scheduleScrollProgress()
-  window.addEventListener('blur', resetParallax)
   visibilityObserver = new IntersectionObserver(([entry]) => {
     inViewport = entry.isIntersecting
     syncLayerMotion()
@@ -131,12 +111,10 @@ onBeforeUnmount(() => {
   section?.removeEventListener('pointermove', updateParallax)
   section?.removeEventListener('pointerleave', resetParallax)
   section?.removeEventListener('pointercancel', resetParallax)
-  parallaxMedia?.removeEventListener('change', resetParallax)
   scrollMotionMedia?.removeEventListener('change', scheduleScrollProgress)
   window.removeEventListener('scroll', scheduleScrollProgress)
   window.removeEventListener('resize', scheduleScrollProgress)
   if (scrollFrame) cancelAnimationFrame(scrollFrame)
-  window.removeEventListener('blur', resetParallax)
   visibilityObserver?.disconnect()
   document.removeEventListener('visibilitychange', syncLayerMotion)
 })

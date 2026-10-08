@@ -1,4 +1,5 @@
 <script setup>
+import BaseButton from '../BaseButton.vue'
 import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import LayeredHeroComposition from '../LayeredHeroComposition.vue'
@@ -113,12 +114,13 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="flex w-full flex-col items-start self-end gap-4 sm:w-auto sm:flex-row sm:items-center sm:self-auto nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
-          <a
-            class="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-surface px-7 text-label font-extrabold tracking-wide text-foreground uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:-translate-y-1 focus-visible:shadow-xl sm:w-auto"
+          <BaseButton
+            variant="surface"
+            class="w-full focus-visible:-translate-y-1 focus-visible:shadow-xl sm:w-auto"
             :href="sitePath('/katalog/')"
           >
             Смотреть каталог
-          </a>
+          </BaseButton>
 
         </div>
       </div>

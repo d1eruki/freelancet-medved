@@ -55,7 +55,7 @@ const horecaHeroLayers = {
 
     <HeroDivider :image-url="horecaDividerUrl" />
 
-    <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="horeca-assortment-title">
+    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="horeca-assortment-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="horeca-assortment-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Три характера<br>для вашей карты</h2>
@@ -96,7 +96,7 @@ const horecaHeroLayers = {
       </div>
     </section>
 
-    <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="horeca-delivery-title">
+    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" data-header-theme="dark" aria-labelledby="horeca-delivery-title">
       <div class="site-container">
         <h2 id="horeca-delivery-title" class="font-display text-h2 break-words hyphens-auto uppercase">Из Петербурга<br>к вашим гостям</h2>
         <p class="mt-6 max-w-2xl text-body-large font-medium text-subtle">

@@ -1,5 +1,6 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import BaseButton from './BaseButton.vue'
 import { vTypography } from '../directives/typography'
 
 const emit = defineEmits(['confirm'])
@@ -53,14 +54,13 @@ onBeforeUnmount(() => {
         </p>
 
         <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-          <button
+          <BaseButton
             ref="confirmButton"
-            class="min-h-14 rounded-full bg-brand px-8 text-label font-extrabold tracking-wide text-surface uppercase transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
             type="button"
             @click="confirmAge"
           >
             Да, мне есть 18
-          </button>
+          </BaseButton>
           <button
             class="secondary-action min-w-36 py-3 text-label font-extrabold tracking-wide text-brand uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
             type="button"
@@ -78,14 +78,15 @@ onBeforeUnmount(() => {
         <p id="age-gate-description" class="mx-auto mt-6 max-w-lg text-body text-subtle">
           Сайт предназначен только для посетителей старше 18 лет.
         </p>
-        <button
+        <BaseButton
           ref="confirmButton"
-          class="mt-10 min-h-14 w-full rounded-full border border-foreground/20 px-8 text-label font-extrabold tracking-wide uppercase transition duration-200 hover:border-foreground hover:bg-panel focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand sm:w-auto"
+          variant="outline"
+          class="mt-10 w-full sm:w-auto"
           type="button"
           @click="resetAnswer"
         >
           Изменить ответ
-        </button>
+        </BaseButton>
       </template>
     </section>
   </div>

@@ -87,13 +87,13 @@
 }
 
 @layer components {
-  section.bg-panel {
+  section.section-decorated {
     position: relative;
     isolation: isolate;
     overflow: hidden;
   }
 
-  section.bg-panel::before {
+  section.section-decorated::before {
     position: absolute;
     right: -512px;
     bottom: -128px;
@@ -106,12 +106,12 @@
     pointer-events: none;
   }
 
-  section.bg-panel > .site-container {
+  section.section-decorated > .site-container {
     position: relative;
     z-index: 1;
   }
 
-  section.bg-panel .rounded-3xl {
+  section.section-decorated .rounded-3xl {
     @apply shadow-2xl/10;
   }
 
