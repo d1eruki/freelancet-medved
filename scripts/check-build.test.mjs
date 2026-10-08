@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFile, stat } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import sharp from 'sharp'
@@ -192,5 +192,15 @@ test('image and script URLs resolve and srcset widths match the built images', a
         }
       }
     }
+  }
+})
+
+// В публикацию не должны попадать исходники через карты сборки.
+test('published output excludes sourcemaps and their references', async () => {
+  const files = await readdir(output, { recursive: true })
+  assert.ok(!files.some(file => file.endsWith('.map')), 'sourcemap files are published')
+  for (const file of files.filter(file => /\.(js|css)$/.test(file))) {
+    const source = await readFile(path.join(output, file), 'utf8')
+    assert.doesNotMatch(source, /[#@]\s*sourceMappingURL\s*=/, file)
   }
 })

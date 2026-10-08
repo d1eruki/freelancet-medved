@@ -1,0 +1,308 @@
+<script setup>
+import { sitePath } from '../../utils/site-path'
+import { computed, onBeforeUnmount, provide, ref, watch } from 'vue'
+import CircleArrow from '../../components/CircleArrow.vue'
+import ProductCard from './ProductCard.vue'
+import { productLabels } from '../../data/product-labels.js'
+import { catalogCategories } from '../../data/catalog'
+import { createProductScene, productSceneKey } from '../../three/product/product-scene.js'
+import barCounterTexture from '../../assets/home/bar-counter-texture.png'
+import productSliderBackground from '../../assets/home/product-slider-background.png'
+
+const productScene = createProductScene()
+provide(productSceneKey, productScene)
+
+
+
+const products = catalogCategories.map((category) => ({
+  slug: category.slug,
+  name: category.name,
+  label: category.tagline,
+  description: category.description,
+  varieties: category.introduction,
+  href: sitePath(`/katalog/${category.slug}/`),
+  image: category.image,
+  drink: category.slug === 'medovuha' ? 'mead' : 'cider',
+  canLabel: productLabels[category.slug] || '',
+}))
+
+const activeIndex = ref(0)
+const tabList = ref(null)
+const isTransitioning = ref(false)
+const isTextHidden = ref(false)
+const motionDirection = ref('')
+const dragOffset = ref(0)
+const isDragging = ref(false)
+const trackTransform = computed(() => `translate3d(calc(-${activeIndex.value * 100}% + ${dragOffset.value}px), 0, 0)`)
+let gesture = null
+let suppressClick = false
+
+const textFadeDuration = 360
+const imageMotionDuration = 820
+let slideTimer
+let revealTimer
+
+watch(activeIndex, () => {
+  if (tabList.value?.contains(document.activeElement)) {
+    tabList.value.querySelector('[aria-selected="true"]')?.focus({ preventScroll: true })
+  }
+}, { flush: 'post' })
+
+function handleTabKeydown(event, index) {
+  if (event.altKey || event.ctrlKey || event.metaKey) return
+  const targets = {
+    ArrowLeft: (index - 1 + products.length) % products.length,
+    ArrowRight: (index + 1) % products.length,
+    Home: 0,
+    End: products.length - 1,
+  }
+  if (!Object.hasOwn(targets, event.key)) return
+  event.preventDefault()
+  showProduct(targets[event.key])
+}
+
+function clearTransitionTimers() {
+  window.clearTimeout(slideTimer)
+  window.clearTimeout(revealTimer)
+}
+
+function showProduct(index) {
+  if (index === activeIndex.value || isTransitioning.value || gesture) {
+    return
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    activeIndex.value = index
+    return
+  }
+
+  isTransitioning.value = true
+  isTextHidden.value = true
+
+  slideTimer = window.setTimeout(() => {
+    settleProduct(index)
+  }, textFadeDuration)
+}
+
+function settleProduct(index) {
+  const direction = index === activeIndex.value
+    ? (dragOffset.value < 0 ? 'backward' : 'forward')
+    : (index > activeIndex.value ? 'forward' : 'backward')
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  motionDirection.value = reducedMotion ? '' : direction
+  activeIndex.value = index
+  dragOffset.value = 0
+  isDragging.value = false
+  isTransitioning.value = true
+  revealTimer = window.setTimeout(() => {
+    motionDirection.value = ''
+    isTextHidden.value = false
+
+    isTransitioning.value = false
+  }, reducedMotion ? 0 : imageMotionDuration)
+}
+
+function startDrag(event) {
+  if (!event.isPrimary || event.button !== 0 || isTransitioning.value || gesture) return
+  suppressClick = false
+  gesture = {
+    id: event.pointerId, x: event.clientX, y: event.clientY,
+    width: event.currentTarget.clientWidth,
+    lastX: event.clientX, lastTime: event.timeStamp, velocity: 0,
+  }
+}
+
+function moveDrag(event) {
+  if (!gesture || gesture.id !== event.pointerId) return
+  const dx = event.clientX - gesture.x
+  const dy = event.clientY - gesture.y
+  if (!isDragging.value) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 4) return
+    if (event.pointerType === 'touch' && Math.abs(dy) > Math.abs(dx) * 1.4) {
+      gesture = null
+      return
+    }
+    if (Math.abs(dx) < 4) return
+    isDragging.value = true
+    isTextHidden.value = true
+    suppressClick = true
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const elapsed = event.timeStamp - gesture.lastTime
+  if (elapsed > 0) gesture.velocity = (event.clientX - gesture.lastX) / elapsed
+  gesture.lastX = event.clientX
+  gesture.lastTime = event.timeStamp
+  const beyondEdge = (activeIndex.value === 0 && dx > 0) || (activeIndex.value === products.length - 1 && dx < 0)
+  dragOffset.value = Math.max(-gesture.width, Math.min(gesture.width, dx * (beyondEdge ? 0.2 : 1)))
+}
+
+function endDrag(event) {
+  if (!gesture || gesture.id !== event.pointerId) return
+  const width = gesture.width
+  const velocity = event.timeStamp - gesture.lastTime < 100 ? gesture.velocity : 0
+  gesture = null
+  if (!isDragging.value) return
+  const distance = Math.abs(dragOffset.value)
+  const flick = distance > 16 && Math.abs(velocity) > 0.35
+    && Math.sign(velocity) === Math.sign(dragOffset.value)
+  const shouldSwitch = event.type !== 'pointercancel'
+    && (distance > Math.min(40, width * 0.08) || flick)
+  const index = Math.max(0, Math.min(products.length - 1,
+    activeIndex.value + (shouldSwitch ? (dragOffset.value < 0 ? 1 : -1) : 0)))
+  settleProduct(index)
+}
+
+function cancelDrag(event) {
+  if (gesture && !isDragging.value) gesture = null
+  else if (gesture) endDrag(event)
+}
+
+function preventDragClick(event) {
+  if (!suppressClick) return
+  event.preventDefault()
+  event.stopPropagation()
+  suppressClick = false
+}
+
+function showPrevious() {
+  showProduct((activeIndex.value - 1 + products.length) % products.length)
+}
+
+function showNext() {
+  showProduct((activeIndex.value + 1) % products.length)
+}
+
+onBeforeUnmount(() => {
+  clearTransitionTimers()
+  productScene.dispose()
+})
+</script>
+
+<template>
+  <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-surface nav:h-svh" aria-labelledby="products-title">
+    <img
+      :src="barCounterTexture"
+      data-product-counter
+      alt=""
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] w-full object-fill"
+    />
+    <div class="pointer-events-none absolute inset-x-0 top-0 bottom-[30svh] z-1 overflow-hidden" aria-hidden="true">
+      <img
+        :src="productSliderBackground"
+        data-product-background
+        alt=""
+        class="h-full w-full object-cover brightness-15"
+      />
+    </div>
+
+    <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-28">
+      <div class="grid items-end gap-6 pb-8 wide:grid-cols-3 wide:gap-12 wide:pb-10">
+        <h2 id="products-title" class="min-w-0 font-display text-h2 text-center text-surface uppercase nav:text-left wide:col-span-2">
+          Продукция
+        </h2>
+
+      </div>
+    </div>
+
+    <div class="relative flex flex-col nav:min-h-0 nav:flex-1">
+      <div class="relative z-1 touch-pan-y select-none overflow-hidden nav:min-h-0 nav:flex-1"
+        @pointerdown="startDrag"
+        @pointermove="moveDrag"
+        @pointerup="endDrag"
+        @pointercancel="endDrag"
+        @pointerleave="cancelDrag"
+        @lostpointercapture="endDrag"
+        @dragstart.prevent
+        @click.capture="preventDragClick"
+      >
+        <div
+          class="product-track flex nav:h-full"
+          :class="{ 'is-dragging': isDragging }"
+          :style="{ transform: trackTransform }"
+        >
+          <ProductCard
+            v-for="(product, index) in products"
+            :key="product.href"
+            :id="`home-product-panel-${product.slug}`"
+            role="tabpanel"
+            :aria-labelledby="`home-product-tab-${product.slug}`"
+            :inert="index !== activeIndex || undefined"
+            class="w-full shrink-0 nav:h-full"
+            :product="product"
+            :active="index === activeIndex"
+            :text-hidden="isTextHidden"
+            :motion-direction="motionDirection"
+            :dragging="isDragging"
+            :drag-angle="dragOffset < 0 ? 3 : -3"
+            :aria-hidden="index !== activeIndex"
+            @previous="showPrevious"
+            @next="showNext"
+          />
+        </div>
+      </div>
+
+      <span class="sr-only" aria-live="polite">Выбран напиток: {{ products[activeIndex].name }}</span>
+
+      <div class="site-container relative z-2 hidden shrink-0 pb-8 nav:block">
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-6">
+          <button
+            class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            type="button"
+            aria-label="Предыдущий напиток"
+            @click="showPrevious"
+          >
+            <CircleArrow direction="left" hover="control" tone="surface" />
+          </button>
+
+          <div
+            ref="tabList"
+            class="hidden flex-wrap items-center justify-center gap-3 nav:flex"
+            role="tablist"
+            aria-label="Выбор напитка"
+          >
+            <button
+              v-for="(product, index) in products"
+              :key="product.href"
+              :id="`home-product-tab-${product.slug}`"
+              class="rounded-full px-5 py-3 text-label font-bold uppercase transition focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              :class="index === activeIndex
+                ? 'bg-brand text-surface'
+                : 'bg-surface text-foreground hover:bg-brand/10'"
+              type="button"
+              role="tab"
+              :aria-controls="`home-product-panel-${product.slug}`"
+              :aria-selected="index === activeIndex"
+              :tabindex="index === activeIndex ? 0 : -1"
+              @click="showProduct(index)"
+              @keydown="handleTabKeydown($event, index)"
+            >
+              {{ product.name }}
+            </button>
+          </div>
+
+          <button
+            class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+            type="button"
+            aria-label="Следующий напиток"
+            @click="showNext"
+          >
+            <CircleArrow hover="control" tone="surface" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.product-track {
+  transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+.product-track.is-dragging {
+  transition: none;
+}
+
+</style>

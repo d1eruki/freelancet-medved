@@ -1,17 +1,17 @@
 const pageLoaders = {
-  home: () => import('../components/home/HomePage.vue'),
-  about: () => import('../components/about/AboutPage.vue'),
-  catalog: () => import('../components/catalog/CatalogPage.vue'),
-  category: () => import('../components/category/CategoryPage.vue'),
-  contacts: () => import('../components/contacts/ContactsPage.vue'),
-  horeca: () => import('../components/horeca/HorecaPage.vue'),
-  legal: () => import('../components/legal/LegalPage.vue'),
-  production: () => import('../components/production/ProductionPage.vue'),
+  home: () => import('../pages/home/HomePage.vue'),
+  about: () => import('../pages/about/AboutPage.vue'),
+  catalog: () => import('../pages/catalog/CatalogPage.vue'),
+  category: () => import('../pages/category/CategoryPage.vue'),
+  contacts: () => import('../pages/contacts/ContactsPage.vue'),
+  horeca: () => import('../pages/horeca/HorecaPage.vue'),
+  legal: () => import('../pages/legal/LegalPage.vue'),
+  production: () => import('../pages/production/ProductionPage.vue'),
 }
 
 export async function loadPageComponent(type) {
   const module = await (pageLoaders[type]
     ? pageLoaders[type]()
-    : import('../components/not-found/NotFoundPage.vue'))
+    : import('../pages/not-found/NotFoundPage.vue'))
   return module.default
 }

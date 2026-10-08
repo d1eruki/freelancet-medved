@@ -29,7 +29,6 @@ const titleLines = computed(() => props.title.trim().split(/\s+/).reduce((lines,
   <section
     class="py-20 sm:py-24 wide:py-28"
     :class="isDark ? 'bg-foreground text-surface' : 'bg-surface text-foreground'"
-    :data-header-theme="isDark ? 'light' : 'dark'"
     :aria-labelledby="headingId"
   >
     <div class="site-container">

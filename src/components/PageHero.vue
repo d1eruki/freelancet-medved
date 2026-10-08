@@ -27,7 +27,6 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
 <template>
   <section
     class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface"
-    data-header-theme="light"
     :aria-labelledby="titleId"
     :style="layers ? layerEntranceTimings[layerEntrance] : animateCopy ? imageCopyTiming : undefined"
     @pointermove="!layers && updateParallax($event)"

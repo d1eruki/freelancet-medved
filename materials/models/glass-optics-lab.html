@@ -94,11 +94,11 @@
     import { createApp, h, nextTick, ref } from 'vue'
     import '../../src/styles/main.css'
     import CategoryPattern from '../../src/components/CategoryPattern.vue'
-    import ProductScene from '../../src/components/home/ProductScene.vue'
+    import ProductScene from '../../src/components/product-scene/ProductScene.vue'
     import barCounterTexture from '../../src/assets/home/bar-counter-texture.png'
     import { drinkPresets } from '../../src/data/drink-presets.js'
 
-    const loadGlassOptics = () => import('../../src/utils/glass-optics.js')
+    const loadGlassOptics = () => import('../../src/three/glass-lab/glass-optics.js')
 
     const drink = ref('cider')
     const foam = ref(true)

@@ -7,6 +7,6 @@ export default defineConfig({
   base: process.env.SITE_BASE || '/freelancet-medved/',
   plugins: [optimizeImagesPlugin(), vue(), tailwindcss()],
   build: {
-    sourcemap: true,
+    sourcemap: false,
   },
 })

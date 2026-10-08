@@ -15,7 +15,6 @@ defineProps({
   <section
     class="py-20 text-surface sm:py-24 wide:py-28"
     :class="background === 'brand' ? 'bg-brand' : 'bg-foreground'"
-    data-header-theme="light"
     :aria-labelledby="headingId"
   >
     <div class="site-container grid items-end gap-10 site-grid">
