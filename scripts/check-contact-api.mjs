@@ -71,7 +71,7 @@ try {
   const valid = { name: 'Тест', phone: '71234567890', email: 'test@example.com', message: 'Проверка формы', consent: true }
   async function expectStatus(body, status, options) {
     const response = await request(body, options)
-    assert.equal(response.status, status, JSON.stringify(body))
+    assert.equal(response.status, status, JSON.stringify(body).slice(0, 300))
     const result = await response.json()
     if (status === 200) assert.equal(result.ok, true)
     else assert.ok(typeof result.message === 'string' && result.message.length > 0)
@@ -93,11 +93,17 @@ try {
   for (const value of [false, 'true', 1, null, {}]) {
     await expectStatus({ ...valid, consent: value }, 422)
   }
-  for (const name of ['', 'a'.repeat(121)]) await expectStatus({ ...valid, name }, 422)
+  for (const field of ['name', 'phone', 'consent']) {
+    const payload = { ...valid }
+    delete payload[field]
+    await expectStatus(payload, 422)
+  }
+  for (const name of ['', '   ', 'a'.repeat(121)]) await expectStatus({ ...valid, name }, 422)
   for (const phone of ['', '...', '+ () -', '123', '1234567890', '61234567890', '712345678901', '7\n1234567890', '7abc1234567890']) {
     await expectStatus({ ...valid, phone }, 422)
   }
   await expectStatus({ ...valid, email: 'invalid-email' }, 422)
+  await expectStatus({ ...valid, email: 'a'.repeat(255) + '@example.com' }, 422)
   await expectStatus({ ...valid, message: 'a'.repeat(4001) }, 422)
   await expectStatus({ website: 'bot.example' }, 200)
   await assert.rejects(stat(mailFile), { code: 'ENOENT' })
@@ -143,6 +149,11 @@ try {
   for (const value of [valid.name, valid.phone, valid.email, valid.message]) {
     assert.ok(!diagnostics.includes(value), 'Журнал не должен содержать данные формы')
   }
+  // Допустимые границы и необязательные поля проверяем в отдельных сессиях.
+  await expectStatus({ ...valid, name: 'a'.repeat(120), message: 'a'.repeat(4000) }, 200)
+  await expectStatus({ name: valid.name, phone: valid.phone, consent: true }, 200)
+  const json = JSON.stringify(valid)
+  await expectStatus(json + ' '.repeat(16384 - Buffer.byteLength(json)), 200)
   console.log('Проверки формы пройдены: валидация, отправка, сессионный лимит, отдельные браузеры, параллельные запросы, истечение лимита и ошибки почты без нарушения JSON.')
 } finally {
   for (const { server } of servers) server.kill()

@@ -13,7 +13,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+
   deploy:
+    needs: checks
     if: ${{ vars.TIMEWEB_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
     runs-on: ubuntu-latest
     env:
@@ -24,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: '24'
+          node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -57,14 +61,6 @@ jobs:
         run: npm run build
         env:
           SITE_BASE: /
-      - name: Check published pages and links
-        run: |
-          npm test
-          node --test scripts/deploy-timeweb.test.mjs
-      - name: Check contact API
-        run: |
-          php -l public/api/contact.php
-          npm run test:api
       - name: Configure SSH
         env:
           TIMEWEB_SSH_KEY: ${{ secrets.TIMEWEB_SSH_KEY }}

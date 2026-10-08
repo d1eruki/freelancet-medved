@@ -1,6 +1,8 @@
 # Публикация на Timeweb
 
-Публикацию выполняет `.github/workflows/deploy-timeweb.yml` при push в `main`, `develop` или ручном запуске workflow для одной из этих веток. Сначала выполняются сборка для корня домена, проверки страниц, механизма публикации и PHP-обработчика формы, затем `scripts/deploy-timeweb.mjs` загружает `dist/` через SSH и rsync.
+Публикацию выполняет `.github/workflows/deploy-timeweb.yml` при push в `main`, `develop` или ручном запуске workflow для одной из этих веток. Сначала вызывается общий `.github/workflows/checks.yml`: линтер, аудит зависимостей, тесты публикации, HTML и браузерные сценарии для production в корне и подкаталоге и staging в корне, а также PHP API на PHP 8.4 и 8.5. Только после успешных проверок создаётся сборка нужного окружения для корня домена, затем `scripts/deploy-timeweb.mjs` загружает `dist/` через SSH и rsync.
+
+Общие проверки также запускаются на pull request в `main` и `develop`, не используют SSH-секреты и работают при `TIMEWEB_ENABLED=false` или отсутствующей переменной. Ошибка любой проверки блокирует job публикации. Запрет слияния при неуспешных проверках настраивается отдельно в правилах защиты веток GitHub; наличие workflow само по себе не запрещает слияние. Node.js берётся из `.nvmrc`, npm должен соответствовать требованиям `package.json`.
 
 - `main` публикуется на `https://medved.beer/` в `TIMEWEB_PATH`.
 - `develop` публикуется на `https://test.medved.beer/` в `TIMEWEB_TEST_PATH` со значением `SITE_ENV=staging`.
@@ -46,7 +48,7 @@ Workflow должен присутствовать в обеих ветках. �
 ## Локальная проверка
 
 ```bash
-node --test scripts/deploy-timeweb.test.mjs
+npm run test:deploy
 ```
 
 Проверка обеих сборок выполняется последовательно:

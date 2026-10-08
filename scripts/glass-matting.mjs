@@ -108,7 +108,7 @@ async function makeLiquidMask(reference) {
       const range = high - low
       if (high === 0 || range / high < 45 / 255) continue
 
-      let hue = 0
+      let hue
       if (high === red) hue = ((green - blue) / range) % 6
       else if (high === green) hue = (blue - red) / range + 2
       else hue = (red - green) / range + 4
@@ -315,7 +315,7 @@ async function main() {
       const image = matteWhiteImage(source, reference, shadowMask, liquidMask)
       results.push({ name, image })
     } catch (error) {
-      throw new Error(`${name}: ${error.message}`)
+      throw new Error(`${name}: ${error.message}`, { cause: error })
     }
   }
 
