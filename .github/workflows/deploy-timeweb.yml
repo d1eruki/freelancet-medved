@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, develop]
   workflow_dispatch:
+    inputs:
+      check_contact_storage:
+        description: 'Только проверить хранилище формы на основном сайте, без публикации'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -14,7 +19,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ vars.TIMEWEB_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
+    if: ${{ vars.TIMEWEB_ENABLED == 'true' && inputs.check_contact_storage != true && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
     runs-on: ubuntu-latest
     env:
       SITE_ENV: ${{ github.ref == 'refs/heads/develop' && 'staging' || 'production' }}
@@ -116,4 +121,90 @@ jobs:
           assert.equal(api.status, 405)
           assert.ok((await api.json()).message)
           console.log('Staging HTML, assets, noindex, redirects and PHP endpoint verified; no mail sent.')
+          NODE
+  check-contact-storage:
+    if: ${{ vars.TIMEWEB_ENABLED == 'true' && github.event_name == 'workflow_dispatch' && inputs.check_contact_storage == true && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TIMEWEB_HOST: ${{ vars.TIMEWEB_HOST }}
+      TIMEWEB_USER: ${{ vars.TIMEWEB_USER }}
+      TIMEWEB_PATH: ${{ vars.TIMEWEB_PATH }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+      - name: Check diagnostic PHP syntax
+        run: php -l scripts/check-contact-storage.php
+      - name: Configure SSH
+        env:
+          TIMEWEB_SSH_KEY: ${{ secrets.TIMEWEB_SSH_KEY }}
+          TIMEWEB_KNOWN_HOSTS: ${{ secrets.TIMEWEB_KNOWN_HOSTS }}
+        run: |
+          test -n "$TIMEWEB_SSH_KEY" && test -n "$TIMEWEB_KNOWN_HOSTS"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$TIMEWEB_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$TIMEWEB_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Check production storage through PHP over HTTPS
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { execFileSync } from 'node:child_process'
+          import { randomBytes } from 'node:crypto'
+          import { appendFileSync, readFileSync } from 'node:fs'
+          const { TIMEWEB_HOST: host, TIMEWEB_USER: user, TIMEWEB_PATH: directory } = process.env
+          assert.match(host || '', /^[A-Za-z0-9][A-Za-z0-9.-]*$/)
+          assert.match(user || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]*$/)
+          assert.match(directory || '', /^\/(?:[A-Za-z0-9_-][A-Za-z0-9_.-]*\/)*public_html$/)
+          const quote = value => `'${value.replaceAll("'", "'\\''")}'`
+          const name = `contact-storage-check-${randomBytes(16).toString('hex')}.php`
+          const target = `${directory}/api/${name}`
+          const token = randomBytes(32).toString('hex')
+          console.log(`::add-mask::${token}`)
+          appendFileSync(process.env.GITHUB_ENV, `CONTACT_STORAGE_CHECK_FILE=${name}\n`)
+          const parts = target.split('/').filter(Boolean)
+          const checks = parts.map((_, index) => `test ! -L ${quote(`/${parts.slice(0, index + 1).join('/')}`)}`).join('\n')
+          const source = readFileSync('scripts/check-contact-storage.php', 'utf8').replace('__CONTACT_STORAGE_CHECK_TOKEN__', token)
+          execFileSync('ssh', ['-i', `${process.env.HOME}/.ssh/id_ed25519`, '-o', 'StrictHostKeyChecking=yes',
+            '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', `${user}@${host}`,
+            `set -eu\n${checks}\nset -C\numask 022\ncat > ${quote(target)}`], { input: source, timeout: 30000 })
+          const response = await fetch(`https://medved.beer/api/${name}`, {
+            headers: { 'X-Contact-Check-Token': token }, redirect: 'manual', signal: AbortSignal.timeout(15000),
+          })
+          const result = await response.json()
+          assert.equal(response.status, 200, `Storage check: HTTP ${response.status}; ${result.check || 'unknown'}`)
+          assert.equal(result.ok, true)
+          console.log('Production PHP storage check passed; no mail sent and no form files changed.')
+          NODE
+      - name: Remove temporary diagnostic files
+        if: ${{ always() && env.CONTACT_STORAGE_CHECK_FILE != '' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { execFileSync } from 'node:child_process'
+          const { TIMEWEB_HOST: host, TIMEWEB_USER: user, TIMEWEB_PATH: directory, CONTACT_STORAGE_CHECK_FILE: name } = process.env
+          assert.match(host || '', /^[A-Za-z0-9][A-Za-z0-9.-]*$/)
+          assert.match(user || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]*$/)
+          assert.match(directory || '', /^\/(?:[A-Za-z0-9_-][A-Za-z0-9_.-]*\/)*public_html$/)
+          assert.match(name || '', /^contact-storage-check-[a-f0-9]{32}\.php$/)
+          const quote = value => `'${value.replaceAll("'", "'\\''")}'`
+          const paths = [`${directory}/api/${name}`, `${directory.slice(0, -'/public_html'.length)}/.${name.slice(0, -4)}.tmp`]
+          const checks = paths.flatMap(target => {
+            const parts = target.split('/').filter(Boolean)
+            return parts.map((_, index) => `test ! -L ${quote(`/${parts.slice(0, index + 1).join('/')}`)}`)
+          }).join('\n')
+          try {
+            execFileSync('ssh', ['-i', `${process.env.HOME}/.ssh/id_ed25519`, '-o', 'StrictHostKeyChecking=yes',
+              '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', `${user}@${host}`,
+              `set -eu\n${checks}\nrm -f ${paths.map(quote).join(' ')}\n${paths.map(target => `test ! -e ${quote(target)}`).join('\n')}`], { timeout: 30000 })
+            console.log('Temporary diagnostic files removed.')
+          } catch (error) {
+            console.error(`Cleanup failed; remove only these temporary files: ${paths.join(', ')}`)
+            throw error
+          }
           NODE
