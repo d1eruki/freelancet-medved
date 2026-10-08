@@ -4,8 +4,8 @@ export const productLightSettings = Object.freeze({
   target: [0, -0.15, 0],
   width: 1.5,
   height: 2.5,
-  radiance: 4,
-  intensity: 45,
+  radiance: 0,
+  intensity: 48,
 })
 
 export function createLightPanel(THREE) {

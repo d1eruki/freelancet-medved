@@ -17,6 +17,11 @@ export function prepareProductMaterials(THREE, model, environmentTexture, lightS
   model.traverse(node => {
     for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
       if (!material) continue
+      if (material.name === 'aluminium') {
+        // Сатиновый алюминий: широкие блики вместо зеркальных отражений.
+        material.roughness = 0.25
+        material.envMapIntensity = 1
+      }
       if (material.name.endsWith('-printed-label')) {
         labelMaterials.set(material, material.map)
         material.envMap = environmentTexture

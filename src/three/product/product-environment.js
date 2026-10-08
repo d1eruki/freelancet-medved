@@ -58,7 +58,7 @@ export function createProductEnvironment({ THREE, RoomEnvironment, renderer, vie
       if (counter?.naturalWidth) {
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20),
           new THREE.MeshBasicMaterial({ map: textureFor(counter, 512, 512, false), side: THREE.DoubleSide,
-            transparent: true, opacity: 0.75, depthWrite: false }))
+            transparent: true, opacity: 0.65, depthWrite: false }))
         floor.rotation.x = -Math.PI / 2
         floor.position.y = -1.3 - room.position.y
         room.add(floor)
