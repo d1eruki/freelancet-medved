@@ -10,11 +10,12 @@ const publicDirectory = path.join(root, 'public')
 const mailFile = path.join(root, 'mail.txt')
 const mailFailure = path.join(root, 'mail-fails')
 const errorLog = path.join(root, 'php-errors.log')
-const limiterFile = path.join(root, '.medved-contact-rate-limit.json')
+const sessionsDirectory = path.join(root, 'sessions')
 const servers = []
 
 try {
   await mkdir(path.join(publicDirectory, 'api'), { recursive: true })
+  await mkdir(sessionsDirectory)
   await copyFile('public/api/contact.php', path.join(publicDirectory, 'api/contact.php'))
   // Подмена системного sendmail исключает настоящую отправку писем во всех тестах.
   const sendmail = path.join(root, 'sendmail')
@@ -34,6 +35,7 @@ try {
     const server = spawn('php', [
       '-d', 'display_errors=1', '-d', 'log_errors=0', '-d', 'error_reporting=E_ALL',
       '-d', `error_log=${errorLog}`, '-d', `sendmail_path=${quote(sendmail)}`,
+      '-d', `session.save_path=${sessionsDirectory}`, '-d', 'session.serialize_handler=php',
       '-S', `127.0.0.1:${port}`, '-t', publicDirectory,
     ], {
       stdio: 'ignore',
@@ -100,60 +102,48 @@ try {
   await expectStatus({ website: 'bot.example' }, 200)
   await assert.rejects(stat(mailFile), { code: 'ENOENT' })
 
-  await expectStatus({ ...valid, phone: '+7 (123) 456-78-90' }, 200, { contentType: 'application/json; charset=utf-8' })
+  const firstResponse = await expectStatus({ ...valid, phone: '+7 (123) 456-78-90' }, 200, { contentType: 'application/json; charset=utf-8' })
   const firstMail = await readFile(mailFile, 'utf8')
   assert.ok(firstMail.includes('Имя: Тест'))
   assert.ok(firstMail.includes('Телефон: 71234567890'))
   assert.ok(firstMail.includes('Reply-To: test@example.com'))
   assert.ok(firstMail.includes('To: info@medved.beer'))
   assert.ok(firstMail.includes('Сообщение:\nПроверка формы'))
-  assert.equal((await stat(limiterFile)).mode & 0o777, 0o600)
-  assert.ok(!(await readFile(limiterFile, 'utf8')).includes('127.0.0.1'))
-
-  for (const cookie of [undefined, 'PHPSESSID=first-session', 'PHPSESSID=second-session']) {
-    const headers = cookie ? { Cookie: cookie } : {}
-    const response = await expectStatus(valid, 429, { headers })
-    assert.ok(Number(response.headers.get('retry-after')) > 0 && Number(response.headers.get('retry-after')) <= 10)
-  }
-  await expectStatus(valid, 429, { headers: { 'X-Forwarded-For': '192.0.2.1', 'X-Real-IP': '192.0.2.2' } })
+  const sessionCookie = firstResponse.headers.get('set-cookie')?.match(/^PHPSESSID=([^;]+)/)
+  assert.ok(sessionCookie, 'После успешной отправки должна появиться PHP-сессия')
+  const headers = { Cookie: sessionCookie[0] }
+  await expectStatus(valid, 429, { headers })
   assert.equal(await readFile(mailFile, 'utf8'), firstMail)
 
-  // Состояние фикстуры позволяет проверить истечение лимита без ожидания в тестах.
-  const limits = JSON.parse(await readFile(limiterFile, 'utf8'))
-  for (const key of Object.keys(limits)) limits[key] = Math.floor(Date.now() / 1000) - 11
-  await writeFile(limiterFile, JSON.stringify(limits))
-  // Отдельные PHP-процессы обращаются к общему файлу действительно параллельно.
-  const endpoints = [endpoint, await startServer(), await startServer()]
-  const concurrent = await Promise.all(Array.from({ length: 6 }, (_, index) => request(valid, { target: endpoints[index % endpoints.length] })))
-  assert.deepEqual(concurrent.map(response => response.status).sort(), [200, 429, 429, 429, 429, 429])
-  for (const response of concurrent) await response.json()
-  assert.equal(Object.keys(JSON.parse(await readFile(limiterFile, 'utf8'))).length, 1)
-
-  await writeFile(limiterFile, '{}')
+  // Другой браузер за тем же IP получает собственную сессию, как в рабочей версии.
   await expectStatus({ ...valid, phone: '8 (123) 456-78-90', email: '', message: '' }, 200)
   const messages = await readFile(mailFile, 'utf8')
-  assert.equal((messages.match(/Телефон: 71234567890/g) || []).length, 3)
-  assert.equal((messages.match(/Reply-To:/g) || []).length, 2)
-  await writeFile(limiterFile, '{}')
+  assert.equal((messages.match(/Телефон: 71234567890/g) || []).length, 2)
+  assert.equal((messages.match(/Reply-To:/g) || []).length, 1)
+
+  // Истечение интервала проверяем через состояние временной сессии.
+  const sessionFile = path.join(sessionsDirectory, `sess_${sessionCookie[1]}`)
+  await writeFile(sessionFile, `contact_form_submitted_at|i:${Math.floor(Date.now() / 1000) - 11};`)
+  const endpoints = [endpoint, await startServer(), await startServer()]
+  const concurrent = await Promise.all(Array.from({ length: 6 }, (_, index) => request(valid, { target: endpoints[index % endpoints.length], headers })))
+  assert.deepEqual(concurrent.map(response => response.status).sort(), [200, 429, 429, 429, 429, 429])
+  for (const response of concurrent) await response.json()
+  assert.equal(((await readFile(mailFile, 'utf8')).match(/Телефон: 71234567890/g) || []).length, 3)
+
   await writeFile(mailFailure, '')
-  await expectStatus(valid, 500)
-  assert.ok((await readFile(errorLog, 'utf8')).includes('Contact API: mail() failed'))
-  await expectStatus(valid, 429)
+  const failure = await expectStatus(valid, 500)
+  const failedCookie = failure.headers.get('set-cookie')?.match(/^PHPSESSID=[^;]+/)?.[0]
+  assert.ok(failedCookie)
+  // Ошибка почты не записывает успешную отправку и не блокирует повторную попытку.
+  await expectStatus(valid, 500, { headers: { Cookie: failedCookie } })
   await rm(mailFailure)
-  await writeFile(limiterFile, 'invalid-json')
-  await expectStatus(valid, 503)
-  // Каталог вместо файла вызывает реальный отказ fopen(), предупреждение должно уйти в журнал.
-  await rm(limiterFile)
-  await mkdir(limiterFile)
-  await expectStatus(valid, 503)
+  await expectStatus(valid, 200, { headers: { Cookie: failedCookie } })
   const diagnostics = await readFile(errorLog, 'utf8')
-  assert.ok(diagnostics.includes('fopen('))
-  assert.ok(diagnostics.includes('rate limit storage failure (read)'))
-  assert.ok(diagnostics.includes('rate limit storage failure (open)'))
+  assert.ok(diagnostics.includes('Contact API: mail() failed'))
   for (const value of [valid.name, valid.phone, valid.email, valid.message]) {
     assert.ok(!diagnostics.includes(value), 'Журнал не должен содержать данные формы')
   }
-  console.log('Проверки формы пройдены: валидация, отправка, лимит независимо от cookies, истечение лимита, ошибки почты/хранилища и журналирование без нарушения JSON.')
+  console.log('Проверки формы пройдены: валидация, отправка, сессионный лимит, отдельные браузеры, параллельные запросы, истечение лимита и ошибки почты без нарушения JSON.')
 } finally {
   for (const { server } of servers) server.kill()
   await Promise.all(servers.map(({ closed }) => closed))

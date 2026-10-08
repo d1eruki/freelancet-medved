@@ -19,12 +19,6 @@ function text_length($value)
     return function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
 }
 
-function rate_limit_unavailable($operation)
-{
-    error_log('Contact API: rate limit storage failure (' . $operation . ').');
-    respond(503, array('message' => 'Отправка временно недоступна. Попробуйте позже.'));
-}
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Allow: POST');
     respond(405, array('message' => 'Метод не поддерживается.'));
@@ -88,46 +82,11 @@ if (!$consent) {
     respond(422, array('message' => 'Необходимо согласие на обработку персональных данных.'));
 }
 
-// Один лимит для IP независимо от cookies. Файл находится вне публичного каталога;
-// храним только хеши IP и удаляем истёкшие записи при следующем обращении.
-$address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-if (!filter_var($address, FILTER_VALIDATE_IP)) {
-    rate_limit_unavailable('invalid_remote_address');
-}
-$rateLimitPath = dirname(__DIR__, 2) . '/.medved-contact-rate-limit.json';
-$previousMask = umask(0077);
-$rateLimitFile = fopen($rateLimitPath, 'c+');
-umask($previousMask);
-if ($rateLimitFile === false) rate_limit_unavailable('open');
-if (!flock($rateLimitFile, LOCK_EX)) {
-    fclose($rateLimitFile);
-    rate_limit_unavailable('lock');
-}
-$storedLimits = stream_get_contents($rateLimitFile);
-$submissions = $storedLimits === '' ? array() : json_decode($storedLimits, true);
-if (!is_array($submissions)) {
-    fclose($rateLimitFile);
-    rate_limit_unavailable('read');
-}
+session_start();
 $now = time();
-foreach ($submissions as $key => $submittedAt) {
-    if (!is_int($submittedAt) || $now - $submittedAt >= 10) unset($submissions[$key]);
-}
-$addressKey = hash('sha256', $address);
-if (isset($submissions[$addressKey])) {
-    $retryAfter = max(1, 10 - ($now - $submissions[$addressKey]));
-    fclose($rateLimitFile);
-    header('Retry-After: ' . $retryAfter);
+$lastSubmission = isset($_SESSION['contact_form_submitted_at']) ? (int) $_SESSION['contact_form_submitted_at'] : 0;
+if ($lastSubmission > 0 && $now - $lastSubmission < 10) {
     respond(429, array('message' => 'Подождите немного перед повторной отправкой.'));
-}
-// Резервируем попытку до mail(): параллельные запросы и ошибки почты тоже ограничены.
-$submissions[$addressKey] = $now;
-$encodedLimits = json_encode($submissions);
-$saved = rewind($rateLimitFile) && ftruncate($rateLimitFile, 0)
-    && fwrite($rateLimitFile, $encodedLimits) === strlen($encodedLimits) && fflush($rateLimitFile);
-fclose($rateLimitFile);
-if (!$saved) {
-    rate_limit_unavailable('write');
 }
 
 $recipient = 'info@medved.beer';
@@ -152,4 +111,5 @@ if (!mail($recipient, $subject, $body, implode("\r\n", $headers))) {
     respond(500, array('message' => 'Не удалось отправить сообщение. Попробуйте ещё раз.'));
 }
 
+$_SESSION['contact_form_submitted_at'] = $now;
 respond(200, array('ok' => true));
