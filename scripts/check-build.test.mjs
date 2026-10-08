@@ -3,6 +3,9 @@ import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import sharp from 'sharp'
+import { contacts } from '../src/data/contacts.js'
+import { metrikaCounterId } from '../src/utils/metrika.js'
+import { runInNewContext } from 'node:vm'
 
 const output = path.resolve('dist')
 const staging = process.env.SITE_ENV === 'staging'
@@ -72,6 +75,131 @@ test('every published URL has its own HTML and metadata', async () => {
     assert.ok(html.includes(`<meta name="robots" content="${staging ? 'noindex, nofollow' : 'index, follow'}">`), url)
     assert.ok(!html.includes('file://'), url)
     assert.ok(!html.includes('/src/assets/'), url)
+  }
+})
+
+test('Metrika is included only in production and initializes only on the canonical host', async () => {
+  for (const url of [...urls, `${origin}/404.html`]) {
+    const file = url.endsWith('/404.html') ? '404.html' : `${new URL(url).pathname.slice(1)}index.html`
+    const html = await readFile(path.join(output, file), 'utf8')
+    const scripts = [...html.matchAll(/<script type="text\/javascript">([\s\S]*?)<\/script>/g)]
+      .filter((match) => match[1].includes('mc.yandex.ru/metrika/tag.js'))
+    const pixels = [...html.matchAll(/<noscript>[\s\S]*?<img src="https:\/\/mc\.yandex\.ru\/watch\/(\d+)"[\s\S]*?<\/noscript>/g)]
+    if (staging) {
+      assert.equal(scripts.length, 0, url)
+      assert.equal(pixels.length, 0, url)
+      continue
+    }
+    assert.equal(scripts.length, 1, url)
+    assert.equal(pixels.length, 1, url)
+    assert.ok(scripts[0].index < html.indexOf('</head>'), url)
+    assert.ok(pixels[0].index > html.indexOf('<body>'), url)
+    assert.equal(Number(pixels[0][1]), metrikaCounterId)
+    for (const hostname of ['medved.beer', 'test.medved.beer', 'localhost', '127.0.0.1']) {
+      const inserted = []
+      const window = {}
+      const context = {
+        window,
+        location: { hostname, href: `https://${hostname}/kontakty/` },
+        document: {
+          referrer: '',
+          scripts: [],
+          createElement: () => ({}),
+          getElementsByTagName: () => [{ parentNode: { insertBefore: (script) => inserted.push(script) } }],
+        },
+      }
+      Object.defineProperty(context, 'ym', { get: () => window.ym })
+      runInNewContext(scripts[0][1], context)
+      if (hostname !== 'medved.beer') {
+        assert.equal(inserted.length, 0, hostname)
+        assert.equal(window.ym, undefined, hostname)
+        continue
+      }
+      assert.equal(inserted.length, 1)
+      assert.equal(inserted[0].src, `https://mc.yandex.ru/metrika/tag.js?id=${metrikaCounterId}`)
+      assert.equal(inserted[0].async, 1)
+      const [id, method, settings] = window.ym.a[0]
+      assert.equal(id, metrikaCounterId)
+      assert.equal(method, 'init')
+      assert.equal(settings.webvisor, true)
+      assert.equal(settings.clickmap, true)
+      assert.equal(settings.trackLinks, true)
+      assert.equal(settings.accurateTrackBounce, true)
+      assert.equal(settings.url, context.location.href)
+    }
+  }
+})
+
+test('structured data describes the organization and only the products on each category page', async () => {
+  const categoryPaths = urls.filter((url) => /^\/katalog\/[^/]+\/$/.test(new URL(url).pathname))
+  for (const url of urls) {
+    const html = await readFile(path.join(output, new URL(url).pathname.slice(1), 'index.html'), 'utf8')
+    const scripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+    assert.equal(scripts.length, 1, url)
+    assert.ok(scripts[0].index < html.indexOf('</head>'), url)
+    const data = JSON.parse(scripts[0][1])
+    assert.equal(data['@context'], 'https://schema.org')
+    const [organization, list] = data['@graph']
+    assert.equal(organization['@type'], 'Organization')
+    assert.equal(organization['@id'], `${origin}/#organization`)
+    assert.equal(organization.address, contacts.address)
+    assert.equal(organization.telephone, contacts.general.phone)
+    assert.equal(organization.email, contacts.general.email)
+    assert.ok(html.includes(organization.email), url)
+    const images = [organization.logo]
+
+    if (categoryPaths.includes(url)) {
+      assert.equal(list['@type'], 'ItemList')
+      assert.equal(list.numberOfItems, list.itemListElement.length)
+      // Каждый доступный в интерфейсе объём должен иметь отдельное описание.
+      const groups = [...html.matchAll(/role="group" aria-label="Выбор объёма: ([^"]+)"[^>]*>([\s\S]*?)<\/div>/g)]
+      const variants = groups.flatMap(([, name, buttons]) => [...buttons.matchAll(/aria-label="Показать объём ([^"]+)"/g)]
+        .map(([, volume]) => ({ name: `${name}, ${volume}`, volume })))
+      assert.ok(variants.length > 0, url)
+      assert.equal(list.numberOfItems, variants.length, url)
+      const ids = new Set()
+      for (const [index, entry] of list.itemListElement.entries()) {
+        const product = entry.item
+        assert.equal(entry.position, index + 1)
+        assert.equal(product['@type'], 'Product')
+        assert.equal(product.url, url)
+        assert.equal(product.manufacturer['@id'], organization['@id'])
+        assert.equal(product.size, variants[index].volume)
+        assert.equal(product.name, variants[index].name)
+        assert.ok(product.description && !product.description.includes('undefined'))
+        assert.ok(!ids.has(product['@id']), url)
+        ids.add(product['@id'])
+        assert.equal(product.offers, undefined)
+        assert.equal(product.aggregateRating, undefined)
+        images.push(product.image)
+      }
+    } else {
+      assert.equal(list, undefined, url)
+    }
+
+    for (const image of images) {
+      const target = new URL(image)
+      assert.equal(target.origin, origin)
+      assert.ok(target.pathname.startsWith(`${basePath}/assets/`), image)
+      const file = target.pathname.slice(basePath.length + 1)
+      assert.ok((await stat(path.join(output, file))).isFile(), image)
+    }
+  }
+
+  const notFoundHtml = await readFile(path.join(output, '404.html'), 'utf8')
+  assert.doesNotMatch(notFoundHtml, /application\/ld\+json/)
+})
+
+test('catalog metadata includes wholesale supply and the city', async () => {
+  for (const url of urls.filter((url) => new URL(url).pathname.startsWith('/katalog/'))) {
+    const html = await readFile(path.join(output, new URL(url).pathname.slice(1), 'index.html'), 'utf8')
+    const title = html.match(/<title>([^<]+)<\/title>/)?.[1]
+    const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1]
+    assert.match(title, /оптом/)
+    assert.match(title, /Санкт-Петербурге/)
+    assert.match(description, /Оптовые поставки/)
+    assert.match(description, /производител/)
+    assert.match(description, /Санкт-Петербург/)
   }
 })
 

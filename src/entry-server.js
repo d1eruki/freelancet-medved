@@ -5,6 +5,7 @@ import { findPage, notFoundPage, pageRoutes } from './data/page-routes'
 import { loadPageComponent } from './utils/page-components'
 
 export { notFoundPage, pageRoutes }
+export { createStructuredData } from './utils/structured-data.js'
 
 export async function render(path) {
   const pageComponent = await loadPageComponent(findPage(path)?.type)

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import BaseButton from './BaseButton.vue'
 import { sitePath } from '../utils/site-path'
+import { trackMetrikaGoal } from '../utils/metrika.js'
 
 const props = defineProps({
   idPrefix: {
@@ -144,11 +145,13 @@ async function submitForm() {
     if (!response.ok || result?.ok !== true) {
       status.value = 'error'
       feedback.value = serverMessage || 'Не удалось отправить сообщение. Попробуйте ещё раз.'
+      trackMetrikaGoal('contact_form_error', { reason: 'server' })
       return
     }
 
     status.value = 'success'
     feedback.value = serverMessage || 'Спасибо! Сообщение отправлено.'
+    trackMetrikaGoal('contact_form_success')
     resetFields()
     emit('success')
   } catch {
@@ -157,6 +160,7 @@ async function submitForm() {
     feedback.value = timedOut
       ? 'Сервер не ответил вовремя. Сообщение могло быть отправлено — повторите попытку чуть позже.'
       : 'Не удалось отправить сообщение. Проверьте соединение и попробуйте ещё раз.'
+    trackMetrikaGoal('contact_form_error', { reason: timedOut ? 'timeout' : 'request' })
   } finally {
     window.clearTimeout(timeout)
     if (submissionController === controller) submissionController = null

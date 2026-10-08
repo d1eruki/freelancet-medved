@@ -2,6 +2,7 @@ import { access, mkdtemp, readFile, mkdir, rm, writeFile } from 'node:fs/promise
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { build } from 'vite'
+import { getMetrikaMarkup } from '../src/utils/metrika.js'
 
 const root = process.cwd()
 const siteEnvironment = process.env.SITE_ENV || 'production'
@@ -56,9 +57,12 @@ try {
     build: { ssr: 'src/entry-server.js', outDir: serverOutput, emptyOutDir: true, sourcemap: false },
   })
 
-  const { render, notFoundPage, pageRoutes } = await import(pathToFileURL(path.join(serverOutput, 'entry-server.mjs')).href)
+  const { render, notFoundPage, pageRoutes, createStructuredData } = await import(pathToFileURL(path.join(serverOutput, 'entry-server.mjs')).href)
   const serverAssetPrefix = `${pathToFileURL(serverOutput).href}/assets/`
   const publicAssetPrefix = `${process.env.SITE_BASE || '/freelancet-medved/'}assets/`
+  const metrika = staging
+    ? { head: '', body: '' }
+    : getMetrikaMarkup(new URL(pageRoutes[0].canonicalUrl).hostname)
 
   async function renderHtml(page, routePath) {
     const { html, modules } = await render(routePath)
@@ -89,8 +93,17 @@ try {
       return ''
     }).filter(Boolean).join('\n    ')
 
+    const structuredData = createStructuredData(page, (asset) => new URL(
+      asset.replaceAll(serverAssetPrefix, publicAssetPrefix), page.canonicalUrl,
+    ).href)
+    // Экранируем символы HTML, чтобы содержимое каталога не могло закрыть script.
+    const jsonLd = structuredData
+      ? `<script type="application/ld+json">${JSON.stringify(structuredData).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('&', '\\u0026')}</script>`
+      : ''
+
     return setMetadata(template, page)
-      .replace('</head>', `${links}\n  </head>`)
+      .replace('</head>', () => `${links}\n    ${jsonLd}\n    ${metrika.head}\n  </head>`)
+      .replace('<body>', () => `<body>\n    ${metrika.body}`)
       .replace('<div id="app"></div>', `<div id="app">${rendered}</div>`)
   }
 

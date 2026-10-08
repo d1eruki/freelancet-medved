@@ -2,11 +2,13 @@ import { createApp, createSSRApp } from 'vue'
 import App from './App.vue'
 import { findPage } from './data/page-routes'
 import { loadPageComponent } from './utils/page-components'
+import { trackContactClicks } from './utils/metrika.js'
 import './styles/main.css'
 
 const root = document.querySelector('#app')
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '')
 const path = window.location.pathname.slice(basePath.length) || '/'
+trackContactClicks()
 
 // Загружаем страницу до гидратации: директивы не должны менять её HTML раньше Vue.
 loadPageComponent(findPage(path)?.type).then((pageComponent) => {
