@@ -54,3 +54,5 @@ tmp/
 temp/
 *.tmp
 
+# Local task list
+/todo.md

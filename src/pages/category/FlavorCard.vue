@@ -27,12 +27,22 @@ function selectVariant(index) {
         :leave-to-class="transitionDirection === 'backward' ? 'translate-x-[150%]' : '-translate-x-[150%]'"
       >
         <img
+          v-if="activeVariant.image"
           :key="activeVariant.volume"
           class="absolute inset-0 h-full w-full object-contain"
           :src="activeVariant.image"
           :alt="`${item.name}, ${activeVariant.volume}`"
           loading="lazy"
         >
+        <div
+          v-else
+          :key="activeVariant.volume"
+          class="absolute inset-0 flex items-center justify-center text-body text-subtle"
+          role="img"
+          :aria-label="`${item.name}, ${activeVariant.volume}: фото пока нет`"
+        >
+          Фото пока нет
+        </div>
       </Transition>
     </div>
     <div class="mt-4 flex flex-wrap items-center justify-center gap-2" role="group" :aria-label="`Выбор объёма: ${item.name}`">

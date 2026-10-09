@@ -1,3 +1,12 @@
+import berryMeadSmallImageUrl from '../assets/products/mead/marion-berry-330ml.png'
+import darkMeadSmallImageUrl from '../assets/products/mead/medved-dark-330ml.png'
+import lightMeadSmallImageUrl from '../assets/products/mead/medved-light-330ml.png'
+import berryMeadImageUrl from '../assets/products/mead/marion-berry-450ml.png'
+import darkMeadImageUrl from '../assets/products/mead/medved-dark-450ml.png'
+import lightMeadImageUrl from '../assets/products/mead/medved-light-450ml.png'
+import darkMeadLiterImageUrl from '../assets/products/mead/medved-dark-1l.png'
+import lightMeadLiterImageUrl from '../assets/products/mead/medved-light-1l.png'
+import cherryMeadLiterImageUrl from '../assets/products/mead/medved-cherry-1l.png'
 import meadImageUrl from '../assets/products/mead/mead-default-glass.png'
 import pomegranateBerryMeadGlassImageUrl from '../assets/products/mead/marion-pomegranate-berry-glass.png'
 import mangoMeadGlassImageUrl from '../assets/products/mead/marion-mango-glass.png'
@@ -9,7 +18,6 @@ import blackcurrantMeadGlassImageUrl from '../assets/products/mead/medved-blackc
 import ciderImageUrl from '../assets/products/cider/cider-default-glass.png'
 import hopCiderGlassImageUrl from '../assets/products/cider/khmelyar-glass.png'
 import woodstockCiderGlassImageUrl from '../assets/products/cider/woodstock-glass.png'
-import blackcurrantCiderGlassImageUrl from '../assets/products/cider/marion-blackcurrant-berry-glass.png'
 import berryCiderGlassImageUrl from '../assets/products/cider/marion-berry-glass.png'
 import cherryCiderGlassImageUrl from '../assets/products/cider/cherry-glass.png'
 import antonovkaCiderGlassImageUrl from '../assets/products/cider/antonovka-glass.png'
@@ -28,18 +36,16 @@ import pearPerryBottleImageUrl from '../assets/products/perry/mister-williams-75
 import hopCiderSmallImageUrl from '../assets/products/cider/khmelyar-330ml.png'
 import woodstockCiderSmallImageUrl from '../assets/products/cider/woodstock-330ml.png'
 import pearPerrySmallImageUrl from '../assets/products/perry/mister-williams-330ml.png'
-import pomegranateMeadSmallImageUrl from '../assets/products/mead/marion-pomegranate-berry-330ml.png'
 import mangoMeadSmallImageUrl from '../assets/products/mead/marion-mango-330ml.png'
-import blackcurrantCiderSmallImageUrl from '../assets/products/cider/marion-blackcurrant-berry-330ml.png'
+import blackcurrantMeadSmallImageUrl from '../assets/products/mead/marion-blackcurrant-330ml.png'
 import berryCiderSmallImageUrl from '../assets/products/cider/marion-berry-330ml.png'
 import cherryCiderSmallImageUrl from '../assets/products/cider/cherry-330ml.png'
 import antonovkaCiderSmallImageUrl from '../assets/products/cider/antonovka-330ml.png'
 import hopCiderImageUrl from '../assets/products/cider/khmelyar-450ml.png'
 import woodstockCiderImageUrl from '../assets/products/cider/woodstock-450ml.png'
 import pearPerryImageUrl from '../assets/products/perry/mister-williams-450ml.png'
-import pomegranateMeadImageUrl from '../assets/products/mead/marion-pomegranate-berry-450ml.png'
 import mangoMeadImageUrl from '../assets/products/mead/marion-mango-450ml.png'
-import blackcurrantCiderImageUrl from '../assets/products/cider/marion-blackcurrant-berry-450ml.png'
+import blackcurrantMeadImageUrl from '../assets/products/cider/marion-blackcurrant-berry-450ml.png'
 import berryCiderImageUrl from '../assets/products/cider/marion-berry-450ml.png'
 import cherryCiderImageUrl from '../assets/products/cider/cherry-450ml.png'
 import antonovkaCiderImageUrl from '../assets/products/cider/antonovka-450ml.png'
@@ -49,20 +55,20 @@ export const catalogCategories = [
     slug: 'medovuha',
     name: 'Мид',
     tagline: 'Фрукты, ягоды и пряности',
-    description: 'Семь сортов мида с фруктами, ягодами и пряностями.',
+    description: 'Десять сортов мида: светлая и тёмная медовуха, фруктовые и ягодные вкусы.',
     heroDescription: ['Мягкий вкус, ', 'сочные фруктовые ноты ', 'и яркий аромат пряностей.'],
-    introduction: 'В линейке — клюква, манго, лесные ягоды, облепиха, слива, чёрная смородина и ягодный купаж «Помэгрэнет энд берри».',
+    introduction: 'В линейке — «Мэрион» Берри, манго, клюква, лесные ягоды, облепиха, слива, чёрная смородина, светлая, тёмная и вишнёвая медовуха.',
     image: meadImageUrl,
     imageAlt: 'Бокал мида',
     items: [
       {
-        name: 'Мид «Мэрион» Помэгрэнет энд берри',
+        name: 'Мид «Мэрион» Берри',
         details: 'нефильтрованная, неосветлённая',
-        description: 'Богатый купаж соков граната, черники, малины и яблок. Яркий и многогранный ягодный вкус, поднимающий самооценку с первого глотка.',
+        description: 'Ягодный мид с черникой и малиной. Мягкая медовая сладость сочетается с сочным ягодным вкусом.',
         variants: [
           { volume: '30 л', image: pomegranateBerryMeadGlassImageUrl },
-          { volume: '0,33 л', image: pomegranateMeadSmallImageUrl },
-          { volume: '0,45 л', image: pomegranateMeadImageUrl },
+          { volume: '0,33 л', image: berryMeadSmallImageUrl },
+          { volume: '0,45 л', image: berryMeadImageUrl },
         ],
       },
       {
@@ -113,12 +119,42 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мёдведь» Черносмородиновая',
+        name: 'Мид «Мэрион» Черносмородиновая',
         details: 'нефильтрованная, неосветлённая',
         description: 'Сок чёрной смородины и секретные пряные травы в мягком сочетании. Насыщенный букет с мягкой терпкостью, способный создать атмосферу уединённого загородного поместья.',
         variants: [
           { volume: '30 л', image: blackcurrantMeadGlassImageUrl },
+          { volume: '0,33 л', image: blackcurrantMeadSmallImageUrl },
+          { volume: '0,45 л', image: blackcurrantMeadImageUrl },
           { volume: '1 л', image: blackcurrantMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Мид «Мёдведь» Тёмная',
+        details: 'нефильтрованная',
+        description: 'Тёмная медовуха на основе мёда.',
+        variants: [
+          { volume: '0,33 л', image: darkMeadSmallImageUrl },
+          { volume: '0,45 л', image: darkMeadImageUrl },
+          { volume: '1 л', image: darkMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Мид «Мёдведь» Светлая',
+        details: 'нефильтрованная',
+        description: 'Светлая медовуха на основе мёда.',
+        variants: [
+          { volume: '0,33 л', image: lightMeadSmallImageUrl },
+          { volume: '0,45 л', image: lightMeadImageUrl },
+          { volume: '1 л', image: lightMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Мид «Мёдведь» Вишнёвая',
+        details: 'нефильтрованная',
+        description: 'Вишнёвая медовуха с ягодным вкусом.',
+        variants: [
+          { volume: '1 л', image: cherryMeadLiterImageUrl },
         ],
       },
     ],
@@ -127,9 +163,9 @@ export const catalogCategories = [
     slug: 'sidr',
     name: 'Сидр',
     tagline: 'Свежесть спелых яблок',
-    description: 'Шесть сортов сидра: сухой, полусухой, полусладкие и сладкий.',
+    description: 'Пять сортов сидра: сухой, полусухой, полусладкие и сладкий.',
     heroDescription: ['Яблочная свежесть, ', 'приятная кислинка ', 'и выразительный фруктовый вкус.'],
-    introduction: 'В линейке — «Хмеляр», «Вудсток», «Антоновка», вишневый и два ягодных сорта «Мэрион».',
+    introduction: 'В линейке — «Хмеляр», «Вудсток», «Антоновка», вишневый и ягодный «Мэрион» Берри.',
     image: ciderImageUrl,
     imageAlt: 'Бокал яблочного сидра',
     items: [
@@ -151,16 +187,6 @@ export const catalogCategories = [
           { volume: '30 л', image: woodstockCiderGlassImageUrl },
           { volume: '0,33 л', image: woodstockCiderSmallImageUrl },
           { volume: '0,45 л', image: woodstockCiderImageUrl },
-        ],
-      },
-      {
-        name: 'Сидр «Мэрион» Блэккорант энд берри',
-        details: 'негазированный, полусладкий',
-        description: 'Сок прямого отжима с черной смородиной, черникой и малиной. Бархатистый ягодный сидр, которому не стыдно признаться в любви в публичном месте.',
-        variants: [
-          { volume: '30 л', image: blackcurrantCiderGlassImageUrl },
-          { volume: '0,33 л', image: blackcurrantCiderSmallImageUrl },
-          { volume: '0,45 л', image: blackcurrantCiderImageUrl },
         ],
       },
       {

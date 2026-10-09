@@ -68,7 +68,7 @@ import InfoCard from '../../components/InfoCard.vue'
             </div>
 
             <p class="text-body font-medium text-subtle sm:col-span-2">
-              В каталоге — семь сортов мида, шесть сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
+              В каталоге — {{ catalogCategories[0].items.length }} сортов мида, {{ catalogCategories[1].items.length }} сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
             </p>
           </div>
         </article>

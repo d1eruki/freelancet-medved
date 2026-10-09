@@ -131,6 +131,11 @@ test('Metrika is included only in production and initializes only on the canonic
 })
 
 test('structured data describes the organization and only the products on each category page', async () => {
+  const catalogSource = await readFile(new URL('../src/data/catalog.js', import.meta.url), 'utf8')
+  // В Node пути картинок подставляются строками; состав каталога остаётся исходным.
+  const catalog = runInNewContext(catalogSource
+    .replace(/^import (\w+) from '([^']+)'$/gm, (_, name, image) => `const ${name} = ${JSON.stringify(image)}`)
+    .replace(/export const /g, 'const ') + '; catalogCategories')
   const categoryPaths = urls.filter((url) => /^\/katalog\/[^/]+\/$/.test(new URL(url).pathname))
   for (const url of urls) {
     const html = await readFile(path.join(output, new URL(url).pathname.slice(1), 'index.html'), 'utf8')
@@ -151,6 +156,13 @@ test('structured data describes the organization and only the products on each c
     if (categoryPaths.includes(url)) {
       assert.equal(list['@type'], 'ItemList')
       assert.equal(list.numberOfItems, list.itemListElement.length)
+      const category = catalog.find((entry) => new URL(url).pathname.endsWith(`/katalog/${entry.slug}/`))
+      assert.ok(category, url)
+      const catalogVariants = category.items.flatMap((item) => item.variants.map((variant) => ({
+        name: `${item.name}, ${variant.volume}`,
+        image: variant.image,
+      })))
+      assert.equal(list.numberOfItems, catalogVariants.length, url)
       // Каждый доступный в интерфейсе объём должен иметь отдельное описание.
       const groups = [...html.matchAll(/role="group" aria-label="Выбор объёма: ([^"]+)"[^>]*>([\s\S]*?)<\/div>/g)]
       const variants = groups.flatMap(([, name, buttons]) => [...buttons.matchAll(/aria-label="Показать объём ([^"]+)"/g)]
@@ -166,12 +178,18 @@ test('structured data describes the organization and only the products on each c
         assert.equal(product.manufacturer['@id'], organization['@id'])
         assert.equal(product.size, variants[index].volume)
         assert.equal(product.name, variants[index].name)
+        assert.equal(product.name, catalogVariants[index].name)
         assert.ok(product.description && !product.description.includes('undefined'))
         assert.ok(!ids.has(product['@id']), url)
         ids.add(product['@id'])
         assert.equal(product.offers, undefined)
         assert.equal(product.aggregateRating, undefined)
-        images.push(product.image)
+        if (catalogVariants[index].image) {
+          assert.equal(typeof product.image, 'string', product.name)
+          images.push(product.image)
+        } else {
+          assert.ok(!Object.hasOwn(product, 'image'), product.name)
+        }
       }
     } else {
       assert.equal(list, undefined, url)

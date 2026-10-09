@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<title>Антоновка — фронтальный 3D-рендер</title>
+<style>html,body{margin:0;background:#fff}canvas{display:block;max-width:100%;height:auto}</style>
+<script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+
+// Самостоятельный экспорт. Исходные модель и этикетка используются без изменений.
+const width = 2048, height = 1118
+const presets = {
+  antonovka: { label:'vetka-antonovki-450ml', titleCenter:0.494 },
+  berry: { label:'marion-berry-450ml-v2', titleCenter:0.469 },
+  khmelyar: { label:'khmelyar-330ml', titleCenter:0.466 },
+  woodstock: { label:'woodstock-330ml', titleCenter:0.558 },
+  'sweet-cherry': { label:'sweet-cherry-330ml', titleCenter:0.436 },
+  'poiret-pear': { label:'poiret-pear-330ml', titleCenter:0.618 },
+  mango: { label:'marion-mango-450ml-v2', titleCenter:0.469 },
+  'light-mead': { label:'medved-light-mead-450ml', titleCenter:0.475 },
+  'dark-mead': { label:'medved-dark-mead-450ml', titleCenter:0.475 },
+  'blackcurrant-and-berry': { label:'marion-blackcurrant-and-berry-450ml-v2', titleCenter:0.469 },
+}
+const presetName = new URLSearchParams(location.search).get('label') || 'antonovka'
+const preset = presets[presetName]
+if (!preset) throw new Error('Неизвестная этикетка')
+document.title = `${presetName} — 3D-рендер банки`
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true })
+// Размер рендера фиксирован; CSS уменьшает обе стороны пропорционально.
+renderer.setSize(width, height, false)
+renderer.setClearColor(0x000000, 0)
+renderer.outputColorSpace = THREE.SRGBColorSpace
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 0.8
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.VSMShadowMap
+document.body.append(renderer.domElement)
+window.renderReady = false
+
+try {
+  const scene = new THREE.Scene()
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  const room = new RoomEnvironment()
+  const environment = pmrem.fromScene(room)
+  scene.environment = environment.texture
+  scene.environmentIntensity = 0.4
+  room.dispose()
+  pmrem.dispose()
+
+  const model = (await new GLTFLoader().loadAsync('../../src/assets/models/can.glb')).scene
+  model.updateMatrixWorld(true)
+  const bounds = new THREE.Box3().setFromObject(model)
+  const size = bounds.getSize(new THREE.Vector3())
+  const center = bounds.getCenter(new THREE.Vector3())
+  // Сохраняем пропорции исходной геометрии, нормируем высоту для сцены.
+  const product = new THREE.Group()
+  model.position.sub(center)
+  product.add(model)
+  product.scale.setScalar(2 / size.y)
+  product.position.y = 1
+  scene.add(product)
+
+  const image = await new THREE.ImageLoader().loadAsync(`../../materials/customer-design/labels/cans-330ml-500ml/${preset.label}.png`)
+  let original, printedMesh
+  model.traverse(node => {
+    if (!node.isMesh) return
+    node.castShadow = true
+    node.receiveShadow = false
+    for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+      if (material.name === 'aluminium') {
+        material.metalness = 1
+        material.roughness = 0.38
+        material.envMapIntensity = 0.7
+      }
+      if (material.name.endsWith('-printed-label')) {
+        original = material.map
+        printedMesh = node
+        const canvas = document.createElement('canvas')
+        canvas.width = original.image.width
+        canvas.height = original.image.height
+        const scale = Math.min(canvas.width * 2376 / 2696 / image.width, canvas.height / image.height)
+        const w = image.width * scale, h = image.height * scale
+        canvas.getContext('2d').drawImage(image, (canvas.width-w)/2, (canvas.height-h)/2, w, h)
+        const texture = original.clone()
+        texture.source = new THREE.Source(canvas)
+        texture.needsUpdate = true
+        material.map = texture
+        material.roughness = 0.55
+        material.metalness = 0
+        material.envMapIntensity = 0.2
+        // Печать лежит поверх алюминия; исключаем конфликт совпадающих поверхностей.
+        material.polygonOffset = true
+        material.polygonOffsetFactor = -1
+        material.polygonOffsetUnits = -1
+        material.needsUpdate = true
+      }
+    }
+  })
+  if (!printedMesh) throw new Error('На модели не найдена печатная поверхность')
+
+  // Центр названия задаётся по исходной этикетке каждого продукта.
+  // Интерполируем точку внутри UV-треугольника, а не округляем до вершины сетки.
+  product.updateMatrixWorld(true)
+  const uv = printedMesh.geometry.attributes.uv
+  const positions = printedMesh.geometry.attributes.position
+  const index = printedMesh.geometry.index
+  const targetUv = new THREE.Vector3(0.5 + (preset.titleCenter - 0.5) * 2376 / 2696, 0.5, 0)
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
+  const barycentric = new THREE.Vector3(), front = new THREE.Vector3()
+  let found = false
+  const count = index ? index.count : uv.count
+  for (let i = 0; i < count; i += 3) {
+    const ids = [0, 1, 2].map(offset => index ? index.getX(i + offset) : i + offset)
+    a.set(uv.getX(ids[0]), uv.getY(ids[0]), 0)
+    b.set(uv.getX(ids[1]), uv.getY(ids[1]), 0)
+    c.set(uv.getX(ids[2]), uv.getY(ids[2]), 0)
+    if (!THREE.Triangle.getBarycoord(targetUv, a, b, c, barycentric)) continue
+    if (Math.min(barycentric.x, barycentric.y, barycentric.z) < -0.000001) continue
+    front.fromBufferAttribute(positions, ids[0]).multiplyScalar(barycentric.x)
+    front.addScaledVector(a.fromBufferAttribute(positions, ids[1]), barycentric.y)
+    front.addScaledVector(b.fromBufferAttribute(positions, ids[2]), barycentric.z)
+    front.applyMatrix4(printedMesh.matrixWorld)
+    found = true
+    break
+  }
+  if (!found) throw new Error('Не удалось определить центр названия на UV-развёртке')
+  product.rotation.y = -Math.atan2(front.x, front.z)
+  product.updateMatrixWorld(true)
+
+  const key = new THREE.DirectionalLight(0xfff7ed, 2)
+  key.position.set(-3, 6, 5)
+  key.target.position.set(0, 0.8, 0)
+  scene.add(key, key.target)
+  const fill = new THREE.DirectionalLight(0xf0f5ff, 0.45)
+  fill.position.set(4, 3, 4)
+  scene.add(fill)
+  // Отдельный источник только для тени: сохраняет согласованное освещение банки.
+  // Почти верхнее направление сокращает тень; VSM размывает её границу.
+  const shadowLight = new THREE.DirectionalLight(0xffffff, 0)
+  shadowLight.position.set(0, 8, 0)
+  shadowLight.target.position.set(0, 0, 0)
+  shadowLight.castShadow = true
+  shadowLight.shadow.mapSize.set(1024, 1024)
+  Object.assign(shadowLight.shadow.camera, { left:-1.2, right:1.2, top:1.2, bottom:-1.2, near:0.1, far:12 })
+  shadowLight.shadow.bias = -0.00008
+  shadowLight.shadow.normalBias = 0.002
+  shadowLight.shadow.radius = 18
+  shadowLight.shadow.blurSamples = 16
+  scene.add(shadowLight, shadowLight.target)
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ color:0x242424, opacity:0.2 }))
+  ground.rotation.x = -Math.PI/2
+  ground.position.y = -0.002
+  ground.receiveShadow = true
+  scene.add(ground)
+
+  // Камера выше центра на 14 градусов: крышка видна, банка остаётся вертикальной.
+  const camera = new THREE.PerspectiveCamera(12, width/height, 0.1, 100)
+  const distance = 2 / (2 * Math.tan(THREE.MathUtils.degToRad(6)) * 0.8)
+  const elevation = THREE.MathUtils.degToRad(14)
+  camera.position.set(0, 1 + distance * Math.sin(elevation), distance * Math.cos(elevation))
+  camera.lookAt(0, 1, 0)
+  await renderer.compileAsync(scene, camera)
+  // VSM включает принимающий тень пол в карту глубины даже при castShadow=false.
+  // Считаем карту только по банке, затем замораживаем её для статичного кадра.
+  ground.visible = false
+  renderer.render(scene, camera)
+  renderer.shadowMap.autoUpdate = false
+  renderer.shadowMap.needsUpdate = false
+  ground.visible = true
+  // Размываем отдельный проход тени по её альфа-каналу, не затрагивая банку.
+  const shadowTarget = new THREE.WebGLRenderTarget(width, height)
+  const blurTarget = new THREE.WebGLRenderTarget(width, height)
+  const softShadowTarget = new THREE.WebGLRenderTarget(width, height)
+  product.visible = false
+  renderer.setRenderTarget(shadowTarget)
+  renderer.render(scene, camera)
+  product.visible = true
+  ground.visible = false
+  const screenScene = new THREE.Scene()
+  const screenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+  const blur = new THREE.ShaderMaterial({
+    uniforms: { image: { value: shadowTarget.texture }, stepSize: { value: new THREE.Vector2(1 / width, 0) } },
+    vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: `uniform sampler2D image; uniform vec2 stepSize; varying vec2 vUv;
+      void main(){float alpha=0.;float total=0.;
+        for(int i=-24;i<=24;i++){float f=float(i);float w=exp(-f*f/128.);
+          alpha+=texture2D(image,vUv+stepSize*f).a*w;total+=w;}
+        gl_FragColor=vec4(0.,0.,0.,alpha/total);}`,
+    depthTest: false, depthWrite: false, toneMapped: false,
+  })
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blur)
+  screenScene.add(quad)
+  renderer.setRenderTarget(blurTarget)
+  renderer.render(screenScene, screenCamera)
+  blur.uniforms.image.value = blurTarget.texture
+  blur.uniforms.stepSize.value.set(0, 1 / height)
+  renderer.setRenderTarget(softShadowTarget)
+  renderer.render(screenScene, screenCamera)
+  quad.material = new THREE.MeshBasicMaterial({ map:softShadowTarget.texture, transparent:true, depthTest:false, depthWrite:false, toneMapped:false })
+  renderer.setRenderTarget(null)
+  renderer.clear()
+  renderer.autoClear = false
+  renderer.render(screenScene, screenCamera)
+  renderer.clearDepth()
+  renderer.render(scene, camera)
+  renderer.autoClear = true
+  window.renderInfo = { width, height, model:'src/assets/models/can.glb', label:`${preset.label}.png`, rotationY:product.rotation.y, cameraPitch:-14, cameraRoll:0, sourceDimensions:size.toArray(), renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER) }
+  window.exportPng = () => renderer.domElement.toDataURL('image/png')
+  window.renderReady = true
+} catch (error) {
+  window.renderError = String(error.stack || error)
+  console.error(error)
+}
+</script>
+</html>
