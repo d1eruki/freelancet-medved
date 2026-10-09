@@ -1,16 +1,19 @@
 <!doctype html>
 <html lang="ru">
 <meta charset="utf-8">
-<title>Антоновка — фронтальный 3D-рендер</title>
+<title>Вудсток 0,33 л — фронтальный 3D-рендер</title>
 <style>html,body{margin:0;background:#fff}canvas{display:block;max-width:100%;height:auto}</style>
 <script type="module">
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 
-// Самостоятельный экспорт. Исходные модель и этикетка используются без изменений.
+// Габариты аналога CrownSleek 330 мл взяты из официальной спецификации.
+// Поставщик банки на фото не установлен; профиль крышки и донышка приблизителен.
+// Свет и камера сохранены от сцены 450 мл; источник размеров записан в GLB extras.
 const width = 2048, height = 1118
 const presets = {
+  valentine: { label:'valentine-450ml', titleCenter:0.49 },
   antonovka: { label:'vetka-antonovki-450ml', titleCenter:0.494 },
   berry: { label:'marion-berry-450ml-v2', titleCenter:0.469 },
   khmelyar: { label:'khmelyar-330ml', titleCenter:0.466 },
@@ -22,10 +25,10 @@ const presets = {
   'dark-mead': { label:'medved-dark-mead-450ml', titleCenter:0.475 },
   'blackcurrant-and-berry': { label:'marion-blackcurrant-and-berry-450ml-v2', titleCenter:0.469 },
 }
-const presetName = new URLSearchParams(location.search).get('label') || 'antonovka'
+const presetName = new URLSearchParams(location.search).get('label') || 'woodstock'
 const preset = presets[presetName]
 if (!preset) throw new Error('Неизвестная этикетка')
-document.title = `${presetName} — 3D-рендер банки`
+document.title = `${presetName} — 3D-рендер банки 0,33 л`
 const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true })
 // Размер рендера фиксирован; CSS уменьшает обе стороны пропорционально.
 renderer.setSize(width, height, false)
@@ -48,17 +51,21 @@ try {
   room.dispose()
   pmrem.dispose()
 
-  const model = (await new GLTFLoader().loadAsync('../../src/assets/models/can.glb')).scene
+  const gltf = await new GLTFLoader().loadAsync('../../src/assets/models/can-330ml.glb')
+  const model = gltf.scene
   model.updateMatrixWorld(true)
   const bounds = new THREE.Box3().setFromObject(model)
   const size = bounds.getSize(new THREE.Vector3())
   const center = bounds.getCenter(new THREE.Vector3())
-  // Сохраняем пропорции исходной геометрии, нормируем высоту для сцены.
+  // В сцене 450 мл высота 2 соответствует принятой в проекте высоте 168 мм.
+  // Здесь GLB уже в метрах: единый масштаб сохраняет разницу размеров банок.
+  // 168 мм — калибровка проекта, не подтверждённая здесь спецификация 450 мл.
+  const unitsPerMeter = 2 / 0.168
   const product = new THREE.Group()
   model.position.sub(center)
   product.add(model)
-  product.scale.setScalar(2 / size.y)
-  product.position.y = 1
+  product.scale.setScalar(unitsPerMeter)
+  product.position.y = size.y * unitsPerMeter / 2
   scene.add(product)
 
   const image = await new THREE.ImageLoader().loadAsync(`../../materials/customer-design/labels/cans-330ml-500ml/${preset.label}.png`)
@@ -79,7 +86,7 @@ try {
         const canvas = document.createElement('canvas')
         canvas.width = original.image.width
         canvas.height = original.image.height
-        const scale = Math.min(canvas.width * 2376 / 2696 / image.width, canvas.height / image.height)
+        const scale = Math.min(canvas.width / image.width, canvas.height / image.height)
         const w = image.width * scale, h = image.height * scale
         canvas.getContext('2d').drawImage(image, (canvas.width-w)/2, (canvas.height-h)/2, w, h)
         const texture = original.clone()
@@ -105,7 +112,7 @@ try {
   const uv = printedMesh.geometry.attributes.uv
   const positions = printedMesh.geometry.attributes.position
   const index = printedMesh.geometry.index
-  const targetUv = new THREE.Vector3(0.5 + (preset.titleCenter - 0.5) * 2376 / 2696, 0.5, 0)
+  const targetUv = new THREE.Vector3(preset.titleCenter, 0.5, 0)
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
   const barycentric = new THREE.Vector3(), front = new THREE.Vector3()
   let found = false
@@ -154,12 +161,15 @@ try {
   ground.receiveShadow = true
   scene.add(ground)
 
-  // Камера выше центра на 14 градусов: крышка видна, банка остаётся вертикальной.
-  const camera = new THREE.PerspectiveCamera(12, width/height, 0.1, 100)
+  // Камера выше центра на 10 градусов: крышка видна, банка остаётся вертикальной.
+  // Те же границы ортографического кадра, что у рендера стакана.
+  const halfHeight = 1 / 0.8
+  const camera = new THREE.OrthographicCamera(-halfHeight*width/height, halfHeight*width/height, halfHeight, -halfHeight, 0.1, 100)
   const distance = 2 / (2 * Math.tan(THREE.MathUtils.degToRad(6)) * 0.8)
-  const elevation = THREE.MathUtils.degToRad(14)
+  const elevation = THREE.MathUtils.degToRad(10)
   camera.position.set(0, 1 + distance * Math.sin(elevation), distance * Math.cos(elevation))
   camera.lookAt(0, 1, 0)
+  camera.updateMatrixWorld(true)
   await renderer.compileAsync(scene, camera)
   // VSM включает принимающий тень пол в карту глубины даже при castShadow=false.
   // Считаем карту только по банке, затем замораживаем её для статичного кадра.
@@ -205,7 +215,7 @@ try {
   renderer.clearDepth()
   renderer.render(scene, camera)
   renderer.autoClear = true
-  window.renderInfo = { width, height, model:'src/assets/models/can.glb', label:`${preset.label}.png`, rotationY:product.rotation.y, cameraPitch:-14, cameraRoll:0, sourceDimensions:size.toArray(), renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER) }
+  window.renderInfo = { projection:'orthographic', nominalVolumeMl:330, referenceDimensionsVerified:gltf.userData.referenceDimensionsVerified, actualProductDimensionsVerified:false, dimensionsSource:gltf.userData.dimensionsSource, referenceProduct:gltf.userData.referenceProduct, reference450mlHeightMeters:0.168, reference450mlDimensionsVerified:false, unitsPerMeter, width, height, model:'src/assets/models/can-330ml.glb', label:`${preset.label}.png`, rotationY:product.rotation.y, cameraPitch:-10, cameraRoll:0, sourceDimensions:size.toArray(), renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER) }
   window.exportPng = () => renderer.domElement.toDataURL('image/png')
   window.renderReady = true
 } catch (error) {

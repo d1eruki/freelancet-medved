@@ -95,7 +95,7 @@ const awards = [
       layer-entrance="foreground-first"
     >
       <template #title>Традиция<br>живёт здесь</template>
-      <span class="wide:block wide:whitespace-nowrap">Петербургский производитель мида, </span>
+      <span class="wide:block wide:whitespace-nowrap">Петербургский производитель медовухи, </span>
       <span class="wide:block wide:whitespace-nowrap">сидра и пуаре с собственной историей, </span>
       <span class="wide:block wide:whitespace-nowrap">характером и узнаваемыми рецептами.</span>
     </PageHero>
@@ -103,17 +103,17 @@ const awards = [
     <HeroDivider :image-url="aboutDividerUrl" />
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="tradition-title">
-      <div class="site-container grid gap-12 site-grid nav:gap-6">
-        <div class="nav:col-span-4">
-          <p class="font-display text-h1 text-brand uppercase">Мид</p>
+      <div class="site-container grid gap-12 site-grid wide:gap-y-16">
+        <div class="nav:col-span-12">
+          <p class="font-display text-h1 text-brand uppercase">Медовуха</p>
           <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Напиток с историей</p>
         </div>
 
-        <div class="nav:col-span-8">
+        <div class="nav:col-span-12">
           <h2 id="tradition-title" class="font-display text-h2 uppercase">
-            От княжеских дворов до заводов Питера
+            От княжеских дворов<br>до заводов Питера
           </h2>
-          <div class="mt-6 grid gap-6 text-body-large font-medium text-subtle sm:grid-cols-2">
+          <div class="mt-6 grid gap-6 text-body-large font-medium text-subtle">
             <p>
               На Руси медовые напитки варили и в крестьянских избах, и на княжеских дворах. Ими встречали дружины и отмечали народные праздники.
             </p>

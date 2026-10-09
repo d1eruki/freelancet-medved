@@ -48,7 +48,7 @@ const horecaHeroLayers = {
       :steam="horecaHeroSteam"
     >
       <template #title>Для ваших<br>гостей</template>
-      <span class="wide:block wide:whitespace-nowrap">Мид, сидр и пуаре «МЁДВЕДЬ» </span>
+      <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре «МЁДВЕДЬ» </span>
       <span class="wide:block wide:whitespace-nowrap">для баров и ресторанов. Поставляем напитки оптом </span>
       <span class="wide:block wide:whitespace-nowrap">в многооборотных кегах и одноразовой ПЭТ-таре.</span>
     </PageHero>
@@ -83,7 +83,7 @@ const horecaHeroLayers = {
           <div class="nav:col-span-6">
             <dt class="font-display text-h3 text-brand uppercase">Многооборотные кеги</dt>
             <dd class="mt-6 max-w-xl text-body-large font-medium text-subtle">
-              Мид, сидр и пуаре для подачи в розлив. Доступные сорта и условия работы с многооборотной тарой уточните в отделе продаж.
+              Медовуха, сидр и пуаре для подачи в розлив. Доступные сорта и условия работы с многооборотной тарой уточните в отделе продаж.
             </dd>
           </div>
           <div class="nav:col-span-6">

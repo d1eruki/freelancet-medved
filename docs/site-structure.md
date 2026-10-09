@@ -13,7 +13,7 @@
 
 ## Категории продукции
 
-1. Мид — `/katalog/medovuha/`.
+1. Медовуха — `/katalog/medovuha/`.
 2. Сидр — `/katalog/sidr/`.
 3. Пуаре — `/katalog/puare/`.
 

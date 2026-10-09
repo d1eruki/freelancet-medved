@@ -107,7 +107,7 @@ onBeforeUnmount(() => {
         <div class="max-w-sm nav:mb-12 wide:mb-16">
           <p class="hero-description text-center sm:text-left">
             <span class="wide:block wide:whitespace-nowrap">Пиво-медоваренный завод «Медведь». </span>
-            <span class="wide:block wide:whitespace-nowrap">Производим мид, сидр и пуаре </span>
+            <span class="wide:block wide:whitespace-nowrap">Производим медовуху, сидр и пуаре </span>
             <span class="wide:block wide:whitespace-nowrap">в Санкт-Петербурге с 2006 года.</span>
           </p>
         </div>

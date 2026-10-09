@@ -49,7 +49,7 @@ const productionHeroLayers = {
 
 const ingredients = [
   {
-    title: 'Основа мида',
+    title: 'Основа медовухи',
     text: 'Цветочный и гречишный мёд формируют основу напитка, а патока дополняет рецептуру.',
     icons: ['hexagons'],
   },
@@ -247,7 +247,7 @@ const qualityPoints = [
             Честный состав
           </h2>
           <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-4">
-            Мид и сидр проходят естественное брожение без добавления спирта.
+            Медовуха и сидр проходят естественное брожение без добавления спирта.
           </p>
         </div>
 

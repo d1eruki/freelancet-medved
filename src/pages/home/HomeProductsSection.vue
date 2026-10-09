@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
 
       <span class="sr-only" aria-live="polite">Выбран напиток: {{ products[activeIndex].name }}</span>
 
-      <div class="site-container relative z-2 hidden shrink-0 pb-8 nav:block">
+      <div class="site-container relative z-2 hidden shrink-0 -translate-y-12 pb-8 nav:block">
         <div class="flex flex-wrap items-center justify-center gap-3 pt-6">
           <button
             class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
@@ -268,7 +268,7 @@ onBeforeUnmount(() => {
               class="rounded-full px-5 py-3 text-label font-bold uppercase transition focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
               :class="index === activeIndex
                 ? 'bg-brand text-surface'
-                : 'bg-surface text-foreground hover:bg-brand/10'"
+                : 'bg-surface text-foreground hover:bg-[#37513e] hover:text-surface'"
               type="button"
               role="tab"
               :aria-controls="`home-product-panel-${product.slug}`"

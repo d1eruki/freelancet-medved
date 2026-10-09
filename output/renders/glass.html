@@ -72,15 +72,15 @@ const presets = {
     "target": "src/assets/products/mead/medved-forest-berries-glass.png",
     "foam": true,
     "absorption": [
-      0.5,
-      3.5,
-      1.8
+      0.3,
+      3,
+      2.1
     ],
-    "scattering": 1,
+    "scattering": 1.2,
     "scatteringColor": [
-      0.2,
-      0.005,
-      0.04
+      0.48,
+      0.012,
+      0.02
     ],
     "foamAllowed": true
   },
@@ -123,15 +123,15 @@ const presets = {
     "target": "src/assets/products/mead/medved-blackcurrant-glass.png",
     "foam": true,
     "absorption": [
-      0.9,
-      4.2,
-      1.5
+      0.55,
+      4.4,
+      2.6
     ],
-    "scattering": 0.9,
+    "scattering": 0.6,
     "scatteringColor": [
-      0.12,
-      0.003,
-      0.035
+      0.22,
+      0.006,
+      0.036
     ],
     "foamAllowed": true
   },
@@ -169,31 +169,14 @@ const presets = {
     ],
     "foamAllowed": false
   },
-  "cider-berry": {
-    "name": "Сидр «Мэрион» Берри",
-    "target": "src/assets/products/cider/marion-berry-glass.png",
-    "foam": false,
-    "absorption": [
-      0.15,
-      3.8,
-      2.7
-    ],
-    "scattering": 0,
-    "scatteringColor": [
-      0,
-      0,
-      0
-    ],
-    "foamAllowed": false
-  },
   "cider-cherry": {
     "name": "Сидр Вишневый",
     "target": "src/assets/products/cider/cherry-glass.png",
     "foam": false,
     "absorption": [
-      0.18,
-      3.2,
-      2.4
+      0.12,
+      5.5,
+      4.5
     ],
     "scattering": 0,
     "scatteringColor": [
@@ -234,6 +217,74 @@ const presets = {
       0.7,
       0.5,
       0.12
+    ],
+    "foamAllowed": false
+  },
+  "mead-dark": {
+    "name": "Медовуха «Мёдведь» Тёмная",
+    "target": "src/assets/products/mead/medved-dark-glass.png",
+    "foam": true,
+    "absorption": [
+      2.5,
+      4.2,
+      6.5
+    ],
+    "scattering": 0.2,
+    "scatteringColor": [
+      0.07,
+      0.019,
+      0.005
+    ],
+    "foamAllowed": true
+  },
+  "mead-light": {
+    "name": "Медовуха «Мёдведь» Светлая",
+    "target": "src/assets/products/mead/medved-light-glass.png",
+    "foam": true,
+    "absorption": [
+      0.08,
+      1.1,
+      3.8
+    ],
+    "scattering": 2.5,
+    "scatteringColor": [
+      0.8,
+      0.25,
+      0.015
+    ],
+    "foamAllowed": true
+  },
+  "mead-cherry": {
+    "name": "Медовуха «Мёдведь» Вишнёвая",
+    "target": "src/assets/products/mead/medved-cherry-glass.png",
+    "foam": true,
+    "absorption": [
+      0.12,
+      5.5,
+      4.5
+    ],
+    "scattering": 0,
+    "scatteringColor": [
+      0,
+      0,
+      0
+    ],
+    "foamAllowed": true
+  },
+  "cider-valentine": {
+    "name": "Сидр «Валентайн»",
+    "target": "src/assets/products/cider/valentine-glass.png",
+    "foam": false,
+    "absorption": [
+      0.03,
+      0.3,
+      2
+    ],
+    "scattering": 0,
+    "scatteringColor": [
+      0,
+      0,
+      0
     ],
     "foamAllowed": false
   }
@@ -343,10 +394,10 @@ try {
   ground.receiveShadow = true
   scene.add(ground)
 
-  // Камера выше центра на 14 градусов: видна поверхность напитка, стакан остаётся вертикальным.
+  // Камера выше центра на 10 градусов: видна поверхность напитка, стакан остаётся вертикальным.
   const camera = new THREE.PerspectiveCamera(12, width/height, 0.1, 100)
   const distance = 2 / (2 * Math.tan(THREE.MathUtils.degToRad(6)) * 0.8)
-  const elevation = THREE.MathUtils.degToRad(14)
+  const elevation = THREE.MathUtils.degToRad(10)
   camera.position.set(0, 1 + distance * Math.sin(elevation), distance * Math.cos(elevation))
   camera.lookAt(0, 1, 0)
   await renderer.compileAsync(scene, camera)
@@ -452,7 +503,7 @@ try {
     const data = uniforms?.bubblePositions?.value?.image?.data
     if (data) for (let i=3;i<data.length;i+=4) if (data[i]>0) activeBubbleCount++
   })
-  window.renderInfo = { activeBubbleCount, actualFoam, width, height, model:'src/assets/models/glass.glb', drink:preset.name, target:preset.target, presetKey, foam:preset.foam, bubbles:true, optics:'glass-lab', projection:'orthographic', cameraPitch:-14, cameraRoll:0, sourceDimensions:size.toArray(), renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER) }
+  window.renderInfo = { activeBubbleCount, actualFoam, width, height, model:'src/assets/models/glass.glb', drink:preset.name, target:preset.target, presetKey, foam:preset.foam, bubbles:true, optics:'glass-lab', projection:'orthographic', cameraPitch:-10, cameraRoll:0, sourceDimensions:size.toArray(), renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER) }
   window.exportPng = () => renderer.domElement.toDataURL('image/png')
   window.renderReady = true
 } catch (error) {

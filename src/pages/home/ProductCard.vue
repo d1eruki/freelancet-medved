@@ -46,7 +46,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
     :aria-label="product.name"
   >
     <div class="site-container relative flex flex-col items-center py-8 text-center sm:py-12 nav:grid nav:h-full nav:min-h-0 site-grid nav:grid-rows-2 nav:text-left">
-      <div class="product-copy relative z-2 w-full max-w-md nav:col-span-4 nav:row-span-2 nav:max-w-none nav:self-center">
+      <div class="product-copy relative z-0 w-full max-w-md nav:col-span-4 nav:row-span-2 nav:max-w-none nav:self-center">
         <h3 class="font-display text-product-title text-surface uppercase">
           {{ product.name }}
         </h3>

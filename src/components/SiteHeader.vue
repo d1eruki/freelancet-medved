@@ -1,7 +1,7 @@
 <script setup>
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import logoUrl from '../assets/branding/brand-logo-mark.svg'
+import BrandLogo from './BrandLogo.vue'
 import { navigation } from '../data/navigation'
 
 const props = defineProps({
@@ -92,11 +92,7 @@ onBeforeUnmount(() => {
   >
     <div class="site-container pointer-events-auto relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
       <a class="absolute left-1/2 z-10 inline-flex -translate-x-1/2 wide:static wide:col-start-4 wide:row-start-1 wide:justify-self-center wide:translate-x-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
-        <img
-          class="h-20 w-auto object-contain brightness-0 invert sm:h-24"
-          :src="logoUrl"
-          alt="МЁДВЕДЬ"
-        >
+        <BrandLogo />
       </a>
 
       <nav

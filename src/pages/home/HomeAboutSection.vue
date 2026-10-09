@@ -64,11 +64,11 @@ import InfoCard from '../../components/InfoCard.vue'
           <div class="grid gap-8 sm:grid-cols-3 sm:items-end">
             <div>
               <p class="font-display text-h1 text-brand">{{ catalogCategories[0].items.length }}</p>
-              <p class="mt-3 text-label font-extrabold tracking-wider uppercase">сортов мида</p>
+              <p class="mt-3 text-label font-extrabold tracking-wider uppercase">сортов медовухи</p>
             </div>
 
             <p class="text-body font-medium text-subtle sm:col-span-2">
-              В каталоге — {{ catalogCategories[0].items.length }} сортов мида, {{ catalogCategories[1].items.length }} сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
+              В каталоге — {{ catalogCategories[0].items.length }} сортов медовухи, {{ catalogCategories[1].items.length }} сортов сидра и пуаре «Мистер Вильямс». Поставляем напитки оптом в кегах и ПЭТ-таре.
             </p>
           </div>
         </article>

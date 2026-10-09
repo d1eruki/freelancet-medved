@@ -47,7 +47,7 @@ const catalogHeroLayers = {
       layer-entrance="foreground-first"
     >
       <template #title>Наши<br>напитки</template>
-      <span class="wide:block wide:whitespace-nowrap">Мид, сидр и пуаре собственного </span>
+      <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре собственного </span>
       <span class="wide:block wide:whitespace-nowrap">производства. Выберите напиток по настроению — </span>
       <span class="wide:block wide:whitespace-nowrap">от пряных до свежих фруктовых вкусов.</span>
     </PageHero>

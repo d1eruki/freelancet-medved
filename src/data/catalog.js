@@ -7,6 +7,9 @@ import lightMeadImageUrl from '../assets/products/mead/medved-light-450ml.png'
 import darkMeadLiterImageUrl from '../assets/products/mead/medved-dark-1l.png'
 import lightMeadLiterImageUrl from '../assets/products/mead/medved-light-1l.png'
 import cherryMeadLiterImageUrl from '../assets/products/mead/medved-cherry-1l.png'
+import darkMeadGlassImageUrl from '../assets/products/mead/medved-dark-glass.png'
+import lightMeadGlassImageUrl from '../assets/products/mead/medved-light-glass.png'
+import cherryMeadGlassImageUrl from '../assets/products/mead/medved-cherry-glass.png'
 import meadImageUrl from '../assets/products/mead/mead-default-glass.png'
 import pomegranateBerryMeadGlassImageUrl from '../assets/products/mead/marion-pomegranate-berry-glass.png'
 import mangoMeadGlassImageUrl from '../assets/products/mead/marion-mango-glass.png'
@@ -18,7 +21,7 @@ import blackcurrantMeadGlassImageUrl from '../assets/products/mead/medved-blackc
 import ciderImageUrl from '../assets/products/cider/cider-default-glass.png'
 import hopCiderGlassImageUrl from '../assets/products/cider/khmelyar-glass.png'
 import woodstockCiderGlassImageUrl from '../assets/products/cider/woodstock-glass.png'
-import berryCiderGlassImageUrl from '../assets/products/cider/marion-berry-glass.png'
+import valentineCiderGlassImageUrl from '../assets/products/cider/valentine-glass.png'
 import cherryCiderGlassImageUrl from '../assets/products/cider/cherry-glass.png'
 import antonovkaCiderGlassImageUrl from '../assets/products/cider/antonovka-glass.png'
 import perryImageUrl from '../assets/products/perry/perry-default-glass.png'
@@ -38,7 +41,7 @@ import woodstockCiderSmallImageUrl from '../assets/products/cider/woodstock-330m
 import pearPerrySmallImageUrl from '../assets/products/perry/mister-williams-330ml.png'
 import mangoMeadSmallImageUrl from '../assets/products/mead/marion-mango-330ml.png'
 import blackcurrantMeadSmallImageUrl from '../assets/products/mead/marion-blackcurrant-330ml.png'
-import berryCiderSmallImageUrl from '../assets/products/cider/marion-berry-330ml.png'
+import valentineCiderSmallImageUrl from '../assets/products/cider/valentine-330ml.png'
 import cherryCiderSmallImageUrl from '../assets/products/cider/cherry-330ml.png'
 import antonovkaCiderSmallImageUrl from '../assets/products/cider/antonovka-330ml.png'
 import hopCiderImageUrl from '../assets/products/cider/khmelyar-450ml.png'
@@ -46,25 +49,49 @@ import woodstockCiderImageUrl from '../assets/products/cider/woodstock-450ml.png
 import pearPerryImageUrl from '../assets/products/perry/mister-williams-450ml.png'
 import mangoMeadImageUrl from '../assets/products/mead/marion-mango-450ml.png'
 import blackcurrantMeadImageUrl from '../assets/products/cider/marion-blackcurrant-berry-450ml.png'
-import berryCiderImageUrl from '../assets/products/cider/marion-berry-450ml.png'
+import valentineCiderImageUrl from '../assets/products/cider/valentine-450ml.png'
 import cherryCiderImageUrl from '../assets/products/cider/cherry-450ml.png'
 import antonovkaCiderImageUrl from '../assets/products/cider/antonovka-450ml.png'
 
 export const catalogCategories = [
   {
     slug: 'medovuha',
-    name: 'Мид',
+    name: 'Медовуха',
     tagline: 'Фрукты, ягоды и пряности',
-    description: 'Десять сортов мида: светлая и тёмная медовуха, фруктовые и ягодные вкусы.',
+    description: 'Девять сортов медовухи: светлая и тёмная медовуха, фруктовые и ягодные вкусы.',
     heroDescription: ['Мягкий вкус, ', 'сочные фруктовые ноты ', 'и яркий аромат пряностей.'],
-    introduction: 'В линейке — «Мэрион» Берри, манго, клюква, лесные ягоды, облепиха, слива, чёрная смородина, светлая, тёмная и вишнёвая медовуха.',
+    introduction: 'В линейке — «Мэрион» Берри, манго, лесные ягоды, облепиха, слива, чёрная смородина, светлая, тёмная и вишнёвая медовуха.',
     image: meadImageUrl,
-    imageAlt: 'Бокал мида',
+    imageAlt: 'Бокал медовухи',
     items: [
       {
-        name: 'Мид «Мэрион» Берри',
+        name: 'Медовуха «Мёдведь» Светлая',
+        popular: true,
+        details: 'нефильтрованная',
+        description: 'Светлая медовуха с мягкой медовой сладостью и деликатным характером. Классика без лишних церемоний, превращающая обычный вечер в маленький праздник.',
+        variants: [
+          { volume: '30 л', image: lightMeadGlassImageUrl },
+          { volume: '0,33 л', image: lightMeadSmallImageUrl },
+          { volume: '0,45 л', image: lightMeadImageUrl },
+          { volume: '1 л', image: lightMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мёдведь» Тёмная',
+        popular: true,
+        details: 'нефильтрованная',
+        description: 'Тёмная медовуха с выразительным медовым вкусом и основательным характером. Солидная компания для неспешного вечера и разговоров до поздней ночи.',
+        variants: [
+          { volume: '30 л', image: darkMeadGlassImageUrl },
+          { volume: '0,33 л', image: darkMeadSmallImageUrl },
+          { volume: '0,45 л', image: darkMeadImageUrl },
+          { volume: '1 л', image: darkMeadLiterImageUrl },
+        ],
+      },
+      {
+        name: 'Медовуха «Мэрион» Берри',
         details: 'нефильтрованная, неосветлённая',
-        description: 'Ягодный мид с черникой и малиной. Мягкая медовая сладость сочетается с сочным ягодным вкусом.',
+        description: 'Черника и малина в сочном сочетании с мягкой медовой сладостью. Ягодный побег от повседневной суеты для тех, кто коллекционирует приятные впечатления.',
         variants: [
           { volume: '30 л', image: pomegranateBerryMeadGlassImageUrl },
           { volume: '0,33 л', image: berryMeadSmallImageUrl },
@@ -72,7 +99,7 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мэрион» Манго',
+        name: 'Медовуха «Мэрион» Манго',
         details: 'нефильтрованная, неосветлённая',
         description: 'Натуральное пюре сочного манго и фруктовые соки в бархатистом исполнении. Тропический побег от серых будней, оформленный с безупречным вкусом и светским изяществом.',
         variants: [
@@ -83,7 +110,8 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мёдведь» Клюквенная',
+        name: 'Медовуха «Мёдведь» Клюквенная',
+        enabled: false,
         details: 'нефильтрованная, неосветлённая',
         description: 'Виртуозный баланс мягкой сладости и бодрящей клюквенной кислинки. Напиток с достоинством, который освежает мысли быстрее, чем новости, и идеально подходит на роль аперитива.',
         variants: [
@@ -92,7 +120,7 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мёдведь» с лесными ягодами',
+        name: 'Медовуха «Мёдведь» с лесными ягодами',
         details: 'нефильтрованная, неосветлённая',
         description: 'Гармоничный союз мягкой сладости и лесной кислинки. Лечит от скуки эффективнее психотерапевта и безупречно сочетается с сырной тарелкой или хорошей компанией.',
         variants: [
@@ -101,7 +129,7 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мёдведь» Облепиховая',
+        name: 'Медовуха «Мёдведь» Облепиховая',
         details: 'нефильтрованная, неосветлённая',
         description: 'Самобытный напиток со вкусом спелой облепихи и мягким послевкусием. Солнце в бокале с аристократическим выдержанным характером.',
         variants: [
@@ -110,7 +138,7 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мёдведь» Сливовая',
+        name: 'Медовуха «Мёдведь» Сливовая',
         details: 'нефильтрованная, неосветлённая',
         description: 'Мягкий округлый вкус садовых слив с приятной кислинкой и благородным финишем. Солидный выбор для тех, кто понимает толк в десертах и хорошем отдыхе.',
         variants: [
@@ -119,7 +147,7 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мэрион» Черносмородиновая',
+        name: 'Медовуха «Мэрион» Черносмородиновая',
         details: 'нефильтрованная, неосветлённая',
         description: 'Сок чёрной смородины и секретные пряные травы в мягком сочетании. Насыщенный букет с мягкой терпкостью, способный создать атмосферу уединённого загородного поместья.',
         variants: [
@@ -130,30 +158,11 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Мид «Мёдведь» Тёмная',
+        name: 'Медовуха «Мёдведь» Вишнёвая',
         details: 'нефильтрованная',
-        description: 'Тёмная медовуха на основе мёда.',
+        description: 'Вишнёвая медовуха с ярким ягодным вкусом на мягкой медовой основе. Обаяние летнего сада в бокале, способное развеселить даже строгого собеседника.',
         variants: [
-          { volume: '0,33 л', image: darkMeadSmallImageUrl },
-          { volume: '0,45 л', image: darkMeadImageUrl },
-          { volume: '1 л', image: darkMeadLiterImageUrl },
-        ],
-      },
-      {
-        name: 'Мид «Мёдведь» Светлая',
-        details: 'нефильтрованная',
-        description: 'Светлая медовуха на основе мёда.',
-        variants: [
-          { volume: '0,33 л', image: lightMeadSmallImageUrl },
-          { volume: '0,45 л', image: lightMeadImageUrl },
-          { volume: '1 л', image: lightMeadLiterImageUrl },
-        ],
-      },
-      {
-        name: 'Мид «Мёдведь» Вишнёвая',
-        details: 'нефильтрованная',
-        description: 'Вишнёвая медовуха с ягодным вкусом.',
-        variants: [
+          { volume: '30 л', image: cherryMeadGlassImageUrl },
           { volume: '1 л', image: cherryMeadLiterImageUrl },
         ],
       },
@@ -163,9 +172,9 @@ export const catalogCategories = [
     slug: 'sidr',
     name: 'Сидр',
     tagline: 'Свежесть спелых яблок',
-    description: 'Пять сортов сидра: сухой, полусухой, полусладкие и сладкий.',
+    description: 'Пять сортов сидра: сухой, полусухие и полусладкие.',
     heroDescription: ['Яблочная свежесть, ', 'приятная кислинка ', 'и выразительный фруктовый вкус.'],
-    introduction: 'В линейке — «Хмеляр», «Вудсток», «Антоновка», вишневый и ягодный «Мэрион» Берри.',
+    introduction: 'В линейке — «Хмеляр», «Вудсток», «Антоновка», вишневый и классический полусухой «Валентайн».',
     image: ciderImageUrl,
     imageAlt: 'Бокал яблочного сидра',
     items: [
@@ -190,13 +199,13 @@ export const catalogCategories = [
         ],
       },
       {
-        name: 'Сидр «Мэрион» Берри',
-        details: 'негазированный, полусладкий',
-        description: 'Ягодный сочный сидр с идеальным балансом умеренной сладости и кислинки. Способен украсить любой вечер, даже если из гостей только вы и ваш кот.',
+        name: 'Сидр «Валентайн»',
+        details: 'жемчужный, газированный, полусухой',
+        description: 'Полусухой яблочный сидр с лёгкой игрой пузырьков и свежим фруктовым вкусом. Элегантный спутник встреч, где хорошие манеры уживаются с искренним смехом.',
         variants: [
-          { volume: '30 л', image: berryCiderGlassImageUrl },
-          { volume: '0,33 л', image: berryCiderSmallImageUrl },
-          { volume: '0,45 л', image: berryCiderImageUrl },
+          { volume: '30 л', image: valentineCiderGlassImageUrl },
+          { volume: '0,33 л', image: valentineCiderSmallImageUrl },
+          { volume: '0,45 л', image: valentineCiderImageUrl },
         ],
       },
       {
@@ -207,7 +216,7 @@ export const catalogCategories = [
           { volume: '30 л', image: cherryCiderGlassImageUrl },
           { volume: '0,33 л', image: cherryCiderSmallImageUrl },
           { volume: '0,45 л', image: cherryCiderImageUrl },
-          { volume: '0,75 л', image: cherryCiderBottleImageUrl, details: 'жемчужный, полусладкий' },
+          { volume: '0,75 л', image: cherryCiderBottleImageUrl },
         ],
       },
       {
@@ -218,7 +227,7 @@ export const catalogCategories = [
           { volume: '30 л', image: antonovkaCiderGlassImageUrl },
           { volume: '0,33 л', image: antonovkaCiderSmallImageUrl },
           { volume: '0,45 л', image: antonovkaCiderImageUrl },
-          { volume: '0,75 л', image: antonovkaCiderBottleImageUrl, details: 'жемчужный, полусухой' },
+          { volume: '0,75 л', image: antonovkaCiderBottleImageUrl },
         ],
       },
     ],
@@ -247,10 +256,12 @@ export const catalogCategories = [
       },
     ],
   },
-]
+].map((category) => ({
+  ...category,
+  items: category.items.filter((item) => item.enabled !== false),
+}))
 
-// Происхождение слова: https://www.oxfordlearnersdictionaries.com/definition/english/mead
 export const meadExplanation = {
-  title: 'Что такое мид',
-  text: 'Мид — от английского mead, названия напитка на основе мёда. Слово восходит к древнеанглийскому medu и связано с древним корнем со значением «мёд, сладкий напиток». Знакомую нам медовуху мы называем мидом: в нашей линейке — фруктовые, ягодные и пряные вкусы.',
+  title: 'Что такое медовуха',
+  text: 'Медовуха — напиток на основе мёда. В нашей линейке — светлая и тёмная медовуха, фруктовые и ягодные вкусы.',
 }

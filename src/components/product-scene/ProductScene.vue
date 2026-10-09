@@ -2,7 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createProductScene, productSceneKey } from '../../three/product/product-scene.js'
 import { drinkPresets } from '../../data/drink-presets.js'
-import canModelUrl from '../../assets/models/can.glb?url'
+import canModelUrl from '../../assets/models/can-450ml.glb?url'
 
 const props = defineProps({
   canOnly: { type: Boolean, default: false },

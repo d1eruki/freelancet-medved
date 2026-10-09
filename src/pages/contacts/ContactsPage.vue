@@ -23,7 +23,7 @@ import { sitePath } from '../../utils/site-path'
       <template #title>Будем<br>знакомы</template>
       <span class="wide:block wide:whitespace-nowrap">Товарищество пиво-медоваренного завода </span>
       <span class="wide:block wide:whitespace-nowrap">«МЁДВЕДЬ». Производим и поставляем </span>
-      <span class="wide:block wide:whitespace-nowrap">мид, сидр и пуаре из Санкт-Петербурга.</span>
+      <span class="wide:block wide:whitespace-nowrap">медовуху, сидр и пуаре из Санкт-Петербурга.</span>
     </PageHero>
 
     <HeroDivider :image-url="contactsDividerUrl" />
@@ -72,7 +72,7 @@ import { sitePath } from '../../utils/site-path'
     <SectionLink
       heading-id="contacts-catalog-title"
       title="Наши напитки"
-      description="Познакомьтесь с ассортиментом мида, сидра и пуаре."
+      description="Познакомьтесь с ассортиментом медовухи, сидра и пуаре."
       :href="sitePath('/katalog/')"
       label="В каталог"
       :background="'foreground'"

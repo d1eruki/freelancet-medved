@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>МЁДВЕДЬ — объёмный логотип</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #fff; color: #222; font: 16px/1.5 system-ui, sans-serif; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; max-width: 1280px; margin: auto; padding: 24px; align-items: center; }
+    canvas { display: block; width: 100%; height: auto; cursor: grab; touch-action: none; }
+    canvas:active { cursor: grabbing; }
+    canvas:focus-visible { outline: 3px solid #8b561c; outline-offset: 4px; }
+    h1 { font-size: 24px; margin: 0 0 24px; }
+    p { margin: 0 0 24px; }
+    #controls { display: grid; gap: 24px; }
+    label { display: grid; gap: 12px; }
+    .axis { display: flex; justify-content: space-between; gap: 16px; }
+    input { width: 100%; accent-color: #8b561c; }
+    textarea { width: 100%; min-height: 100px; resize: vertical; padding: 12px; border: 1px solid #777; border-radius: 8px; font: 14px/1.5 monospace; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    button { padding: 12px 16px; border: 1px solid #777; border-radius: 8px; background: #fff; color: #222; font: inherit; cursor: pointer; }
+    #copy-status { min-height: 24px; margin: 0; }
+    @media (max-width: 760px) { main { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 16px; } }
+    #status { margin: 24px; font: 16px/1.5 system-ui, sans-serif; }
+    #status[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <p id="status" role="status">Загрузка 3D-логотипа…</p>
+  <main>
+    <div id="stage"></div>
+    <section aria-labelledby="controls-title">
+      <h1 id="controls-title">Поворот логотипа</h1>
+      <p>Тяни модель мышью или пальцем. Наклон против часовой регулируй осью Z. Стрелки клавиатуры тоже вращают модель; Shift + ← / → меняют ось Z.</p>
+      <div id="controls">
+        <label for="pitch"><span class="axis">Наклон вверх / вниз · X <output id="pitch-value">−12°</output></span><input id="pitch" type="range" min="-180" max="180" step="1" value="-12"></label>
+        <label for="yaw"><span class="axis">Поворот вправо / влево · Y <output id="yaw-value">23°</output></span><input id="yaw" type="range" min="-180" max="180" step="1" value="23"></label>
+        <label for="roll"><span class="axis">Наклон против часовой · Z <output id="roll-value">9°</output></span><input id="roll" type="range" min="-180" max="180" step="1" value="9"></label>
+        <label for="parameters">Параметры для отправки<textarea id="parameters" readonly spellcheck="false"></textarea></label>
+        <div class="actions"><button id="copy" type="button">Копировать углы</button><button id="reset" type="button">Сбросить</button></div>
+        <p id="copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+  <script>
+    if (location.protocol === 'file:') {
+      document.getElementById('status').textContent =
+        'Откройте этот рендер через локальный сервер проекта (npm run dev): /freelancet-medved/output/renders/brand-logo.html';
+    }
+  </script>
+  <script type="module">
+    import { createBrandLogoRenderer } from '../../src/three/brand-logo.js'
+
+    const status = document.getElementById('status')
+    window.renderReady = false
+    try {
+      const scene = createBrandLogoRenderer({ width: 1600, height: 1400 })
+      document.getElementById('stage').append(scene.canvas)
+      scene.canvas.tabIndex = 0
+      scene.canvas.setAttribute('role', 'img')
+      scene.canvas.setAttribute('aria-label', '3D-логотип. Перетаскивай для поворота или используй стрелки клавиатуры.')
+      const axes = ['pitch', 'yaw', 'roll']
+      const inputs = Object.fromEntries(axes.map(axis => [axis, document.getElementById(axis)]))
+      const initial = Object.fromEntries(axes.map(axis => [axis, scene.info[axis]]))
+      for (const axis of axes) inputs[axis].value = initial[axis]
+      const parameters = document.getElementById('parameters')
+      const copyStatus = document.getElementById('copy-status')
+      let frame = 0
+      let drag = null
+      const clamp = value => Math.max(-180, Math.min(180, Math.round(value)))
+
+      function update() {
+        frame = 0
+        const rotation = Object.fromEntries(axes.map(axis => [axis, Number(inputs[axis].value)]))
+        scene.setRotation(rotation)
+        for (const axis of axes) document.getElementById(`${axis}-value`).value = `${rotation[axis]}°`
+        parameters.value = `pitch: ${rotation.pitch}°\nyaw: ${rotation.yaw}°\nroll: ${rotation.roll}°`
+        copyStatus.textContent = ''
+      }
+      function scheduleUpdate() {
+        if (!frame) frame = requestAnimationFrame(update)
+      }
+      for (const axis of axes) inputs[axis].addEventListener('input', scheduleUpdate)
+      scene.canvas.addEventListener('pointerdown', event => {
+        if (event.button !== 0 || drag) return
+        scene.canvas.focus({ preventScroll: true })
+        scene.canvas.setPointerCapture(event.pointerId)
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY, pitch: Number(inputs.pitch.value), yaw: Number(inputs.yaw.value) }
+      })
+      scene.canvas.addEventListener('pointermove', event => {
+        if (!drag || drag.id !== event.pointerId) return
+        inputs.pitch.value = clamp(drag.pitch + (event.clientY - drag.y) * 0.35)
+        inputs.yaw.value = clamp(drag.yaw + (event.clientX - drag.x) * 0.35)
+        scheduleUpdate()
+      })
+      scene.canvas.addEventListener('lostpointercapture', () => { drag = null })
+      for (const name of ['pointerup', 'pointercancel']) scene.canvas.addEventListener(name, event => {
+        if (scene.canvas.hasPointerCapture(event.pointerId)) scene.canvas.releasePointerCapture(event.pointerId)
+        drag = null
+      })
+      scene.canvas.addEventListener('keydown', event => {
+        const changes = { ArrowLeft: ['yaw', -1], ArrowRight: ['yaw', 1], ArrowUp: ['pitch', -1], ArrowDown: ['pitch', 1] }
+        const change = changes[event.key]
+        if (!change) return
+        event.preventDefault()
+        const [axis, direction] = change
+        const target = event.shiftKey && axis === 'yaw' ? 'roll' : axis
+        inputs[target].value = clamp(Number(inputs[target].value) + direction)
+        scheduleUpdate()
+      })
+      document.getElementById('reset').addEventListener('click', () => {
+        for (const axis of axes) inputs[axis].value = initial[axis]
+        scheduleUpdate()
+      })
+      document.getElementById('copy').addEventListener('click', async () => {
+        if (frame) { cancelAnimationFrame(frame); update() }
+        try {
+          await navigator.clipboard.writeText(parameters.value)
+          copyStatus.textContent = 'Углы скопированы — пришли их в чат.'
+        } catch {
+          parameters.focus()
+          parameters.select()
+          copyStatus.textContent = 'Текст выделен. Нажми ⌘C или Ctrl+C.'
+        }
+      })
+      update()
+      window.renderInfo = scene.info
+      window.exportPng = scene.exportPng
+      window.renderReady = true
+      status.hidden = true
+      window.addEventListener('pagehide', () => {
+        cancelAnimationFrame(frame)
+        scene.dispose()
+      }, { once: true })
+    } catch (error) {
+      window.renderError = String(error.stack || error)
+      status.textContent = `Не удалось загрузить 3D-логотип: ${error.message}`
+      console.error(error)
+    }
+  </script>
+</body>
+</html>
