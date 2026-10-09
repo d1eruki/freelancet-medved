@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<title>Мид «Мэрион» Берри — 3D-рендер стакана</title>
+<style>html,body{margin:0;background:#fff}canvas{display:block;max-width:100%;height:auto}</style>
+<script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { createGlassOptics } from '../../src/three/glass-lab/glass-optics.js'
+import { createLightPanel, productLightSettings } from '../../src/three/product/product-light.js'
+
+// Самостоятельный рендер существующей модели стакана. Каталог не изменяется.
+const width = 2048, height = 1118
+// Цвета — художественная настройка по существующим изображениям каталога.
+// Пена и пузырьки заданы по прямому уточнению пользователя.
+const presets = {
+  "mead-berry": {
+    "name": "Мид «Мэрион» Берри",
+    "target": "src/assets/products/mead/marion-pomegranate-berry-glass.png",
+    "foam": true,
+    "absorption": [
+      0.35,
+      3.2,
+      1.8
+    ],
+    "scattering": 1.5,
+    "scatteringColor": [
+      0.42,
+      0.018,
+      0.065
+    ],
+    "foamAllowed": true
+  },
+  "mead-mango": {
+    "name": "Мид «Мэрион» Манго",
+    "target": "src/assets/products/mead/marion-mango-glass.png",
+    "foam": true,
+    "absorption": [
+      0.1,
+      0.9,
+      3.4
+    ],
+    "scattering": 2.4,
+    "scatteringColor": [
+      0.7,
+      0.3,
+      0.02
+    ],
+    "foamAllowed": true
+  },
+  "mead-cranberry": {
+    "name": "Мид «Мёдведь» Клюквенная",
+    "target": "src/assets/products/mead/medved-cranberry-glass.png",
+    "foam": true,
+    "absorption": [
+      0.3,
+      3,
+      2.1
+    ],
+    "scattering": 1.2,
+    "scatteringColor": [
+      0.48,
+      0.012,
+      0.02
+    ],
+    "foamAllowed": true
+  },
+  "mead-forest-berries": {
+    "name": "Мид «Мёдведь» с лесными ягодами",
+    "target": "src/assets/products/mead/medved-forest-berries-glass.png",
+    "foam": true,
+    "absorption": [
+      0.5,
+      3.5,
+      1.8
+    ],
+    "scattering": 1,
+    "scatteringColor": [
+      0.2,
+      0.005,
+      0.04
+    ],
+    "foamAllowed": true
+  },
+  "mead-sea-buckthorn": {
+    "name": "Мид «Мёдведь» Облепиховая",
+    "target": "src/assets/products/mead/medved-sea-buckthorn-glass.png",
+    "foam": true,
+    "absorption": [
+      0.08,
+      1.1,
+      3.8
+    ],
+    "scattering": 2.5,
+    "scatteringColor": [
+      0.8,
+      0.25,
+      0.015
+    ],
+    "foamAllowed": true
+  },
+  "mead-plum": {
+    "name": "Мид «Мёдведь» Сливовая",
+    "target": "src/assets/products/mead/medved-plum-glass.png",
+    "foam": true,
+    "absorption": [
+      0.28,
+      0.75,
+      2.4
+    ],
+    "scattering": 1.6,
+    "scatteringColor": [
+      0.46,
+      0.3,
+      0.05
+    ],
+    "foamAllowed": true
+  },
+  "mead-blackcurrant": {
+    "name": "Мид «Мэрион» Черносмородиновая",
+    "target": "src/assets/products/mead/medved-blackcurrant-glass.png",
+    "foam": true,
+    "absorption": [
+      0.9,
+      4.2,
+      1.5
+    ],
+    "scattering": 0.9,
+    "scatteringColor": [
+      0.12,
+      0.003,
+      0.035
+    ],
+    "foamAllowed": true
+  },
+  "cider-khmelyar": {
+    "name": "Сидр «Хмеляр»",
+    "target": "src/assets/products/cider/khmelyar-glass.png",
+    "foam": false,
+    "absorption": [
+      0.1,
+      0.7,
+      2.5
+    ],
+    "scattering": 0.6,
+    "scatteringColor": [
+      0.62,
+      0.36,
+      0.09
+    ],
+    "foamAllowed": false
+  },
+  "cider-woodstock": {
+    "name": "Сидр «Вудсток»",
+    "target": "src/assets/products/cider/woodstock-glass.png",
+    "foam": false,
+    "absorption": [
+      0.08,
+      0.62,
+      2.3
+    ],
+    "scattering": 0.35,
+    "scatteringColor": [
+      0.7,
+      0.45,
+      0.16
+    ],
+    "foamAllowed": false
+  },
+  "cider-berry": {
+    "name": "Сидр «Мэрион» Берри",
+    "target": "src/assets/products/cider/marion-berry-glass.png",
+    "foam": false,
+    "absorption": [
+      0.15,
+      3.8,
+      2.7
+    ],
+    "scattering": 0,
+    "scatteringColor": [
+      0,
+      0,
+      0
+    ],
+    "foamAllowed": false
+  },
+  "cider-cherry": {
+    "name": "Сидр Вишневый",
+    "target": "src/assets/products/cider/cherry-glass.png",
+    "foam": false,
+    "absorption": [
+      0.18,
+      3.2,
+      2.4
+    ],
+    "scattering": 0,
+    "scatteringColor": [
+      0,
+      0,
+      0
+    ],
+    "foamAllowed": false
+  },
+  "cider-antonovka": {
+    "name": "Сидр «Антоновка»",
+    "target": "src/assets/products/cider/antonovka-glass.png",
+    "foam": false,
+    "absorption": [
+      0.03,
+      0.3,
+      2
+    ],
+    "scattering": 0,
+    "scatteringColor": [
+      0,
+      0,
+      0
+    ],
+    "foamAllowed": false
+  },
+  "perry-williams": {
+    "name": "Пуаре «Мистер Вильямс»",
+    "target": "src/assets/products/perry/mister-williams-glass.png",
+    "foam": false,
+    "absorption": [
+      0.05,
+      0.5,
+      2.6
+    ],
+    "scattering": 0.5,
+    "scatteringColor": [
+      0.7,
+      0.5,
+      0.12
+    ],
+    "foamAllowed": false
+  }
+}
+const presetKey = new URLSearchParams(location.search).get('drink') || 'mead-berry'
+const preset = presets[presetKey]
+if (!preset) throw new Error('Неизвестный напиток')
+window.renderPresets = presets
+document.title = `${preset.name} — 3D-рендер стакана`
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true })
+// Размер рендера фиксирован; CSS уменьшает обе стороны пропорционально.
+renderer.setSize(width, height, false)
+renderer.setClearColor(0xffffff, 0)
+renderer.outputColorSpace = THREE.SRGBColorSpace
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 0.8
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.VSMShadowMap
+document.body.append(renderer.domElement)
+window.renderReady = false
+
+try {
+  const scene = new THREE.Scene()
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  const room = new RoomEnvironment()
+  const environment = pmrem.fromScene(room)
+  scene.environment = environment.texture
+  scene.environmentIntensity = 0.4
+  room.dispose()
+  pmrem.dispose()
+
+  const model = (await new GLTFLoader().loadAsync('../../src/assets/models/glass.glb')).scene
+  model.updateMatrixWorld(true)
+  const bounds = new THREE.Box3().setFromObject(model)
+  const size = bounds.getSize(new THREE.Vector3())
+  const center = bounds.getCenter(new THREE.Vector3())
+  // Сохраняем пропорции исходной геометрии, нормируем высоту для сцены.
+  const product = new THREE.Group()
+  model.position.sub(center)
+  product.add(model)
+  product.scale.setScalar(2 / size.y)
+  product.position.y = 1
+  scene.add(product)
+
+  // Ориентир цвета — существующее изображение выбранного напитка.
+  // Материалы Three.js дают приближение оптики и мутности напитка.
+  let glassMesh, liquidMesh
+  model.traverse(node => {
+    if (!node.isMesh) return
+    node.castShadow = true
+    node.receiveShadow = false
+    for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+      if (material.name === 'cider-bubbles') {
+        node.visible = false
+        node.castShadow = false
+      }
+      if (material.name === 'clear-glass') {
+        glassMesh = node
+        material.roughness = 0.025
+        material.transmission = 1
+        material.ior = 1.52
+        material.thickness = 0.06
+        material.envMapIntensity = 1
+      }
+      if (material.name === 'golden-mead') {
+        liquidMesh = node
+        material.color.set('#a62c52')
+        material.attenuationColor.set('#890d30')
+        material.attenuationDistance = 0.7
+        material.thickness = 0.9
+        // Мутный напиток выводится непрозрачным внутри преломляющей оболочки.
+        // Стандартный transmission-pass не показывает вложенные прозрачные объёмы.
+        material.transmission = 0
+        material.roughness = 0.1
+        material.ior = 1.333
+        material.envMapIntensity = 0.4
+      }
+      material.needsUpdate = true
+    }
+  })
+  if (!glassMesh || !liquidMesh) throw new Error('Не найдены стекло или объём напитка')
+  product.updateMatrixWorld(true)
+
+  const key = new THREE.DirectionalLight(0xfff7ed, 2)
+  key.position.set(-3, 6, 5)
+  key.target.position.set(0, 0.8, 0)
+  scene.add(key, key.target)
+  const fill = new THREE.DirectionalLight(0xf0f5ff, 0.45)
+  fill.position.set(4, 3, 4)
+  scene.add(fill)
+  // Отдельный источник только для тени: сохраняет согласованное освещение стакана.
+  // Почти верхнее направление сокращает тень; VSM размывает её границу.
+  const shadowLight = new THREE.DirectionalLight(0xffffff, 0)
+  shadowLight.position.set(0, 8, 0)
+  shadowLight.target.position.set(0, 0, 0)
+  shadowLight.castShadow = true
+  shadowLight.shadow.mapSize.set(1024, 1024)
+  Object.assign(shadowLight.shadow.camera, { left:-1.2, right:1.2, top:1.2, bottom:-1.2, near:0.1, far:12 })
+  shadowLight.shadow.bias = -0.00008
+  shadowLight.shadow.normalBias = 0.002
+  shadowLight.shadow.radius = 18
+  shadowLight.shadow.blurSamples = 16
+  scene.add(shadowLight, shadowLight.target)
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ color:0x242424, opacity:0.2 }))
+  ground.rotation.x = -Math.PI/2
+  ground.position.y = -0.002
+  ground.receiveShadow = true
+  scene.add(ground)
+
+  // Камера выше центра на 14 градусов: видна поверхность напитка, стакан остаётся вертикальным.
+  const camera = new THREE.PerspectiveCamera(12, width/height, 0.1, 100)
+  const distance = 2 / (2 * Math.tan(THREE.MathUtils.degToRad(6)) * 0.8)
+  const elevation = THREE.MathUtils.degToRad(14)
+  camera.position.set(0, 1 + distance * Math.sin(elevation), distance * Math.cos(elevation))
+  camera.lookAt(0, 1, 0)
+  await renderer.compileAsync(scene, camera)
+  // VSM включает принимающий тень пол в карту глубины даже при castShadow=false.
+  // Считаем карту только по стакану, затем замораживаем её для статичного кадра.
+  ground.visible = false
+  renderer.render(scene, camera)
+  renderer.shadowMap.autoUpdate = false
+  renderer.shadowMap.needsUpdate = false
+  ground.visible = true
+  // Размываем отдельный проход тени по её альфа-каналу, не затрагивая стакан.
+  const shadowTarget = new THREE.WebGLRenderTarget(width, height)
+  const blurTarget = new THREE.WebGLRenderTarget(width, height)
+  const softShadowTarget = new THREE.WebGLRenderTarget(width, height)
+  product.visible = false
+  renderer.setRenderTarget(shadowTarget)
+  renderer.render(scene, camera)
+  product.visible = true
+  ground.visible = false
+  const screenScene = new THREE.Scene()
+  const screenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+  const blur = new THREE.ShaderMaterial({
+    uniforms: { image: { value: shadowTarget.texture }, stepSize: { value: new THREE.Vector2(1 / width, 0) } },
+    vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: `uniform sampler2D image; uniform vec2 stepSize; varying vec2 vUv;
+      void main(){float alpha=0.;float total=0.;
+        for(int i=-24;i<=24;i++){float f=float(i);float w=exp(-f*f/128.);
+          alpha+=texture2D(image,vUv+stepSize*f).a*w;total+=w;}
+        gl_FragColor=vec4(0.,0.,0.,alpha/total);}`,
+    depthTest: false, depthWrite: false, toneMapped: false,
+  })
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blur)
+  screenScene.add(quad)
+  renderer.setRenderTarget(blurTarget)
+  renderer.render(screenScene, screenCamera)
+  blur.uniforms.image.value = blurTarget.texture
+  blur.uniforms.stepSize.value.set(0, 1 / height)
+  renderer.setRenderTarget(softShadowTarget)
+  renderer.render(screenScene, screenCamera)
+  quad.material = new THREE.MeshBasicMaterial({ map:softShadowTarget.texture, transparent:true, depthTest:false, depthWrite:false, toneMapped:false })
+  renderer.setRenderTarget(null)
+  // Используем тот же трассировщик границ стекла и напитка, что в лаборатории.
+  // Сцена изолирована: производственные модули и их пресеты не изменяются.
+  const traceScene = new THREE.Scene()
+  const traceModel = model.clone(true)
+  const traceProduct = new THREE.Group()
+  traceProduct.scale.copy(product.scale)
+  traceProduct.position.copy(product.position)
+  traceProduct.add(traceModel)
+  traceScene.add(traceProduct)
+  traceScene.updateMatrixWorld(true)
+  const halfHeight = 1 / 0.8
+  const traceCamera = new THREE.OrthographicCamera(-halfHeight*width/height, halfHeight*width/height, halfHeight, -halfHeight, 0.1, 100)
+  traceCamera.position.copy(camera.position)
+  traceCamera.lookAt(0, 1, 0)
+  traceCamera.updateMatrixWorld(true)
+  const section = document.createElement('div')
+  section.style.cssText = `position:fixed;left:-10000px;top:0;width:${width}px;height:${height}px;background:#fff;pointer-events:none`
+  document.body.append(section)
+  const view = { section, counter:null, pattern:null, glass:{host:section,proxy:section} }
+  const lab = createGlassOptics({
+    getView:()=>view, getBankOptics:()=>null,
+    canvasToScreen:()=>{const r=section.getBoundingClientRect();return new THREE.Matrix3().set(r.width,0,r.left,0,-r.height,r.bottom,0,0,1)},
+  })
+  const lightPanel = createLightPanel(THREE)
+  lightPanel.updateMatrixWorld(true)
+  const emptyCan = new THREE.Group()
+  traceScene.add(emptyCan)
+  const shared = {
+    glassBufferSize:()=>new THREE.Vector2(1024,559),
+    setView:()=>{}, placeBank:()=>{},
+    drinkPreset:()=>preset,
+    foamEnabled:()=>preset.foam, bankDisplay:{value:false}, canPlacement:emptyCan,
+    lightSource:{panelFrame(worldToLab){
+      const m=worldToLab.clone().multiply(lightPanel.matrixWorld)
+      const right=new THREE.Vector3().setFromMatrixColumn(m,0)
+      const up=new THREE.Vector3().setFromMatrixColumn(m,1)
+      return {position:new THREE.Vector3().setFromMatrixPosition(m),normal:new THREE.Vector3().setFromMatrixColumn(m,2).normalize(),
+        right:right.clone().normalize(),up:up.clone().normalize(),
+        halfSize:new THREE.Vector2(productLightSettings.width*right.length()/2,productLightSettings.height*up.length()/2),radiance:productLightSettings.radiance}
+    }},
+    beginFinal(matrix){
+      matrix.identity()
+      renderer.setRenderTarget(null)
+      renderer.setClearColor(0x000000,0)
+      renderer.autoClear=true
+      renderer.clear()
+      renderer.autoClear=false
+      renderer.render(screenScene,screenCamera)
+    },
+    finishFinal:()=>{},
+  }
+  const optics = await lab.createGlassRenderer(THREE,renderer,traceScene,traceCamera,section,()=>{},()=>{},shared)
+  traceModel.traverse(node=>{if(node.isMesh)node.visible=false})
+  optics.resize()
+  optics.render()
+  // Статичный кадр с пузырьками, созданными штатной оптикой лабы.
+  renderer.autoClear=true
+  let activeBubbleCount = 0, actualFoam = false
+  traceScene.traverse(node=>{
+    const uniforms = node.material?.uniforms
+    if (uniforms?.foamEnabled) actualFoam = uniforms.foamEnabled.value
+    const data = uniforms?.bubblePositions?.value?.image?.data
+    if (data) for (let i=3;i<data.length;i+=4) if (data[i]>0) activeBubbleCount++
+  })
+  window.renderInfo = { activeBubbleCount, actualFoam, width, height, model:'src/assets/models/glass.glb', drink:preset.name, target:preset.target, presetKey, foam:preset.foam, bubbles:true, optics:'glass-lab', projection:'orthographic', cameraPitch:-14, cameraRoll:0, sourceDimensions:size.toArray(), renderer:renderer.getContext().getParameter(renderer.getContext().RENDERER) }
+  window.exportPng = () => renderer.domElement.toDataURL('image/png')
+  window.renderReady = true
+} catch (error) {
+  window.renderError = String(error.stack || error)
+  console.error(error)
+}
+</script>
+</html>
