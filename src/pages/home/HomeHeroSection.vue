@@ -13,9 +13,21 @@ const heroLayerSizes = 'max(100vw, calc((100svh + 8svh) * 1.3042))'
 const heroLayerClassName = 'home-hero-layer absolute inset-x-0 top-0 w-full object-contain object-top'
 
 const heroLayerLayout = {
-  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1.5, x: 0, y: 450 }, desktop: { scale: 0.75, x: 0, y: 200 } },
-  foreground: { mobile: { scale: 1.5, x: 0, y: 350 }, desktop: { scale: 0.85, x: 0, y: 100 } },
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: 0, y: -50 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: 0, y: -50 },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: 200 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.85, x: 0, y: 100 },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: -150 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.85, x: 0, y: -25 },
+  },
 }
 
 const isBlinking = ref(false)

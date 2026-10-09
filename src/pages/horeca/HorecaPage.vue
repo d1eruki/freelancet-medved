@@ -12,9 +12,21 @@ import { sitePath } from '../../utils/site-path'
 import horecaDividerUrl from '../../assets/heroes/horeca/divider.png'
 
 const horecaHeroLayout = {
-  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 50, y: 100 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 100, y: 0 } },
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2.5, x: 100, y: -100 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2, x: 0, y: -50 },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 50, y: 100 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 100, y: 0 },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.9, x: 100, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.9, x: 200, y: -100 },
+  },
 }
 const horecaHeroSteam = { fit: 'cover', anchorX: 0.71, anchorY: 0.2, scaleDivisor: 3500 }
 

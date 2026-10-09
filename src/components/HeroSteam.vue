@@ -102,16 +102,17 @@ onMounted(async () => {
     if (source?.naturalWidth) {
       const bounds = source.getBoundingClientRect()
       const container = host.value.parentElement.getBoundingClientRect()
-      const imageScale = props.fit === 'cover'
+      const imageStyle = getComputedStyle(source)
+      const fit = ['contain', 'cover'].includes(imageStyle.objectFit) ? imageStyle.objectFit : props.fit
+      const [positionX, positionY] = imageStyle.objectPosition.split(' ').map(value => Number.parseFloat(value) / 100)
+      const imageScale = fit === 'cover'
         ? Math.max(bounds.width / source.naturalWidth, bounds.height / source.naturalHeight)
         : Math.min(bounds.width / source.naturalWidth, bounds.height / source.naturalHeight)
       const width = source.naturalWidth * imageScale
       const height = source.naturalHeight * imageScale
       const scale = width / props.scaleDivisor
-      const left = bounds.left - container.left + (bounds.width - width) / 2
-      const top = props.fit === 'cover'
-        ? bounds.top - container.top + (bounds.height - height) / 2
-        : bounds.bottom - container.top - height
+      const left = bounds.left - container.left + (bounds.width - width) * positionX
+      const top = bounds.top - container.top + (bounds.height - height) * positionY
       const x = left + width * props.anchorX
       const y = top + height * props.anchorY
       host.value.style.transform = `translate(${x - 520 * scale}px, ${y - 280 * scale}px) scale(${scale})`

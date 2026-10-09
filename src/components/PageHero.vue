@@ -79,6 +79,21 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
   background: radial-gradient(ellipse 56% 80% at 50% 48%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 24%) 48%, transparent 100%);
 }
 
+@media (width < 40rem) {
+  .hero-overlay-center {
+    display: none;
+  }
+
+  .hero-description::before {
+    content: '';
+    position: absolute;
+    inset: -4rem -6rem;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse closest-side at 50% 50%, rgb(16 16 16 / 72%) 0%, rgb(16 16 16 / 48%) 40%, rgb(16 16 16 / 20%) 70%, transparent 100%);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .hero-copy-rise {
     animation: hero-copy-rise 500ms ease-out var(--hero-title-delay) both;

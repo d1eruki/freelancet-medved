@@ -14,9 +14,21 @@ import { sitePath } from '../../utils/site-path'
 import partnersDividerUrl from '../../assets/heroes/partners/divider.png'
 
 const partnersHeroLayout = {
-  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1.3, x: 50, y: 100 } },
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.3, x: 50, y: 100 },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.3, x: 50, y: 100 },
+  },
 }
 
 const partnersHeroLayers = {

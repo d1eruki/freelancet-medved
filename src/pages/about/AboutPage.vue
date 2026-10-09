@@ -21,9 +21,21 @@ import HeroDivider from '../../components/HeroDivider.vue'
 import { catalogCategories } from '../../data/catalog'
 
 const aboutHeroLayout = {
-  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1, x: 40, y: -100 }, desktop: { scale: 1, x: 40, y: -100 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1.1, x: -50, y: 100 } },
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: false, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1, x: 40, y: -100 },
+    foreground: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 3, x: 350, y: 0 },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 40, y: -100 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.1, x: -50, y: 100 },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1.1, x: 50, y: 150 },
+    foreground: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1.1, x: 0, y: -75 },
+  },
 }
 
 const aboutHeroLayers = {

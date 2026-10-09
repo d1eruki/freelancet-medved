@@ -2,7 +2,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { usePointerParallax } from '../composables/use-pointer-parallax.js'
 import HeroSteam from './HeroSteam.vue'
-import { heroLayerStyle } from '../utils/hero-layer-layout'
+import { heroLayerStyle, heroLayerVisibilityStyle } from '../utils/hero-layer-layout'
 import { entranceMotions } from '../utils/hero-entrance'
 
 const pointerRange = { x: 12, y: 12 }
@@ -73,11 +73,13 @@ function layerStyle(layer, name) {
   const shadow = layerShadows[name]
   return {
     ...heroLayerStyle(
-      props.layerLayout[name],
+      props.layerLayout,
+      name,
       parallaxOffset.value.x * (motion?.parallaxFactor ?? 0),
       parallaxOffset.value.y * (motion?.parallaxFactor ?? 0),
     ),
     '--hero-layer-base-x-mobile': layer.baseX?.mobile ?? '0px',
+    '--hero-layer-base-x-tablet': layer.baseX?.tablet ?? layer.baseX?.desktop ?? layer.baseX?.mobile ?? '0px',
     '--hero-layer-base-x-desktop': layer.baseX?.desktop ?? '0px',
     '--hero-layer-scroll-y': `${-scrollProgress.value * (motion?.scrollDistance ?? 0)}px`,
     '--float-distance': motion?.floatDistance,
@@ -125,14 +127,15 @@ onBeforeUnmount(() => {
     <picture
       v-for="(layer, name) in layers"
       :key="name"
-      class="hero-composition-plane"
+      class="hero-composition-plane hero-composition-visibility"
       :class="entranceMotions[entrance][name]"
-      :style="{ zIndex: layerZIndex?.[name] ?? layer.zIndex }"
+      :style="{ ...heroLayerVisibilityStyle(layerLayout, name), zIndex: layerZIndex?.[name] ?? layer.zIndex }"
     >
       <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
         :ref="name === 'middle' ? setMiddleImage : undefined"
         :class="['hero-composition-layer', layer.className, {
+          'hero-composition-layer-complete': name !== 'background',
           'hero-composition-layer-moving': name !== 'background',
           'hero-composition-layer-float': layerMotion[name]?.floatDuration,
         }]"
@@ -147,6 +150,8 @@ onBeforeUnmount(() => {
     </picture>
     <HeroSteam
       v-if="steam"
+      class="hero-composition-visibility"
+      :style="heroLayerVisibilityStyle(layerLayout, 'middle')"
       :source="middleImage"
       :fit="steam.fit"
       :anchor-x="steam.anchorX"
@@ -168,10 +173,32 @@ onBeforeUnmount(() => {
   inset: 0;
 }
 
+.hero-composition-visibility {
+  display: var(--hero-layer-mobile-display, block);
+}
+
 .hero-composition-layer {
+  --hero-layer-scale: var(--hero-layer-mobile-scale);
+  --hero-layer-x: var(--hero-layer-mobile-x);
+  --hero-layer-y: var(--hero-layer-mobile-y);
+  --hero-layer-base-x: var(--hero-layer-base-x-mobile);
+  --hero-layer-anchor-x: var(--hero-layer-mobile-anchor-x);
+  --hero-layer-anchor-y: var(--hero-layer-mobile-anchor-y);
+  --hero-layer-top: var(--hero-layer-mobile-top);
+  --hero-layer-bottom: var(--hero-layer-mobile-bottom);
+  --hero-layer-anchor-shift-y: var(--hero-layer-mobile-anchor-shift-y);
   pointer-events: none;
-  scale: var(--hero-layer-mobile-scale);
-  translate: calc(var(--hero-layer-base-x-mobile) + var(--hero-layer-mobile-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-mobile-y) + var(--hero-layer-parallax-y) + var(--hero-layer-scroll-y));
+  scale: var(--hero-layer-scale);
+  translate: calc(var(--hero-layer-base-x) + var(--hero-layer-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-y) + var(--hero-layer-parallax-y) + var(--hero-layer-scroll-y));
+}
+
+.hero-composition-layer-complete {
+  top: var(--hero-layer-top);
+  bottom: var(--hero-layer-bottom);
+  object-fit: contain;
+  object-position: var(--hero-layer-anchor-x) var(--hero-layer-anchor-y);
+  transform-origin: var(--hero-layer-anchor-x) var(--hero-layer-anchor-y);
+  translate: calc(var(--hero-layer-base-x) + var(--hero-layer-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-anchor-shift-y) - var(--hero-layer-y) + var(--hero-layer-parallax-y) + var(--hero-layer-scroll-y));
 }
 
 .hero-composition-layer-moving {
@@ -185,9 +212,38 @@ onBeforeUnmount(() => {
 }
 
 @media (min-width: 40rem) {
+  .hero-composition-visibility {
+    display: var(--hero-layer-tablet-display, block);
+  }
+
   .hero-composition-layer {
-    scale: var(--hero-layer-desktop-scale);
-    translate: calc(var(--hero-layer-base-x-desktop) + var(--hero-layer-desktop-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-desktop-y) + var(--hero-layer-parallax-y) + var(--hero-layer-scroll-y));
+    --hero-layer-scale: var(--hero-layer-tablet-scale);
+    --hero-layer-x: var(--hero-layer-tablet-x);
+    --hero-layer-y: var(--hero-layer-tablet-y);
+    --hero-layer-base-x: var(--hero-layer-base-x-tablet);
+    --hero-layer-anchor-x: var(--hero-layer-tablet-anchor-x);
+    --hero-layer-anchor-y: var(--hero-layer-tablet-anchor-y);
+    --hero-layer-top: var(--hero-layer-tablet-top);
+    --hero-layer-bottom: var(--hero-layer-tablet-bottom);
+    --hero-layer-anchor-shift-y: var(--hero-layer-tablet-anchor-shift-y);
+  }
+}
+
+@media (min-width: 80rem) {
+  .hero-composition-visibility {
+    display: var(--hero-layer-desktop-display, block);
+  }
+
+  .hero-composition-layer {
+    --hero-layer-scale: var(--hero-layer-desktop-scale);
+    --hero-layer-x: var(--hero-layer-desktop-x);
+    --hero-layer-y: var(--hero-layer-desktop-y);
+    --hero-layer-base-x: var(--hero-layer-base-x-desktop);
+    --hero-layer-anchor-x: var(--hero-layer-desktop-anchor-x);
+    --hero-layer-anchor-y: var(--hero-layer-desktop-anchor-y);
+    --hero-layer-top: var(--hero-layer-desktop-top);
+    --hero-layer-bottom: var(--hero-layer-desktop-bottom);
+    --hero-layer-anchor-shift-y: var(--hero-layer-desktop-anchor-shift-y);
   }
 }
 

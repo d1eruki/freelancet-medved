@@ -18,16 +18,26 @@ import ProductionProcessStep from './ProductionProcessStep.vue'
 import SectionWatermark from '../../components/SectionWatermark.vue'
 
 const middleTankLayout = {
-  mobile: { scale: 1, x: 0, y: 0 },
-  desktop: { scale: 1.05, x: 0, y: 75 },
+  mobile: { enabled: false, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
+  tablet: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.05, x: 0, y: 75 },
+  desktop: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.05, x: -300, y: -100 },
 }
 
 const productionHeroLayout = {
-  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: middleTankLayout,
-  middle2: {
-    mobile: { ...middleTankLayout.mobile, x: -middleTankLayout.mobile.x },
-    desktop: { ...middleTankLayout.desktop, x: -middleTankLayout.desktop.x },
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: middleTankLayout.mobile,
+    middle2: { ...middleTankLayout.mobile, x: -middleTankLayout.mobile.x },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: middleTankLayout.tablet,
+    middle2: { ...middleTankLayout.tablet, x: -middleTankLayout.tablet.x },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: middleTankLayout.desktop,
+    middle2: { ...middleTankLayout.desktop, x: -middleTankLayout.desktop.x },
   },
 }
 

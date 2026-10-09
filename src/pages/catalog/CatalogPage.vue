@@ -11,9 +11,21 @@ import { sitePath } from '../../utils/site-path'
 import catalogDividerUrl from '../../assets/heroes/catalog/divider.png'
 
 const catalogHeroLayout = {
-  background: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 1, x: 0, y: 0 } },
-  middle: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.85, x: 135, y: -100 } },
-  foreground: { mobile: { scale: 1, x: 0, y: 0 }, desktop: { scale: 0.8, x: 225, y: 150 } },
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'top' }, scale: 3, x: 200, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2, x: 115, y: -40 },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.85, x: 135, y: -100 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 225, y: 150 },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1.1, x: 0, y: -50 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 225, y: -50 },
+  },
 }
 
 const catalogHeroLayers = {

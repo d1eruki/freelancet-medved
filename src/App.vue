@@ -6,6 +6,7 @@ import AgeGate from './components/AgeGate.vue'
 import CustomCursor from './components/CustomCursor.vue'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
+import MetrikaNotice from './components/metrika-notice.vue'
 import { vTypography } from './directives/typography'
 import { findPage, notFoundPage } from './data/page-routes'
 
@@ -93,6 +94,7 @@ onBeforeUnmount(() => {
     </main>
 
     <SiteFooter />
+    <MetrikaNotice v-if="isAgeConfirmed" />
   </div>
 
   <AgeGate v-if="!isAgeConfirmed" @confirm="confirmAge" />

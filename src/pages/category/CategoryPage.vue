@@ -1,5 +1,5 @@
 <script setup>
-import CategoryHero from './CategoryHero.vue'
+import DrinkCategoryHero from './DrinkCategoryHero.vue'
 import FlavorCard from './FlavorCard.vue'
 import SectionLink from '../../components/SectionLink.vue'
 import { sitePath } from '../../utils/site-path'
@@ -11,7 +11,7 @@ defineProps({
 
 <template>
   <div>
-    <CategoryHero :category="category" />
+    <DrinkCategoryHero :category="category" />
 
     <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" :aria-labelledby="`${category.slug}-range-title`">
       <div class="site-container">
