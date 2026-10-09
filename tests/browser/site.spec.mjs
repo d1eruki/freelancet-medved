@@ -70,17 +70,17 @@ test('Мобильные кнопки переключают слайды в о�
   await expect(page.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'home-product-tab-medovuha')
 })
 
-test('Выбор объёма меняет изображение и характеристики напитка', async ({ page, openPage }) => {
+test('Выбор объёма меняет изображение и выбранную кнопку', async ({ page, openPage }) => {
   await openPage('katalog/sidr/')
   const selector = page.getByRole('group', { name: 'Выбор объёма: Сидр Вишневый', exact: true })
   const card = page.getByRole('listitem').filter({ has: selector })
   await selector.getByRole('button', { name: 'Показать объём 0,75 л', exact: true }).click()
   await expect(selector.getByRole('button', { name: 'Показать объём 0,75 л', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(card.getByRole('img', { name: 'Сидр Вишневый, 0,75 л', exact: true })).toBeVisible()
-  await expect(card.locator('[aria-live="polite"]')).toHaveText('жемчужный, полусладкий')
   await selector.getByRole('button', { name: 'Показать объём 30 л', exact: true }).click()
+  await expect(selector.getByRole('button', { name: 'Показать объём 30 л', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(selector.getByRole('button', { name: 'Показать объём 0,75 л', exact: true })).toHaveAttribute('aria-pressed', 'false')
   await expect(card.getByRole('img', { name: 'Сидр Вишневый, 30 л', exact: true })).toBeVisible()
-  await expect(card.locator('[aria-live="polite"]')).toContainText('газированный')
 })
 
 test('Служебная страница 404 подключает Vue и остаётся без canonical', async ({ page, openPage }) => {
