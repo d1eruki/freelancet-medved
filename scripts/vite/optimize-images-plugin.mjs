@@ -39,12 +39,16 @@ export function optimizeImagesPlugin() {
     async load(id) {
       const [resourcePath, query = ''] = id.split('?', 2)
       const extension = path.extname(resourcePath).toLowerCase()
+      const params = new URLSearchParams(query)
+      const lossless = params.has('lossless')
 
-      if (!resourcePath.startsWith(assetsRoot) || !rasterExtensions.has(extension)) {
+      if ((!resourcePath.startsWith(assetsRoot) && !lossless) || !rasterExtensions.has(extension)) {
         return null
       }
 
-      const params = new URLSearchParams(query)
+      if (lossless && (params.has('responsive') || params.has('width') || params.has('format'))) {
+        this.error('Lossless textures cannot be resized or converted to a lossy format')
+      }
       if (params.has('responsive')) {
         this.addWatchFile(resourcePath)
         const { width } = await sharp(resourcePath).metadata()
@@ -68,7 +72,9 @@ export function optimizeImagesPlugin() {
       if (width !== null) image.resize({ width, withoutEnlargement: true })
       const optimized = format === 'avif'
         ? await image.avif({ quality: 65, effort: 4 }).toBuffer()
-        : await image.webp({ quality: 82, effort: 4, alphaQuality: 100 }).toBuffer()
+        : await image.webp(lossless
+          ? { lossless: true, effort: 6 }
+          : { quality: 82, effort: 4, alphaQuality: 100 }).toBuffer()
       const useOptimized = format === 'avif' || width !== null || optimized.length < original.length
       const outputExtension = useOptimized ? (format === 'avif' ? '.avif' : '.webp') : extension
       const referenceId = this.emitFile({

@@ -41,7 +41,7 @@ export function createProductScene({ loadGlassOptics } = {}) {
     let cleanup = () => {}
     try {
       const [THREE, { GLTFLoader }, { RoomEnvironment }, { FXAAShader }] = await Promise.all([
-        import('three'), import('three/addons/loaders/GLTFLoader.js'),
+        import('../three-runtime.js'), import('three/addons/loaders/GLTFLoader.js'),
         import('three/addons/environments/RoomEnvironment.js'), import('three/addons/shaders/FXAAShader.js'),
       ])
       if (closed || !currentView) return

@@ -15,7 +15,7 @@ let unmounted = false
 onMounted(async () => {
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
   // Load the renderer separately so it does not delay the page content.
-  const THREE = await import('three')
+  const THREE = await import('../three/three-runtime.js')
   if (unmounted) return
 
   let renderer
