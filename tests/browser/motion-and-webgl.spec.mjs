@@ -38,9 +38,11 @@ async function runWithDiagnostics(page, openPage, testInfo, scenario) {
   page.on('pageerror', onError)
   await page.addInitScript(({ prefix }) => {
     if (globalThis !== globalThis.top) return
-    const emit = (event, details = {}) => console.info(prefix + JSON.stringify({
-      event, browserMs: Math.round(performance.now()), ...details,
-    }))
+    const emit = (event, details = {}) => {
+      const message = prefix + JSON.stringify({ event, browserMs: Math.round(performance.now()), ...details })
+      console.info(message)
+      if (['product-input', 'product-timer-probe', 'snapshot-copy-start'].includes(event)) console.timeStamp(message)
+    }
     // Оборачиваем нативные вызовы только внутри тестового браузера.
     // Начало первого вызова видно даже тогда, когда сам вызов зависает.
     const contexts = new WeakMap()
@@ -95,6 +97,32 @@ async function runWithDiagnostics(page, openPage, testInfo, scenario) {
               }
             }
           },
+        })
+      }
+    }
+    // Изменение размера холста и 2D-копирование могут ждать GPU вне WebGL API.
+    for (const prototype of [globalThis.HTMLCanvasElement.prototype, globalThis.CanvasRenderingContext2D.prototype]) {
+      for (const operation of prototype === globalThis.HTMLCanvasElement.prototype ? ['width', 'height'] : ['drawImage', 'fillRect', 'getImageData']) {
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, operation)
+        const original = descriptor.set || descriptor.value
+        const invoke = function (...args) {
+          const canvas = this.canvas || this
+          const snapshot = canvas.classList.contains('product-scene-snapshot') && operation === 'drawImage'
+          const startMs = performance.now()
+          if (snapshot) emit('snapshot-copy-start', { width: canvas.width, height: canvas.height })
+          try {
+            return Reflect.apply(original, this, args)
+          } finally {
+            const durationMs = Math.round(performance.now() - startMs)
+            if (snapshot || durationMs >= 50) emit('canvas-call-end', {
+              operation, startMs: Math.round(startMs), durationMs,
+              canvasClass: canvas.className, width: canvas.width, height: canvas.height,
+              stack: new Error().stack?.split('\n').slice(2, 7).join('\n'),
+            })
+          }
+        }
+        Object.defineProperty(prototype, operation, {
+          ...descriptor, ...(descriptor.set ? { set: invoke } : { value: invoke }),
         })
       }
     }
@@ -155,12 +183,29 @@ async function runWithDiagnostics(page, openPage, testInfo, scenario) {
   // Профиль отличает тяжёлый JavaScript от ожидания ресурсов или рендеринга.
   let session
   let cpuHotspots = []
+  const traceEvents = []
+  let tracing = false
+  const onTrace = ({ value }) => traceEvents.push(...value)
+  let browserTimeline = []
+  let traceMarkers = []
   try {
     session = await page.context().newCDPSession(page)
     await session.send('Profiler.enable')
     await session.send('Profiler.start')
   } catch (error) {
     record({ event: 'profiler-unavailable', message: error.message })
+  }
+  if (session) {
+    try {
+      session.on('Tracing.dataCollected', onTrace)
+      await session.send('Tracing.start', {
+        categories: 'devtools.timeline,v8.execute,blink,cc,gpu',
+        options: 'record-as-much-as-possible',
+      })
+      tracing = true
+    } catch (error) {
+      record({ event: 'tracing-unavailable', message: error.message })
+    }
   }
   let outcome = 'failed'
   try {
@@ -170,6 +215,35 @@ async function runWithDiagnostics(page, openPage, testInfo, scenario) {
     outcome = 'passed'
   } finally {
     if (session) {
+      if (tracing) {
+        let traceTimer
+        let onComplete
+        try {
+          const complete = new Promise(resolve => { onComplete = resolve; session.once('Tracing.tracingComplete', resolve) })
+          await Promise.race([
+            session.send('Tracing.end').then(() => complete),
+            new Promise((_, reject) => { traceTimer = setTimeout(() => reject(new Error('Tracing response exceeded 1500ms')), 1500) }),
+          ])
+          traceMarkers = traceEvents.filter(event => event.name === 'TimeStamp' && event.args?.data?.message?.startsWith(prefix))
+            .map(event => ({ traceMs: Math.round(event.ts / 1000), ...JSON.parse(event.args.data.message.slice(prefix.length)) }))
+          const threads = new Map(traceEvents.filter(event => event.ph === 'M' && event.name === 'thread_name')
+            .map(event => [`${event.pid}:${event.tid}`, event.args.name]))
+          // Сохраняем конкретные GPU-вызовы и крупные задачи, исключая вложенные дубли ожидания.
+          browserTimeline = traceEvents.filter(event => event.ph === 'X' && event.dur >= 50000
+            && /GLES2|CommandBufferProxyImpl|FunctionCall|RunMicrotasks|Paint|Raster|DrawFrame/.test(event.name))
+            .sort((a, b) => b.dur - a.dur).slice(0, 40).map(event => ({
+              operation: event.name, thread: threads.get(`${event.pid}:${event.tid}`),
+              traceMs: Math.round(event.ts / 1000), durationMs: Math.round(event.dur / 1000),
+              ...(event.args?.data ? { source: event.args.data } : {}),
+            }))
+        } catch (error) {
+          record({ event: 'tracing-unavailable', message: error.message })
+        } finally {
+          clearTimeout(traceTimer)
+          if (onComplete) session.off('Tracing.tracingComplete', onComplete)
+        }
+      }
+      session.off('Tracing.dataCollected', onTrace)
       let timer
       try {
         const { profile } = await Promise.race([
@@ -196,7 +270,7 @@ async function runWithDiagnostics(page, openPage, testInfo, scenario) {
     }
     const entries = [...resources.values()]
     console.info(prefix + JSON.stringify({
-      test: testInfo.title, project: testInfo.project.name, outcome, events, cpuHotspots,
+      test: testInfo.title, project: testInfo.project.name, outcome, events, cpuHotspots, browserTimeline, traceMarkers,
       pending: entries.filter((resource) => resource.durationMs === undefined && !resource.failure),
       slowest: entries.filter((resource) => resource.durationMs !== undefined)
         .sort((a, b) => b.durationMs - a.durationMs).slice(0, 10),
