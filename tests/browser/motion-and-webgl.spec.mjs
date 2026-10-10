@@ -47,8 +47,7 @@ async function openPageWithDiagnostics(page, openPage, testInfo) {
     let nextContext = 0, slowWebglCalls = 0
     const describeContext = (gl) => {
       const canvas = gl.canvas
-      const scene = canvas?.closest?.('.hero-steam') ? 'hero-steam'
-        : canvas?.classList?.contains('product-scene-canvas') ? 'product-scene' : 'unassigned'
+      const scene = canvas?.classList?.contains('product-scene-canvas') ? 'product-scene' : 'unassigned'
       return { scene, canvasWidth: canvas?.width, canvasHeight: canvas?.height }
     }
     const operations = new Set([

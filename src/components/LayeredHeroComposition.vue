@@ -1,7 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { usePointerParallax } from '../composables/use-pointer-parallax.js'
-import HeroSteam from './HeroSteam.vue'
 import { heroLayerStyle, heroLayerVisibilityStyle } from '../utils/hero-layer-layout'
 import { entranceMotions } from '../utils/hero-entrance'
 
@@ -29,11 +28,9 @@ const props = defineProps({
   layerLayout: { type: Object, required: true },
   layerZIndex: { type: Object, default: null },
   entrance: { type: String, default: 'rise', validator: (value) => Object.hasOwn(entranceMotions, value) },
-  steam: { type: Object, default: null },
 })
 
 const host = ref(null)
-const middleImage = ref(null)
 const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } = usePointerParallax({ range: pointerRange })
 const scrollProgress = ref(0)
 const layersVisible = ref(true)
@@ -42,10 +39,6 @@ let scrollMotionMedia
 let visibilityObserver
 let inViewport = true
 let scrollFrame = 0
-
-function setMiddleImage(element) {
-  middleImage.value = element
-}
 
 function syncLayerMotion() {
   layersVisible.value = inViewport && !document.hidden
@@ -133,7 +126,6 @@ onBeforeUnmount(() => {
     >
       <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
-        :ref="name === 'middle' ? setMiddleImage : undefined"
         :class="['hero-composition-layer', layer.className, {
           'hero-composition-layer-complete': name !== 'background',
           'hero-composition-layer-moving': name !== 'background',
@@ -148,16 +140,6 @@ onBeforeUnmount(() => {
         :aria-hidden="layer.alt ? undefined : 'true'"
       >
     </picture>
-    <HeroSteam
-      v-if="steam"
-      class="hero-composition-visibility"
-      :style="heroLayerVisibilityStyle(layerLayout, 'middle')"
-      :source="middleImage"
-      :fit="steam.fit"
-      :anchor-x="steam.anchorX"
-      :anchor-y="steam.anchorY"
-      :scale-divisor="steam.scaleDivisor"
-    />
   </div>
 </template>
 

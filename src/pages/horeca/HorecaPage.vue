@@ -28,7 +28,6 @@ const horecaHeroLayout = {
     foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.9, x: 200, y: -100 },
   },
 }
-const horecaHeroSteam = { fit: 'cover', anchorX: 0.71, anchorY: 0.2, scaleDivisor: 3500 }
 
 const horecaHeroLayers = {
   background: {
@@ -57,7 +56,6 @@ const horecaHeroLayers = {
       :title-z-index="0"
       :layers="horecaHeroLayers"
       :layer-layout="horecaHeroLayout"
-      :steam="horecaHeroSteam"
     >
       <template #title>Для ваших<br>гостей</template>
       <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре «МЁДВЕДЬ» </span>

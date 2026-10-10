@@ -51,7 +51,6 @@ const heroLayers = computed(() => ({
     fetchpriority: 'high',
   },
 }))
-const heroSteam = {}
 let blinkTimer
 let blinkMedia
 let blinkReady = false
@@ -136,7 +135,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" :steam="heroSteam" />
+    <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" />
   </section>
 </template>
 

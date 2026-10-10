@@ -15,7 +15,6 @@ const props = defineProps({
   layerLayout: { type: Object, default: null },
   layerEntrance: { type: String, default: 'rise', validator: (value) => Object.hasOwn(layerEntranceTimings, value) },
   animateCopy: { type: Boolean, default: false },
-  steam: { type: Object, default: null },
 })
 
 const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } = usePointerParallax({
@@ -42,7 +41,7 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
         :alt="imageAlt"
       >
     </figure>
-    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :layer-z-index="pageHeroLayerZIndex" :entrance="layerEntrance" :steam="steam" />
+    <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :layer-z-index="pageHeroLayerZIndex" :entrance="layerEntrance" />
     <figure class="pointer-events-none absolute inset-0 -z-1">
       <span class="hero-overlay-bottom absolute inset-0" :class="{ 'is-centered': contentAlign === 'center' }" aria-hidden="true" />
       <span class="hero-overlay-center absolute inset-0" :class="{ 'is-centered': contentAlign === 'center' }" aria-hidden="true" />
