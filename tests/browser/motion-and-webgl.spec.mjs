@@ -2,7 +2,7 @@ import { test, expect } from './fixtures.mjs'
 
 test.use({ reducedMotion: 'no-preference' })
 
-async function openPageWithDiagnostics(page, openPage, testInfo) {
+async function runWithDiagnostics(page, openPage, testInfo, scenario) {
   const started = Date.now()
   const events = []
   const resources = new Map()
@@ -102,9 +102,39 @@ async function openPageWithDiagnostics(page, openPage, testInfo) {
     globalThis.addEventListener('DOMContentLoaded', () => emit('dom-ready'), { once: true })
     globalThis.addEventListener('load', () => emit('window-load'), { once: true })
     let longTasks = 0
+    const productState = () => {
+      const panel = globalThis.document.querySelector('[role=tabpanel][aria-hidden=false]')
+      const scene = panel?.querySelector('.product-scene')
+      return {
+        panel: panel?.getAttribute('aria-labelledby') ?? null,
+        panelClass: panel?.className ?? null,
+        sceneClass: scene?.className ?? null,
+      }
+    }
+    let previousState
+    const products = new globalThis.MutationObserver(() => {
+      const state = productState()
+      const signature = JSON.stringify(state)
+      if (signature === previousState) return
+      previousState = signature
+      emit('product-state', state)
+    })
+    products.observe(globalThis.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'aria-labelledby', 'aria-hidden'] })
+    const observeInput = (event) => {
+      if (!event.target.closest?.('[role=tablist], [role=tabpanel]')) return
+      if (event.type === 'keydown' && !['ArrowRight', 'ArrowLeft'].includes(event.key)) return
+      const startMs = performance.now()
+      emit('product-input', { type: event.type, key: event.key, ...productState() })
+      // Независимый таймер показывает блокировку потока, не меняя таймеры приложения.
+      globalThis.setTimeout(() => emit('product-timer-probe', {
+        delayMs: Math.round(performance.now() - startMs), expectedMs: 360, ...productState(),
+      }), 360)
+    }
+    globalThis.document.addEventListener('keydown', observeInput, true)
+    globalThis.document.addEventListener('click', observeInput, true)
     const observer = new PerformanceObserver((list) => {
       for (const task of list.getEntries()) {
-        if (longTasks++ < 20) emit('long-task', { startMs: Math.round(task.startTime), durationMs: Math.round(task.duration) })
+        if (longTasks++ < 80) emit('long-task', { startMs: Math.round(task.startTime), durationMs: Math.round(task.duration) })
       }
     })
     observer.observe({ type: 'longtask', buffered: true })
@@ -136,7 +166,8 @@ async function openPageWithDiagnostics(page, openPage, testInfo) {
   try {
     await openPage()
     record({ event: 'fixture-ready' })
-    outcome = 'ready'
+    await scenario(record)
+    outcome = 'passed'
   } finally {
     if (session) {
       let timer
@@ -178,7 +209,8 @@ async function openPageWithDiagnostics(page, openPage, testInfo) {
   }
 }
 
-async function switchDrink(page, isMobile, direction, slug) {
+async function switchDrink(page, isMobile, direction, slug, record) {
+  record({ event: 'switch-start', direction, slug })
   if (isMobile) {
     await page.getByRole('tabpanel').getByRole('button', {
       name: direction === 'next' ? 'Следующий напиток' : 'Предыдущий напиток',
@@ -187,23 +219,27 @@ async function switchDrink(page, isMobile, direction, slug) {
     await page.getByRole('tab', { selected: true }).focus()
     await page.keyboard.press(direction === 'next' ? 'ArrowRight' : 'ArrowLeft')
   }
+  record({ event: 'switch-input-sent', direction, slug })
   const panel = page.getByRole('tabpanel')
   await expect(panel).toHaveAttribute('aria-labelledby', `home-product-tab-${slug}`)
+  record({ event: 'switch-panel-updated', direction, slug })
   // Текст должен вернуться после анимации, а следующий переход снова быть доступен.
   await expect.poll(() => panel.getByRole('heading').evaluate((heading) =>
     Number(globalThis.getComputedStyle(heading.parentElement).opacity))).toBe(1)
+  record({ event: 'switch-text-visible', direction, slug })
   return panel
 }
 
 test('Обычная анимация завершается и позволяет переключать напитки и переходить в каталог', async ({ page, openPage, isMobile }, testInfo) => {
-  await openPageWithDiagnostics(page, openPage, testInfo)
-  await expect.poll(() => page.evaluate(() => globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(false)
-  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
-  await switchDrink(page, isMobile, 'next', 'sidr')
-  const panel = await switchDrink(page, isMobile, 'previous', 'medovuha')
-  await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
-  await expect(page).toHaveURL(/\/katalog\/medovuha\/$/)
-  await expect(page.locator('main h1')).toContainText('Медовуха')
+  await runWithDiagnostics(page, openPage, testInfo, async (record) => {
+    await expect.poll(() => page.evaluate(() => globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(false)
+    await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+    await switchDrink(page, isMobile, 'next', 'sidr', record)
+    const panel = await switchDrink(page, isMobile, 'previous', 'medovuha', record)
+    await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
+    await expect(page).toHaveURL(/\/katalog\/medovuha\/$/)
+    await expect(page.locator('main h1')).toContainText('Медовуха')
+  })
 })
 
 test('При недоступном WebGL показывается изображение и сохраняются управление и переходы', async ({ page, openPage, isMobile }, testInfo) => {
@@ -217,17 +253,18 @@ test('При недоступном WebGL показывается изобра�
       return getContext.call(this, type, ...options)
     }
   })
-  await openPageWithDiagnostics(page, openPage, testInfo)
-  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
-  const fallback = page.getByRole('tabpanel').locator('img')
-  await expect(fallback).toBeVisible()
-  await expect.poll(() => fallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
-  await expect.poll(() => page.evaluate(() => globalThis.__webglAttempts || 0)).toBeGreaterThan(0)
-  const panel = await switchDrink(page, isMobile, 'next', 'sidr')
-  const nextFallback = panel.locator('img')
-  await expect(nextFallback).toBeVisible()
-  await expect.poll(() => nextFallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
-  await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
-  await expect(page).toHaveURL(/\/katalog\/sidr\/$/)
-  await expect(page.locator('main h1')).toContainText('Сидр')
+  await runWithDiagnostics(page, openPage, testInfo, async (record) => {
+    await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+    const fallback = page.getByRole('tabpanel').locator('img')
+    await expect(fallback).toBeVisible()
+    await expect.poll(() => fallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
+    await expect.poll(() => page.evaluate(() => globalThis.__webglAttempts || 0)).toBeGreaterThan(0)
+    const panel = await switchDrink(page, isMobile, 'next', 'sidr', record)
+    const nextFallback = panel.locator('img')
+    await expect(nextFallback).toBeVisible()
+    await expect.poll(() => nextFallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
+    await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
+    await expect(page).toHaveURL(/\/katalog\/sidr\/$/)
+    await expect(page.locator('main h1')).toContainText('Сидр')
+  })
 })
