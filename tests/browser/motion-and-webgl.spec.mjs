@@ -41,6 +41,64 @@ async function openPageWithDiagnostics(page, openPage, testInfo) {
     const emit = (event, details = {}) => console.info(prefix + JSON.stringify({
       event, browserMs: Math.round(performance.now()), ...details,
     }))
+    // Оборачиваем нативные вызовы только внутри тестового браузера.
+    // Начало первого вызова видно даже тогда, когда сам вызов зависает.
+    const contexts = new WeakMap()
+    let nextContext = 0, slowWebglCalls = 0
+    const describeContext = (gl) => {
+      const canvas = gl.canvas
+      const scene = canvas?.closest?.('.hero-steam') ? 'hero-steam'
+        : canvas?.classList?.contains('product-scene-canvas') ? 'product-scene' : 'unassigned'
+      return { scene, canvasWidth: canvas?.width, canvasHeight: canvas?.height }
+    }
+    const operations = new Set([
+      'compileShader', 'linkProgram', 'getProgramInfoLog', 'getShaderInfoLog', 'getProgramParameter',
+      'getShaderParameter', 'getActiveUniform', 'getUniformLocation', 'getActiveAttrib', 'getAttribLocation',
+      'getParameter', 'getError',
+      'texImage2D', 'texSubImage2D', 'texStorage2D', 'generateMipmap', 'checkFramebufferStatus',
+      'drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced',
+      'readPixels', 'finish', 'flush',
+    ])
+    const prototypes = [globalThis.WebGLRenderingContext?.prototype, globalThis.WebGL2RenderingContext?.prototype]
+    for (const prototype of prototypes.filter(Boolean)) {
+      for (const operation of Object.getOwnPropertyNames(prototype)) {
+        if (operation === 'constructor') continue
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, operation)
+        if (typeof descriptor?.value !== 'function') continue
+        const original = descriptor.value
+        Object.defineProperty(prototype, operation, {
+          ...descriptor,
+          value: function (...args) {
+            let context = contexts.get(this)
+            if (!context) {
+              context = { id: ++nextContext, started: new Set() }
+              contexts.set(this, context)
+            }
+            const first = operations.has(operation) && !context.started.has(operation)
+            if (first) {
+              context.started.add(operation)
+              emit('webgl-call-start', {
+                context: context.id, operation, ...describeContext(this),
+                stack: new Error().stack?.split('\n').slice(2, 7).join('\n'),
+              })
+            }
+            const startMs = performance.now()
+            try {
+              return Reflect.apply(original, this, args)
+            } finally {
+              const durationMs = Math.round(performance.now() - startMs)
+              if (first || (durationMs >= 50 && slowWebglCalls < 40)) {
+                if (durationMs >= 50) slowWebglCalls++
+                emit('webgl-call-end', {
+                  context: context.id, operation, ...describeContext(this), startMs: Math.round(startMs), durationMs,
+                  ...(durationMs >= 50 ? { stack: new Error().stack?.split('\n').slice(2, 7).join('\n') } : {}),
+                })
+              }
+            }
+          },
+        })
+      }
+    }
     emit('document-start', { motion: globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'no-preference' })
     globalThis.addEventListener('DOMContentLoaded', () => emit('dom-ready'), { once: true })
     globalThis.addEventListener('load', () => emit('window-load'), { once: true })
