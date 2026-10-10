@@ -8,11 +8,12 @@ import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import MetrikaNotice from './components/metrika-notice.vue'
 import { vTypography } from './directives/typography'
-import { findPage, notFoundPage } from './data/page-routes'
+import { findPage, notFoundPage, getPageRobots } from './data/page-routes'
 
 const props = defineProps({
   path: { type: String, default: '/' },
   pageComponent: { type: Object, required: true },
+  pageData: { type: Object, default: () => ({}) },
 })
 
 const ageConfirmationKey = 'medved-age-confirmed'
@@ -22,9 +23,7 @@ const currentPath = props.path
 const page = findPage(currentPath)
 const pageProps = computed(() => {
   if (page?.type === 'production') return { lenis: lenis.value }
-  if (page?.type === 'legal') return { page: page.legalPage }
-  if (page?.type === 'category') return { category: page.category }
-  return {}
+  return props.pageData
 })
 
 onMounted(() => {
@@ -33,7 +32,7 @@ onMounted(() => {
   document.querySelector('meta[name="description"]')?.setAttribute('content', seo.description)
   if (seo.canonicalUrl) document.querySelector('link[rel="canonical"]')?.setAttribute('href', seo.canonicalUrl)
   else document.querySelector('link[rel="canonical"]')?.remove()
-  document.querySelector('meta[name="robots"]')?.setAttribute('content', seo.robots || 'index, follow')
+  document.querySelector('meta[name="robots"]')?.setAttribute('content', getPageRobots(seo, import.meta.env.VITE_SITE_ENV))
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.title)
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', seo.description)
   if (seo.canonicalUrl) document.querySelector('meta[property="og:url"]')?.setAttribute('content', seo.canonicalUrl)

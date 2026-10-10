@@ -39,6 +39,18 @@ test('page code is separate from the shared client entry', () => {
   }
 })
 
+test('catalog details and legal text are excluded from the shared client entry', async () => {
+  const initialChunks = collectChunks(entry)
+  for (const id of ['src/data/catalog.js', 'src/data/legal-content.js']) {
+    assert.ok(manifest[id]?.isDynamicEntry, `${id} must be loaded on demand`)
+    assert.ok(!initialChunks.has(id), `${id} must not load on every page`)
+  }
+  const initialCode = (await Promise.all([...initialChunks].map((id) =>
+    readFile(path.join(output, manifest[id].file), 'utf8')))).join('\n')
+  assert.doesNotMatch(initialCode, /Светлая медовуха с мягкой медовой сладостью/)
+  assert.doesNotMatch(initialCode, /Настоящая Политика конфиденциальности персональных данных/)
+})
+
 test('each HTML preloads only its page and includes all required scripts and styles', async () => {
   const pageChunks = Object.keys(manifest).filter((id) => /Page\.vue$/.test(id))
   for (const url of [...urls, `${origin}/404.html`]) {
@@ -131,11 +143,16 @@ test('Metrika is included only in production and initializes only on the canonic
 })
 
 test('structured data describes the organization and only the products on each category page', async () => {
+  const categoriesSource = await readFile(new URL('../src/data/catalog-categories.js', import.meta.url), 'utf8')
+  const categories = runInNewContext(categoriesSource
+    .replace(/^import (\w+) from '([^']+)'$/gm, (_, name, image) => `const ${name} = ${JSON.stringify(image)}`)
+    .replace(/export const /g, 'const ') + '; catalogCategoryDefinitions')
   const catalogSource = await readFile(new URL('../src/data/catalog.js', import.meta.url), 'utf8')
   // В Node пути картинок подставляются строками; состав каталога остаётся исходным.
   const catalog = runInNewContext(catalogSource
+    .replace(/^import \{ catalogCategoryDefinitions \}.*$/m, '')
     .replace(/^import (\w+) from '([^']+)'$/gm, (_, name, image) => `const ${name} = ${JSON.stringify(image)}`)
-    .replace(/export const /g, 'const ') + '; catalogCategories')
+    .replace(/export const /g, 'const ') + '; catalogCategories', { catalogCategoryDefinitions: categories })
   const categoryPaths = urls.filter((url) => /^\/katalog\/[^/]+\/$/.test(new URL(url).pathname))
   for (const url of urls) {
     const html = await readFile(path.join(output, new URL(url).pathname.slice(1), 'index.html'), 'utf8')

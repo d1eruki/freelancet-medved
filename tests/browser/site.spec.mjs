@@ -9,6 +9,7 @@ test('Прямые адреса всех опубликованных стран
     await openPage(path)
     await expect(page.locator('main h1')).toBeVisible()
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://medved.beer${path}`)
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', process.env.SITE_ENV === 'staging' ? 'noindex, nofollow' : 'index, follow')
     await expect(page).not.toHaveTitle('')
   }
 })
@@ -87,4 +88,5 @@ test('Служебная страница 404 подключает Vue и ост
   await openPage('404.html')
   await expect(page.locator('main h1')).toContainText('404')
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', process.env.SITE_ENV === 'staging' ? 'noindex, nofollow' : 'noindex, follow')
 })

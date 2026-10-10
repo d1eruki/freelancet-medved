@@ -21,11 +21,11 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function setMetadata(template, page) {
+function setMetadata(template, page, robots) {
   const values = [
     [/<title>[^<]*<\/title>/, `<title>${escapeHtml(page.title)}</title>`],
     [/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeHtml(page.description)}">`],
-    [/<meta name="robots" content="[^"]*">/, `<meta name="robots" content="${staging ? 'noindex, nofollow' : page.robots || 'index, follow'}">`],
+    [/<meta name="robots" content="[^"]*">/, `<meta name="robots" content="${robots}">`],
     [/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeHtml(page.title)}">`],
     [/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeHtml(page.description)}">`],
     [/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeHtml(page.title)}">`],
@@ -54,10 +54,13 @@ try {
   const manifest = JSON.parse(await readFile(path.join(output, '.vite', 'manifest.json'), 'utf8'))
   if (!template.includes('<div id="app"></div>')) throw new Error('Client HTML template has no empty app container')
   await build({
-    build: { ssr: 'src/entry-server.js', outDir: serverOutput, emptyOutDir: true, sourcemap: false },
+    build: {
+      ssr: 'src/entry-server.js', outDir: serverOutput, emptyOutDir: true, sourcemap: false,
+      rollupOptions: { output: { entryFileNames: '[name].mjs', chunkFileNames: 'assets/[name]-[hash].mjs' } },
+    },
   })
 
-  const { render, notFoundPage, pageRoutes, createStructuredData } = await import(pathToFileURL(path.join(serverOutput, 'entry-server.mjs')).href)
+  const { render, notFoundPage, pageRoutes, createStructuredData, getPageRobots } = await import(pathToFileURL(path.join(serverOutput, 'entry-server.mjs')).href)
   const serverAssetPrefix = `${pathToFileURL(serverOutput).href}/assets/`
   const publicAssetPrefix = `${process.env.SITE_BASE || '/freelancet-medved/'}assets/`
   const metrika = staging
@@ -65,7 +68,7 @@ try {
     : getMetrikaMarkup(new URL(pageRoutes[0].canonicalUrl).hostname)
 
   async function renderHtml(page, routePath) {
-    const { html, modules } = await render(routePath)
+    const { html, modules, page: renderedPage } = await render(routePath)
     const rendered = html.replaceAll(serverAssetPrefix, publicAssetPrefix)
     for (const [, file] of rendered.matchAll(/(?:src|srcset)="[^"]*?assets\/([^\s,"<>]+)/g)) {
       await access(path.join(output, 'assets', file))
@@ -93,7 +96,7 @@ try {
       return ''
     }).filter(Boolean).join('\n    ')
 
-    const structuredData = createStructuredData(page, (asset) => new URL(
+    const structuredData = createStructuredData(renderedPage, (asset) => new URL(
       asset.replaceAll(serverAssetPrefix, publicAssetPrefix), page.canonicalUrl,
     ).href)
     // Экранируем символы HTML, чтобы содержимое каталога не могло закрыть script.
@@ -101,7 +104,7 @@ try {
       ? `<script type="application/ld+json">${JSON.stringify(structuredData).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('&', '\\u0026')}</script>`
       : ''
 
-    return setMetadata(template, page)
+    return setMetadata(template, page, getPageRobots(page, siteEnvironment))
       .replace('</head>', () => `${links}\n    ${jsonLd}\n    ${metrika.head}\n  </head>`)
       .replace('<body>', () => `<body>\n    ${metrika.body}`)
       .replace('<div id="app"></div>', `<div id="app">${rendered}</div>`)
