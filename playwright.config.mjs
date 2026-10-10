@@ -16,6 +16,7 @@ export default defineConfig({
   expect: { timeout: 10000 },
   reporter: 'list',
   use: {
+    channel: 'chromium',
     baseURL: `http://127.0.0.1:4173${basePath}`,
     reducedMotion: 'reduce',
     screenshot: 'off',
