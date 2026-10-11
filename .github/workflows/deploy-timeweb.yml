@@ -113,3 +113,9 @@ jobs:
           assert.ok((await api.json()).message)
           console.log('Staging HTML, assets, noindex, redirects and PHP endpoint verified; no mail sent.')
           NODE
+
+  lighthouse:
+    name: Lighthouse after production deployment
+    needs: deploy
+    if: ${{ github.ref == 'refs/heads/main' && needs.deploy.result == 'success' }}
+    uses: ./.github/workflows/lighthouse.yml
