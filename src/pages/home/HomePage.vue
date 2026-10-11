@@ -9,7 +9,8 @@ import homeDividerUrl from '../../assets/heroes/home/divider.png'
 
 <template>
   <HomeHeroSection />
-  <HeroDivider class="-translate-y-[max(5.6vw,43px)]" :image-url="homeDividerUrl" />
+  <!-- The grass baseline is at 69.1% of the image height, below its transparent top. -->
+  <HeroDivider class="[&>img]:-translate-y-[69.1%] [&>img]:object-[center_69.1%]" :image-url="homeDividerUrl" />
   <HomeProductsSection />
   <HomeAboutSection />
   <ContactSection
