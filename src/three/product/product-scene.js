@@ -4,11 +4,12 @@ import { createProductPostprocess, prepareProductMaterials } from './product-mat
 import { createProductLabels } from './product-labels.js'
 import { createProductEnvironment } from './product-environment.js'
 import { createProductLight } from './product-light.js'
+import { warmupWebGL } from './webgl-warmup.js'
 
 export const productSceneKey = Symbol('product-scene')
 
 // Один контекст WebGL на слайдер. Смена владельца DOM сохраняет модели и оптику.
-export function createProductScene({ loadGlassOptics } = {}) {
+export function createProductScene({ loadGlassOptics, staticMode = () => false } = {}) {
   let currentView = null, closed = false, failed = false
   let bankOptics = null
   const sceneSettings = { camera: [0, 0.88, 5] }
@@ -34,17 +35,36 @@ export function createProductScene({ loadGlassOptics } = {}) {
   // Один владелец WebGL, камеры, света, качества и цикла для обеих моделей.
   let sharedScene = null
   let sceneStarting = false
+  let warmup = null
+  let generation = 0
+  const views = new Set()
   const sceneQuality = Object.freeze({ maxModelPixels: 720, maxPixelRatio: 1.5, samples: 4 })
   async function startSharedScene() {
     if (closed || failed || sharedScene || sceneStarting || !currentView) return
     sceneStarting = true
+    const startingGeneration = generation
     let cleanup = () => {}
     try {
+      if (staticMode()) {
+        failed = true
+        currentView.can.emit('error', 'Показано изображение продукции.')
+        return
+      }
+      // Запасные рендеры относятся к банкам слайдера; лаборатория стакана
+      // сохраняет собственный запуск и поведение при reduced-motion.
+      warmup = currentView.glass ? null : warmupWebGL()
+      const supported = warmup ? await warmup.ready : true
+      if (closed || !currentView || startingGeneration !== generation) return
+      if (!supported) {
+        failed = true
+        currentView.can.emit('error', 'Показано изображение продукции.')
+        return
+      }
       const [THREE, { GLTFLoader }, { RoomEnvironment }, { FXAAShader }] = await Promise.all([
         import('../three-runtime.js'), import('three/addons/loaders/GLTFLoader.js'),
         import('three/addons/environments/RoomEnvironment.js'), import('three/addons/shaders/FXAAShader.js'),
       ])
-      if (closed || !currentView) return
+      if (closed || !currentView || startingGeneration !== generation) return
       const hasGlass = Boolean(currentView.glass)
       if (hasGlass && !loadGlassOptics) throw new Error('Для стакана требуется загрузчик оптики лаборатории')
       const glassOptics = hasGlass
@@ -54,10 +74,11 @@ export function createProductScene({ loadGlassOptics } = {}) {
           canvasToScreen,
         })
         : null
-      if (closed || !currentView) return
+      if (closed || !currentView || startingGeneration !== generation) return
       let glassSlot = currentView.glass || currentView.can, canSlot = currentView.can
       let article = currentView.root
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' })
+      warmup?.release()
       let aborted = false
       cleanup = () => { aborted = true; renderer.dispose(); renderer.domElement.remove(); sharedScene = null }
       sharedScene = { dispose: cleanup, sync: () => {} }
@@ -94,7 +115,7 @@ export function createProductScene({ loadGlassOptics } = {}) {
       canSlot = currentView?.can || canSlot; glassSlot = currentView?.glass || canSlot
       article = currentView?.root || article
       article.appendChild(renderer.domElement)
-      if (aborted || closed || !currentView) { models.forEach(model => disposeProductModel(model.scene)); cleanup(); return }
+      if (aborted || closed || !currentView || startingGeneration !== generation) { models.forEach(model => disposeProductModel(model.scene)); cleanup(); return }
       let optics, disposed = false, frame = 0, lastTime = null, interactionUntil = 0, visible = true, renderedSize = ''
       const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
       const { finalTarget, fxaaUniforms, fxaa } = createProductPostprocess(THREE, FXAAShader, sceneQuality.samples)
@@ -464,13 +485,17 @@ export function createProductScene({ loadGlassOptics } = {}) {
       failed = true
       if (!closed && currentView) currentView.can.emit('error', 'Не удалось загрузить модели. Обновите страницу.')
       cleanup()
-    } finally { sceneStarting = false }
+    } finally {
+      warmup?.release(); warmup = null; sceneStarting = false
+      if (startingGeneration !== generation && !closed && currentView) void startSharedScene()
+    }
   }
 
 
   return {
     activate(view) {
       if (closed || currentView === view) return
+      views.add(view)
       try { sharedScene?.capture?.() } catch (error) {
         console.error('Сцена продукции: сохранение кадра', error)
         sharedScene?.dispose()
@@ -485,12 +510,28 @@ export function createProductScene({ loadGlassOptics } = {}) {
       if (view === currentView) sharedScene?.sync(true)
     },
     release(view) {
-      if (view === currentView) { sharedScene?.dispose(); currentView = null }
+      views.delete(view)
+      if (view === currentView) { warmup?.cancel(); sharedScene?.dispose(); currentView = null }
     },
     dispose() {
       closed = true
+      warmup?.cancel()
       sharedScene?.dispose()
       currentView = null
+      views.clear()
+    },
+    reset() {
+      if (closed) return
+      generation++
+      warmup?.cancel()
+      sharedScene?.dispose()
+      failed = false
+      for (const view of views) {
+        view.snapshot.hidden = true
+        view.can.emit('reset')
+        view.glass?.emit('reset')
+      }
+      if (!sceneStarting) void startSharedScene()
     },
   }
 }

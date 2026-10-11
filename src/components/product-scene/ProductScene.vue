@@ -38,6 +38,7 @@ function model(bank) {
       get label() { return props.canLabel },
     },
     emit(event, message) {
+      if (event === 'reset') { error.value = ''; can.ready.value = false; glass.ready.value = false }
       if (event === 'error') { error.value = message; emit('error', message) }
     },
   }
@@ -82,7 +83,7 @@ onBeforeUnmount(() => {
 
 <template>
   <span ref="root" class="product-scene" :class="{ 'is-loading': !ready, 'has-error': error, 'is-can-only': canOnly }">
-    <img v-if="error && fallback" class="product-scene-fallback" :src="fallback" alt="" draggable="false">
+    <img v-if="error && fallback" class="product-scene-fallback" :src="fallback" alt="" draggable="false" decoding="async">
     <span v-if="active && !ready && !error" class="product-scene-loader" role="status" aria-label="Загрузка моделей">
       <span class="product-scene-spinner" aria-hidden="true" />
     </span>
@@ -154,7 +155,7 @@ onBeforeUnmount(() => {
 .product-scene.has-error :deep(.product-scene-canvas),
 .product-scene.has-error .product-scene-snapshot { visibility: hidden; }
 
-.product-scene-fallback { width: 100%; height: 100%; object-fit: contain; }
+.product-scene-fallback { position: absolute; inset: 0 auto auto 0; width: auto; max-width: none; height: 100%; object-fit: contain; }
 .product-scene-error { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
 .product-scene-loader { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; }
 .product-scene-spinner { width: 44px; height: 44px; border: 3px solid rgb(61 90 69 / 0.18); border-top-color: #3d5a45; border-radius: 50%; animation: product-scene-spin 800ms linear infinite; }

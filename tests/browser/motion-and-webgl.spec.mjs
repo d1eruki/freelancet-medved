@@ -1,290 +1,10 @@
-import { test, expect } from './fixtures.mjs'
+import { test, expect as baseExpect } from './fixtures.mjs'
+
+const expect = baseExpect.configure({ timeout: 13000 })
 
 test.use({ reducedMotion: 'no-preference' })
 
-async function runWithDiagnostics(page, openPage, testInfo, scenario) {
-  const started = Date.now()
-  const events = []
-  const resources = new Map()
-  const prefix = '[hydration-diagnostic] '
-  const record = (event) => events.push({ elapsedMs: Date.now() - started, ...event })
-  const resourcePath = (url) => new URL(url).pathname
-  const onRequest = (request) => {
-    resources.set(request, { path: resourcePath(request.url()), type: request.resourceType(), startedMs: Date.now() - started })
-    if (['script', 'stylesheet'].includes(request.resourceType())) {
-      record({ event: 'request', path: resourcePath(request.url()) })
-    }
-  }
-  const onFinished = (request) => {
-    const resource = resources.get(request)
-    if (!resource) return
-    resource.durationMs = Date.now() - started - resource.startedMs
-    if (['script', 'stylesheet'].includes(resource.type)) record({ event: 'loaded', ...resource })
-  }
-  const onFailed = (request) => {
-    const resource = resources.get(request)
-    if (resource) resource.failure = request.failure()?.errorText
-    record({ event: 'request-failed', path: resourcePath(request.url()), error: request.failure()?.errorText })
-  }
-  const onConsole = (message) => {
-    if (message.text().startsWith(prefix)) record({ browser: JSON.parse(message.text().slice(prefix.length)) })
-    else if (message.type() === 'error') record({ event: 'console-error', message: message.text().slice(0, 500) })
-  }
-  const onError = (error) => record({ event: 'page-error', message: error.message })
-  page.on('request', onRequest)
-  page.on('requestfinished', onFinished)
-  page.on('requestfailed', onFailed)
-  page.on('console', onConsole)
-  page.on('pageerror', onError)
-  await page.addInitScript(({ prefix }) => {
-    if (globalThis !== globalThis.top) return
-    const emit = (event, details = {}) => {
-      const message = prefix + JSON.stringify({ event, browserMs: Math.round(performance.now()), ...details })
-      console.info(message)
-      if (['product-input', 'product-timer-probe', 'snapshot-copy-start'].includes(event)) console.timeStamp(message)
-    }
-    // Оборачиваем нативные вызовы только внутри тестового браузера.
-    // Начало первого вызова видно даже тогда, когда сам вызов зависает.
-    const contexts = new WeakMap()
-    let nextContext = 0, slowWebglCalls = 0
-    const describeContext = (gl) => {
-      const canvas = gl.canvas
-      const scene = canvas?.classList?.contains('product-scene-canvas') ? 'product-scene' : 'unassigned'
-      return { scene, canvasWidth: canvas?.width, canvasHeight: canvas?.height }
-    }
-    const operations = new Set([
-      'compileShader', 'linkProgram', 'getProgramInfoLog', 'getShaderInfoLog', 'getProgramParameter',
-      'getShaderParameter', 'getActiveUniform', 'getUniformLocation', 'getActiveAttrib', 'getAttribLocation',
-      'getParameter', 'getError',
-      'texImage2D', 'texSubImage2D', 'texStorage2D', 'generateMipmap', 'checkFramebufferStatus',
-      'drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced',
-      'readPixels', 'finish', 'flush',
-    ])
-    const prototypes = [globalThis.WebGLRenderingContext?.prototype, globalThis.WebGL2RenderingContext?.prototype]
-    for (const prototype of prototypes.filter(Boolean)) {
-      for (const operation of Object.getOwnPropertyNames(prototype)) {
-        if (operation === 'constructor') continue
-        const descriptor = Object.getOwnPropertyDescriptor(prototype, operation)
-        if (typeof descriptor?.value !== 'function') continue
-        const original = descriptor.value
-        Object.defineProperty(prototype, operation, {
-          ...descriptor,
-          value: function (...args) {
-            let context = contexts.get(this)
-            if (!context) {
-              context = { id: ++nextContext, started: new Set() }
-              contexts.set(this, context)
-            }
-            const first = operations.has(operation) && !context.started.has(operation)
-            if (first) {
-              context.started.add(operation)
-              emit('webgl-call-start', {
-                context: context.id, operation, ...describeContext(this),
-                stack: new Error().stack?.split('\n').slice(2, 7).join('\n'),
-              })
-            }
-            const startMs = performance.now()
-            try {
-              return Reflect.apply(original, this, args)
-            } finally {
-              const durationMs = Math.round(performance.now() - startMs)
-              if (first || (durationMs >= 50 && slowWebglCalls < 40)) {
-                if (durationMs >= 50) slowWebglCalls++
-                emit('webgl-call-end', {
-                  context: context.id, operation, ...describeContext(this), startMs: Math.round(startMs), durationMs,
-                  ...(durationMs >= 50 ? { stack: new Error().stack?.split('\n').slice(2, 7).join('\n') } : {}),
-                })
-              }
-            }
-          },
-        })
-      }
-    }
-    // Изменение размера холста и 2D-копирование могут ждать GPU вне WebGL API.
-    for (const prototype of [globalThis.HTMLCanvasElement.prototype, globalThis.CanvasRenderingContext2D.prototype]) {
-      for (const operation of prototype === globalThis.HTMLCanvasElement.prototype ? ['width', 'height'] : ['drawImage', 'fillRect', 'getImageData']) {
-        const descriptor = Object.getOwnPropertyDescriptor(prototype, operation)
-        const original = descriptor.set || descriptor.value
-        const invoke = function (...args) {
-          const canvas = this.canvas || this
-          const snapshot = canvas.classList.contains('product-scene-snapshot') && operation === 'drawImage'
-          const startMs = performance.now()
-          if (snapshot) emit('snapshot-copy-start', { width: canvas.width, height: canvas.height })
-          try {
-            return Reflect.apply(original, this, args)
-          } finally {
-            const durationMs = Math.round(performance.now() - startMs)
-            if (snapshot || durationMs >= 50) emit('canvas-call-end', {
-              operation, startMs: Math.round(startMs), durationMs,
-              canvasClass: canvas.className, width: canvas.width, height: canvas.height,
-              stack: new Error().stack?.split('\n').slice(2, 7).join('\n'),
-            })
-          }
-        }
-        Object.defineProperty(prototype, operation, {
-          ...descriptor, ...(descriptor.set ? { set: invoke } : { value: invoke }),
-        })
-      }
-    }
-    emit('document-start', { motion: globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'no-preference' })
-    globalThis.addEventListener('DOMContentLoaded', () => emit('dom-ready'), { once: true })
-    globalThis.addEventListener('load', () => emit('window-load'), { once: true })
-    let longTasks = 0
-    const productState = () => {
-      const panel = globalThis.document.querySelector('[role=tabpanel][aria-hidden=false]')
-      const scene = panel?.querySelector('.product-scene')
-      return {
-        panel: panel?.getAttribute('aria-labelledby') ?? null,
-        panelClass: panel?.className ?? null,
-        sceneClass: scene?.className ?? null,
-      }
-    }
-    let previousState
-    const products = new globalThis.MutationObserver(() => {
-      const state = productState()
-      const signature = JSON.stringify(state)
-      if (signature === previousState) return
-      previousState = signature
-      emit('product-state', state)
-    })
-    products.observe(globalThis.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'aria-labelledby', 'aria-hidden'] })
-    const observeInput = (event) => {
-      if (!event.target.closest?.('[role=tablist], [role=tabpanel]')) return
-      if (event.type === 'keydown' && !['ArrowRight', 'ArrowLeft'].includes(event.key)) return
-      const startMs = performance.now()
-      emit('product-input', { type: event.type, key: event.key, ...productState() })
-      // Независимый таймер показывает блокировку потока, не меняя таймеры приложения.
-      globalThis.setTimeout(() => emit('product-timer-probe', {
-        delayMs: Math.round(performance.now() - startMs), expectedMs: 360, ...productState(),
-      }), 360)
-    }
-    globalThis.document.addEventListener('keydown', observeInput, true)
-    globalThis.document.addEventListener('click', observeInput, true)
-    const observer = new PerformanceObserver((list) => {
-      for (const task of list.getEntries()) {
-        if (longTasks++ < 80) emit('long-task', { startMs: Math.round(task.startTime), durationMs: Math.round(task.duration) })
-      }
-    })
-    observer.observe({ type: 'longtask', buffered: true })
-    // Наблюдаем готовность, не перехватывая внутренние свойства Vue и не меняя приложение.
-    let reported = false
-    const checkVue = () => {
-      if (reported) return
-      if (!globalThis.document.querySelector('#app')?.__vue_app__) return
-      reported = true
-      emit('vue-observed')
-      globalThis.clearInterval(timer)
-      mutations.disconnect()
-    }
-    const timer = globalThis.setInterval(checkVue, 100)
-    const mutations = new globalThis.MutationObserver(checkVue)
-    mutations.observe(globalThis.document, { childList: true, subtree: true, attributes: true })
-  }, { prefix })
-  // Профиль отличает тяжёлый JavaScript от ожидания ресурсов или рендеринга.
-  let session
-  let cpuHotspots = []
-  const traceEvents = []
-  let tracing = false
-  const onTrace = ({ value }) => traceEvents.push(...value)
-  let browserTimeline = []
-  let traceMarkers = []
-  try {
-    session = await page.context().newCDPSession(page)
-    await session.send('Profiler.enable')
-    await session.send('Profiler.start')
-  } catch (error) {
-    record({ event: 'profiler-unavailable', message: error.message })
-  }
-  if (session) {
-    try {
-      session.on('Tracing.dataCollected', onTrace)
-      await session.send('Tracing.start', {
-        categories: 'devtools.timeline,v8.execute,blink,cc,gpu',
-        options: 'record-as-much-as-possible',
-      })
-      tracing = true
-    } catch (error) {
-      record({ event: 'tracing-unavailable', message: error.message })
-    }
-  }
-  let outcome = 'failed'
-  try {
-    await openPage()
-    record({ event: 'fixture-ready' })
-    await scenario(record)
-    outcome = 'passed'
-  } finally {
-    if (session) {
-      if (tracing) {
-        let traceTimer
-        let onComplete
-        try {
-          const complete = new Promise(resolve => { onComplete = resolve; session.once('Tracing.tracingComplete', resolve) })
-          await Promise.race([
-            session.send('Tracing.end').then(() => complete),
-            new Promise((_, reject) => { traceTimer = setTimeout(() => reject(new Error('Tracing response exceeded 1500ms')), 1500) }),
-          ])
-          traceMarkers = traceEvents.filter(event => event.name === 'TimeStamp' && event.args?.data?.message?.startsWith(prefix))
-            .map(event => ({ traceMs: Math.round(event.ts / 1000), ...JSON.parse(event.args.data.message.slice(prefix.length)) }))
-          const threads = new Map(traceEvents.filter(event => event.ph === 'M' && event.name === 'thread_name')
-            .map(event => [`${event.pid}:${event.tid}`, event.args.name]))
-          // Сохраняем конкретные GPU-вызовы и крупные задачи, исключая вложенные дубли ожидания.
-          browserTimeline = traceEvents.filter(event => event.ph === 'X' && event.dur >= 50000
-            && /GLES2|CommandBufferProxyImpl|FunctionCall|RunMicrotasks|Paint|Raster|DrawFrame/.test(event.name))
-            .sort((a, b) => b.dur - a.dur).slice(0, 40).map(event => ({
-              operation: event.name, thread: threads.get(`${event.pid}:${event.tid}`),
-              traceMs: Math.round(event.ts / 1000), durationMs: Math.round(event.dur / 1000),
-              ...(event.args?.data ? { source: event.args.data } : {}),
-            }))
-        } catch (error) {
-          record({ event: 'tracing-unavailable', message: error.message })
-        } finally {
-          clearTimeout(traceTimer)
-          if (onComplete) session.off('Tracing.tracingComplete', onComplete)
-        }
-      }
-      session.off('Tracing.dataCollected', onTrace)
-      let timer
-      try {
-        const { profile } = await Promise.race([
-          session.send('Profiler.stop'),
-          new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Profiler response exceeded 1500ms')), 1500) }),
-        ])
-        const totals = new Map()
-        for (const [index, id] of (profile.samples || []).entries()) {
-          totals.set(id, (totals.get(id) || 0) + (profile.timeDeltas?.[index] || 0))
-        }
-        cpuHotspots = profile.nodes.map(({ id, callFrame }) => ({
-          function: callFrame.functionName || '(anonymous)',
-          path: callFrame.url ? resourcePath(callFrame.url) : null,
-          line: callFrame.lineNumber + 1,
-          selfMs: Math.round((totals.get(id) || 0) / 1000),
-        })).filter((node) => node.selfMs > 0).sort((a, b) => b.selfMs - a.selfMs).slice(0, 10)
-      } catch (error) {
-        record({ event: 'profiler-unavailable', message: error.message })
-      } finally {
-        clearTimeout(timer)
-        // Не ждём ответа зависшего renderer; это не должно скрыть исходный сбой теста.
-        void session.detach().catch(() => {})
-      }
-    }
-    const entries = [...resources.values()]
-    console.info(prefix + JSON.stringify({
-      test: testInfo.title, project: testInfo.project.name, outcome, events, cpuHotspots, browserTimeline, traceMarkers,
-      pending: entries.filter((resource) => resource.durationMs === undefined && !resource.failure),
-      slowest: entries.filter((resource) => resource.durationMs !== undefined)
-        .sort((a, b) => b.durationMs - a.durationMs).slice(0, 10),
-    }))
-    page.off('request', onRequest)
-    page.off('requestfinished', onFinished)
-    page.off('requestfailed', onFailed)
-    page.off('console', onConsole)
-    page.off('pageerror', onError)
-  }
-}
-
-async function switchDrink(page, isMobile, direction, slug, record) {
-  record({ event: 'switch-start', direction, slug })
+async function switchDrink(page, isMobile, direction, slug) {
   if (isMobile) {
     await page.getByRole('tabpanel').getByRole('button', {
       name: direction === 'next' ? 'Следующий напиток' : 'Предыдущий напиток',
@@ -293,31 +13,44 @@ async function switchDrink(page, isMobile, direction, slug, record) {
     await page.getByRole('tab', { selected: true }).focus()
     await page.keyboard.press(direction === 'next' ? 'ArrowRight' : 'ArrowLeft')
   }
-  record({ event: 'switch-input-sent', direction, slug })
   const panel = page.getByRole('tabpanel')
   await expect(panel).toHaveAttribute('aria-labelledby', `home-product-tab-${slug}`)
-  record({ event: 'switch-panel-updated', direction, slug })
-  // Текст должен вернуться после анимации, а следующий переход снова быть доступен.
+  // При задержанном кадре opacity может ещё показывать прежнее значение.
+  // Сначала ждём снятия состояния перехода, которое блокирует следующий выбор.
+  await expect(panel).not.toHaveClass(/\bis-text-hidden\b/)
   await expect.poll(() => panel.getByRole('heading').evaluate((heading) =>
     Number(globalThis.getComputedStyle(heading.parentElement).opacity))).toBe(1)
-  record({ event: 'switch-text-visible', direction, slug })
   return panel
 }
 
-test('Обычная анимация завершается и позволяет переключать напитки и переходить в каталог', async ({ page, openPage, isMobile }, testInfo) => {
-  await runWithDiagnostics(page, openPage, testInfo, async (record) => {
-    await expect.poll(() => page.evaluate(() => globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(false)
-    await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
-    await switchDrink(page, isMobile, 'next', 'sidr', record)
-    const panel = await switchDrink(page, isMobile, 'previous', 'medovuha', record)
-    await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
-    await expect(page).toHaveURL(/\/katalog\/medovuha\/$/)
-    await expect(page.locator('main h1')).toContainText('Медовуха')
+async function allowSoftwareWebGL(page) {
+  // CI использует программный GPU. Разрешаем его только в этом тесте,
+  // чтобы проверять настоящую сцену отдельно от производственного выбора режима.
+  await page.route(/webgl-warmup\.worker[^/]*\.js/, async route => {
+    const response = await route.fetch()
+    let source = await response.text()
+    source = source.replace(/failIfMajorPerformanceCaveat\s*:\s*(?:true|!0)/g, 'failIfMajorPerformanceCaveat:false')
+      .replace(/supported\s*:\s*!\w+/g, 'supported:true')
+    await route.fulfill({ response, body: source })
   })
+}
+
+test('Обычная анимация завершается и позволяет переключать напитки и переходить в каталог', async ({ page, openPage, isMobile }) => {
+  await openPage()
+  await expect.poll(() => page.evaluate(() => globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(false)
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  await switchDrink(page, isMobile, 'next', 'sidr')
+  const panel = await switchDrink(page, isMobile, 'previous', 'medovuha')
+  await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
+  await expect(page).toHaveURL(/\/katalog\/medovuha\/$/)
+  await expect(page.locator('main h1')).toContainText('Медовуха')
 })
 
-test('При недоступном WebGL показывается изображение и сохраняются управление и переходы', async ({ page, openPage, isMobile }, testInfo) => {
+test('При недоступном WebGL показывается изображение и сохраняются управление и переходы', async ({ page, openPage, isMobile }) => {
   await page.addInitScript(() => {
+    // Worker недоступен: проверка должна перейти к обычному контексту,
+    // который здесь намеренно заблокирован.
+    globalThis.Worker = undefined
     const getContext = globalThis.HTMLCanvasElement.prototype.getContext
     globalThis.HTMLCanvasElement.prototype.getContext = function (type, ...options) {
       if (/^(webgl2?|experimental-webgl)$/.test(type)) {
@@ -327,18 +60,147 @@ test('При недоступном WebGL показывается изобра�
       return getContext.call(this, type, ...options)
     }
   })
-  await runWithDiagnostics(page, openPage, testInfo, async (record) => {
-    await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
-    const fallback = page.getByRole('tabpanel').locator('img')
-    await expect(fallback).toBeVisible()
-    await expect.poll(() => fallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
-    await expect.poll(() => page.evaluate(() => globalThis.__webglAttempts || 0)).toBeGreaterThan(0)
-    const panel = await switchDrink(page, isMobile, 'next', 'sidr', record)
-    const nextFallback = panel.locator('img')
-    await expect(nextFallback).toBeVisible()
-    await expect.poll(() => nextFallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
-    await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
-    await expect(page).toHaveURL(/\/katalog\/sidr\/$/)
-    await expect(page.locator('main h1')).toContainText('Сидр')
+  await openPage()
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  const fallback = page.getByRole('tabpanel').locator('img')
+  await expect(fallback).toBeVisible()
+  await expect.poll(() => fallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
+  await expect.poll(() => page.evaluate(() => globalThis.__webglAttempts || 0)).toBeGreaterThan(0)
+  const panel = await switchDrink(page, isMobile, 'next', 'sidr')
+  const nextFallback = panel.locator('img')
+  await expect(nextFallback).toBeVisible()
+  await expect.poll(() => nextFallback.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
+  await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
+  await expect(page).toHaveURL(/\/katalog\/sidr\/$/)
+  await expect(page.locator('main h1')).toContainText('Сидр')
+})
+
+test('После прогрева работает 3D, а потеря контекста переключает на изображение', async ({ page, openPage }) => {
+  await allowSoftwareWebGL(page)
+  await openPage()
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  await page.getByRole('tabpanel').getByRole('link').first().focus()
+  const scene = page.getByRole('tabpanel').locator('.product-scene')
+  await expect(scene).not.toHaveClass(/is-loading|has-error/)
+  const canvas = scene.locator('.product-scene-canvas')
+  await expect(canvas).toBeVisible()
+  await canvas.evaluate(canvas => canvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext())
+  await expect(scene.locator('img')).toBeVisible()
+  await expect.poll(() => scene.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+})
+
+test('Запрет анимации выбирает статичную банку без запуска 3D', async ({ page, openPage }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await openPage()
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  const scene = page.getByRole('tabpanel').locator('.product-scene')
+  await expect(scene.locator('img')).toBeVisible()
+  await expect.poll(() => scene.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+  await expect(scene.locator('.product-scene-canvas')).toHaveCount(0)
+})
+
+test('Зависший прогрев завершается статичным изображением', async ({ page, openPage }) => {
+  await page.addInitScript(() => {
+    globalThis.Worker = class {
+      postMessage() {}
+      terminate() { globalThis.__warmupTerminated = true }
+    }
   })
+  await openPage()
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  const scene = page.getByRole('tabpanel').locator('.product-scene')
+  await expect(scene.locator('img')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => globalThis.__warmupTerminated)).toBe(true)
+  await expect(scene.locator('.product-scene-canvas')).toHaveCount(0)
+})
+
+test('При недоступном Worker сохраняется обычный запуск 3D', async ({ page, openPage }) => {
+  await page.addInitScript(() => {
+    globalThis.Worker = undefined
+    const getContext = globalThis.HTMLCanvasElement.prototype.getContext
+    globalThis.HTMLCanvasElement.prototype.getContext = function(type, options) {
+      const probe = type === 'webgl2' && options?.failIfMajorPerformanceCaveat
+      const gl = getContext.call(this, type, probe ? { ...options, failIfMajorPerformanceCaveat: false } : options)
+      if (probe && gl) {
+        globalThis.__ordinaryProbe = true
+        const getParameter = gl.getParameter.bind(gl)
+        const debug = gl.getExtension('WEBGL_debug_renderer_info')
+        gl.getParameter = parameter => parameter === debug?.UNMASKED_RENDERER_WEBGL
+          ? 'Test hardware renderer' : getParameter(parameter)
+      }
+      return gl
+    }
+  })
+  await openPage()
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  await page.getByRole('tabpanel').getByRole('link').first().focus()
+  const scene = page.getByRole('tabpanel').locator('.product-scene')
+  await expect(scene).not.toHaveClass(/is-loading|has-error/)
+  await expect.poll(() => page.evaluate(() => globalThis.__ordinaryProbe)).toBe(true)
+  await expect(scene.locator('.product-scene-canvas')).toBeVisible()
+})
+
+test('Программный графический драйвер выбирает изображение вместо 3D', async ({ page, openPage }) => {
+  await page.route(/webgl-warmup\.worker[^/]*\.js/, async route => {
+    const response = await route.fetch()
+    const probe = `
+      const originalContext = OffscreenCanvas.prototype.getContext;
+      OffscreenCanvas.prototype.getContext = function(type, options) {
+        const gl = originalContext.call(this, type, {...options, failIfMajorPerformanceCaveat:false});
+        if (gl) {
+          const debug = gl.getExtension('WEBGL_debug_renderer_info');
+          const originalParameter = gl.getParameter.bind(gl);
+          gl.getParameter = parameter => parameter === debug?.UNMASKED_RENDERER_WEBGL
+            ? 'SwiftShader' : originalParameter(parameter);
+        }
+        return gl;
+      };
+    `
+    await route.fulfill({ response, body: probe + await response.text() })
+  })
+  await openPage()
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  const scene = page.getByRole('tabpanel').locator('.product-scene')
+  await expect(scene.locator('img')).toBeVisible()
+  await expect(scene.locator('.product-scene-canvas')).toHaveCount(0)
+})
+
+test('Локальная кнопка включает картинки и возвращает обычный режим после переключения слайда', async ({ page, openPage, isMobile }) => {
+  await allowSoftwareWebGL(page)
+  await openPage()
+  const button = page.getByRole('button', { name: /Картинки вместо 3D:/ })
+  await expect(button).toBeVisible()
+  await button.click()
+  await expect(button).toHaveAttribute('aria-pressed', 'true')
+  const scene = () => page.getByRole('tabpanel').locator('.product-scene')
+  await expect(scene().locator('img')).toBeVisible()
+  await expect(scene().locator('.product-scene-canvas')).toHaveCount(0)
+  await switchDrink(page, isMobile, 'next', 'sidr')
+  await expect(scene().locator('img')).toBeVisible()
+  await button.click()
+  await expect(button).toHaveAttribute('aria-pressed', 'false')
+  await page.getByRole('tabpanel').locator('.product-visual').scrollIntoViewIfNeeded()
+  await expect(scene()).not.toHaveClass(/is-loading|has-error/)
+  await expect(scene().locator('.product-scene-canvas')).toBeVisible()
+  await expect(scene().locator('img')).toHaveCount(0)
+})
+
+test('Кнопка доступна на тестовом домене только в staging и отсутствует на основном', async ({ page, baseURL }) => {
+  await page.route('https://mc.yandex.ru/**', route => route.abort())
+  await page.route(/^http:\/\/(?:test\.)?medved\.beer\//, async route => {
+    const target = new URL(route.request().url())
+    const local = new URL(baseURL)
+    target.host = local.host
+    const response = await route.fetch({ url: target.href })
+    await route.fulfill({ response })
+  })
+  await page.addInitScript(() => localStorage.setItem('medved-age-confirmed', 'true'))
+  for (const hostname of ['medved.beer', 'test.medved.beer']) {
+    await page.goto(`http://${hostname}${new URL(baseURL).pathname}`)
+    await page.waitForLoadState('networkidle')
+    await expect.poll(() => page.evaluate(() => Boolean(globalThis.document.querySelector('#app')?.__vue_app__))).toBe(true)
+    await expect(page.getByRole('heading', { name: 'Продукция', exact: true })).toBeAttached()
+    await expect(page.getByRole('button', { name: /Картинки вместо 3D:/ })).toHaveCount(
+      hostname === 'test.medved.beer' && process.env.SITE_ENV === 'staging' ? 1 : 0)
+  }
 })

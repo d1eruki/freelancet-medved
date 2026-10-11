@@ -127,17 +127,26 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   transform-origin: 50% 90%;
 }
 
+:deep(.product-scene-fallback) {
+  /* Рендер вдвое шире квадрата модели: центр банки — четверть изображения. */
+  transform-origin: 25% 90%;
+  transition: rotate 500ms;
+}
+
 .is-moving-forward :deep(.product-scene-transform),
-.is-moving-forward :deep(.product-scene-snapshot) {
+.is-moving-forward :deep(.product-scene-snapshot),
+.is-moving-forward :deep(.product-scene-fallback) {
   animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .is-moving-backward :deep(.product-scene-transform),
-.is-moving-backward :deep(.product-scene-snapshot) {
+.is-moving-backward :deep(.product-scene-snapshot),
+.is-moving-backward :deep(.product-scene-fallback) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.is-dragging :deep(.product-scene-transform) {
+.is-dragging :deep(.product-scene-transform),
+.is-dragging :deep(.product-scene-fallback) {
   rotate: v-bind(dragAngleCss);
 }
 
@@ -186,9 +195,11 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 }
 @media (prefers-reduced-motion: reduce) {
   :deep(.product-scene-transform),
-  :deep(.product-scene-snapshot) {
+  :deep(.product-scene-snapshot),
+  :deep(.product-scene-fallback) {
     animation: none;
     rotate: none;
+    transition: none;
   }
 }
 </style>
