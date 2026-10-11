@@ -79,7 +79,9 @@ test('После прогрева работает 3D, а потеря конт�
   await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
   await page.getByRole('tabpanel').getByRole('link').first().focus()
   const scene = page.getByRole('tabpanel').locator('.product-scene')
-  await expect(scene).not.toHaveClass(/is-loading|has-error/)
+  // Здесь CI принудительно рисует 3D программным GPU: проверяем работу,
+  // а не скорость загрузки сайта. Остальные ожидания сохраняют 10 секунд.
+  await expect(scene).not.toHaveClass(/is-loading|has-error/, { timeout: 30000 })
   const canvas = scene.locator('.product-scene-canvas')
   await expect(canvas).toBeVisible()
   await canvas.evaluate(canvas => canvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext())
@@ -133,7 +135,7 @@ test('При недоступном Worker сохраняется обычный
   await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
   await page.getByRole('tabpanel').getByRole('link').first().focus()
   const scene = page.getByRole('tabpanel').locator('.product-scene')
-  await expect(scene).not.toHaveClass(/is-loading|has-error/)
+  await expect(scene).not.toHaveClass(/is-loading|has-error/, { timeout: 30000 })
   await expect.poll(() => page.evaluate(() => globalThis.__ordinaryProbe)).toBe(true)
   await expect(scene.locator('.product-scene-canvas')).toBeVisible()
 })
@@ -178,7 +180,7 @@ test('Локальная кнопка включает картинки и во�
   await button.click()
   await expect(button).toHaveAttribute('aria-pressed', 'false')
   await page.getByRole('tabpanel').locator('.product-visual').scrollIntoViewIfNeeded()
-  await expect(scene()).not.toHaveClass(/is-loading|has-error/)
+  await expect(scene()).not.toHaveClass(/is-loading|has-error/, { timeout: 30000 })
   await expect(scene().locator('.product-scene-canvas')).toBeVisible()
   await expect(scene().locator('img')).toHaveCount(0)
 })
