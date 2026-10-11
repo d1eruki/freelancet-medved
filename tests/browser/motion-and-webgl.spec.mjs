@@ -1,4 +1,26 @@
-import { test, expect as baseExpect } from './fixtures.mjs'
+import { test as baseTest, expect as baseExpect } from './fixtures.mjs'
+
+const test = baseTest.extend({
+  sceneDiagnostics: [async ({ page }, use, testInfo) => {
+    const stages = []
+    const prefix = '[product-scene-diagnostic] '
+    const capture = message => {
+      if (!message.text().startsWith(prefix) || stages.length >= 150) return
+      stages.push(JSON.parse(message.text().slice(prefix.length)))
+    }
+    page.on('console', capture)
+    try {
+      await use()
+    } finally {
+      page.off('console', capture)
+      if (testInfo.status !== testInfo.expectedStatus) {
+        console.info('[product-scene-failure] ' + JSON.stringify({
+          test: testInfo.title, project: testInfo.project.name, stages,
+        }))
+      }
+    }
+  }, { auto: true }],
+})
 
 const expect = baseExpect.configure({ timeout: 13000 })
 

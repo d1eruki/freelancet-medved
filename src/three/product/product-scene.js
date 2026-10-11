@@ -43,27 +43,42 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
     if (closed || failed || sharedScene || sceneStarting || !currentView) return
     sceneStarting = true
     const startingGeneration = generation
+    const started = import.meta.env.VITE_SCENE_DIAGNOSTICS === 'true' ? performance.now() : 0
+    // Только проверочная сборка CI: обычная сборка удаляет эти сообщения.
+    const diagnostic = (stage, details = {}) => {
+      if (import.meta.env.VITE_SCENE_DIAGNOSTICS === 'true') {
+        console.info('[product-scene-diagnostic] ' + JSON.stringify({
+          stage, generation: startingGeneration, elapsedMs: Math.round(performance.now() - started), ...details,
+        }))
+      }
+    }
     let cleanup = () => {}
     try {
       if (staticMode()) {
+        diagnostic('fallback', { reason: 'simulation' })
         failed = true
         currentView.can.emit('error', 'Показано изображение продукции.')
         return
       }
       // Запасные рендеры относятся к банкам слайдера; лаборатория стакана
       // сохраняет собственный запуск и поведение при reduced-motion.
+      diagnostic('warmup-start')
       warmup = currentView.glass ? null : warmupWebGL()
       const supported = warmup ? await warmup.ready : true
+      diagnostic('warmup-end', { supported })
       if (closed || !currentView || startingGeneration !== generation) return
       if (!supported) {
+        diagnostic('fallback', { reason: 'unsupported' })
         failed = true
         currentView.can.emit('error', 'Показано изображение продукции.')
         return
       }
+      diagnostic('imports-start')
       const [THREE, { GLTFLoader }, { RoomEnvironment }, { FXAAShader }] = await Promise.all([
         import('../three-runtime.js'), import('three/addons/loaders/GLTFLoader.js'),
         import('three/addons/environments/RoomEnvironment.js'), import('three/addons/shaders/FXAAShader.js'),
       ])
+      diagnostic('imports-end')
       if (closed || !currentView || startingGeneration !== generation) return
       const hasGlass = Boolean(currentView.glass)
       if (hasGlass && !loadGlassOptics) throw new Error('Для стакана требуется загрузчик оптики лаборатории')
@@ -77,7 +92,9 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       if (closed || !currentView || startingGeneration !== generation) return
       let glassSlot = currentView.glass || currentView.can, canSlot = currentView.can
       let article = currentView.root
+      diagnostic('renderer-start')
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' })
+      diagnostic('renderer-end')
       warmup?.release()
       let aborted = false
       cleanup = () => { aborted = true; renderer.dispose(); renderer.domElement.remove(); sharedScene = null }
@@ -93,9 +110,11 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       camera.lookAt(0, 0, 0)
       camera.updateMatrixWorld(true)
       let onEnvironmentReady = () => {}, lightSource = null
+      diagnostic('environment-start')
       const environment = createProductEnvironment({
         THREE, RoomEnvironment, renderer, view: currentView,
         onChange(texture) {
+          diagnostic('environment-updated')
           scene.environment = texture
           scene.traverse(node => {
             for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
@@ -105,13 +124,16 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
           onEnvironmentReady()
         },
       })
+      diagnostic('environment-end')
       cleanup = () => { aborted = true; lightSource?.dispose(); environment.dispose(); renderer.dispose(); renderer.domElement.remove(); sharedScene = null }
       sharedScene.dispose = cleanup
       scene.environment = environment.texture
       scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
       const loader = new GLTFLoader()
       const slots = hasGlass ? [glassSlot, canSlot] : [canSlot]
+      diagnostic('models-start')
       const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl)
+      diagnostic('models-end')
       canSlot = currentView?.can || canSlot; glassSlot = currentView?.glass || canSlot
       article = currentView?.root || article
       article.appendChild(renderer.domElement)
@@ -148,8 +170,8 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       const labelMaterials = prepareProductMaterials(THREE, canItem.model, environment.texture, lightSource, bankDisplay)
       const labels = createProductLabels({
         THREE, renderer, labelMaterials, preloadLabelUrls,
-        onPending() { items.forEach(item => { item.slot.ready.value = false }) },
-        onReady() { sync(true) },
+        onPending() { diagnostic('label-start'); items.forEach(item => { item.slot.ready.value = false }) },
+        onReady() { diagnostic('label-end'); sync(true) },
         onError(error) {
           failed = true
           console.error('Сцена продукции: загрузка этикетки', error)
@@ -332,7 +354,10 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       }
       function tick(time) {
         frame = 0
-        if (disposed || labels.pending || !visible || document.hidden) { lastTime = null; return }
+        if (disposed || labels.pending || !visible || document.hidden) {
+          diagnostic('frame-wait', { disposed, labelPending: labels.pending, visible, documentHidden: document.hidden })
+          lastTime = null; return
+        }
         try {
           resize()
           const canMoving = !motion.matches && canSlot.props.active && !canSlot.props.paused
@@ -341,6 +366,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
           if (canMoving) canItem.product.rotation.y = (canItem.product.rotation.y + elapsed * Math.PI / 10000) % (Math.PI * 2)
           if (bubblesMoving) optics.updateBubbles(elapsed / 1000)
           lastTime = time
+          if (!canSlot.ready.value) diagnostic('first-frame-start', { width: renderer.domElement.width, height: renderer.domElement.height })
           optics.render()
           if (canMoving || bubblesMoving || performance.now() < interactionUntil) frame = requestAnimationFrame(tick)
           else lastTime = null
@@ -394,7 +420,10 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       article.addEventListener('pointerleave', onInteraction)
       motion.addEventListener('change', sync)
       resize()
-      const onFrameReady = () => items.forEach(item => { item.slot.ready.value = true })
+      const onFrameReady = () => {
+        if (!canSlot.ready.value) diagnostic('first-frame-end')
+        items.forEach(item => { item.slot.ready.value = true })
+      }
       if (hasGlass) {
         optics = await glassOptics.createGlassRenderer(THREE, renderer, scene, camera, glassSlot.host, sync,
           onFrameReady, {
@@ -481,6 +510,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       sharedScene.retarget()
       labels.preload()
     } catch (error) {
+      diagnostic('initialization-error', { message: error.message })
       console.error('Сцена продукции: инициализация общей сцены', error)
       failed = true
       if (!closed && currentView) currentView.can.emit('error', 'Не удалось загрузить модели. Обновите страницу.')
