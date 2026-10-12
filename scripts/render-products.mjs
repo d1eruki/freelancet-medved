@@ -37,11 +37,11 @@ export async function renderProductBatch({ preset = 'card', products = Object.ke
       const page = await browser.newPage({viewport:{width:1440,height:1000},deviceScaleFactor:1,reducedMotion:'reduce'})
       try {
         await page.goto(`${endpoint}/materials/models/product-render-lab.html?manual`)
-        await page.waitForFunction(() => typeof window.runProductRender === 'function')
+        await page.waitForFunction(() => typeof globalThis.runProductRender === 'function')
         const result = await page.evaluate(async config => {
-          await window.runProductRender(config)
-          const layers = window.exportLayers()
-          return {metadata:window.renderInfo,png:window.exportPng(),layers:Object.fromEntries(Object.entries(layers.canvases).map(([key,canvas]) => [key,canvas.toDataURL('image/png')]))}
+          await globalThis.runProductRender(config)
+          const layers = globalThis.exportLayers()
+          return {metadata:globalThis.renderInfo,png:globalThis.exportPng(),layers:Object.fromEntries(Object.entries(layers.canvases).map(([key,canvas]) => [key,canvas.toDataURL('image/png')]))}
         },config)
         const files = []
         const encode = async data => { const bytes = Buffer.from(data.split(',')[1],'base64'); return format === 'webp' ? sharp(bytes).webp({lossless:true}).toBuffer() : bytes }

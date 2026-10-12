@@ -35,7 +35,7 @@ test('Статичные слои загружаются, а анимация н
   else { await page.getByRole('tab', { selected: true }).focus(); await page.keyboard.press('ArrowRight') }
   await expect(current).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
   await expect.poll(() => current.locator('.product-model').evaluate(model =>
-    model.getAnimations().some(animation => animation.playState === 'running')))).toBe(true)
+    model.getAnimations().some(animation => animation.playState === 'running'))).toBe(true)
   for (let sample = 0; sample < 6; sample++) {
     const offset = await current.evaluate(panel => {
       const model = panel.querySelector('.product-model.product-pair').getBoundingClientRect()
@@ -47,7 +47,7 @@ test('Статичные слои загружаются, а анимация н
   }
   await expect(current).not.toHaveClass(/is-text-hidden/)
   await expect.poll(() => current.locator('.product-model').evaluate(model =>
-    model.getAnimations().some(animation => animation.playState === 'running')))).toBe(false)
+    model.getAnimations().some(animation => animation.playState === 'running'))).toBe(false)
   await expectComposition(await switchDrink(page, isMobile, 'next', 'puare'))
   const panel = await switchDrink(page, isMobile, 'previous', 'sidr')
   await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
