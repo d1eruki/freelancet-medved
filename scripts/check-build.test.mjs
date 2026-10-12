@@ -6,7 +6,6 @@ import sharp from 'sharp'
 import { contacts } from '../src/data/contacts.js'
 import { metrikaCounterId } from '../src/utils/metrika.js'
 import { runInNewContext } from 'node:vm'
-import { parseGlb } from './vite/optimize-models-plugin.mjs'
 
 const output = path.resolve('dist')
 const staging = process.env.SITE_ENV === 'staging'
@@ -370,11 +369,9 @@ test('published output excludes sourcemaps and their references', async () => {
 })
 
 async function builtAsset(source, extension) {
-  const name = path.basename(source, path.extname(source))
-  const candidates = (await readdir(path.join(output, 'assets')))
-    .filter(file => file.startsWith(`${name}-`) && file.endsWith(extension))
-  assert.equal(candidates.length, 1, `expected one built asset for ${source}`)
-  return readFile(path.join(output, 'assets', candidates[0]))
+  const asset = manifest[source]
+  assert.ok(asset?.file.endsWith(extension), `missing built asset for ${source}`)
+  return readFile(path.join(output, asset.file))
 }
 
 async function assertTexturePreserved(original, optimized) {
@@ -390,67 +387,39 @@ async function assertTexturePreserved(original, optimized) {
   assert.ok(before.data.equals(after.data), 'texture pixels or transparency changed')
 }
 
-test('built product labels retain resolution, visible pixels and transparency', async () => {
-  const labelsPath = path.resolve('src/data/product-labels.js')
-  const source = await readFile(labelsPath, 'utf8')
-  const imports = [...source.matchAll(/^import \w+ from '([^']+\?url&lossless)'$/gm)]
-  assert.ok(imports.length > 0, 'missing lossless product label imports')
-  for (const [, imported] of imports) {
-    const original = await readFile(path.resolve(path.dirname(labelsPath), imported.split('?')[0]))
-    const optimized = await builtAsset(imported.split('?')[0], '.webp')
-    assert.ok(optimized.length < original.length, imported)
-    await assertTexturePreserved(original, optimized)
+test('slider layers preserve visible pixels, alpha and a shared frame', async () => {
+  for (const slug of ['medovuha', 'sidr', 'puare']) {
+    let frame
+    for (const layer of ['pair', 'pair-shadow']) {
+      const source = `src/assets/home/product-renders/${slug}-${layer}.webp`
+      const original = await readFile(source)
+      const built = await builtAsset(source, '.webp')
+      await assertTexturePreserved(original, built)
+      const metadata = await sharp(built).metadata()
+      const size = [metadata.width, metadata.height]
+      if (frame) assert.deepEqual(size, frame)
+      frame = size
+      const stats = await sharp(built).stats()
+      assert.ok(stats.channels[3]?.max > 0 && !stats.isOpaque, source)
+      const { data, info } = await sharp(built).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+      // Для всех моделей и теней сохраняется прозрачное поле по краям кадра.
+      for (let x = 0; x < info.width; x++) {
+        assert.equal(data[x * info.channels + 3], 0, source)
+        assert.equal(data[((info.height - 1) * info.width + x) * info.channels + 3], 0, source)
+      }
+      for (let y = 0; y < info.height; y++) {
+        assert.equal(data[(y * info.width) * info.channels + 3], 0, source)
+        assert.equal(data[(y * info.width + info.width - 1) * info.channels + 3], 0, source)
+      }
+    }
   }
 })
 
-test('optimized can model preserves geometry, materials and embedded texture pixels', async () => {
-  const source = 'src/assets/models/can-450ml.glb'
-  const original = await readFile(source)
-  const optimized = await builtAsset(source, '.glb')
-  assert.ok(optimized.length < original.length, 'model did not shrink')
-  const before = parseGlb(original)
-  const after = parseGlb(optimized)
-  const unchanged = json => Object.fromEntries(Object.entries(json)
-    .filter(([key]) => !['buffers', 'bufferViews', 'images', 'textures', 'extensionsUsed', 'extensionsRequired'].includes(key)))
-  assert.deepEqual(unchanged(after.json), unchanged(before.json))
-  assert.equal(after.json.bufferViews.length, before.json.bufferViews.length)
-  assert.equal(after.json.images.length, before.json.images.length)
-  const imageViews = new Set(before.json.images.map(image => image.bufferView))
-  const viewData = ({ json, binary }, index) => {
-    const view = json.bufferViews[index]
-    const offset = view.byteOffset || 0
-    assert.equal(offset % 4, 0, 'buffer view must be aligned')
-    assert.ok(offset + view.byteLength <= binary.length, 'buffer view exceeds BIN chunk')
-    return binary.subarray(offset, offset + view.byteLength)
+test('published site excludes Three, models and the removed WebGL mode', async () => {
+  const assets = await readdir(path.join(output, 'assets'))
+  assert.ok(!assets.some(file => /\.glb$|three-runtime|webgl-warmup/.test(file)))
+  for (const chunk of Object.values(manifest).filter(item => item.file.endsWith('.js'))) {
+    const source = await readFile(path.join(output, chunk.file), 'utf8')
+    assert.doesNotMatch(source, /WebGLRenderer|Картинки вместо 3D/)
   }
-  for (const [index, view] of before.json.bufferViews.entries()) {
-    if (imageViews.has(index)) continue
-    assert.deepEqual({ ...after.json.bufferViews[index], byteOffset: 0 }, { ...view, byteOffset: 0 })
-    assert.ok(viewData(before, index).equals(viewData(after, index)), `geometry buffer ${index} changed`)
-  }
-  for (const [index, image] of before.json.images.entries()) {
-    const builtImage = after.json.images[index]
-    assert.deepEqual({ ...builtImage, mimeType: image.mimeType }, image)
-    assert.equal(builtImage.mimeType, 'image/webp')
-    await assertTexturePreserved(viewData(before, image.bufferView), viewData(after, builtImage.bufferView))
-  }
-  assert.ok(after.json.extensionsUsed.includes('EXT_texture_webp'))
-  assert.ok(after.json.extensionsRequired.includes('EXT_texture_webp'))
-  const restoredTextures = after.json.textures.map(texture => {
-    const restored = structuredClone(texture)
-    restored.source = restored.extensions.EXT_texture_webp.source
-    delete restored.extensions.EXT_texture_webp
-    if (!Object.keys(restored.extensions).length) delete restored.extensions
-    return restored
-  })
-  assert.deepEqual(restoredTextures, before.json.textures)
-})
-
-test('Three runtime stays on demand and excludes unused audio and geometry exports', async () => {
-  const id = Object.keys(manifest).find(id => manifest[id].name === 'three-runtime')
-  assert.ok(manifest[id]?.isDynamicEntry, 'Three runtime must be loaded on demand')
-  assert.ok(!collectChunks(entry).has(id), 'Three runtime loads on every page')
-  const code = (await Promise.all([...collectChunks(id)].map(chunk =>
-    readFile(path.join(output, manifest[chunk].file), 'utf8')))).join('\n')
-  assert.doesNotMatch(code, /\b(?:AudioAnalyser|PositionalAudio|TorusKnotGeometry)\b/)
 })

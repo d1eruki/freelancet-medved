@@ -1,3 +1,4 @@
+import { productRenderSettings } from '../../data/product-render-settings.js'
 import { preloadLabelUrls } from '../../data/product-labels.js'
 import { disposeProductModel, loadProductModels, prepareProductModels } from './product-models.js'
 import { createProductPostprocess, prepareProductMaterials } from './product-materials.js'
@@ -8,11 +9,11 @@ import { warmupWebGL } from './webgl-warmup.js'
 
 export const productSceneKey = Symbol('product-scene')
 
-// Один контекст WebGL на слайдер. Смена владельца DOM сохраняет модели и оптику.
-export function createProductScene({ loadGlassOptics, staticMode = () => false } = {}) {
+// Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
+export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false } = {}) {
   let currentView = null, closed = false, failed = false
   let bankOptics = null
-  const sceneSettings = { camera: [0, 0.88, 5] }
+  const sceneSettings = productRenderSettings.camera
 
   function canvasToScreen(THREE, element, canvas, rotationOverride) {
     const rect = element.getBoundingClientRect()
@@ -38,7 +39,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
   let warmup = null
   let generation = 0
   const views = new Set()
-  const sceneQuality = Object.freeze({ maxModelPixels: 720, maxPixelRatio: 1.5, samples: 4 })
+  const sceneQuality = productRenderSettings.quality
   async function startSharedScene() {
     if (closed || failed || sharedScene || sceneStarting || !currentView) return
     sceneStarting = true
@@ -50,9 +51,8 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
         currentView.can.emit('error', 'Показано изображение продукции.')
         return
       }
-      // Запасные рендеры относятся к банкам слайдера; лаборатория стакана
-      // сохраняет собственный запуск и поведение при reduced-motion.
-      warmup = currentView.glass ? null : warmupWebGL()
+      // Служебный экспорт и лаба запускаются напрямую, без проверки аппаратного GPU.
+      warmup = currentView.glass || exportRender ? null : warmupWebGL()
       const supported = warmup ? await warmup.ready : true
       if (closed || !currentView || startingGeneration !== generation) return
       if (!supported) {
@@ -77,7 +77,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       if (closed || !currentView || startingGeneration !== generation) return
       let glassSlot = currentView.glass || currentView.can, canSlot = currentView.can
       let article = currentView.root
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' })
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power', preserveDrawingBuffer: exportRender })
       warmup?.release()
       let aborted = false
       cleanup = () => { aborted = true; renderer.dispose(); renderer.domElement.remove(); sharedScene = null }
@@ -88,9 +88,9 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       renderer.toneMapping = THREE.NoToneMapping
       article.appendChild(renderer.domElement)
       const scene = new THREE.Scene()
-      const camera = new THREE.OrthographicCamera(-1.28, 1.28, 1.28, -1.28, 0.1, 20)
-      camera.position.set(...sceneSettings.camera)
-      camera.lookAt(0, 0, 0)
+      const camera = new THREE.OrthographicCamera(-sceneSettings.halfHeight, sceneSettings.halfHeight, sceneSettings.halfHeight, -sceneSettings.halfHeight, sceneSettings.near, sceneSettings.far)
+      camera.position.set(...sceneSettings.position)
+      camera.lookAt(...sceneSettings.target)
       camera.updateMatrixWorld(true)
       let onEnvironmentReady = () => {}, lightSource = null
       const environment = createProductEnvironment({
@@ -110,23 +110,36 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       scene.environment = environment.texture
       scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
       const loader = new GLTFLoader()
-      const slots = hasGlass ? [glassSlot, canSlot] : [canSlot]
+      const slots = (hasGlass ? [glassSlot, canSlot] : [canSlot]).map(slot => modelSource && slot.props.bank ? { ...slot, props: { ...slot.props, source: modelSource } } : slot)
       const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl)
       canSlot = currentView?.can || canSlot; glassSlot = currentView?.glass || canSlot
       article = currentView?.root || article
       article.appendChild(renderer.domElement)
       if (aborted || closed || !currentView || startingGeneration !== generation) { models.forEach(model => disposeProductModel(model.scene)); cleanup(); return }
+      let exportLayer = null, displayMesh = null
       let optics, disposed = false, frame = 0, lastTime = null, interactionUntil = 0, visible = true, renderedSize = ''
       const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
       const { finalTarget, fxaaUniforms, fxaa } = createProductPostprocess(THREE, FXAAShader, sceneQuality.samples)
       const bankDisplay = { value: false }
       const items = prepareProductModels(THREE, models, hasGlass ? [glassSlot, canSlot] : [canSlot])
       const glassItem = hasGlass ? items[0] : null, canItem = items[items.length - 1]
+      // У меньшей банки размеры записаны в GLB. Сохраняем единый масштаб лабы,
+      // вместо растягивания 330 мл до размеров принятого эталона 450 мл.
+      const canMetadata = models[models.length - 1].userData
+      if (canMetadata.heightMeters && canMetadata.diameterMeters) {
+        canItem.product.scale.x *= canMetadata.diameterMeters / 0.066
+        canItem.product.scale.z *= canMetadata.diameterMeters / 0.066
+        canItem.product.scale.y *= canMetadata.heightMeters / 0.168
+        canItem.product.position.y = canMetadata.heightMeters / 0.1495 - 1
+        canItem.product.updateMatrixWorld(true)
+        canItem.productBounds.setFromObject(canItem.product)
+        canItem.compositionBounds.setFromObject(canItem.product, true)
+      }
       const canPlacement = new THREE.Group()
       canPlacement.matrixAutoUpdate = false
       canPlacement.add(canItem.product)
       if (glassItem) scene.add(glassItem.product)
-      scene.add(canPlacement)
+      if (!glassOnly) scene.add(canPlacement)
       const groundY = glassItem?.productBounds.min.y ?? canItem.productBounds.min.y
       lightSource = createProductLight(THREE, renderer, scene, groundY)
       canItem.model.traverse(node => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true } })
@@ -141,7 +154,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
         scene.add(glassShadowPlacement)
       }
       const profile = hasGlass ? glassOptics.createBankProfile(THREE, canItem.product, canItem.productBounds) : null
-      bankOptics = hasGlass ? { product: canItem.product, placement: canPlacement, profile,
+      bankOptics = hasGlass && !glassOnly ? { product: canItem.product, placement: canPlacement, profile,
         height: canItem.productBounds.max.y - canItem.productBounds.min.y,
         center: canItem.productBounds.getCenter(new THREE.Vector3()),
       } : null
@@ -157,7 +170,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
           cleanup()
         },
       })
-      let glassRect, unionRect, pixelRatio = 1, compositionOffset = 0, layoutSignature = ''
+      let glassRect, unionRect, framePadding = 0, pixelRatio = 1, compositionOffset = 0, layoutSignature = ''
       function layoutKey(articleRect, glassRect, canRect) {
         return JSON.stringify([
           articleRect.width, articleRect.height, window.devicePixelRatio,
@@ -170,7 +183,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       const sizeBuffer = new THREE.Vector2()
       function setView(capture) {
         const aspect = glassRect.width / glassRect.height
-        const halfHeight = 1.28 / Math.min(aspect, 1)
+        const halfHeight = sceneSettings.halfHeight / Math.min(aspect, 1)
         const halfWidth = halfHeight * aspect
         referenceProjection.makeOrthographic(-halfWidth, halfWidth, halfHeight, -halfHeight, camera.near, camera.far)
         if (capture) {
@@ -184,7 +197,8 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
         }
         camera.updateProjectionMatrix()
         camera.updateMatrixWorld(true)
-        lightSource.setCounterClip(currentView.counter.getBoundingClientRect(), capture ? glassRect : unionRect)
+        const viewport = capture ? glassRect : unionRect
+        lightSource.setCounterClip(exportRender ? { left: -1e6, top: -1e6, right: 1e6, bottom: 1e6 } : currentView.counter.getBoundingClientRect(), viewport)
       }
       function placementMatrix(slot, capture, depth, rotationOverride) {
         const glassUV = capture ? canvasToScreen(THREE, glassSlot.host, glassSlot.proxy, rotationOverride === undefined ? undefined : 0).invert()
@@ -218,7 +232,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
         const slot = item.slot
         const productBounds = item.productBounds
         const { width, height } = slot.host.getBoundingClientRect()
-        const aspect = width / height, halfHeight = 1.28 / Math.min(aspect, 1)
+        const aspect = width / height, halfHeight = sceneSettings.halfHeight / Math.min(aspect, 1)
         const left = -halfHeight * aspect, right = halfHeight * aspect
         const viewProjection = new THREE.Matrix4().makeOrthographic(left, right, halfHeight, -halfHeight, camera.near, camera.far).multiply(camera.matrixWorldInverse)
         // Контактная тень остаётся под проекцией основания при любом размере.
@@ -268,6 +282,11 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
         }
         // Поле для фильтрации тени и сглаживания краёв; границы следуют за моделью.
         bounds.left -= 32; bounds.top -= 32; bounds.right += 32; bounds.bottom += 32
+        // Дополнительное поле мягкой тени при экспорте. Старый кадр задаёт
+        // масштаб и верхний край композиции на сайте, а не новые пустые поля.
+        framePadding = exportRender ? 128 : 0
+        bounds.left -= framePadding; bounds.top -= framePadding
+        bounds.right += framePadding; bounds.bottom += framePadding
         bounds.width = bounds.right - bounds.left; bounds.height = bounds.bottom - bounds.top
         return bounds
       }
@@ -290,7 +309,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
           const rect = slot.host.getBoundingClientRect()
           if (!rect.width || !rect.height) return
           const aspect = rect.width / rect.height
-          const halfWidth = 1.28 / Math.min(aspect, 1) * aspect
+          const halfWidth = sceneSettings.halfHeight / Math.min(aspect, 1) * aspect
           for (const x of [compositionBounds.min.x, compositionBounds.max.x])
             for (const y of [compositionBounds.min.y, compositionBounds.max.y])
               for (const z of [compositionBounds.min.z, compositionBounds.max.z]) {
@@ -337,8 +356,8 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
         }
         try {
           resize()
-          const canMoving = !motion.matches && canSlot.props.active && !canSlot.props.paused
-          const bubblesMoving = hasGlass && !motion.matches && glassSlot.props.active && !glassSlot.props.paused
+          const canMoving = !exportRender && !motion.matches && canSlot.props.active && !canSlot.props.paused
+          const bubblesMoving = !exportRender && hasGlass && !motion.matches && glassSlot.props.active && !glassSlot.props.paused
           const elapsed = lastTime === null ? 0 : Math.min(time - lastTime, 100)
           if (canMoving) canItem.product.rotation.y = (canItem.product.rotation.y + elapsed * Math.PI / 10000) % (Math.PI * 2)
           if (bubblesMoving) optics.updateBubbles(elapsed / 1000)
@@ -402,19 +421,21 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       if (hasGlass) {
         optics = await glassOptics.createGlassRenderer(THREE, renderer, scene, camera, glassSlot.host, sync,
           onFrameReady, {
-            canPlacement, bankDisplay, setView, placeBank, lightSource,
+            canPlacement: glassOnly ? new THREE.Group() : canPlacement, bankDisplay, setView, placeBank, lightSource,
             foamEnabled: () => glassSlot.props.foam,
             drinkPreset: () => glassOptics.drinkPreset(glassSlot.props.drink),
             glassBufferSize: () => new THREE.Vector2(Math.max(1, Math.round(glassRect.width * pixelRatio)), Math.max(1, Math.round(glassRect.height * pixelRatio))),
             beginFinal(matrix) {
               setView(false); placeBank(false)
-              canPlacement.visible = true
+              canPlacement.visible = exportLayer !== 'glass'
+              lightSource.receiver.visible = exportLayer !== 'glass' && exportLayer !== 'pair'
               bankDisplay.value = true
               matrix.copy(new THREE.Matrix3().set(1 / unionRect.width, 0, -unionRect.left / unionRect.width,
                 0, -1 / unionRect.height, 1 + unionRect.top / unionRect.height, 0, 0, 1)).multiply(canvasToScreen(THREE, glassSlot.host, glassSlot.proxy))
               renderer.setRenderTarget(finalTarget)
             },
             finishFinal(mesh) {
+              displayMesh = mesh
               canPlacement.visible = false
               mesh.material = fxaa
               renderer.setRenderTarget(null)
@@ -449,6 +470,86 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
       }
       optics.resize()
       sharedScene = { dispose: cleanup, sync,
+        exportLayers() {
+          if (disposed || !currentView.can.ready.value) throw new Error('Сцена ещё не готова')
+          resize()
+          const canvases = {}
+          const exportScene = new THREE.Scene()
+          const exportQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fxaa)
+          exportQuad.frustumCulled = false
+          exportScene.add(exportQuad)
+          const renderPass = () => {
+            renderer.setRenderTarget(finalTarget)
+            renderer.render(scene, camera)
+            renderer.setRenderTarget(null)
+            renderer.render(exportScene, camera)
+          }
+          const save = key => {
+            const copy = document.createElement('canvas')
+            copy.width = renderer.domElement.width; copy.height = renderer.domElement.height
+            copy.getContext('2d').drawImage(renderer.domElement, 0, 0)
+            canvases[key] = copy
+          }
+          const lightPosition = lightSource.spotlight.position.clone()
+          const targetPosition = lightSource.spotlight.target.position.clone()
+          const previousTarget = renderer.getRenderTarget()
+          const visibility = { can: canPlacement.visible, receiver: lightSource.receiver.visible, glass: glassShadowPlacement?.visible, display: displayMesh?.visible }
+          const previousDisplay = bankDisplay.value
+          try {
+            if (hasGlass) {
+              exportLayer = glassOnly ? 'glass' : 'pair'
+              optics.invalidate()
+              optics.render()
+              save(glassOnly ? 'glass' : 'pair')
+            }
+            if (displayMesh) displayMesh.visible = false
+            setView(false); placeBank(false)
+            bankDisplay.value = true
+            renderer.setRenderTarget(null)
+            lightSource.receiver.visible = false
+            canPlacement.visible = true
+            if (glassShadowPlacement) glassShadowPlacement.visible = true
+            lightSource.invalidate()
+            renderPass()
+            if (!hasGlass) save('can')
+            if (shadowStyle === 'contact') {
+              lightSource.spotlight.position.set(...productRenderSettings.shadows.contact)
+              lightSource.spotlight.target.position.set(0, groundY, 0)
+            }
+            for (const kind of glassOnly ? ['glass'] : hasGlass ? ['pair'] : ['can']) {
+              canPlacement.visible = kind === 'can' || kind === 'pair'
+              if (glassShadowPlacement) glassShadowPlacement.visible = kind === 'glass' || kind === 'pair'
+              lightSource.receiver.visible = false
+              lightSource.invalidate()
+              renderer.render(scene, camera)
+              canPlacement.visible = false
+              if (glassShadowPlacement) glassShadowPlacement.visible = false
+              lightSource.receiver.visible = true
+              renderPass()
+              save(`${kind}-shadow`)
+            }
+            const origins = {}
+            for (const item of items) {
+              const rect = item.slot.host.getBoundingClientRect()
+              const [x, y] = item.slot.host.style.getPropertyValue('--model-origin').split(' ').map(Number.parseFloat)
+              origins[item === canItem ? 'can' : 'glass'] = `${(rect.left + x - unionRect.left) / unionRect.width * 100}% ${(rect.top + y - unionRect.top) / unionRect.height * 100}%`
+            }
+            return { heightScale: unionRect.height / (unionRect.height - framePadding * 2), topOffset: -framePadding / (unionRect.height - framePadding * 2) * 100, origins, center: (article.getBoundingClientRect().left + article.getBoundingClientRect().width / 2 - unionRect.left) / unionRect.width * 100, width: renderer.domElement.width, height: renderer.domElement.height, canvases }
+          } finally {
+            exportLayer = null
+            lightSource.spotlight.position.copy(lightPosition)
+            lightSource.spotlight.target.position.copy(targetPosition)
+            lightSource.receiver.visible = visibility.receiver
+            canPlacement.visible = visibility.can
+            if (glassShadowPlacement) glassShadowPlacement.visible = visibility.glass
+            if (displayMesh) displayMesh.visible = visibility.display
+            bankDisplay.value = previousDisplay
+            renderer.setRenderTarget(previousTarget)
+            lightSource.invalidate()
+            optics.invalidate?.()
+            exportQuad.geometry.dispose()
+          }
+        },
         capture() {
           if (!currentView.can.ready.value || (currentView.glass && !currentView.glass.ready.value) || disposed) return
           resize()
@@ -497,6 +598,10 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false }
 
 
   return {
+    exportLayers() {
+      if (!exportRender) throw new Error('Экспорт доступен только в служебном рендере')
+      return sharedScene?.exportLayers()
+    },
     activate(view) {
       if (closed || currentView === view) return
       views.add(view)

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Мастерская рендеров продукции</title>
+<style>
+body{margin:0;font:16px system-ui;background:#eee;color:#222}form{display:flex;flex-wrap:wrap;gap:16px;padding:24px}label{display:grid;gap:8px}select,button{font:inherit;padding:8px}output{display:block;padding:0 24px 16px}[data-render-output]{background:repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 0/24px 24px;overflow:auto}[data-render-output] img{max-width:100%;height:auto}
+</style>
+</head>
+<body>
+<form>
+<label>Напиток<select name="drink"></select></label>
+<label>Объекты<select name="mode"><option value="glass">Стакан</option><option value="can">Банка</option><option value="pair">Стакан и банка</option></select></label>
+<label>Объём банки<select name="volume"><option value="450">450 мл</option><option value="330">330 мл</option></select></label>
+<label>Тень<select name="shadow"><option value="contact">Под продуктом — каталог</option><option value="cast">Вбок — слайдер</option></select></label>
+<button>Рендерить</button><button type="button" id="download" disabled>Скачать PNG</button>
+</form>
+<output aria-live="polite"></output>
+<div data-render-output></div>
+<script type="module">
+import { drinkPresets } from '../../src/data/drink-presets.js'
+import { canLabelPresets } from '../../src/data/product-render-settings.js'
+import { mountProductRender } from '../../src/three/product/product-renderer.js'
+const form = document.querySelector('form')
+const status = document.querySelector('output')
+const download = document.querySelector('#download')
+const query = new URLSearchParams(location.search)
+for (const [key, recipe] of Object.entries(drinkPresets)) form.elements.drink.add(new Option(recipe.name, key))
+for (const name of ['drink','mode','volume','shadow']) if (query.has(name)) form.elements[name].value = query.get(name)
+if (!query.has('drink')) form.elements.drink.value = 'cider-antonovka'
+function sync() {
+  const preset = Object.values(canLabelPresets).find(item => item.drink === form.elements.drink.value)
+  for (const option of form.elements.mode.options) option.disabled = option.value !== 'glass' && !preset
+  if (!preset) form.elements.mode.value = 'glass'
+  form.elements.volume.disabled = form.elements.mode.value === 'glass'
+}
+form.addEventListener('change', sync)
+async function render() {
+  sync()
+  const values = Object.fromEntries(new FormData(form))
+  const preset = Object.values(canLabelPresets).find(item => item.drink === values.drink)
+  for (const control of form.elements) control.disabled = true
+  window.renderReady = false
+  window.renderError = null
+  status.textContent = 'Рендерим…'
+  try {
+    await mountProductRender({ drink: values.drink, canOnly: values.mode === 'can', pair: values.mode === 'pair', shadow: values.shadow,
+      modelSource: new URL(`../../src/assets/models/can-${values.volume || 450}ml.glb`, import.meta.url).href,
+      label: preset ? new URL(`../customer-design/labels/cans-330ml-500ml/${preset.label}.png`, import.meta.url).href : '' })
+    status.textContent = 'Готово. Стакан, банка и тени доступны отдельно через window.exportLayers(); общий кадр — window.exportPng().'
+    const parameters = new URLSearchParams(values)
+    history.replaceState(null, '', `?${parameters}`)
+  } catch (error) {
+    window.renderError = String(error.stack || error)
+    status.textContent = error.message
+    console.error(error)
+  } finally {
+    for (const control of form.elements) control.disabled = false
+    download.disabled = !window.renderReady
+    sync()
+  }
+}
+form.addEventListener('submit', event => { event.preventDefault(); void render() })
+download.addEventListener('click', () => {
+  const link = document.createElement('a')
+  link.href = window.exportPng()
+  link.download = `${form.elements.drink.value}-${form.elements.mode.value}-${form.elements.shadow.value}.png`
+  link.click()
+})
+await render()
+</script>
+</body>
+</html>

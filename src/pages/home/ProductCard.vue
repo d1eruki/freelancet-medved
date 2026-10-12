@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import ProductScene from '../../components/product-scene/ProductScene.vue'
+import ProductComposition from '../../components/ProductComposition.vue'
 import CircleArrow from '../../components/CircleArrow.vue'
 
 const props = defineProps({
@@ -36,7 +36,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 
 <template>
   <article
-    class="product-card relative isolate block overflow-hidden bg-transparent"
+    class="product-card relative isolate block bg-transparent"
     :class="{
       'is-text-hidden': textHidden,
       'is-moving-forward': motionDirection === 'forward',
@@ -83,21 +83,13 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
         </button>
 
         <a
-          class="product-interactive product-visual relative z-1 min-w-0 max-w-64 flex-1 aspect-square focus-visible:outline-4 focus-visible:outline-brand sm:max-w-72 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
+          class="product-interactive product-visual relative z-1 min-w-0 max-w-96 flex-1 aspect-square focus-visible:outline-4 focus-visible:outline-brand sm:max-w-112 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
           draggable="false"
           :href="product.href"
           :tabindex="active ? 0 : -1"
           :aria-label="`Подробнее о напитке «${product.name}»`"
         >
-          <ProductScene
-            can-only
-            :active="active"
-            :paused="dragging || Boolean(motionDirection)"
-            :drink="product.drink"
-            :can-label="product.canLabel"
-            :pattern-slug="product.slug"
-            :fallback="product.image"
-          />
+          <ProductComposition :renders="product.renders" />
         </a>
 
         <button
@@ -123,32 +115,14 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   opacity: 0;
 }
 
-:deep(.product-scene-snapshot) {
-  transform-origin: 50% 90%;
-}
-
-:deep(.product-scene-fallback) {
-  /* Рендер вдвое шире квадрата модели: центр банки — четверть изображения. */
-  transform-origin: 25% 90%;
-  transition: rotate 500ms;
-}
-
-.is-moving-forward :deep(.product-scene-transform),
-.is-moving-forward :deep(.product-scene-snapshot),
-.is-moving-forward :deep(.product-scene-fallback) {
+.is-moving-forward :deep(.product-layer) {
   animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.is-moving-backward :deep(.product-scene-transform),
-.is-moving-backward :deep(.product-scene-snapshot),
-.is-moving-backward :deep(.product-scene-fallback) {
+.is-moving-backward :deep(.product-layer) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.is-dragging :deep(.product-scene-transform),
-.is-dragging :deep(.product-scene-fallback) {
-  rotate: v-bind(dragAngleCss);
-}
+.is-dragging :deep(.product-composition), .is-dragging :deep(.product-motion-layer), .is-dragging :deep(.product-layer) { transition: none; }
+.is-dragging :deep(.product-layer) { rotate: v-bind(dragAngleCss); }
 
 @keyframes product-inertia-forward {
   0% {
@@ -194,9 +168,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  :deep(.product-scene-transform),
-  :deep(.product-scene-snapshot),
-  :deep(.product-scene-fallback) {
+  :deep(.product-layer) {
     animation: none;
     rotate: none;
     transition: none;

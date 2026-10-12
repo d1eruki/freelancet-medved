@@ -1,35 +1,12 @@
 <script setup>
 import { sitePath } from '../../utils/site-path'
-import { computed, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CircleArrow from '../../components/CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
-import { productLabels } from '../../data/product-labels.js'
+import { productSliderRenders } from '../../data/product-slider-renders.js'
 import { catalogCategories } from '../../data/catalog'
-import { createProductScene, productSceneKey } from '../../three/product/product-scene.js'
 import barCounterTexture from '../../assets/home/bar-counter-texture.png'
 import productSliderBackground from '../../assets/home/product-slider-background.png'
-import meadFallback from '../../assets/home/product-fallbacks/medovuha.webp'
-import ciderFallback from '../../assets/home/product-fallbacks/sidr.webp'
-import perryFallback from '../../assets/home/product-fallbacks/puare.webp'
-
-const simulateFallback = ref(false)
-const showFallbackControl = ref(import.meta.env.DEV || import.meta.env.VITE_SITE_ENV === 'staging')
-onMounted(() => {
-  const hostname = window.location.hostname
-  showFallbackControl.value = !['medved.beer', 'www.medved.beer'].includes(hostname)
-    && (showFallbackControl.value || ['localhost', '127.0.0.1', '[::1]'].includes(hostname))
-})
-const productScene = createProductScene({ staticMode: () => simulateFallback.value })
-provide(productSceneKey, productScene)
-
-function toggleFallback() {
-  simulateFallback.value = !simulateFallback.value
-  productScene.reset()
-}
-
-
-
-const productFallbacks = { medovuha: meadFallback, sidr: ciderFallback, puare: perryFallback }
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
   name: category.name,
@@ -37,13 +14,18 @@ const products = catalogCategories.map((category) => ({
   description: category.description,
   varieties: category.introduction,
   href: sitePath(`/katalog/${category.slug}/`),
-  image: productFallbacks[category.slug],
-  drink: category.slug === 'medovuha' ? 'mead' : 'cider',
-  canLabel: productLabels[category.slug] || '',
+  renders: productSliderRenders[category.slug],
 }))
 
 const activeIndex = ref(0)
 const tabList = ref(null)
+const track = ref(null)
+const panelWidth = ref(0)
+let resizeObserver
+onMounted(() => {
+  resizeObserver = new ResizeObserver(([entry]) => { panelWidth.value = entry.contentRect.width })
+  resizeObserver.observe(track.value)
+})
 const isTransitioning = ref(false)
 const isTextHidden = ref(false)
 const motionDirection = ref('')
@@ -54,7 +36,7 @@ let gesture = null
 let suppressClick = false
 
 const textFadeDuration = 360
-const imageMotionDuration = 820
+const imageMotionDuration = 920
 let slideTimer
 let revealTimer
 
@@ -190,16 +172,12 @@ function showNext() {
 
 onBeforeUnmount(() => {
   clearTransitionTimers()
-  productScene.dispose()
+  resizeObserver?.disconnect()
 })
 </script>
 
 <template>
   <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-surface nav:h-svh" aria-labelledby="products-title">
-    <button v-if="showFallbackControl" type="button" :aria-pressed="simulateFallback"
-      class="absolute bottom-3 right-3 z-10 rounded-full bg-brand px-4 py-3 text-label font-bold text-surface focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
-      @click="toggleFallback"
-    >Картинки вместо 3D: {{ simulateFallback ? 'вкл' : 'выкл' }}</button>
     <img
       :src="barCounterTexture"
       data-product-counter
@@ -237,9 +215,10 @@ onBeforeUnmount(() => {
         @click.capture="preventDragClick"
       >
         <div
+          ref="track"
           class="product-track flex nav:h-full"
           :class="{ 'is-dragging': isDragging }"
-          :style="{ transform: trackTransform }"
+          :style="{ transform: trackTransform, '--product-translation': `${-activeIndex * panelWidth + dragOffset}px` }"
         >
           <ProductCard
             v-for="(product, index) in products"
@@ -317,7 +296,9 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .product-track {
-  transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
+  --product-track-duration: 700ms;
+  --product-track-easing: cubic-bezier(0.65, 0, 0.35, 1);
+  transition: transform var(--product-track-duration) var(--product-track-easing);
   will-change: transform;
 }
 
@@ -325,4 +306,7 @@ onBeforeUnmount(() => {
   transition: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .product-track { transition: none; }
+}
 </style>

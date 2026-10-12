@@ -1071,7 +1071,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       const rect = section.getBoundingClientRect()
       const patternRect = pattern?.getBoundingClientRect()
       const counterRect = counter?.getBoundingClientRect()
-      const next = JSON.stringify([rect.width, rect.height, patternRect?.width, patternRect?.height, patternRect?.left - rect.left, patternRect?.top - rect.top, counterRect?.top - rect.top, counterRect?.height, counter?.complete, patternVersion])
+      const next = JSON.stringify([rect.width, rect.height, patternRect?.width, patternRect?.height, patternRect?.left - rect.left, patternRect?.top - rect.top, counterRect?.top - rect.top, counterRect?.height, counter?.complete, patternVersion, shared.exportBackdrop?.()])
       if (next !== signature) {
         signature = next
         const scale = Math.min(1.5, 2048 / Math.max(rect.width, rect.height))
@@ -1085,7 +1085,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
           uniforms.backdropTexture.value = texture
         }
         context.setTransform(scale, 0, 0, scale, 0, 0)
-        context.fillStyle = getComputedStyle(section).backgroundColor
+        context.fillStyle = shared.exportBackdrop?.() || getComputedStyle(section).backgroundColor
         context.fillRect(0, 0, rect.width, rect.height)
         if (counter?.complete && counter.naturalWidth) context.drawImage(counter, counterRect.left - rect.left, counterRect.top - rect.top, counterRect.width, counterRect.height)
         if (patternImage && patternRect) {
@@ -1164,7 +1164,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
         uniforms.halfSize.value.set(camera.right * 10 / modelScale, camera.top * 10 / modelScale)
         renderer.toneMapping = THREE.NoToneMapping
         shared.bankDisplay.value = false
-        shared.canPlacement.visible = true
+        shared.canPlacement.visible = !shared.exportBackdrop?.()
         background.visible = true
         screenMesh.visible = false
         renderer.setRenderTarget(backdrop)
