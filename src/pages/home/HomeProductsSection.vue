@@ -195,7 +195,7 @@ onBeforeUnmount(() => {
       <span class="absolute inset-0 bg-surface/85" />
     </div>
 
-    <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-28">
+    <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-40">
       <div class="grid items-end gap-6 pb-8 wide:grid-cols-3 wide:gap-12 wide:pb-10">
         <h2 id="products-title" class="min-w-0 font-display text-h2 text-center text-foreground uppercase nav:text-left wide:col-span-2">
           Продукция

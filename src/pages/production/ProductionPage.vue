@@ -1,11 +1,13 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { IconArrowLeft, IconArrowRight } from '@tabler/icons-vue'
 import Snap from 'lenis/snap'
 import { sitePath } from '../../utils/site-path'
 import brewingImageUrl from '../../assets/production/production-brewing.png'
 import fermentationImageUrl from '../../assets/production/production-fermentation.png'
 import conditioningImageUrl from '../../assets/production/production-conditioning.png'
 import bottlingImageUrl from '../../assets/production/production-bottling.png'
+import ingredientsBackgroundUrl from '../../assets/production/ingredients-background.png'
 import productionHeroBackgroundUrl from '../../assets/heroes/production/background.png'
 import productionHeroMiddleUrl from '../../assets/heroes/production/middle.png'
 import productionHeroMiddle2Url from '../../assets/heroes/production/middle-2.png'
@@ -15,7 +17,6 @@ import InfoCard from '../../components/InfoCard.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
 import ProductionProcessStep from './ProductionProcessStep.vue'
-import SectionWatermark from '../../components/SectionWatermark.vue'
 
 const middleTankLayout = {
   mobile: { enabled: false, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
@@ -103,8 +104,13 @@ const processSteps = [
 ]
 
 const activeStepIndex = ref(0)
+const processNavigation = [
+  { direction: -1, label: 'Предыдущий этап', icon: IconArrowLeft },
+  { direction: 1, label: 'Следующий этап', icon: IconArrowRight },
+]
 const processScrollSection = ref(null)
-let touchStartY = null
+const processStepList = ref(null)
+let touchStart = null
 const desktopProcess = typeof window === 'undefined'
   ? { matches: false, addEventListener() {}, removeEventListener() {} }
   : window.matchMedia('(min-width: 54rem)')
@@ -137,19 +143,31 @@ function selectStep(index) {
 }
 
 function handleProcessTouchStart(event) {
-  touchStartY = event.changedTouches[0]?.clientY ?? null
+  if (desktopProcess.matches && processStepList.value?.contains(event.target)) {
+    touchStart = null
+    return
+  }
+  const touch = event.changedTouches[0]
+  touchStart = touch ? { x: touch.clientX, y: touch.clientY } : null
 }
 
 function handleProcessTouchEnd(event) {
-  if (touchStartY === null) return
-  const distance = touchStartY - (event.changedTouches[0]?.clientY ?? touchStartY)
-  touchStartY = null
-  if (Math.abs(distance) > 40) selectStep(activeStepIndex.value + Math.sign(distance))
+  if (!touchStart) return
+  const touch = event.changedTouches[0]
+  const distanceX = touchStart.x - (touch?.clientX ?? touchStart.x)
+  const distanceY = touchStart.y - (touch?.clientY ?? touchStart.y)
+  touchStart = null
+  const distance = desktopProcess.matches ? distanceY : distanceX
+  if (Math.abs(distance) > 40 && (desktopProcess.matches || Math.abs(distanceX) > Math.abs(distanceY))) {
+    selectStep(activeStepIndex.value + Math.sign(distance))
+  }
 }
 
 function handleProcessKeydown(event) {
-  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
-  const nextIndex = activeStepIndex.value + (event.key === 'ArrowDown' ? 1 : -1)
+  const nextKey = desktopProcess.matches ? 'ArrowDown' : 'ArrowRight'
+  const previousKey = desktopProcess.matches ? 'ArrowUp' : 'ArrowLeft'
+  if (event.key !== nextKey && event.key !== previousKey) return
+  const nextIndex = activeStepIndex.value + (event.key === nextKey ? 1 : -1)
   if (nextIndex < 0 || nextIndex >= processSteps.length) return
   event.preventDefault()
   selectStep(nextIndex)
@@ -229,15 +247,15 @@ const qualityPoints = [
 
     <HeroDivider :image-url="productionDividerUrl" />
 
-    <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="production-history-title">
+    <section class="bg-surface pt-20 pb-28 text-foreground sm:pt-24 sm:pb-32 wide:pt-40 wide:pb-40" aria-labelledby="production-history-title">
       <div class="site-container grid gap-12 site-grid nav:gap-6">
-        <div class="nav:col-span-4">
+        <div class="order-2 nav:order-1 nav:col-span-4">
           <p class="font-display text-h1 text-brand">1874</p>
           <p class="mt-3 font-display text-h4 text-brand">1880</p>
           <p class="mt-4 text-label font-extrabold tracking-widest uppercase">Годы строительства</p>
         </div>
 
-        <div class="nav:col-span-8">
+        <div class="order-1 nav:order-2 nav:col-span-8">
           <h2 id="production-history-title" class="max-w-5xl font-display text-h2 uppercase">
             Завод с историей
           </h2>
@@ -248,10 +266,18 @@ const qualityPoints = [
       </div>
     </section>
 
-    <section class="relative overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="production-ingredients-title">
-      <SectionWatermark text="Натурально" />
+    <section class="relative flex min-h-svh items-center overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="production-ingredients-title">
+      <img
+        :src="ingredientsBackgroundUrl"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        class="pointer-events-none absolute inset-0 size-full object-cover object-center"
+      >
+      <div class="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent from-15% via-black/60 via-45% to-black/60" aria-hidden="true" />
 
-      <div class="site-container relative z-10">
+      <div class="site-container relative z-10 grid site-grid">
+        <div class="nav:col-span-8 nav:col-start-5">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="production-ingredients-title" class="font-display text-h2 uppercase nav:col-span-8">
             Честный состав
@@ -272,6 +298,7 @@ const qualityPoints = [
             variant="ingredient"
           />
         </ul>
+        </div>
       </div>
     </section>
 
@@ -282,13 +309,18 @@ const qualityPoints = [
           aria-labelledby="production-process-title"
           @keydown="handleProcessKeydown"
         >
-          <div class="site-container nav:grid nav:h-full nav:grid-cols-2 nav:gap-10">
-            <div class="flex flex-col nav:justify-center">
+          <div
+            class="site-container nav:grid nav:h-full nav:grid-cols-2 nav:gap-10"
+            @touchstart.passive="handleProcessTouchStart"
+            @touchend.passive="handleProcessTouchEnd"
+            @touchcancel.passive="touchStart = null"
+          >
+            <div class="flex flex-col touch-pan-y nav:justify-center">
               <h2 id="production-process-title" class="font-display text-h2 uppercase">
                 Четыре этапа
               </h2>
 
-              <ol class="mt-12 flex flex-col gap-6 nav:mt-8 nav:gap-8">
+              <ol ref="processStepList" class="mt-12 flex gap-10 py-2 sm:mt-16 nav:mt-8 nav:flex-col nav:gap-8 nav:py-0">
                 <ProductionProcessStep
                   v-for="(step, index) in processSteps"
                   :key="step.number"
@@ -299,23 +331,48 @@ const qualityPoints = [
                   @select="selectStep(index)"
                 />
               </ol>
+
+              <p
+                id="production-step-description"
+                class="mt-6 max-w-3xl text-body font-medium text-subtle nav:hidden"
+                aria-live="polite"
+                aria-atomic="true"
+              >{{ processSteps[activeStepIndex].text }}</p>
             </div>
 
             <div
-              class="relative mt-12 h-96 overflow-hidden sm:mt-16 nav:mt-0 nav:h-full"
-              @touchstart.passive="handleProcessTouchStart"
-              @touchend.passive="handleProcessTouchEnd"
+              id="production-step-images"
+              class="relative mt-10 aspect-[4/3] overflow-hidden touch-pan-y nav:mt-0 nav:aspect-auto nav:h-full nav:touch-auto"
             >
               <img
                 v-for="(step, index) in processSteps"
                 :key="step.number"
-                class="absolute inset-x-0 h-[70%] w-full object-cover transition-[top,opacity] duration-700 ease-in-out motion-reduce:transition-none"
+                class="absolute left-0 top-1/2 h-full w-full -translate-y-1/2 translate-x-[calc(var(--step-offset)*110%)] object-contain transition-[translate,opacity] duration-700 ease-in-out motion-reduce:transition-none nav:top-[calc(50%_+_var(--step-offset)*77%)] nav:h-[70%] nav:translate-x-0 nav:object-cover nav:transition-[top,opacity]"
                 :class="Math.abs(index - activeStepIndex) > 1 ? 'opacity-0' : index === activeStepIndex ? 'opacity-100' : 'opacity-35'"
-                :style="{ top: `${50 + (index - activeStepIndex) * 77}%`, transform: 'translateY(-50%)' }"
+                :style="{ '--step-offset': index - activeStepIndex }"
                 :src="step.image"
                 :alt="index === activeStepIndex ? `Иллюстрация этапа «${step.title}»` : ''"
                 :loading="index === 0 ? 'eager' : 'lazy'"
               >
+            </div>
+
+            <div class="mt-10 grid w-full grid-cols-[3rem_1fr_3rem] items-center gap-4 nav:hidden" role="group" aria-label="Переключение этапов производства">
+              <span class="col-start-2 row-start-1 text-center text-label font-extrabold text-subtle" aria-live="polite" aria-atomic="true">
+                {{ processSteps[activeStepIndex].number }} / {{ processSteps.length.toString().padStart(2, '0') }}
+              </span>
+              <button
+                v-for="control in processNavigation"
+                :key="control.direction"
+                type="button"
+                class="row-start-1 flex size-12 items-center justify-center rounded-full border border-brand text-brand transition-colors hover:bg-brand hover:text-surface disabled:cursor-default disabled:border-subtle/30 disabled:text-subtle/30 disabled:hover:bg-transparent disabled:hover:text-subtle/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                :class="control.direction === -1 ? 'col-start-1' : 'col-start-3'"
+                :aria-label="control.label"
+                aria-controls="production-step-description production-step-images"
+                :disabled="activeStepIndex + control.direction < 0 || activeStepIndex + control.direction >= processSteps.length"
+                @click="selectStep(activeStepIndex + control.direction)"
+              >
+                <component :is="control.icon" class="size-6" aria-hidden="true" />
+              </button>
             </div>
           </div>
         </section>

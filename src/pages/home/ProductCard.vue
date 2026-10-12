@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import ProductComposition from '../../components/ProductComposition.vue'
 import CircleArrow from '../../components/CircleArrow.vue'
+import BaseButton from '../../components/BaseButton.vue'
 
 const props = defineProps({
   product: {
@@ -56,22 +57,21 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
         </p>
       </div>
 
-      <div class="product-copy relative z-2 order-3 mt-8 w-full max-w-md nav:order-none nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:mt-0 nav:max-w-none nav:self-center">
-        <p class="mx-auto max-w-md text-body font-medium nav:mx-0">
+      <div class="contents nav:relative nav:z-2 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:block nav:w-full nav:self-center">
+        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium nav:mx-0 nav:mt-0">
           {{ product.varieties }}
         </p>
 
-        <a
-          class="product-interactive group mt-10 inline-flex items-center gap-3 text-label font-bold uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+        <BaseButton
+          class="product-copy product-interactive relative z-2 order-3 -mt-6 inline-flex items-center justify-center nav:mt-10"
           :href="product.href"
           :tabindex="active ? 0 : -1"
         >
-          <span class="secondary-action py-3">Подробнее</span>
-          <CircleArrow hover="detail" />
-        </a>
+          Подробнее
+        </BaseButton>
       </div>
 
-      <div class="order-2 mt-8 flex w-full items-center justify-center gap-2 nav:contents">
+      <div class="relative -top-4 order-2 mt-8 flex w-full items-center justify-center gap-2 nav:static nav:top-auto nav:contents">
         <button
           class="group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
           type="button"

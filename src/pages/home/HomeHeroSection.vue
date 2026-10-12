@@ -109,7 +109,7 @@ onBeforeUnmount(() => {
     <span class="home-hero-overlay pointer-events-none absolute inset-0 z-1" aria-hidden="true" />
     <span class="home-hero-corner-overlay pointer-events-none absolute inset-0 z-1" aria-hidden="true" />
     <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-104 nav:pb-0 wide:pt-36">
-      <h1 id="hero-title" class="home-hero-title absolute top-28 left-0 z-2 w-full translate-y-0 px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6" :style="layerEntranceTimings.rise">
+      <h1 id="hero-title" class="home-hero-title absolute top-62 left-0 z-2 w-full -translate-y-full px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6" :style="layerEntranceTimings.rise">
         <span class="font-normal">Лапу приложили</span><br>
         к напиткам
       </h1>

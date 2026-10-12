@@ -15,7 +15,7 @@ let touchStart = null
 // Учитываем видимые границы PNG, чтобы прозрачные поля не смещали опору.
 const foregroundTransform = computed(() => {
   const [, , width, height] = activeRecipe.value.imageFrame.bounds
-  const scale = Math.min(650 / width, 470 / height)
+  const scale = Math.min(650 / width, 470 / height) * 1.15
   return `translate(${430 - width * scale / 2} ${875 - height * scale}) scale(${scale})`
 })
 
@@ -43,7 +43,7 @@ function finishTouch(event) {
 
 <template>
   <section
-    class="relative isolate min-h-svh overflow-hidden bg-brand pt-20 pb-4 text-surface sm:pt-24 sm:pb-6 nav:h-svh"
+    class="relative isolate h-svh overflow-hidden bg-brand pt-20 pb-[7svh] text-surface sm:pt-24 nav:pt-24 nav:pb-6"
     :style="{ '--slide-enter-x': `${direction * 24}px`, '--slide-leave-x': `${direction * -24}px` }"
     aria-labelledby="horeca-cocktails-title"
     aria-roledescription="карусель"
@@ -55,7 +55,7 @@ function finishTouch(event) {
       <source type="image/avif" :srcset="background.avifSrcset" sizes="100vw">
       <img class="size-full object-cover object-center" :src="background.src" :srcset="background.srcset" sizes="100vw" alt="" decoding="async">
     </picture>
-    <div class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-black/35 via-transparent to-black/20" aria-hidden="true" />
+    <div class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-black/65 via-black/35 to-black/20 nav:from-black/35 nav:via-transparent" aria-hidden="true" />
 
     <Transition name="cocktail-slide" mode="out-in">
       <svg
@@ -78,25 +78,25 @@ function finishTouch(event) {
       </svg>
     </Transition>
 
-    <div class="site-container relative flex min-h-0 flex-col nav:h-full">
+    <div class="site-container relative flex h-full min-h-0 flex-col">
       <h2 id="horeca-cocktails-title" class="shrink-0 font-display text-h2 break-words hyphens-auto uppercase">Коктейли на основе<br>наших напитков</h2>
 
       <div
         id="horeca-cocktail-slides"
-        class="mt-6 min-h-0 flex-1 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface sm:mt-8"
+        class="mt-6 min-h-0 flex-1 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface nav:mt-8"
         tabindex="0"
         aria-label="Рецепты коктейлей. Листайте стрелками или свайпом"
         @keydown.left.prevent="moveSlide(-1)"
         @keydown.right.prevent="moveSlide(1)"
       >
         <Transition name="cocktail-slide" mode="out-in" @after-enter="switching = false">
-          <div :key="activeRecipe.id" class="min-h-0 nav:h-full" role="group" aria-roledescription="слайд" :aria-label="`${activeIndex + 1} из ${cocktailRecipes.length}`">
-            <CocktailRecipeCard :recipe="activeRecipe" />
+          <div :key="activeRecipe.id" class="h-full min-h-0" role="group" aria-roledescription="слайд" :aria-label="`${activeIndex + 1} из ${cocktailRecipes.length}`">
+            <CocktailRecipeCard :recipe="activeRecipe" @previous="moveSlide(-1)" @next="moveSlide(1)" />
           </div>
         </Transition>
       </div>
 
-      <div class="mt-6 flex shrink-0 items-center justify-between gap-4">
+      <div class="mt-6 hidden shrink-0 items-center justify-between gap-4 nav:flex">
         <p class="text-label font-bold" aria-live="polite" aria-atomic="true">{{ activeIndex + 1 }} / {{ cocktailRecipes.length }}<span class="sr-only"> — {{ activeRecipe.name }}</span></p>
         <div class="flex gap-4">
           <button class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" type="button" aria-label="Предыдущий рецепт" aria-controls="horeca-cocktail-slides" @click="moveSlide(-1)">

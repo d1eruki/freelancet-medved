@@ -1,13 +1,13 @@
 <script setup>
-import logoUrl from '../assets/branding/brand-logo-3d.png'
+import logoUrl from '../assets/branding/brand-logo-seal-lithograph.png'
 </script>
 
 <template>
   <img
-    class="block aspect-[8/7] h-25 w-auto shrink-0 object-contain sm:h-30"
+    class="block aspect-1224/1285 h-33 w-auto shrink-0 object-contain sm:h-40"
     :src="logoUrl"
-    width="1600"
-    height="1400"
+    width="1224"
+    height="1285"
     alt=""
     aria-hidden="true"
     loading="eager"

@@ -10,26 +10,26 @@ const emit = defineEmits(['select'])
 </script>
 
 <template>
-  <li>
+  <li class="min-w-0 w-full shrink-0 nav:w-auto" :class="active ? 'block' : 'hidden nav:block'">
     <h3>
       <button
         type="button"
-        class="group flex w-full items-center gap-5 text-left transition-colors duration-700 ease-in-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+        class="group flex w-full items-center gap-4 text-left transition-colors duration-700 ease-in-out motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand nav:gap-5"
         :class="active ? 'text-brand' : 'text-subtle hover:text-foreground'"
         :aria-expanded="active"
-        :aria-controls="`production-step-description-${number}`"
+        :aria-controls="`production-step-description production-step-description-${number}`"
         @click="emit('select')"
       >
         <span
           class="flex size-10 shrink-0 items-center justify-center rounded-full text-label font-extrabold text-surface transition-colors duration-700 ease-in-out motion-reduce:transition-none"
           :class="active ? 'bg-brand' : 'bg-subtle group-hover:bg-foreground'"
         >{{ number }}</span>
-        <span class="font-display text-h4 uppercase">{{ title }}</span>
+        <span class="min-w-0 font-display text-h4 uppercase">{{ title }}</span>
       </button>
     </h3>
     <div
       :id="`production-step-description-${number}`"
-      class="grid transition-[grid-template-rows,opacity] duration-700 ease-in-out motion-reduce:transition-none"
+      class="hidden transition-[grid-template-rows,opacity] duration-700 ease-in-out motion-reduce:transition-none nav:grid"
       :class="active ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'"
       :aria-hidden="!active"
     >

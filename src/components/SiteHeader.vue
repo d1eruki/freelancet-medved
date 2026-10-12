@@ -3,6 +3,7 @@ import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BrandLogo from './BrandLogo.vue'
 import { navigation } from '../data/navigation'
+import headerRibbonUrl from '../../materials/image-generation/header-ribbon.png'
 
 const props = defineProps({
   lenis: { type: Object, default: null },
@@ -86,7 +87,7 @@ onBeforeUnmount(() => {
 
 <template>
   <header
-    class="site-header pointer-events-none fixed inset-x-0 top-0 z-50 w-full pt-3 pb-16 text-surface transition-transform duration-300 ease-out"
+    class="site-header pointer-events-none fixed inset-x-0 top-0 z-50 w-full pt-6 pb-16 text-surface transition-transform duration-300 ease-out"
     :class="isHeaderVisible ? 'translate-y-0' : '-translate-y-full'"
     :inert="!isHeaderVisible || undefined"
   >
@@ -97,19 +98,28 @@ onBeforeUnmount(() => {
 
       <nav
         id="main-navigation"
-        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out wide:static wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:grid-cols-7 wide:items-center wide:bg-transparent wide:p-0 wide:text-surface wide:shadow-none"
+        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out wide:relative wide:inset-auto wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:w-full wide:max-w-6xl wide:grid-cols-7 wide:items-center wide:justify-self-center wide:bg-transparent wide:p-0 wide:shadow-none"
         :class="isMenuOpen ? 'block' : 'hidden'"
         aria-label="Основная навигация"
       >
+        <img
+          class="pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
+          :src="headerRibbonUrl"
+          width="2172"
+          height="756"
+          alt=""
+          aria-hidden="true"
+        >
+
         <ul
           v-for="(group, groupIndex) in navigationGroups"
           :key="groupIndex"
-          class="flex flex-col gap-1 wide:col-span-3 wide:grid wide:items-center wide:justify-items-center wide:gap-0"
-          :class="groupIndex === 0 ? 'wide:col-start-1 wide:grid-cols-2' : 'wide:col-start-5 wide:grid-cols-3'"
+          class="relative flex flex-col gap-1 wide:col-span-3 wide:flex-row wide:items-center wide:gap-6"
+          :class="groupIndex === 0 ? 'wide:col-start-1 wide:justify-end wide:pr-6' : 'wide:col-start-5 wide:justify-start wide:pl-6'"
         >
           <li v-for="item in group" :key="item.href">
             <a
-              class="secondary-action block py-3 text-label font-extrabold tracking-wide uppercase"
+              class="nav-link block py-3 font-display text-label font-normal tracking-wide uppercase wide:whitespace-nowrap"
               :class="{ 'nav-link--current': isCurrentPage(item.href) }"
               :href="item.href"
               :aria-current="isCurrentPage(item.href) ? 'page' : undefined"
@@ -174,7 +184,11 @@ onBeforeUnmount(() => {
   transform: translateY(-2px) rotate(-45deg);
 }
 
-.nav-link--current::after {
-  transform: scaleX(1);
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-link--current {
+  color: #7f1d1d;
+  font-weight: 700;
+  -webkit-text-stroke: 0.5px currentColor;
 }
 </style>

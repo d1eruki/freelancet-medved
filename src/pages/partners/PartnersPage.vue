@@ -94,7 +94,7 @@ const pointCountLabel = computed(() => {
 
     <HeroDivider :image-url="partnersDividerUrl" />
 
-    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="partners-list-title">
+    <section class="section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="partners-list-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <div class="nav:col-span-8">

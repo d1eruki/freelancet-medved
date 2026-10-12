@@ -2,25 +2,15 @@ import * as THREE from 'three'
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js'
 import logoSvg from '../assets/branding/brand-logo-mark.svg?raw'
 
-// Одна сцена для шапки и отдельного HTML-рендера.
-export function createBrandLogoRenderer({ width, height, pixelRatio = 1 }) {
+export function createBrandLogoModel() {
   const source = 'src/assets/branding/brand-logo-mark.svg'
   const depth = 5
   const pitch = -8, yaw = 17, roll = 0
   const geometries = [], materials = []
-  const renderer = new THREE.WebGLRenderer({
-    alpha: true, antialias: true, preserveDrawingBuffer: true,
-  })
-  renderer.setClearColor(0x000000, 0)
-  renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = THREE.NoToneMapping
-
   function dispose() {
     geometries.forEach(geometry => geometry.dispose())
     materials.forEach(material => material.dispose())
-    renderer.dispose()
   }
-
   try {
     // В исходном SVG inline-стиль Display P3 перекрывает обычный fill.
     // Three.js не читает color(display-p3 ...); используем исходный sRGB fill.
@@ -31,10 +21,9 @@ export function createBrandLogoRenderer({ width, height, pixelRatio = 1 }) {
     const data = new SVGLoader().parse(new XMLSerializer().serializeToString(svgDocument))
     const [originX, originY, svgWidth, svgHeight] = data.xml.getAttribute('viewBox')
       .trim().split(/[\s,]+/).map(Number)
-    const scene = new THREE.Scene()
     const logo = new THREE.Group()
     let shapeCount = 0, triangleCount = 0
-
+  
     for (const path of data.paths) {
       if (path.userData.style.fill === 'none') continue
       // Лицевая сторона сохраняет исходный цвет; свет моделирует торцы.
@@ -60,11 +49,46 @@ export function createBrandLogoRenderer({ width, height, pixelRatio = 1 }) {
       }
     }
     if (!shapeCount) throw new Error('В исходном логотипе не найдены заполненные контуры')
-
+  
     logo.rotation.set(
       THREE.MathUtils.degToRad(pitch), THREE.MathUtils.degToRad(yaw),
       THREE.MathUtils.degToRad(roll), 'YXZ',
     )
+    logo.name = 'medved-original-logo'
+    return {
+      logo, dispose,
+      info: {
+        source, depth, pitch, yaw, roll, shapeCount, triangleCount,
+        sourceDimensions: [svgWidth, svgHeight],
+        colors: data.paths.filter(path => path.userData.style.fill !== 'none')
+          .map(path => `#${path.color.getHexString(THREE.SRGBColorSpace)}`),
+      },
+    }
+  } catch (error) {
+    dispose()
+    throw error
+  }
+}
+
+// Рендер исходного логотипа с сохранёнными светом и камерой.
+export function createBrandLogoRenderer({ width, height, pixelRatio = 1 }) {
+  let model
+  const renderer = new THREE.WebGLRenderer({
+    alpha: true, antialias: true, preserveDrawingBuffer: true,
+  })
+  renderer.setClearColor(0x000000, 0)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  renderer.toneMapping = THREE.NoToneMapping
+
+  function dispose() {
+    model?.dispose()
+    renderer.dispose()
+  }
+
+  try {
+    model = createBrandLogoModel()
+    const { logo } = model
+    const scene = new THREE.Scene()
     scene.add(logo)
     const ambient = new THREE.HemisphereLight(0xffffff, 0x806442, 1)
     const key = new THREE.DirectionalLight(0xffffff, 1.5)
@@ -79,12 +103,7 @@ export function createBrandLogoRenderer({ width, height, pixelRatio = 1 }) {
     camera.position.set(center.x, center.y, center.z + 400)
     camera.lookAt(center)
     camera.updateMatrixWorld(true)
-    const info = {
-      width, height, source, depth, pitch, yaw, roll, shapeCount, triangleCount,
-      sourceDimensions: [svgWidth, svgHeight],
-      colors: data.paths.filter(path => path.userData.style.fill !== 'none')
-        .map(path => `#${path.color.getHexString(THREE.SRGBColorSpace)}`),
-    }
+    const info = { width, height, ...model.info }
 
     function render() {
       const aspect = info.width / info.height

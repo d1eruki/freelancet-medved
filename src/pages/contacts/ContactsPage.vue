@@ -28,7 +28,7 @@ import { sitePath } from '../../utils/site-path'
 
     <HeroDivider :image-url="contactsDividerUrl" />
 
-    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="contacts-details-title">
+    <section class="section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="contacts-details-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="contacts-details-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase nav:col-span-8">Связаться</h2>
