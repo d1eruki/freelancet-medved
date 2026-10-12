@@ -137,16 +137,18 @@ const awards = [
       </div>
     </section>
 
-    <section class="relative min-h-svh overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="durdin-title">
+    <section class="relative min-h-svh overflow-hidden bg-brand pt-20 text-surface sm:pt-24 nav:pb-24 wide:py-28" aria-labelledby="durdin-title">
       <SectionWatermark text="Дурдин" />
 
       <div class="site-container relative z-10">
         <div class="grid gap-12 site-grid nav:gap-6">
-          <div class="nav:col-span-5">
-            <p class="font-display text-h1 text-surface">1874</p>
-            <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
+          <div class="contents nav:block nav:col-span-5">
+            <div class="nav:contents">
+              <p class="font-display text-h1 text-surface">1874</p>
+              <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
+            </div>
             <img
-              class="mt-75 ml-35 block -scale-x-250 scale-250 h-auto w-full max-w-sm absolute"
+              class="order-last mx-auto -mb-10 block h-auto w-full max-w-64 -scale-x-100 nav:absolute nav:order-none nav:mt-75 nav:mb-0 nav:ml-35 nav:max-w-sm nav:-scale-x-250 nav:scale-250"
               :src="durdinPortraitUrl"
               alt="Стилизованный портрет Ивана Алексеевича Дурдина с подмигиванием"
               loading="lazy"

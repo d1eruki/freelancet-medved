@@ -1,8 +1,9 @@
+import { productRenderSettings } from '../../data/product-render-settings.js'
 import { drinkPresets } from '../../data/drink-presets.js'
 import glassModelUrl from '../../assets/models/glass.glb?url'
 
 // Оптика и модель стакана подключаются только лабораторией.
-const sceneQuality = Object.freeze({ bodySamples: 4, baseSamples: 8, traceSteps: 18, reflectionSteps: 6 })
+
 
   function profile(THREE, mesh) {
     const position = mesh.geometry.attributes.position
@@ -214,10 +215,16 @@ const sceneQuality = Object.freeze({ bodySamples: 4, baseSamples: 8, traceSteps:
 
 export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
   async function createGlassRenderer(THREE, renderer, scene, camera, element, onBackgroundReady, onFrameReady, shared) {
+    const sceneQuality = shared.quality || productRenderSettings.quality
     const section = getView().section
     const counter = getView().counter
     let pattern = getView().pattern
     const canvas = document.createElement('canvas')
+    const refractionImage = section.querySelector('[data-product-refraction-background]')
+    const refractionCanvas = refractionImage ? document.createElement('canvas') : null
+    const refractionContext = refractionCanvas?.getContext('2d')
+    const refractionTexture = refractionCanvas ? new THREE.CanvasTexture(refractionCanvas) : null
+    if (refractionTexture) refractionTexture.colorSpace = THREE.SRGBColorSpace
     const context = canvas.getContext('2d')
     if (!context) throw new Error('Could not create the refraction backdrop')
     let texture = new THREE.CanvasTexture(canvas)
@@ -346,6 +353,8 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       bankProfileTree: { value: emptyBankTree }, bankTreeCount: { value: 0 },
       bankInverse: { value: new THREE.Matrix4() }, bankSize: { value: new THREE.Vector3() },
       bankFrame: { value: backdrop.texture }, bankExposure: { value: 1 },
+      separateReflections: { value: Boolean(refractionImage) },
+      refractionTexture: { value: refractionTexture || texture },
       backdropTexture: { value: texture }, screenToBackdrop: { value: screenToBackdrop },
       liquidAbsorption: { value: new THREE.Vector3(...drinkPresets.cider.absorption) },
       liquidScattering: { value: drinkPresets.cider.scattering },
@@ -371,7 +380,9 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       uniform vec4 foamShape;
       uniform vec2 foamWall[8];
       uniform vec2 resolution;
-      uniform sampler2D backdropTexture;
+      uniform sampler2D backdropTexture,refractionTexture;
+      uniform bool separateReflections;
+      bool reflectionPass=false;
       uniform mat4 labProjection;
       uniform vec3 rayOrigin, rayRight, rayUp, rayDirection;
       uniform vec2 halfSize, backdropScale, backdropOffset;
@@ -744,6 +755,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       vec3 backdropColor(Hit h,vec3 p,vec3 d){
         if(h.object==-1)return environment(d);
         if(h.object==7)return bankColor(h,p,d);
+        if(separateReflections&&!reflectionPass)return textureLod(refractionTexture,backdropUV(p),0.0).rgb;
         return textureLod(backdropTexture,backdropUV(p),0.0).rgb;
       }
       vec3 panelBackdrop(vec3 p,vec3 d){
@@ -810,11 +822,15 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
             float foamT=intersectFoam(o,d,h.t);
             if(foamT>0.0)return color+weight*(scattering(medium,foamT)+absorption(medium,foamT)*foamSurfaceColor(o+d*foamT));
           }
-          if(h.object==-1){recordRay(o,d,weight,variance);return color;}
+          if(h.object==-1){
+            if(separateReflections)return color+weight*filteredStaticRayColor(o,d,variance);
+            recordRay(o,d,weight,variance);return color;}
           variance+=scatteringVariance(medium,h.t);
           color+=weight*scattering(medium,h.t);
           weight*=absorption(medium,h.t);
-          if(h.object!=1&&h.object!=2){recordRay(o,d,weight,variance);return color;}
+          if(h.object!=1&&h.object!=2){
+            if(separateReflections)return color+weight*filteredStaticRayColor(o,d,variance);
+            recordRay(o,d,weight,variance);return color;}
           int next=nextMedium(h,p,d);float from=ior(medium),to=ior(next);
           vec3 n=interfaceNormal(h,d,from/to);
           float f=fresnel(clamp(dot(-d,n),0.0,1.0),from,to);
@@ -845,7 +861,11 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
           vec3 reflected=reflect(d,n);
           if(f>=0.9999)d=reflected;
           else{
-            if(f>0.001)color+=reflectionPath(offsetOrigin(p,h,reflected),reflected,medium,weight*f,variance);
+            if(f>0.001){
+              reflectionPass=true;
+              color+=reflectionPath(offsetOrigin(p,h,reflected),reflected,medium,weight*f,variance);
+              reflectionPass=false;
+            }
             weight*=1.0-f;d=refract(d,n,from/to);medium=next;
           }
           o=offsetOrigin(p,h,d);
@@ -1074,7 +1094,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       const next = JSON.stringify([rect.width, rect.height, patternRect?.width, patternRect?.height, patternRect?.left - rect.left, patternRect?.top - rect.top, counterRect?.top - rect.top, counterRect?.height, counter?.complete, patternVersion, shared.exportBackdrop?.()])
       if (next !== signature) {
         signature = next
-        const scale = Math.min(1.5, 2048 / Math.max(rect.width, rect.height))
+        const scale = Math.min(sceneQuality.backdropScale, sceneQuality.backdropPixels / Math.max(rect.width, rect.height))
         const width = Math.max(1, Math.round(rect.width * scale)), height = Math.max(1, Math.round(rect.height * scale))
         if (canvas.width !== width || canvas.height !== height) {
           texture.dispose()
@@ -1083,6 +1103,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
           texture.colorSpace = THREE.SRGBColorSpace
           backgroundMaterial.uniforms.map.value = texture
           uniforms.backdropTexture.value = texture
+          if (!refractionTexture) uniforms.refractionTexture.value = texture
         }
         context.setTransform(scale, 0, 0, scale, 0, 0)
         context.fillStyle = shared.exportBackdrop?.() || getComputedStyle(section).backgroundColor
@@ -1105,6 +1126,13 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
           context.globalAlpha = 1
         }
         texture.needsUpdate = true
+        // Статичный хиро преломляет собственный фон. Отражённые ветви
+        // запекаются из того же светлого окружения, что у слайдера.
+        if (refractionImage?.complete && refractionImage.naturalWidth) {
+          refractionCanvas.width = width; refractionCanvas.height = height
+          refractionContext.drawImage(refractionImage, 0, 0, width, height)
+          refractionTexture.needsUpdate = true
+        }
       }
       screenToBackdrop.copy(new THREE.Matrix3().set(1 / rect.width, 0, -rect.left / rect.width, 0, -1 / rect.height, 1 + rect.top / rect.height, 0, 0, 1))
         .multiply(canvasToScreen(THREE, element, getView().glass.proxy))
@@ -1212,7 +1240,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
         disposed = true
         counter?.removeEventListener('load', backgroundReady)
         requestVersion++
-        backdrop.dispose(); texture.dispose(); tree.texture.dispose(); emptyBankTree.dispose()
+        backdrop.dispose(); texture.dispose(); refractionTexture?.dispose(); tree.texture.dispose(); emptyBankTree.dispose()
         screenMesh.geometry.dispose(); opticsMaterial.dispose(); displayMaterial.dispose(); opticsCache.dispose()
         bubbleCache.dispose(); bubblePathMaterial.dispose(); bubblePositions.dispose()
         background.geometry.dispose(); backgroundMaterial.dispose()

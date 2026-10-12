@@ -1,8 +1,9 @@
 <script setup>
 import productionImageUrl from '../../assets/production-real.png'
-import { catalogCategories, meadExplanation } from '../../data/catalog'
+import marionLogoUrl from '../../assets/home/marion-logo.png'
+import marionPromoUrl from '../../assets/home/marion-promo.webp'
+import { catalogCategories } from '../../data/catalog'
 import SectionWatermark from '../../components/SectionWatermark.vue'
-import InfoCard from '../../components/InfoCard.vue'
 </script>
 
 <template>
@@ -81,12 +82,45 @@ import InfoCard from '../../components/InfoCard.vue'
         </article>
       </div>
 
-      <InfoCard
-        class="mt-10 text-foreground"
-        :title="meadExplanation.title"
-        :text="meadExplanation.text"
-        variant="group"
-      />
+      <article
+        class="mt-10 grid gap-10 rounded-3xl bg-surface p-6 text-foreground sm:p-8 nav:grid-cols-2 nav:items-center wide:p-10"
+        aria-labelledby="marion-title"
+      >
+        <div>
+          <h3 id="marion-title">
+            <img
+              class="h-auto w-full max-w-sm"
+              :src="marionLogoUrl"
+              alt="MARION"
+              width="897"
+              height="260"
+              loading="lazy"
+            >
+          </h3>
+          <p class="mt-6 font-display text-h4 text-brand uppercase">
+            Когда мёда становится мало — мы идём в дикие яблочные сады
+          </p>
+          <p class="mt-6 text-body text-subtle">
+            <strong class="font-extrabold text-foreground">MARION CIDERS</strong> — наш сайд-проект, в котором мы исследуем чистую эстетику натурального сидроделия. 100% натуральные ингредиенты, устойчивая технология, баланс между классическими сидровыми традициями и смелыми крафтовыми релизами: от сухих охмелённых сортов до сочных ягодных профилей.
+          </p>
+        </div>
+
+        <figure class="relative isolate overflow-hidden rounded-2xl">
+          <img
+            class="block h-auto w-full"
+            :src="marionPromoUrl"
+            alt="Девушка с бокалом сидра MARION на красном фоне"
+            width="1530"
+            height="1000"
+            loading="lazy"
+          >
+          <figcaption class="absolute right-6 bottom-6 left-6 sm:right-8 sm:bottom-8 sm:left-8">
+            <span class="inline-block rounded-full bg-brand px-6 py-3 text-label font-extrabold text-surface uppercase">
+              Скоро
+            </span>
+          </figcaption>
+        </figure>
+      </article>
     </div>
   </section>
 </template>

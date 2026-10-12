@@ -195,7 +195,8 @@ const catalogProducts = {
   ],
   },
   'antonovka-cider': {
-  name: 'Сидр «Антоновка»',
+  name: 'Сидр «Ветка Антоновки»',
+  popular: true,
   details: 'жемчужный, газированный, полусухой',
   description: 'Игристый полусухой сидр с легендарной яблочной кислинкой. Заряжает бодростью и аристократическим оптимизмом лучше любого утреннего кофе.',
   variants: [
@@ -221,10 +222,9 @@ const catalogProducts = {
 
 export const catalogCategories = catalogCategoryDefinitions.map(({ products, ...category }) => ({
   ...category,
-  items: products.filter((product) => product.enabled !== false).map((product) => catalogProducts[product.id]),
+  items: products
+    .filter((product) => product.enabled !== false)
+    .map((product) => catalogProducts[product.id])
+    .sort((a, b) => Number(Boolean(b.popular)) - Number(Boolean(a.popular))),
 }))
 
-export const meadExplanation = {
-  title: 'Что такое медовуха',
-  text: 'Медовуха — напиток на основе мёда. В нашей линейке — светлая и тёмная медовуха, фруктовые и ягодные вкусы.',
-}

@@ -10,6 +10,16 @@ let cursorX = -100
 let cursorY = -100
 let finePointer
 let isEnabled = false
+let dialogObserver
+
+function raiseCursor() {
+  const element = cursorElement.value
+  if (!isEnabled || typeof element?.showPopover !== 'function') return
+
+  // Повторное открытие помещает курсор выше недавно открытого диалога.
+  if (element.matches(':popover-open')) element.hidePopover()
+  element.showPopover()
+}
 
 function renderCursor() {
   cursorElement.value?.style.setProperty('--cursor-x', `${cursorX}px`)
@@ -99,6 +109,13 @@ function enableCursor() {
   }
 
   isEnabled = true
+  raiseCursor()
+  dialogObserver = new MutationObserver((mutations) => {
+    if (mutations.some(({ target }) => target instanceof HTMLDialogElement && target.open)) {
+      raiseCursor()
+    }
+  })
+  dialogObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] })
   document.documentElement.classList.add('has-custom-cursor')
   document.addEventListener('pointermove', handlePointerMove)
   document.addEventListener('pointerover', setCursorState)
@@ -115,6 +132,11 @@ function disableCursor() {
   }
 
   isEnabled = false
+  dialogObserver?.disconnect()
+  dialogObserver = null
+  if (typeof cursorElement.value?.hidePopover === 'function' && cursorElement.value.matches(':popover-open')) {
+    cursorElement.value.hidePopover()
+  }
   document.documentElement.classList.remove('has-custom-cursor')
   document.removeEventListener('pointermove', handlePointerMove)
   document.removeEventListener('pointerover', setCursorState)
@@ -155,7 +177,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="cursorElement" class="custom-cursor" aria-hidden="true">
+  <div ref="cursorElement" class="custom-cursor" popover="manual" aria-hidden="true">
     <span class="custom-cursor__visual">
       <img class="custom-cursor__paw" :src="pawUrl" alt="">
       <span ref="cursorLabel" class="custom-cursor__label"></span>
@@ -170,14 +192,25 @@ onBeforeUnmount(() => {
   --cursor-action-shadow: color-mix(in srgb, var(--color-brand) 70%, var(--color-foreground));
   position: fixed;
   z-index: 1000;
+  inset: auto;
   top: 0;
   left: 0;
   width: 1px;
   height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  background: transparent;
   pointer-events: none;
   opacity: 0;
   transform: translate3d(var(--cursor-x), var(--cursor-y), 0);
   transition: opacity 160ms ease;
+}
+
+.custom-cursor::backdrop {
+  background: transparent;
+  pointer-events: none;
 }
 
 .custom-cursor.is-visible {

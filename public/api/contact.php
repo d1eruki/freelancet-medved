@@ -40,7 +40,7 @@ if (!is_object($decoded)) {
 }
 $data = get_object_vars($decoded);
 
-foreach (array('name', 'phone', 'email', 'message', 'website') as $field) {
+foreach (array('name', 'phone', 'email', 'message', 'website', 'source', 'pageUrl') as $field) {
     if (array_key_exists($field, $data) && !is_string($data[$field])) {
         respond(422, array('message' => 'Поля формы должны содержать текст.'));
     }
@@ -52,6 +52,8 @@ $email = isset($data['email']) ? trim((string) $data['email']) : '';
 $message = isset($data['message']) ? trim((string) $data['message']) : '';
 $website = isset($data['website']) ? trim((string) $data['website']) : '';
 $consent = isset($data['consent']) && $data['consent'] === true;
+$source = isset($data['source']) ? trim($data['source']) : '';
+$pageUrl = isset($data['pageUrl']) ? trim($data['pageUrl']) : '';
 
 if ($website !== '') {
     respond(200, array('ok' => true));
@@ -82,6 +84,27 @@ if (!$consent) {
     respond(422, array('message' => 'Необходимо согласие на обработку персональных данных.'));
 }
 
+// Источник определяет серверное название и тип заявки, а не текст посетителя.
+$sources = array(
+    'home-contact' => array('label' => 'Главная → «Связаться с нами»', 'type' => 'Общее обращение'),
+    'contacts-inquiry' => array('label' => 'Контакты → «Запрос на поставку»', 'type' => 'Запрос на поставку'),
+    'horeca-hero-tasting' => array('label' => 'HoReCa → первый экран', 'type' => 'Дегустационный сет'),
+);
+if ($source !== '' && !isset($sources[$source])) {
+    respond(422, array('message' => 'Неизвестный источник заявки.'));
+}
+// Старые версии формы могут отправлять заявку без этих полей.
+$sourceDetails = $source !== '' ? $sources[$source] : array('label' => 'Не указан', 'type' => 'Общее обращение');
+if ($pageUrl !== '') {
+    if (strlen($pageUrl) > 2048 || preg_match('/[\x00-\x20\x7f]/', $pageUrl)
+        || !filter_var($pageUrl, FILTER_VALIDATE_URL)
+        || !in_array(strtolower((string) parse_url($pageUrl, PHP_URL_SCHEME)), array('http', 'https'), true)
+        || parse_url($pageUrl, PHP_URL_USER) !== null || parse_url($pageUrl, PHP_URL_PASS) !== null) {
+        respond(422, array('message' => 'Некорректный адрес страницы.'));
+    }
+    $pageUrl = preg_replace('/[?#].*$/', '', $pageUrl);
+}
+
 session_start();
 $now = time();
 $lastSubmission = isset($_SESSION['contact_form_submitted_at']) ? (int) $_SESSION['contact_form_submitted_at'] : 0;
@@ -90,8 +113,14 @@ if ($lastSubmission > 0 && $now - $lastSubmission < 10) {
 }
 
 $recipient = 'info@medved.beer';
-$subject = '=?UTF-8?B?' . base64_encode('Новая заявка с сайта medved.beer') . '?=';
-$body = "Имя: " . $name . "\n"
+$subjectText = $source === 'horeca-hero-tasting'
+    ? 'Заявка на дегустационный сет — medved.beer'
+    : 'Новая заявка с сайта medved.beer';
+$subject = '=?UTF-8?B?' . base64_encode($subjectText) . '?=';
+$body = "Тип заявки: " . $sourceDetails['type'] . "\n"
+    . "Источник: " . $sourceDetails['label'] . "\n"
+    . "Страница: " . ($pageUrl !== '' ? $pageUrl : 'не указана') . "\n\n"
+    . "Имя: " . $name . "\n"
     . "Телефон: " . $phone . "\n"
     . "Электронная почта: " . ($email !== '' ? $email : 'не указана') . "\n\n"
     . "Сообщение:\n" . ($message !== '' ? $message : 'не указано') . "\n";

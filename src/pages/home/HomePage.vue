@@ -14,6 +14,7 @@ import homeDividerUrl from '../../assets/heroes/home/divider.png'
   <HomeProductsSection />
   <HomeAboutSection />
   <ContactSection
+    source="home-contact"
     id="contact-form"
     class="scroll-mt-20"
     title="Связаться с нами"

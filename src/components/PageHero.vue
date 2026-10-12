@@ -57,6 +57,9 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
           <slot />
         </p>
       </div>
+      <div v-if="$slots.actions" class="hero-actions relative z-4 mt-10" :class="{ 'text-center': contentAlign === 'center', 'hero-copy-rise': layers || animateCopy }">
+        <slot name="actions" />
+      </div>
     </div>
   </section>
 </template>
@@ -100,6 +103,10 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
 
   .hero-description.hero-copy-rise {
     animation-delay: var(--hero-description-delay);
+  }
+
+  .hero-actions.hero-copy-rise {
+    animation-delay: calc(var(--hero-description-delay) + 140ms);
   }
 }
 

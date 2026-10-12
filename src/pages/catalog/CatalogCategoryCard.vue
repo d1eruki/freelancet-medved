@@ -14,7 +14,7 @@ defineProps({
       :href="sitePath(`/katalog/${category.slug}/`)"
     >
       <div class="relative grid min-h-20 place-items-center overflow-hidden rounded-2xl">
-        <img class="h-64 w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105" :src="category.image" :alt="category.imageAlt">
+        <img class="h-64 w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105" :src="category.cardImage" :alt="category.imageAlt">
       </div>
       <div class="mt-10">
         <h3 class="font-display text-h4 uppercase">{{ category.name }}</h3>

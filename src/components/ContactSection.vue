@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import ContactForm from './ContactForm.vue'
 
 const props = defineProps({
+  source: { type: String, required: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
   headingId: { type: String, required: true },
@@ -39,7 +40,7 @@ const titleLines = computed(() => props.title.trim().split(/\s+/).reduce((lines,
           </h2>
           <p class="mt-6 max-w-md text-body-large font-medium" :class="isDark ? 'text-surface/80' : 'text-subtle'">{{ description }}</p>
         </div>
-        <ContactForm class="nav:flex-1" :id-prefix="idPrefix" :tone="tone" />
+        <ContactForm class="nav:flex-1" :id-prefix="idPrefix" :tone="tone" :source="source" />
       </div>
     </div>
   </section>

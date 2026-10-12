@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import horecaHeroForeground from '../../assets/heroes/horeca/foreground.png?responsive'
 import horecaHeroMiddle from '../../assets/heroes/horeca/middle.png?responsive'
 import horecaHeroBackground from '../../assets/heroes/horeca/background.png?responsive'
@@ -6,10 +7,15 @@ import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
 import ActionTile from '../../components/ActionTile.vue'
 import InfoCard from '../../components/InfoCard.vue'
+import BaseButton from '../../components/BaseButton.vue'
+import ContactFormDialog from '../../components/contact-form-dialog.vue'
 import CatalogCategoryCard from '../catalog/CatalogCategoryCard.vue'
+import HorecaCocktailsSection from './HorecaCocktailsSection.vue'
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'
 import horecaDividerUrl from '../../assets/heroes/horeca/divider.png'
+
+const isTastingFormOpen = ref(false)
 
 const horecaHeroLayout = {
   mobile: {
@@ -61,7 +67,20 @@ const horecaHeroLayers = {
       <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре «МЁДВЕДЬ» </span>
       <span class="wide:block wide:whitespace-nowrap">для баров и ресторанов. Поставляем напитки оптом </span>
       <span class="wide:block wide:whitespace-nowrap">в многооборотных кегах и одноразовой ПЭТ-таре.</span>
+      <template #actions>
+        <BaseButton class="w-full max-w-xl px-6 py-4 sm:w-auto" aria-haspopup="dialog" @click="isTastingFormOpen = true">
+          Заказать дегустационный сет
+        </BaseButton>
+      </template>
     </PageHero>
+
+    <ContactFormDialog
+      source="horeca-hero-tasting"
+      v-if="isTastingFormOpen"
+      id-prefix="horeca-tasting"
+      title="Заказать дегустационный сет"
+      @close="isTastingFormOpen = false"
+    />
 
     <HeroDivider :image-url="horecaDividerUrl" />
 
@@ -79,6 +98,8 @@ const horecaHeroLayers = {
         </ul>
       </div>
     </section>
+
+    <HorecaCocktailsSection />
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="horeca-formats-title">
       <div class="site-container">

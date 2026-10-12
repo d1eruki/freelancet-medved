@@ -1,75 +1,97 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="data:,">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
 <title>Мастерская рендеров продукции</title>
 <style>
-body{margin:0;font:16px system-ui;background:#eee;color:#222}form{display:flex;flex-wrap:wrap;gap:16px;padding:24px}label{display:grid;gap:8px}select,button{font:inherit;padding:8px}output{display:block;padding:0 24px 16px}[data-render-output]{background:repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 0/24px 24px;overflow:auto}[data-render-output] img{max-width:100%;height:auto}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui;background:#eee;color:#222}main{display:grid;grid-template-columns:320px 1fr;min-height:100vh}form{padding:24px;background:#fff}h1{font-size:24px;margin:0 0 24px}label{display:grid;gap:8px;margin-bottom:24px}select,button{font:inherit;padding:12px;width:100%}button{cursor:pointer;margin-bottom:12px}.preview{min-width:0;overflow:auto}output{display:block;padding:24px;white-space:pre-wrap}[data-render-output]{min-height:70vh;background:#fff}[data-render-output] img{display:block;max-width:100%;height:auto;margin:auto}.hint{font-size:13px;color:#666}details{margin-top:24px}details label{margin-top:16px}@media(max-width:800px){main{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
-<form>
-<label>Напиток<select name="drink"></select></label>
-<label>Объекты<select name="mode"><option value="glass">Стакан</option><option value="can">Банка</option><option value="pair">Стакан и банка</option></select></label>
-<label>Объём банки<select name="volume"><option value="450">450 мл</option><option value="330">330 мл</option></select></label>
-<label>Тень<select name="shadow"><option value="contact">Под продуктом — каталог</option><option value="cast">Вбок — слайдер</option></select></label>
-<button>Рендерить</button><button type="button" id="download" disabled>Скачать PNG</button>
-</form>
-<output aria-live="polite"></output>
-<div data-render-output></div>
+<body><main><form>
+<h1>Мастерская рендеров</h1>
+<label>Назначение<select name="preset"></select></label>
+<label>Сорт<select name="product"></select></label>
+<label>Тень<select name="shadow"><option value="contact">Мягкая под продуктом</option><option value="cast">Вбок, как в слайдере</option><option value="none">Без тени</option></select></label>
+<label>Фон<select name="background"><option value="white">Белый</option><option value="slider">Со слайдера</option><option value="hero">Из хиро категории сорта</option><option value="custom">Свой из файла настроек</option></select></label>
+<label>Композиция<select name="composition"><option value="glass">Стакан</option><option value="can-330">Банка маленькая</option><option value="can-450">Банка большая</option><option value="pair-330">Стакан и маленькая банка</option><option value="pair-450">Стакан и большая банка</option></select></label>
+<label>Качество<select name="quality"><option value="standard">Обычное</option><option value="hero">Для крупного изображения</option></select></label>
+<button type="submit">Рендерить</button>
+<button type="button" id="save">Сохранить для этого назначения</button>
+<button type="button" id="download" disabled>Скачать картинку</button>
+<details><summary>Настройки и отдельные слои</summary>
+<button type="button" id="reset">Вернуть исходный вариант</button>
+<button type="button" id="json" disabled>Скачать настройки</button>
+<button type="button" id="layers" disabled>Скачать продукт и тень отдельно</button>
+<label>Открыть сохранённые настройки<input id="import" type="file" accept=".json,application/json"></label>
+<p class="hint">Сохранение меняет только выбранное назначение в этом браузере. Для пакетного рендера используйте скачанный файл настроек.</p>
+</details>
+</form><div class="preview"><output aria-live="polite"></output><div data-render-output></div></div></main>
 <script type="module">
 import { drinkPresets } from '../../src/data/drink-presets.js'
-import { canLabelPresets } from '../../src/data/product-render-settings.js'
+import { canLabelPresets, productRenderProfiles, productRenderSettings, resolveProductRender } from '../../src/data/product-render-settings.js'
 import { mountProductRender } from '../../src/three/product/product-renderer.js'
-const form = document.querySelector('form')
-const status = document.querySelector('output')
-const download = document.querySelector('#download')
-const query = new URLSearchParams(location.search)
-for (const [key, recipe] of Object.entries(drinkPresets)) form.elements.drink.add(new Option(recipe.name, key))
-for (const name of ['drink','mode','volume','shadow']) if (query.has(name)) form.elements[name].value = query.get(name)
-if (!query.has('drink')) form.elements.drink.value = 'cider-antonovka'
-function sync() {
-  const preset = Object.values(canLabelPresets).find(item => item.drink === form.elements.drink.value)
-  for (const option of form.elements.mode.options) option.disabled = option.value !== 'glass' && !preset
-  if (!preset) form.elements.mode.value = 'glass'
-  form.elements.volume.disabled = form.elements.mode.value === 'glass'
+const form=document.querySelector('form'), status=document.querySelector('output'), query=new URLSearchParams(location.search)
+const storageKey='medved-render-profiles-v1'
+let saved={}, settings, rendered=null
+try {saved=JSON.parse(localStorage.getItem(storageKey)||'{}')} catch { /* используем исходные профили */ }
+for(const [key,profile] of Object.entries(productRenderProfiles)) form.elements.preset.add(new Option(profile.label,key))
+for(const [key,recipe] of Object.entries(drinkPresets)) form.elements.product.add(new Option(recipe.name,key))
+function sync(){
+ const hasLabel=Object.values(canLabelPresets).some(item=>item.drink===form.elements.product.value)
+ for(const option of form.elements.composition.options) option.disabled=option.value!=='glass'&&!hasLabel
+ if(!hasLabel) form.elements.composition.value='glass'
+ form.elements.background.querySelector('[value="custom"]').disabled=!settings.background.source
 }
-form.addEventListener('change', sync)
-async function render() {
-  sync()
-  const values = Object.fromEntries(new FormData(form))
-  const preset = Object.values(canLabelPresets).find(item => item.drink === values.drink)
-  for (const control of form.elements) control.disabled = true
-  window.renderReady = false
-  window.renderError = null
-  status.textContent = 'Рендерим…'
-  try {
-    await mountProductRender({ drink: values.drink, canOnly: values.mode === 'can', pair: values.mode === 'pair', shadow: values.shadow,
-      modelSource: new URL(`../../src/assets/models/can-${values.volume || 450}ml.glb`, import.meta.url).href,
-      label: preset ? new URL(`../customer-design/labels/cans-330ml-500ml/${preset.label}.png`, import.meta.url).href : '' })
-    status.textContent = 'Готово. Стакан, банка и тени доступны отдельно через window.exportLayers(); общий кадр — window.exportPng().'
-    const parameters = new URLSearchParams(values)
-    history.replaceState(null, '', `?${parameters}`)
-  } catch (error) {
-    window.renderError = String(error.stack || error)
-    status.textContent = error.message
-    console.error(error)
-  } finally {
-    for (const control of form.elements) control.disabled = false
-    download.disabled = !window.renderReady
-    sync()
-  }
+function fill(){
+ form.elements.shadow.value=settings.shadow.type
+ form.elements.background.value=settings.background.type
+ form.elements.composition.value=settings.objects==='glass'?'glass':`${settings.objects}-${settings.volume}`
+ form.elements.quality.value=settings.quality.maxModelPixels>productRenderSettings.quality.maxModelPixels?'hero':'standard'
+ sync()
 }
-form.addEventListener('submit', event => { event.preventDefault(); void render() })
-download.addEventListener('click', () => {
-  const link = document.createElement('a')
-  link.href = window.exportPng()
-  link.download = `${form.elements.drink.value}-${form.elements.mode.value}-${form.elements.shadow.value}.png`
-  link.click()
-})
-await render()
-</script>
-</body>
-</html>
+function read(){
+ const result=structuredClone(settings), shadow=form.elements.shadow.value, background=form.elements.background.value
+ if(shadow!==result.shadow.type) result.shadow={...result.shadow,...(productRenderSettings.shadows[shadow]||{}),type:shadow}
+ if(background!==result.background.type){
+   result.background={...productRenderProfiles[background==='slider'?'slider':background==='hero'?'hero':'card'].settings.background,type:background,source:result.background.source}
+ }
+ const [objects,volume]=form.elements.composition.value.split('-')
+ if(objects!==result.objects){result.composition=structuredClone(productRenderProfiles[objects==='pair'?'slider':'card'].settings.composition)}
+ result.objects=objects; if(volume) result.volume=volume
+ const quality=form.elements.quality.value==='hero'?productRenderSettings.heroQuality:productRenderSettings.quality
+ if((result.quality.maxModelPixels>productRenderSettings.quality.maxModelPixels)!==(form.elements.quality.value==='hero')){
+   result.quality=structuredClone(quality)
+   result.output=form.elements.quality.value==='hero'?{width:2508,height:2508}:{width:0,height:0}
+ }
+ return result
+}
+function loadProfile(){try{settings=resolveProductRender({preset:form.elements.preset.value,settings:saved[form.elements.preset.value]||{}}).settings}catch{settings=resolveProductRender({preset:form.elements.preset.value}).settings}fill()}
+function download(url,name){const link=document.createElement('a');link.href=url;link.download=name;link.click()}
+function jsonDownload(){const url=URL.createObjectURL(new Blob([JSON.stringify(rendered,null,2)],{type:'application/json'}));download(url,`${rendered.product}-${rendered.preset}.json`);setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function render(configuration){
+ for(const control of form.elements) control.disabled=true
+ window.renderReady=false;window.renderError=null;status.textContent='Рендерим…'
+ try{
+   const result=await mountProductRender(configuration);rendered=result.metadata;status.textContent='Готово. Можно скачать картинку или отдельные слои.'
+   const parameters=new URLSearchParams({product:configuration.product,preset:configuration.preset,settings:JSON.stringify(configuration.settings)})
+   if(parameters.toString().length<32000) history.replaceState(null,'',`?${parameters}`)
+   return result
+ }catch(error){window.renderError=String(error.stack||error);status.textContent=error.message;throw error}
+ finally{for(const control of form.elements)control.disabled=false;sync();for(const id of ['download','json','layers'])document.querySelector(`#${id}`).disabled=!window.renderReady}
+}
+window.runProductRender=render
+form.addEventListener('submit',event=>{event.preventDefault();void render({product:form.elements.product.value,preset:form.elements.preset.value,settings:read()}).catch(()=>{})})
+form.elements.preset.addEventListener('change',loadProfile);form.elements.product.addEventListener('change',sync)
+document.querySelector('#save').addEventListener('click',()=>{try{settings=resolveProductRender({preset:form.elements.preset.value,settings:read()}).settings;saved[form.elements.preset.value]=settings;localStorage.setItem(storageKey,JSON.stringify(saved));status.textContent='Вариант сохранён для выбранного назначения.'}catch(error){status.textContent=error.message}})
+document.querySelector('#reset').addEventListener('click',()=>{delete saved[form.elements.preset.value];localStorage.setItem(storageKey,JSON.stringify(saved));loadProfile()})
+document.querySelector('#download').addEventListener('click',()=>download(window.exportPng(),`${rendered.product}-${rendered.preset}.png`))
+document.querySelector('#json').addEventListener('click',jsonDownload)
+document.querySelector('#layers').addEventListener('click',()=>{for(const [key,canvas] of Object.entries(window.exportLayers().canvases))download(canvas.toDataURL('image/png'),`${rendered.product}-${rendered.preset}-${key}.png`)})
+document.querySelector('#import').addEventListener('change',async event=>{try{const config=resolveProductRender(JSON.parse(await event.target.files[0].text()));if(!Object.hasOwn(drinkPresets,config.product))throw new Error('Неизвестный сорт');form.elements.product.value=config.product;form.elements.preset.value=config.preset;settings=config.settings;fill();status.textContent='Настройки открыты. Нажмите «Рендерить».'}catch(error){status.textContent=error.message}})
+try{
+ form.elements.product.value=query.get('product')||'cider-antonovka';form.elements.preset.value=query.get('preset')||'card'
+ settings=resolveProductRender({preset:form.elements.preset.value,settings:query.has('settings')?JSON.parse(query.get('settings')):saved[form.elements.preset.value]||{}}).settings;fill()
+ if(!query.has('manual'))await render({product:form.elements.product.value,preset:form.elements.preset.value,settings:read()})
+ else status.textContent='Выберите вариант и нажмите «Рендерить».'
+}catch(error){status.textContent=error.message;window.renderError=String(error)}
+</script></body></html>

@@ -85,7 +85,7 @@ try {
     await expectStatus(body, 400)
   }
   await expectStatus(' '.repeat(16385), 400)
-  for (const field of ['name', 'phone', 'email', 'message', 'website']) {
+  for (const field of ['name', 'phone', 'email', 'message', 'website', 'source', 'pageUrl']) {
     for (const value of [[], {}, null, 123, true]) {
       await expectStatus({ ...valid, [field]: value }, 422)
     }
@@ -105,6 +105,12 @@ try {
   await expectStatus({ ...valid, email: 'invalid-email' }, 422)
   await expectStatus({ ...valid, email: 'a'.repeat(255) + '@example.com' }, 422)
   await expectStatus({ ...valid, message: 'a'.repeat(4001) }, 422)
+  for (const source of ['unknown', 'horeca-hero-tasting\r\nBcc: other@example.com']) {
+    await expectStatus({ ...valid, source }, 422)
+  }
+  for (const pageUrl of ['not-a-url', 'javascript:alert(1)', 'https://user:pass@medved.beer/', 'https://medved.beer/\nИсточник: подмена', `https://medved.beer/${'a'.repeat(2048)}`]) {
+    await expectStatus({ ...valid, pageUrl }, 422)
+  }
   await expectStatus({ website: 'bot.example' }, 200)
   await assert.rejects(stat(mailFile), { code: 'ENOENT' })
 
@@ -115,6 +121,8 @@ try {
   assert.ok(firstMail.includes('Reply-To: test@example.com'))
   assert.ok(firstMail.includes('To: info@medved.beer'))
   assert.ok(firstMail.includes('Сообщение:\nПроверка формы'))
+  assert.ok(firstMail.includes('Тип заявки: Общее обращение\nИсточник: Не указан\nСтраница: не указана'))
+  assert.ok(firstMail.includes(`Subject: =?UTF-8?B?${Buffer.from('Новая заявка с сайта medved.beer').toString('base64')}?=`))
   const sessionCookie = firstResponse.headers.get('set-cookie')?.match(/^PHPSESSID=([^;]+)/)
   assert.ok(sessionCookie, 'После успешной отправки должна появиться PHP-сессия')
   const headers = { Cookie: sessionCookie[0] }
@@ -154,7 +162,26 @@ try {
   await expectStatus({ name: valid.name, phone: valid.phone, consent: true }, 200)
   const json = JSON.stringify(valid)
   await expectStatus(json + ' '.repeat(16384 - Buffer.byteLength(json)), 200)
-  console.log('Проверки формы пройдены: валидация, отправка, сессионный лимит, отдельные браузеры, параллельные запросы, истечение лимита и ошибки почты без нарушения JSON.')
+
+  for (const { source, label, type, pageUrl, subject } of [
+    { source: 'home-contact', label: 'Главная → «Связаться с нами»', type: 'Общее обращение', pageUrl: 'https://medved.beer/', subject: 'Новая заявка с сайта medved.beer' },
+    { source: 'contacts-inquiry', label: 'Контакты → «Запрос на поставку»', type: 'Запрос на поставку', pageUrl: 'https://medved.beer/kontakty/', subject: 'Новая заявка с сайта medved.beer' },
+    { source: 'horeca-hero-tasting', label: 'HoReCa → первый экран', type: 'Дегустационный сет', pageUrl: 'https://medved.beer/horeca/', subject: 'Заявка на дегустационный сет — medved.beer' },
+  ]) {
+    const previousMail = await readFile(mailFile, 'utf8')
+    await expectStatus({ ...valid, source, pageUrl: `${pageUrl}?utm_source=test#form` }, 200)
+    const mail = (await readFile(mailFile, 'utf8')).slice(previousMail.length)
+    assert.ok(mail.includes(`Тип заявки: ${type}\nИсточник: ${label}\nСтраница: ${pageUrl}\n\n`))
+    assert.ok(mail.includes(`Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`))
+    assert.ok(mail.includes('To: info@medved.beer'))
+    assert.ok(!mail.includes('utm_source') && !mail.includes('#form'))
+  }
+  const previousMail = await readFile(mailFile, 'utf8')
+  await expectStatus({ ...valid, source: 'horeca-hero-tasting', pageUrl: 'http://localhost:5173/freelancet-medved/horeca/' }, 200)
+  const localMail = (await readFile(mailFile, 'utf8')).slice(previousMail.length)
+  assert.ok(localMail.includes('Страница: http://localhost:5173/freelancet-medved/horeca/'))
+  assert.ok(localMail.includes('Тип заявки: Дегустационный сет'))
+  console.log('Проверки формы пройдены: валидация, отправка, источники и темы заявок, адреса без параметров, совместимость старых форм, сессионный лимит, отдельные браузеры, параллельные запросы, истечение лимита и ошибки почты без нарушения JSON.')
 } finally {
   for (const { server } of servers) server.kill()
   await Promise.all(servers.map(({ closed }) => closed))

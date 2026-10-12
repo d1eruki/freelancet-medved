@@ -4,16 +4,16 @@ import { disposeProductModel, loadProductModels, prepareProductModels } from './
 import { createProductPostprocess, prepareProductMaterials } from './product-materials.js'
 import { createProductLabels } from './product-labels.js'
 import { createProductEnvironment } from './product-environment.js'
-import { createProductLight } from './product-light.js'
+import { createProductLight, renderProductContactShadow } from './product-light.js'
 import { warmupWebGL } from './webgl-warmup.js'
 
 export const productSceneKey = Symbol('product-scene')
 
 // Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
-export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false } = {}) {
+export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
   let currentView = null, closed = false, failed = false
   let bankOptics = null
-  const sceneSettings = productRenderSettings.camera
+  const sceneSettings = cameraSettings
 
   function canvasToScreen(THREE, element, canvas, rotationOverride) {
     const rect = element.getBoundingClientRect()
@@ -39,7 +39,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
   let warmup = null
   let generation = 0
   const views = new Set()
-  const sceneQuality = productRenderSettings.quality
+  const sceneQuality = quality
   async function startSharedScene() {
     if (closed || failed || sharedScene || sceneStarting || !currentView) return
     sceneStarting = true
@@ -94,7 +94,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       camera.updateMatrixWorld(true)
       let onEnvironmentReady = () => {}, lightSource = null
       const environment = createProductEnvironment({
-        THREE, RoomEnvironment, renderer, view: currentView,
+        THREE, RoomEnvironment, renderer, view: currentView, lightSettings,
         onChange(texture) {
           scene.environment = texture
           scene.traverse(node => {
@@ -141,7 +141,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       if (glassItem) scene.add(glassItem.product)
       if (!glassOnly) scene.add(canPlacement)
       const groundY = glassItem?.productBounds.min.y ?? canItem.productBounds.min.y
-      lightSource = createProductLight(THREE, renderer, scene, groundY)
+      lightSource = createProductLight(THREE, renderer, scene, groundY, lightSettings, shadowStyle === 'cast' ? shadowSettings : productRenderSettings.shadows.cast)
       canItem.model.traverse(node => { if (node.isMesh) { node.castShadow = true; node.receiveShadow = true } })
       // Стакан рисуется трассировщиком; отдельная копия геометрии отбрасывает упрощённую тень.
       const glassShadowPlacement = glassItem ? new THREE.Group() : null
@@ -258,7 +258,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
           bounds.left = Math.min(bounds.left, x); bounds.right = Math.max(bounds.right, x)
           bounds.top = Math.min(bounds.top, y); bounds.bottom = Math.max(bounds.bottom, y)
         }
-        const light = lightSource.spotlight.getWorldPosition(new THREE.Vector3())
+        const light = exportRender && shadowStyle === 'cast' ? new THREE.Vector3(...shadowSettings.position) : lightSource.spotlight.getWorldPosition(new THREE.Vector3())
         for (const item of items) {
           const rect = item.slot.host.getBoundingClientRect()
           bounds.left = Math.min(bounds.left, rect.left); bounds.right = Math.max(bounds.right, rect.right)
@@ -331,7 +331,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         layoutSignature = layoutKey(articleRect, glassRect, canRect)
         // Стойка задаёт только отсечение, а размеры холста — модель и проекция её тени.
         unionRect = renderBounds()
-        pixelRatio = Math.min(window.devicePixelRatio, sceneQuality.maxPixelRatio, sceneQuality.maxModelPixels / Math.max(glassRect.width, glassRect.height, canRect.width, canRect.height), 2048 / Math.max(unionRect.width, unionRect.height))
+        pixelRatio = Math.min(exportRender ? sceneQuality.maxPixelRatio : window.devicePixelRatio, sceneQuality.maxPixelRatio, sceneQuality.maxModelPixels / Math.max(glassRect.width, glassRect.height, canRect.width, canRect.height), (sceneQuality.maxFramePixels ?? 2048) / Math.max(unionRect.width, unionRect.height))
         const next = JSON.stringify([glassRect.left, glassRect.top, glassRect.width, glassRect.height, canRect.left, canRect.top, canRect.width, canRect.height, pixelRatio])
         if (next !== renderedSize) {
           renderedSize = next
@@ -422,6 +422,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         optics = await glassOptics.createGlassRenderer(THREE, renderer, scene, camera, glassSlot.host, sync,
           onFrameReady, {
             canPlacement: glassOnly ? new THREE.Group() : canPlacement, bankDisplay, setView, placeBank, lightSource,
+            quality: sceneQuality,
             foamEnabled: () => glassSlot.props.foam,
             drinkPreset: () => glassOptics.drinkPreset(glassSlot.props.drink),
             glassBufferSize: () => new THREE.Vector2(Math.max(1, Math.round(glassRect.width * pixelRatio)), Math.max(1, Math.round(glassRect.height * pixelRatio))),
@@ -512,13 +513,21 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
             lightSource.invalidate()
             renderPass()
             if (!hasGlass) save('can')
-            if (shadowStyle === 'contact') {
-              lightSource.spotlight.position.set(...productRenderSettings.shadows.contact)
-              lightSource.spotlight.target.position.set(0, groundY, 0)
-            }
             for (const kind of glassOnly ? ['glass'] : hasGlass ? ['pair'] : ['can']) {
               canPlacement.visible = kind === 'can' || kind === 'pair'
               if (glassShadowPlacement) glassShadowPlacement.visible = kind === 'glass' || kind === 'pair'
+              if (shadowStyle === 'none') {
+                renderer.setRenderTarget(null); renderer.clear(); save(`${kind}-shadow`); continue
+              }
+              if (shadowStyle === 'contact') {
+                renderProductContactShadow(THREE, renderer, scene, camera, lightSource, groundY, () => {
+                  canPlacement.visible = false
+                  if (glassShadowPlacement) glassShadowPlacement.visible = false
+                }, shadowSettings)
+                save(`${kind}-shadow`)
+                continue
+              }
+              lightSource.setShadowView()
               lightSource.receiver.visible = false
               lightSource.invalidate()
               renderer.render(scene, camera)

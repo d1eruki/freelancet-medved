@@ -5,6 +5,7 @@ import { sitePath } from '../utils/site-path'
 import { trackMetrikaGoal } from '../utils/metrika.js'
 
 const props = defineProps({
+  source: { type: String, required: true },
   idPrefix: {
     type: String,
     required: true,
@@ -137,7 +138,12 @@ async function submitForm() {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...fields, phone: phoneDigits }),
+      body: JSON.stringify({
+        ...fields,
+        phone: phoneDigits,
+        source: props.source,
+        pageUrl: `${window.location.origin}${window.location.pathname}`,
+      }),
     })
     const result = await response.json()
     const serverMessage = typeof result?.message === 'string' ? result.message.trim() : ''

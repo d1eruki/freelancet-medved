@@ -1,6 +1,28 @@
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { productRenderFrame } from '../data/product-slider-renders.js'
 defineProps({ renders: { type: Object, required: true } })
+const composition = ref(null)
+const shadowClip = ref({ visibility: 'hidden' })
+let resizeObserver
+onMounted(() => {
+  const element = composition.value
+  const section = element.closest('section')
+  const counter = section?.querySelector('[data-product-counter]')
+  if (!counter) return
+  const updateClip = () => {
+    const frame = element.getBoundingClientRect()
+    const surface = counter.getBoundingClientRect()
+    // Маска находится снаружи движущегося слоя: наклон не уводит тень за стойку.
+    shadowClip.value = {
+      clipPath: `inset(${surface.top - frame.top}px ${frame.right - surface.right}px ${frame.bottom - surface.bottom}px ${surface.left - frame.left}px)`,
+    }
+  }
+  resizeObserver = new ResizeObserver(updateClip)
+  for (const target of [element, counter, section]) resizeObserver.observe(target)
+  updateClip()
+})
+onBeforeUnmount(() => resizeObserver?.disconnect())
 const layers = [
   { source: 'pairShadow', shadow: true },
   { source: 'pair', shadow: false },
@@ -8,8 +30,9 @@ const layers = [
 </script>
 
 <template>
-  <span class="product-composition" :style="{ '--frame-center': `${-productRenderFrame.center}%`, '--frame-height': `${productRenderFrame.heightScale * 100}%`, '--frame-top': `${productRenderFrame.topOffset}%` }" aria-hidden="true">
-    <span v-for="layer in layers" :key="layer.source" class="product-motion-layer product-pair">
+  <span ref="composition" class="product-composition" :style="{ '--frame-center': `${-productRenderFrame.center}%`, '--frame-height': `${productRenderFrame.heightScale * 100}%`, '--frame-top': `${productRenderFrame.topOffset}%` }" aria-hidden="true">
+    <span v-for="layer in layers" :key="layer.source" class="product-layer-clip" :style="layer.shadow ? shadowClip : undefined">
+      <span class="product-motion-layer product-pair">
       <img
         class="product-layer"
         :class="['product-pair', layer.shadow ? 'product-shadow' : 'product-model']"
@@ -19,6 +42,7 @@ const layers = [
         draggable="false"
         decoding="async"
       >
+      </span>
     </span>
   </span>
 </template>
@@ -32,6 +56,10 @@ const layers = [
   pointer-events: none;
   transform: translateX(calc(-1 * var(--product-translation, 0px)));
   transition: transform var(--product-track-duration) var(--product-track-easing);
+}
+.product-layer-clip {
+  position: absolute;
+  inset: 0;
 }
 /* Трек компенсируется тем же движением; пара и её тень едут вместе.
    Перемещение снаружи вращения не меняет путь при наклоне изображения. */

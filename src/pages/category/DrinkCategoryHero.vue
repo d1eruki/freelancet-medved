@@ -11,10 +11,10 @@ defineProps({
 
 <template>
   <section class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface" :aria-labelledby="`${category.slug}-title`">
-    <CategoryPattern :slug="category.slug" id-prefix="hero" class="pointer-events-none absolute inset-0 size-full text-surface opacity-[0.07]" />
+    <img v-if="category.heroBackground" :src="category.heroBackground" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full object-cover object-center">
+    <CategoryPattern v-else :slug="category.slug" id-prefix="hero" class="pointer-events-none absolute inset-0 size-full text-surface opacity-[0.07]" />
 
     <div class="site-container absolute inset-x-0 top-28 z-2 sm:top-40">
-      <a class="secondary-action inline-flex py-2 text-label font-extrabold tracking-wide text-surface/80 uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" :href="sitePath('/katalog/')">← Все напитки</a>
       <nav class="mx-auto mt-6 flex w-max max-w-full gap-3 overflow-x-auto nav:absolute nav:top-0 nav:left-1/2 nav:mt-0 nav:-translate-x-1/2" aria-label="Виды напитков">
         <a
           v-for="drink in catalogCategories"

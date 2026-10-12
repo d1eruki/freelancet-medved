@@ -1,15 +1,10 @@
-// Общие координаты светильника для прямого света, отражений и оптики стакана.
-export const productLightSettings = Object.freeze({
-  position: [-1.2, 3.8, 2],
-  target: [0, -0.15, 0],
-  width: 1.5,
-  height: 2.5,
-  radiance: 0,
-  intensity: 48,
-})
+import { productRenderSettings } from '../../data/product-render-settings.js'
+import { DirectionalLight, VSMShadowMap } from 'three'
 
-export function createLightPanel(THREE) {
-  const settings = productLightSettings
+export { productLightSettings } from '../../data/product-render-settings.js'
+import { productLightSettings } from '../../data/product-render-settings.js'
+
+export function createLightPanel(THREE, settings = productLightSettings) {
   const panel = new THREE.Mesh(new THREE.PlaneGeometry(settings.width, settings.height),
     new THREE.MeshBasicMaterial({ color: new THREE.Color().setScalar(settings.radiance), side: THREE.DoubleSide }))
   panel.position.set(...settings.position)
@@ -17,17 +12,93 @@ export function createLightPanel(THREE) {
   return panel
 }
 
-export function createProductLight(THREE, renderer, scene, groundY) {
-  const settings = productLightSettings
+// Контактный экспорт повторяет проход старого glass.html: VSM только по
+// продукту, затем два прохода Gaussian по альфе. Свет продукта не меняется.
+export function renderProductContactShadow(THREE, renderer, scene, camera, lightSource, groundY, hideCasters, settings = productRenderSettings.shadows.contact) {
+  const receiver = lightSource.receiver
+  const previous = { type: renderer.shadowMap.type, autoUpdate: renderer.shadowMap.autoUpdate,
+    material: receiver.material, visible: receiver.visible, castShadow: lightSource.spotlight.castShadow,
+    target: renderer.getRenderTarget() }
+  const light = new DirectionalLight(0xffffff, 0)
+  light.position.set(...settings.position)
+  light.target.position.set(0, groundY, 0)
+  light.castShadow = true
+  light.shadow.mapSize.set(settings.mapSize, settings.mapSize)
+  Object.assign(light.shadow.camera, { left: -settings.extent, right: settings.extent,
+    top: settings.extent, bottom: -settings.extent, near: 0.1, far: 12 })
+  Object.assign(light.shadow, { bias: settings.bias, normalBias: settings.normalBias,
+    radius: settings.radius, blurSamples: settings.blurSamples })
+  const material = new THREE.ShadowMaterial({ color: 0x242424, opacity: settings.opacity, depthWrite: false })
+  const width = renderer.domElement.width, height = renderer.domElement.height
+  const targets = Array.from({ length: 3 }, () => new THREE.WebGLRenderTarget(width, height))
+  const blur = new THREE.ShaderMaterial({
+    uniforms: { image: { value: targets[0].texture },
+      stepSize: { value: new THREE.Vector2(height / settings.referenceHeight / width, 0) },
+      sigma: { value: settings.blurSigma } },
+    vertexShader: 'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader: `uniform sampler2D image;uniform vec2 stepSize;uniform float sigma;varying vec2 vUv;
+      void main(){float alpha=0.;float total=0.;
+        for(int i=-24;i<=24;i++){float f=float(i);float w=exp(-f*f/(2.*sigma*sigma));
+          alpha+=texture2D(image,vUv+stepSize*f).a*w;total+=w;}
+        gl_FragColor=vec4(0.,0.,0.,alpha/total);}`,
+    depthTest: false, depthWrite: false, toneMapped: false,
+  })
+  const screen = new THREE.Scene()
+  const screenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blur)
+  screen.add(quad)
+  const composite = new THREE.MeshBasicMaterial({ map: targets[2].texture, transparent: true,
+    depthTest: false, depthWrite: false, toneMapped: false })
+  scene.add(light, light.target)
+  try {
+    lightSource.spotlight.castShadow = false
+    receiver.material = material
+    receiver.visible = false
+    renderer.shadowMap.type = VSMShadowMap
+    renderer.shadowMap.autoUpdate = false
+    renderer.shadowMap.needsUpdate = true
+    renderer.setRenderTarget(targets[0])
+    renderer.render(scene, camera)
+    hideCasters()
+    receiver.visible = true
+    renderer.render(scene, camera)
+    renderer.setRenderTarget(targets[1])
+    renderer.render(screen, screenCamera)
+    blur.uniforms.image.value = targets[1].texture
+    blur.uniforms.stepSize.value.set(0, 1 / settings.referenceHeight)
+    renderer.setRenderTarget(targets[2])
+    renderer.render(screen, screenCamera)
+    quad.material = composite
+    renderer.setRenderTarget(null)
+    renderer.render(screen, screenCamera)
+  } finally {
+    scene.remove(light, light.target)
+    renderer.shadowMap.type = previous.type
+    renderer.shadowMap.autoUpdate = previous.autoUpdate
+    renderer.shadowMap.needsUpdate = true
+    lightSource.spotlight.castShadow = previous.castShadow
+    receiver.material = previous.material
+    receiver.visible = previous.visible
+    renderer.setRenderTarget(previous.target)
+    light.dispose()
+    material.dispose()
+    blur.dispose()
+    composite.dispose()
+    quad.geometry.dispose()
+    for (const target of targets) target.dispose()
+  }
+}
+
+export function createProductLight(THREE, renderer, scene, groundY, settings = productLightSettings, shadow = productRenderSettings.shadows.cast) {
   const spotlight = new THREE.SpotLight(0xffffff, settings.intensity, 0, Math.PI / 3, 0.7, 2)
   spotlight.position.set(...settings.position)
   spotlight.target.position.set(...settings.target)
   spotlight.castShadow = true
-  spotlight.shadow.mapSize.set(1024, 1024)
+  spotlight.shadow.mapSize.set(shadow.mapSize, shadow.mapSize)
   spotlight.shadow.camera.near = 0.1
   spotlight.shadow.camera.far = 30
-  spotlight.shadow.bias = -0.0001
-  spotlight.shadow.normalBias = 0.015
+  spotlight.shadow.bias = shadow.bias
+  spotlight.shadow.normalBias = shadow.normalBias
   scene.add(spotlight, spotlight.target)
   renderer.shadowMap.enabled = true
   // PCSS читает исходную глубину, без предварительного размытия VSM.
@@ -35,7 +106,7 @@ export function createProductLight(THREE, renderer, scene, groundY) {
   renderer.shadowMap.autoUpdate = false
 
   const shadowCamera = { value: new THREE.Vector2(spotlight.shadow.camera.near, spotlight.shadow.camera.far) }
-  const emitterUV = { value: new THREE.Vector2(settings.width, settings.height).multiplyScalar(1 / (4 * Math.tan(spotlight.angle))) }
+  const emitterUV = { value: new THREE.Vector2(settings.width * shadow.softness, settings.height * shadow.softness).multiplyScalar(1 / (4 * Math.tan(spotlight.angle))) }
   function patchShadow(shader) {
     shader.uniforms.productShadowCamera = shadowCamera
     shader.uniforms.productEmitterUV = emitterUV
@@ -103,7 +174,7 @@ export function createProductLight(THREE, renderer, scene, groundY) {
   }
 
   const clip = { value: new THREE.Vector4(0, 0, 1, 1) }
-  const material = new THREE.ShadowMaterial({ opacity: 0.25, depthWrite: false })
+  const material = new THREE.ShadowMaterial({ opacity: shadow.opacity, depthWrite: false })
   material.onBeforeCompile = shader => {
     patchShadow(shader)
     shader.uniforms.counterClip = clip
@@ -128,6 +199,12 @@ export function createProductLight(THREE, renderer, scene, groundY) {
         1 - (counter.bottom - viewport.top) / viewport.height,
         (counter.right - viewport.left) / viewport.width,
         1 - (counter.top - viewport.top) / viewport.height)
+    },
+    setShadowView() {
+      spotlight.position.set(...shadow.position)
+      spotlight.target.position.set(...shadow.target)
+      spotlight.updateMatrixWorld(true); spotlight.target.updateMatrixWorld(true)
+      renderer.shadowMap.needsUpdate = true
     },
     invalidate() { renderer.shadowMap.needsUpdate = true },
     panelFrame(worldToLocal) {

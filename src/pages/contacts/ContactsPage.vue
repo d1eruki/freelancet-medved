@@ -43,6 +43,7 @@ import { sitePath } from '../../utils/site-path'
     </section>
 
     <ContactSection
+      source="contacts-inquiry"
       title="Запрос на поставку"
       description="Расскажите о вашем вопросе."
       heading-id="contacts-inquiry-title"

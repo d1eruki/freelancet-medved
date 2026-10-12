@@ -1,7 +1,7 @@
 import { createLightPanel } from './product-light.js'
 
 // Один владелец карты отражений, её источников и GPU-ресурсов.
-export function createProductEnvironment({ THREE, RoomEnvironment, renderer, view, onChange }) {
+export function createProductEnvironment({ THREE, RoomEnvironment, renderer, view, onChange, lightSettings }) {
   const generator = new THREE.PMREMGenerator(renderer)
   let target = null, disposed = false, revision = 0, frame = 0, signature = ''
   let background = null, counter = null
@@ -64,7 +64,7 @@ export function createProductEnvironment({ THREE, RoomEnvironment, renderer, vie
         room.add(floor)
       }
     }
-    const softbox = createLightPanel(THREE)
+    const softbox = createLightPanel(THREE, lightSettings)
     // RoomEnvironment имеет собственный сдвиг; светильник задан в мировых координатах.
     softbox.position.sub(room.position)
     room.add(softbox)

@@ -172,7 +172,7 @@ const recipes = {
     "foamAllowed": false
   },
   "cider-antonovka": {
-    "name": "Сидр «Антоновка»",
+    "name": "Сидр «Ветка Антоновки»",
     "target": "src/assets/products/cider/antonovka-glass.png",
     "foam": false,
     "absorption": [
