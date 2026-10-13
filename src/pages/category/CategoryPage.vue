@@ -1,10 +1,12 @@
 <script setup>
 import DrinkCategoryHero from './DrinkCategoryHero.vue'
 import FlavorCard from './FlavorCard.vue'
+import FlavorCardSlider from './flavor-card-slider.vue'
 import SupplySection from '../../components/supply-section.vue'
 
 defineProps({
   category: { type: Object, required: true },
+  lenis: { type: Object, default: null },
 })
 </script>
 
@@ -12,7 +14,7 @@ defineProps({
   <div>
     <DrinkCategoryHero :category="category" />
 
-    <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" :aria-labelledby="`${category.slug}-range-title`">
+    <section class="section-decorated bg-panel py-20 text-foreground max-sm:overflow-clip sm:py-24 wide:py-28" :aria-labelledby="`${category.slug}-range-title`">
       <div class="site-container">
         <div class="flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -24,7 +26,9 @@ defineProps({
           </div>
         </div>
 
-        <ul class="mt-12 grid gap-4 sm:mt-16 sm:max-nav:grid-cols-2 site-grid">
+        <FlavorCardSlider :key="category.slug" class="mt-12 sm:hidden" :items="category.items" :lenis="lenis" />
+
+        <ul class="mt-12 hidden gap-4 sm:mt-16 sm:grid sm:max-nav:grid-cols-2 site-grid">
           <FlavorCard v-for="item in category.items" :key="item.name" class="nav:col-span-4" :item="item" />
         </ul>
       </div>

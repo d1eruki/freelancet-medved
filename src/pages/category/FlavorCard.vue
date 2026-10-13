@@ -8,7 +8,17 @@ const props = defineProps({
 
 const activeVariantIndex = ref(0)
 const transitionDirection = ref('forward')
-const activeVariant = computed(() => props.item.variants[activeVariantIndex.value])
+const sortedVariants = computed(() => {
+  const liters = variant => Number.parseFloat(variant.volume.replace(',', '.'))
+  return [...props.item.variants].sort((a, b) => {
+    const aVolume = liters(a)
+    const bVolume = liters(b)
+    if (aVolume === 30 && bVolume !== 30) return -1
+    if (bVolume === 30 && aVolume !== 30) return 1
+    return aVolume - bVolume
+  })
+})
+const activeVariant = computed(() => sortedVariants.value[activeVariantIndex.value])
 const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
 const card = ref(null)
 const background = ref(null)
@@ -95,7 +105,7 @@ function selectVariant(index) {
     </div>
     <div class="mt-4 flex flex-wrap items-center justify-center gap-2" role="group" :aria-label="`Выбор объёма: ${item.name}`">
       <button
-        v-for="(variant, index) in item.variants"
+        v-for="(variant, index) in sortedVariants"
         :key="variant.volume"
         class="min-h-10 rounded-full px-3 py-2 text-caption font-extrabold tracking-wide uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         :class="index === activeVariantIndex ? 'bg-brand text-surface' : 'bg-brand/10 text-foreground hover:bg-brand/20'"

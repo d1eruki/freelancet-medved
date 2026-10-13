@@ -10,7 +10,7 @@ import { warmupWebGL } from './webgl-warmup.js'
 export const productSceneKey = Symbol('product-scene')
 
 // Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
-export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, vessel = 'glass', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
+export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, vessel = 'glass', bottleLabelSource = '', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
   let currentView = null, closed = false, failed = false
   let bankOptics = null
   const sceneSettings = cameraSettings
@@ -111,7 +111,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
       const loader = new GLTFLoader()
       const slots = (hasGlass ? [glassSlot, canSlot] : [canSlot]).map(slot => modelSource && slot.props.bank ? { ...slot, props: { ...slot.props, source: modelSource } } : slot)
-      const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl, vessel)
+      const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl, vessel, bottleLabelSource)
       canSlot = currentView?.can || canSlot; glassSlot = currentView?.glass || canSlot
       article = currentView?.root || article
       article.appendChild(renderer.domElement)
@@ -131,6 +131,11 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         for (const node of accessories) {
           node.updateWorldMatrix(true, false)
           const clone = node.clone()
+          // Оптический экран не пишет глубину. Непрозрачная крышка и бумага
+          // завершают кадр после стекла, с обычной глубиной между собой.
+          clone.material.transparent = true
+          clone.material.opacity = 1
+          clone.renderOrder = 200
           clone.matrixAutoUpdate = false
           clone.matrix.copy(node.matrixWorld)
           accessoryPlacement.add(clone)
@@ -197,6 +202,8 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       const referenceProjection = new THREE.Matrix4()
       const sizeBuffer = new THREE.Vector2()
       function setView(capture) {
+        // Металл и бумага не должны попадать в буферы путей стеклянных лучей.
+        accessoryPlacement.visible = !capture
         const aspect = glassRect.width / glassRect.height
         const halfHeight = sceneSettings.halfHeight / Math.min(aspect, 1)
         const halfWidth = halfHeight * aspect
@@ -279,6 +286,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         }
         const light = exportRender && shadowStyle === 'cast' ? new THREE.Vector3(...shadowSettings.position) : lightSource.spotlight.getWorldPosition(new THREE.Vector3())
         for (const item of items) {
+          if (vessel === 'bottle' && glassOnly && item === canItem) continue
           const rect = item.slot.host.getBoundingClientRect()
           bounds.left = Math.min(bounds.left, rect.left); bounds.right = Math.max(bounds.right, rect.right)
           bounds.top = Math.min(bounds.top, rect.top); bounds.bottom = Math.max(bounds.bottom, rect.bottom)
@@ -292,6 +300,9 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
             for (const x of [-radius, radius]) for (const y of [box.min.y, box.max.y]) for (const z of [-radius, radius]) {
               const point = new THREE.Vector3(x, y, z).applyMatrix4(matrix)
               include(point)
+              // Контактная тень не требует проекции к боковому светильнику.
+              // Высокая бутылка возле его высоты давала огромное пустое поле.
+              if (vessel === 'bottle' && shadowStyle !== 'cast') continue
               const denominator = point.y - light.y
               if (Math.abs(denominator) < 0.00001) continue
               const distance = (groundY - light.y) / denominator
@@ -523,7 +534,6 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
               save(glassOnly ? 'glass' : 'pair')
             }
             if (displayMesh) displayMesh.visible = false
-            accessoryPlacement.visible = false
             setView(false); placeBank(false)
             bankDisplay.value = true
             renderer.setRenderTarget(null)
@@ -534,6 +544,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
             renderPass()
             if (!hasGlass) save('can')
             for (const kind of glassOnly ? ['glass'] : hasGlass ? ['pair'] : ['can']) {
+              accessoryPlacement.visible = false
               canPlacement.visible = kind === 'can' || kind === 'pair'
               if (glassShadowPlacement) glassShadowPlacement.visible = kind === 'glass' || kind === 'pair'
               if (shadowStyle === 'none') {

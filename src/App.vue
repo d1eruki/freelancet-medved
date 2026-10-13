@@ -23,6 +23,7 @@ const currentPath = props.path
 const page = findPage(currentPath)
 const pageProps = computed(() => {
   if (page?.type === 'production') return { lenis: lenis.value }
+  if (page?.type === 'category') return { ...props.pageData, lenis: lenis.value }
   return props.pageData
 })
 

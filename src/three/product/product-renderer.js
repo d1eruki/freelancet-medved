@@ -35,6 +35,21 @@ export async function mountProductRender(options = {}) {
   if (objects !== 'glass' && !bottle && !labelPreset) throw new Error('Для этого сорта нет этикетки банки')
   const modelSource = new URL(`../../assets/models/can-${bottle ? '450' : settings.volume}ml.glb`, import.meta.url).href
   const label = labelPreset ? new URL(`../../../materials/customer-design/labels/cans-330ml-500ml/${labelPreset.label}.png`, import.meta.url).href : ''
+  // Пробная этикетка именно с изображения бутылки 0,75 л, не с другой упаковки.
+  const bottleLabelPhoto = bottle && product === 'perry-williams'
+    ? new URL('../../assets/products/perry/mister-williams-750ml.png', import.meta.url).href : ''
+  let bottleLabelSource = ''
+  if (bottleLabelPhoto) {
+    const photo = new Image()
+    photo.src = bottleLabelPhoto
+    await photo.decode()
+    const crop = document.createElement('canvas')
+    crop.width = Math.round(photo.naturalWidth * 0.92)
+    crop.height = Math.round(photo.naturalHeight * 0.326)
+    crop.getContext('2d').drawImage(photo, photo.naturalWidth * 0.04, photo.naturalHeight * 0.616,
+      photo.naturalWidth * 0.92, photo.naturalHeight * 0.326, 0, 0, crop.width, crop.height)
+    bottleLabelSource = crop.toDataURL('image/png')
+  }
   const refractionSource = backgroundSource(background.type, background.source, product)
   const reflectionSource = backgroundSource(background.reflections, background.source, product)
   const section = document.createElement('section')
@@ -84,7 +99,7 @@ export async function mountProductRender(options = {}) {
   section.append(host)
   document.body.append(section)
   const owner = createProductScene({ loadGlassOptics: () => import('../glass-lab/glass-optics.js'), exportRender: true, modelSource,
-    shadowStyle: shadow.type, shadowSettings: shadow, glassOnly: objects === 'glass' || bottle, vessel: bottle ? 'bottle' : 'glass', quality,
+    shadowStyle: shadow.type, shadowSettings: shadow, glassOnly: objects === 'glass' || bottle, vessel: bottle ? 'bottle' : 'glass', bottleLabelSource, quality,
     cameraSettings: settings.camera, lightSettings: settings.light })
   const app = createApp({ render: () => h(ProductScene, { active: true, paused: true, canOnly,
     loadGlassOptics: () => import('../glass-lab/glass-optics.js'), drink: product, foam: bottle ? false : recipe.foam, canLabel: label, patternSlug: 'render' }) })
@@ -139,7 +154,9 @@ export async function mountProductRender(options = {}) {
     }))
     const layers = { ...raw, width, height, center, origins, canvases }
     const metadata = { ...configuration, ...(bottle ? { model: bottlePrototype } : {}), recipe: { foam: bottle ? false : recipe.foam, absorption: recipe.absorption, scattering: recipe.scattering, scatteringColor: recipe.scatteringColor },
-      sources: { model: bottle ? 'procedural:antonovka-750ml' : modelSource, label: bottle ? '' : label, refraction: background.refractionSource || refractionSource, reflections: reflectionSource, counter: background.counter ? counterTexture : '' },
+      sources: { model: bottle ? 'procedural:antonovka-750ml' : modelSource, label: bottle ? bottleLabelPhoto : label,
+        ...(bottleLabelPhoto ? { labelCrop: { x: 0.04, y: 0.616, width: 0.92, height: 0.326, method: 'Front photograph crop; low resolution and perspective retained' } } : {}),
+        refraction: background.refractionSource || refractionSource, reflections: reflectionSource, counter: background.counter ? counterTexture : '' },
       frame: { width, height, sourceWidth: raw.width, sourceHeight: raw.height, scale, heightScale: raw.heightScale, topOffset: raw.topOffset, center, origins, centering: { x: offsetX, y: offsetY } } }
     window.exportLayers = () => layers
     window.renderInfo = metadata

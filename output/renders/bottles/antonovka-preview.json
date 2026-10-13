@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "product": "cider-antonovka",
+  "product": "perry-williams",
   "preset": "card",
   "settings": {
     "objects": "bottle",
@@ -93,9 +93,9 @@
       "offset": 0
     },
     "output": {
-      "width": 0,
-      "height": 0,
-      "subjectHeight": 0
+      "width": 768,
+      "height": 1024,
+      "subjectHeight": 860
     }
   },
   "model": {
@@ -124,39 +124,46 @@
   "recipe": {
     "foam": false,
     "absorption": [
-      0.03,
-      0.3,
-      2
+      0.05,
+      0.5,
+      2.6
     ],
-    "scattering": 0,
+    "scattering": 0.5,
     "scatteringColor": [
-      0,
-      0,
-      0
+      0.7,
+      0.5,
+      0.12
     ]
   },
   "sources": {
     "model": "procedural:antonovka-750ml",
-    "label": "",
+    "label": "http://127.0.0.1:4193/freelancet-medved/src/assets/products/perry/mister-williams-750ml.png",
+    "labelCrop": {
+      "x": 0.04,
+      "y": 0.616,
+      "width": 0.92,
+      "height": 0.326,
+      "method": "Front photograph crop; low resolution and perspective retained"
+    },
     "refraction": "",
     "reflections": "",
     "counter": ""
   },
   "frame": {
-    "width": 2048,
-    "height": 840,
-    "sourceWidth": 2048,
-    "sourceHeight": 840,
-    "scale": 1,
+    "width": 768,
+    "height": 1024,
+    "sourceWidth": 1120,
+    "sourceHeight": 1120,
+    "scale": 1.3782051282051282,
     "heightScale": 1.4,
     "topOffset": -20,
-    "center": 50.014350313690436,
+    "center": 50,
     "origins": {
-      "glass": "50.014350313690436% 76.70343961444351%",
-      "can": "50.014350313690436% 76.70343961444351%"
+      "glass": "50% 90.34280844658534%",
+      "can": "50% 90.34280844658534%"
     },
     "centering": {
-      "x": 604,
+      "x": 0,
       "y": -2
     }
   }

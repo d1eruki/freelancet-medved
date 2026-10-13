@@ -15,9 +15,13 @@ export function disposeProductModel(model) {
   for (const resource of resources) resource.dispose()
 }
 
-export async function loadProductModels(loader, slots, glassModelUrl, vessel = 'glass') {
+export async function loadProductModels(loader, slots, glassModelUrl, vessel = 'glass', bottleLabelSource = '') {
   const results = await Promise.allSettled(slots.map(slot => !slot.props.bank && vessel === 'bottle'
-    ? import('three').then(THREE => ({ scene: createBottleModel(THREE).group, userData: {} }))
+    ? import('three').then(async THREE => {
+      const labelTexture = bottleLabelSource ? await new THREE.TextureLoader().loadAsync(bottleLabelSource) : null
+      if (labelTexture) labelTexture.colorSpace = THREE.SRGBColorSpace
+      return { scene: createBottleModel(THREE, { labelTexture }).group, userData: {} }
+    })
     : loader.loadAsync(slot.props.bank ? slot.props.source : glassModelUrl)))
   const rejected = results.find(result => result.status === 'rejected')
   if (rejected) {
@@ -72,7 +76,7 @@ export const bottlePrototype = Object.freeze({
   liquid: { preset: 'cider-antonovka', ior: 1.333 },
 })
 
-export function createBottleModel(THREE, { filled = true } = {}) {
+export function createBottleModel(THREE, { filled = true, labelTexture = null } = {}) {
   const settings = bottlePrototype
   const scale = 1
   const group = new THREE.Group()
@@ -142,6 +146,23 @@ export function createBottleModel(THREE, { filled = true } = {}) {
   cap.userData.opticalAccessory = true
   group.userData.bottlePrototype = settings
   const resources = [shell, liquid, cap]
+  if (labelTexture) {
+    // Фронт исходной фотографии накладывается только на переднюю половину.
+    // Это пробная текстура с перспективой фото, не развёртка печатного макета.
+    const frontMaterial = new THREE.MeshStandardMaterial({ map: labelTexture, color: '#ffffff', roughness: 0.8, metalness: 0 })
+    frontMaterial.name = 'bottle-paper-front'
+    const backMaterial = new THREE.MeshStandardMaterial({ color: '#f3f1eb', roughness: 0.8, metalness: 0 })
+    backMaterial.name = 'bottle-paper-back'
+    for (const [material, start] of [[frontMaterial, -Math.PI / 2], [backMaterial, Math.PI / 2]]) {
+      const labelMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.0436, 0.044,
+        0.097, 64, 1, true, start, Math.PI), material)
+      labelMesh.position.y = 0.0665
+      labelMesh.userData.opticalAccessory = true
+      labelMesh.name = material.name
+      group.add(labelMesh)
+      resources.push(labelMesh)
+    }
+  }
   return {
     group,
     setFilled(value) { liquid.visible = Boolean(value) },

@@ -251,6 +251,9 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
     })
     if (!glass || !liquid) throw new Error('Glass and drink meshes are required')
     const glassProfile = profile(THREE, glass)
+    const glassRadius = Math.max(...glassProfile.map(point => point.x)) + 0.00001
+    const glassMin = new THREE.Vector3(-glassRadius, Math.min(...glassProfile.map(point => point.y)) - 0.00001, -glassRadius)
+    const glassMax = new THREE.Vector3(glassRadius, Math.max(...glassProfile.map(point => point.y)) + 0.00001, glassRadius)
     const liquidProfile = fittedLiquidProfile(THREE, glassProfile, profile(THREE, liquid))
     const tree = profileTree(THREE, glassProfile, liquidProfile)
     // Координаты пузырьков локальны для стакана: общий наклон слайдера
@@ -348,6 +351,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
     emptyBankTree.needsUpdate = true
     const uniforms = {
       profileTree: { value: tree.texture }, treeCount: { value: tree.count },
+      glassMin: { value: glassMin }, glassMax: { value: glassMax },
       traceSteps: { value: sceneQuality.traceSteps }, reflectionSteps: { value: sceneQuality.reflectionSteps },
       bodySamples: { value: sceneQuality.bodySamples }, baseSamples: { value: sceneQuality.baseSamples },
       bankProfileTree: { value: emptyBankTree }, bankTreeCount: { value: 0 },
@@ -374,6 +378,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
     const bankToneMapping = toneChunk.slice(toneChunk.indexOf('vec3 RRTAndODTFit'), toneChunk.indexOf('const mat3 LINEAR_REC2020_TO_LINEAR_SRGB')).replaceAll('toneMappingExposure', 'bankExposure')
     const optics = /* glsl */ `    precision highp float;
       uniform sampler2D profileTree;
+      uniform vec3 glassMin, glassMax;
       uniform int treeCount,traceSteps,reflectionSteps,bodySamples,baseSamples;
       uniform bool hasLiquid, perspective, foamEnabled;
       uniform vec3 liquidAbsorption, liquidScatteringColor, glassAbsorption;
@@ -491,7 +496,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       }
       bool meetsGlass(vec3 o,vec3 d){
         vec3 inverse=1.0/max(abs(d),vec3(0.00000001))*mix(vec3(-1.0),vec3(1.0),step(vec3(0.0),d));
-        vec3 a=(vec3(-0.53,-0.002,-0.53)-o)*inverse,b=(vec3(0.53,1.80,0.53)-o)*inverse;
+        vec3 a=(glassMin-o)*inverse,b=(glassMax-o)*inverse;
         vec3 lo=min(a,b),hi=max(a,b);
         return min(hi.x,min(hi.y,hi.z))>=max(0.00005,max(lo.x,max(lo.y,lo.z)));
       }
