@@ -180,12 +180,12 @@ test('structured data describes the organization and only the products on each c
         image: variant.image,
       })))
       assert.equal(list.numberOfItems, catalogVariants.length, url)
-      // Каждый доступный в интерфейсе объём должен иметь отдельное описание.
+      // Мобильная и десктопная разметка повторяют карточки: считаем уникальные варианты.
       const groups = [...html.matchAll(/role="group" aria-label="Выбор объёма: ([^"]+)"[^>]*>([\s\S]*?)<\/div>/g)]
-      const variants = groups.flatMap(([, name, buttons]) => [...buttons.matchAll(/aria-label="Показать объём ([^"]+)"/g)]
-        .map(([, volume]) => ({ name: `${name}, ${volume}`, volume })))
-      assert.ok(variants.length > 0, url)
-      assert.equal(list.numberOfItems, variants.length, url)
+      const variants = new Map(groups.flatMap(([, name, buttons]) => [...buttons.matchAll(/aria-label="Показать объём ([^"]+)"/g)]
+        .map(([, volume]) => [`${name}, ${volume}`, volume])))
+      assert.ok(variants.size > 0, url)
+      assert.equal(list.numberOfItems, variants.size, url)
       const ids = new Set()
       for (const [index, entry] of list.itemListElement.entries()) {
         const product = entry.item
@@ -193,8 +193,8 @@ test('structured data describes the organization and only the products on each c
         assert.equal(product['@type'], 'Product')
         assert.equal(product.url, url)
         assert.equal(product.manufacturer['@id'], organization['@id'])
-        assert.equal(product.size, variants[index].volume)
-        assert.equal(product.name, variants[index].name)
+        assert.ok(variants.has(product.name), product.name)
+        assert.equal(product.size, variants.get(product.name))
         assert.equal(product.name, catalogVariants[index].name)
         assert.ok(product.description && !product.description.includes('undefined'))
         assert.ok(!ids.has(product['@id']), url)

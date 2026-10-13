@@ -18,8 +18,8 @@ const tabs = computed(() => [
 const selectedTab = computed(() => tabs.value.find(tab => tab.id === activeTab.value) ?? tabs.value[0])
 const mobileForegroundTransform = computed(() => {
   const [, , width, height] = props.recipe.imageFrame.bounds
-  const scale = Math.min(650 / width, 540 / height)
-  return `translate(${450 - width * scale / 2} ${600 - height * scale}) scale(${scale})`
+  const scale = Math.min(630 / width, 620 / height)
+  return `translate(${375 - width * scale / 2} ${640 - height * scale}) scale(${scale})`
 })
 
 function moveTab(event, step) {
@@ -31,20 +31,19 @@ function moveTab(event, step) {
 </script>
 
 <template>
-  <article class="grid h-full min-h-0 min-w-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4 nav:grid-cols-2 nav:grid-rows-none nav:content-start nav:gap-6 nav:gap-x-12" :aria-labelledby="`${recipe.id}-title`">
-    <div class="min-w-0 nav:col-start-2">
+  <article class="cocktail-recipe-card grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)_var(--mobile-art-height)] gap-4 nav:grid-cols-2 nav:grid-rows-none nav:content-start nav:gap-6 nav:gap-x-0" :aria-labelledby="`${recipe.id}-title`">
+    <div class="min-w-0 nav:col-start-2 nav:pl-10 wide:pl-16">
       <h3 :id="`${recipe.id}-title`" class="font-display text-h3 break-words uppercase">{{ recipe.name }}</h3>
-      <p class="mt-3 text-label font-bold">{{ recipe.englishName }} · {{ recipe.base }}</p>
     </div>
 
-    <div class="nav:hidden">
-      <div class="flex flex-wrap gap-3" role="tablist" aria-label="Разделы рецепта">
+    <div class="flex min-h-0 flex-col nav:hidden">
+      <div class="flex shrink-0 flex-wrap gap-3" role="tablist" aria-label="Разделы рецепта">
         <button
           v-for="tab in tabs"
           :id="`${recipe.id}-tab-${tab.id}`"
           :key="tab.id"
-          class="min-h-11 rounded-full px-3 py-2 text-label font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface"
-          :class="selectedTab.id === tab.id ? 'bg-surface text-brand' : 'bg-surface/10 text-surface'"
+          class="min-h-11 rounded-full px-3 py-2 text-label font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          :class="selectedTab.id === tab.id ? 'bg-brand text-surface' : 'bg-brand/10 text-brand'"
           type="button"
           role="tab"
           :aria-selected="selectedTab.id === tab.id"
@@ -57,7 +56,7 @@ function moveTab(event, step) {
       </div>
       <div
         :id="`${recipe.id}-mobile-panel`"
-        class="mt-4 text-body font-medium"
+        class="mt-4 min-h-0 overflow-y-auto overscroll-contain text-body font-medium"
         role="tabpanel"
         :aria-labelledby="`${recipe.id}-tab-${selectedTab.id}`"
         tabindex="0"
@@ -66,14 +65,16 @@ function moveTab(event, step) {
       </div>
     </div>
 
-    <div class="hidden min-w-0 nav:col-start-2 nav:block">
+    <div class="hidden min-w-0 nav:col-start-2 nav:block nav:pl-10 wide:pl-16">
       <p class="text-body font-medium">{{ recipe.description }}</p>
 
-      <div class="mt-10 grid gap-10 text-body font-medium sm:grid-cols-2">
+      <div class="mt-10 grid gap-10 text-body font-medium sm:grid-cols-2 sm:gap-x-6">
         <div class="grid content-start gap-10">
           <section>
             <h4 class="font-display text-h4 uppercase">Ингредиенты</h4>
-            <p class="mt-6">{{ recipe.ingredients.join('; ') }}</p>
+            <ul class="mt-6 space-y-3">
+              <li v-for="ingredient in recipe.ingredients" :key="ingredient">{{ ingredient }}</li>
+            </ul>
           </section>
           <section v-if="recipe.barBenefit">
             <h4 class="font-display text-h4 uppercase">Плюс для бара</h4>
@@ -94,8 +95,8 @@ function moveTab(event, step) {
     </div>
 
     <div class="relative flex min-h-0 items-end nav:hidden">
-      <div class="relative h-full max-h-full w-full" style="height: min(100%, calc((100vw - 2rem) * 0.666667))">
-      <svg class="pointer-events-none size-full" viewBox="0 0 900 600" preserveAspectRatio="xMidYMax meet" role="img" :aria-label="recipe.imageAlt">
+      <div class="relative h-full w-full">
+      <svg class="pointer-events-none size-full" viewBox="0 0 750 660" preserveAspectRatio="xMidYMax meet" role="img" :aria-label="recipe.imageAlt">
         <g :transform="mobileForegroundTransform">
           <image
             :href="recipe.image.src"
@@ -106,13 +107,20 @@ function moveTab(event, step) {
           />
         </g>
       </svg>
-      <button class="group absolute top-1/2 left-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" type="button" aria-label="Предыдущий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('previous')">
-        <CircleArrow direction="left" tone="surface" />
+      <button class="group absolute top-1/2 left-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" type="button" aria-label="Предыдущий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('previous')">
+        <CircleArrow direction="left" tone="brand" />
       </button>
-      <button class="group absolute top-1/2 right-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" type="button" aria-label="Следующий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('next')">
-        <CircleArrow tone="surface" />
+      <button class="group absolute top-1/2 right-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" type="button" aria-label="Следующий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('next')">
+        <CircleArrow tone="brand" />
       </button>
       </div>
     </div>
   </article>
 </template>
+
+<style scoped>
+.cocktail-recipe-card {
+  /* Нижняя область не зависит от длины названия или выбранного текста. */
+  --mobile-art-height: min(35svh, calc((94vw - 48px) * 0.88));
+}
+</style>

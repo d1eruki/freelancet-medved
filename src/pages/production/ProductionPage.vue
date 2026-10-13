@@ -305,7 +305,7 @@ const qualityPoints = [
     <div ref="processScrollSection" class="nav:h-[400svh]">
       <div class="nav:sticky nav:top-0 nav:h-svh">
         <section
-          class="section-decorated bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:overflow-visible nav:py-8"
+          class="production-process section-decorated bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:overflow-visible nav:py-8"
           aria-labelledby="production-process-title"
           @keydown="handleProcessKeydown"
         >
@@ -405,3 +405,11 @@ const qualityPoints = [
     </section>
   </div>
 </template>
+
+<style scoped>
+.production-process::before {
+  /* Общий декор выступает на 128px ниже секции. Обрезаем только его,
+     сохраняя выход иллюстраций этапов за пределы закреплённого блока. */
+  clip-path: inset(0 0 128px 0);
+}
+</style>

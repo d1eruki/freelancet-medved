@@ -26,22 +26,13 @@ let resizeObserver
 let frame
 let motionQuery
 let snapTarget
-let pendingSnapTimer
-let pendingSnapIndex
 let positionInitialized = false
 
 function releaseSnap() {
   snapTarget = undefined
 }
 
-function cancelPendingSnap() {
-  window.clearTimeout(pendingSnapTimer)
-  pendingSnapIndex = undefined
-}
-
-function startSnap() {
-  const index = pendingSnapIndex
-  cancelPendingSnap()
+function startSnap(index) {
   if (index === undefined || index <= activeIndex.value || !track.value?.getClientRects().length
     || !props.lenis || props.lenis.isStopped) return
   snapTarget = window.scrollY + track.value.getBoundingClientRect().top - stickyTop.value
@@ -70,18 +61,7 @@ function updatePosition() {
   if (snapTarget !== undefined) {
     return
   }
-  if (scrollPosition.value < previousPosition || activeIndex.value >= props.items.length - 1
-    || (pendingSnapIndex !== undefined && activeIndex.value >= pendingSnapIndex)) {
-    cancelPendingSnap()
-    return
-  }
-  // Доводим после затихания жеста, чтобы палец и инерция не прерывали движение.
-  if (pendingSnapIndex !== undefined) {
-    window.clearTimeout(pendingSnapTimer)
-    pendingSnapTimer = window.setTimeout(startSnap, 140)
-    return
-  }
-  if (scrollPosition.value <= previousPosition) return
+  if (scrollPosition.value <= previousPosition || activeIndex.value >= props.items.length - 1) return
 
   const nextTop = Math.min(32, (activeIndex.value + 1) * 16)
   const shownHeight = transitionProgress.value * (deckHeight.value - nextTop)
@@ -89,8 +69,7 @@ function updatePosition() {
   if (shownHeight < cardHeight * 0.25) return
 
   // Порог считается по видимой части входящей карточки, а не длине жеста.
-  pendingSnapIndex = activeIndex.value + 1
-  pendingSnapTimer = window.setTimeout(startSnap, 140)
+  startSnap(activeIndex.value + 1)
 }
 
 function schedulePosition() {
@@ -163,7 +142,6 @@ onBeforeUnmount(() => {
   motionQuery?.removeEventListener('change', updateMotionPreference)
   window.removeEventListener('resize', measure)
   releaseSnap()
-  cancelPendingSnap()
   if (frame !== undefined) window.cancelAnimationFrame(frame)
 })
 </script>

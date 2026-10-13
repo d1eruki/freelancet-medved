@@ -71,9 +71,17 @@ test('Мобильные кнопки переключают слайды в о�
   await expect(page.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', 'home-product-tab-medovuha')
 })
 
-test('Выбор объёма меняет изображение и выбранную кнопку', async ({ page, openPage }) => {
+test('Выбор объёма меняет изображение и выбранную кнопку', async ({ page, openPage, isMobile }) => {
   await openPage('katalog/sidr/')
   const selector = page.getByRole('group', { name: 'Выбор объёма: Сидр Вишневый', exact: true })
+  if (isMobile) {
+    // В мобильной стопке доступен только текущий вкус: сначала долистываем до него.
+    await expect.poll(async () => {
+      if (await selector.count()) return true
+      await page.mouse.wheel(0, 320)
+      return false
+    }, { message: 'Прокрутка открывает карточку вишнёвого сидра', intervals: [100] }).toBe(true)
+  }
   const card = page.getByRole('listitem').filter({ has: selector })
   await selector.getByRole('button', { name: 'Показать объём 0,75 л', exact: true }).click()
   await expect(selector.getByRole('button', { name: 'Показать объём 0,75 л', exact: true })).toHaveAttribute('aria-pressed', 'true')

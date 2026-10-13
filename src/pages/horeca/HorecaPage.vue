@@ -86,7 +86,8 @@ const horecaHeroLayers = {
 
     <HeroDivider :image-url="horecaDividerUrl" />
 
-    <section class="section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="horeca-assortment-title">
+    <div class="relative isolate bg-panel">
+    <section class="horeca-assortment section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="horeca-assortment-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="horeca-assortment-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Три характера<br>для вашей карты</h2>
@@ -102,8 +103,9 @@ const horecaHeroLayers = {
     </section>
 
     <HorecaCocktailsSection />
+    </div>
 
-    <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="horeca-formats-title">
+    <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="horeca-formats-title">
       <div class="site-container grid items-start gap-12 site-grid sm:gap-16 nav:gap-8">
         <div class="nav:col-span-5">
           <h2 id="horeca-formats-title" class="font-display text-h2 break-words hyphens-auto uppercase">Напитки<br>в нужном<br>формате</h2>
@@ -185,3 +187,10 @@ const horecaHeroLayers = {
     </ContactActionSection>
   </div>
 </template>
+
+<style scoped>
+.horeca-assortment {
+  overflow: visible;
+  z-index: 1;
+}
+</style>
