@@ -41,7 +41,7 @@ const baseProfile = {
   background: { type: 'white', source: '', refractionSource: '', reflections: 'studio', opacity: 0.15, counter: false, counterHeight: 0.3 },
   preview: { background: '#ffffff' },
   composition: { width: 1024, height: 768, modelHeight: 576, modelBottom: 96, canOffset: 0, canBottom: 96, offset: 0 },
-  output: { width: 0, height: 0 },
+  output: { width: 0, height: 0, subjectHeight: 0 },
 }
 export const productRenderProfiles = Object.freeze({
   card: { label: 'Карточки товаров', settings: baseProfile },
@@ -52,7 +52,7 @@ export const productRenderProfiles = Object.freeze({
   hero: { label: 'Хиро категорий', settings: { ...baseProfile,
     quality: productRenderSettings.heroQuality,
     background: { ...baseProfile.background, type: 'hero', reflections: 'hero', counter: true },
-    output: { width: 2508, height: 2508 } } },
+    output: { width: 2508, height: 2508, subjectHeight: 0 } } },
 })
 
 function mergeSettings(base, overrides, path = '') {
@@ -76,17 +76,19 @@ export function resolveProductRender({ product = 'cider-antonovka', preset = 'ca
   if (!Object.hasOwn(productRenderProfiles, preset)) throw new Error(`Неизвестный профиль: ${preset}`)
   const resolved = mergeSettings(productRenderProfiles[preset].settings, settings)
   for (const [value, choices, name] of [
-    [resolved.objects, ['glass', 'can', 'pair'], 'Объекты'],
-    [resolved.volume, ['330', '450'], 'Объём'],
+    [resolved.objects, ['glass', 'can', 'pair', 'bottle'], 'Объекты'],
+    [resolved.volume, ['330', '450', '750'], 'Объём'],
     [resolved.shadow.type, ['contact', 'cast', 'none'], 'Тень'],
     [resolved.background.type, ['white', 'slider', 'hero', 'custom'], 'Фон'],
     [resolved.background.reflections, ['studio', 'slider', 'hero', 'custom'], 'Отражения'],
   ]) if (!choices.includes(value)) throw new Error(`${name}: неизвестное значение ${value}`)
+  if ((resolved.objects === 'bottle') !== (resolved.volume === '750')) throw new Error('Бутылка доступна только в объёме 0,75 л; банки — 0,33 и 0,45 л')
   for (const group of ['composition', 'quality']) for (const [key, value] of Object.entries(resolved[group])) {
     if (!['modelBottom', 'canBottom', 'canOffset', 'offset'].includes(key) && (value <= 0 || value > 8192)) throw new Error(`Недопустимое значение ${group}.${key}`)
   }
   for (const key of ['width','height']) if (resolved.output[key] < 0 || resolved.output[key] > 8192) throw new Error('Размер экспорта должен быть от 0 до 8192')
   if (Boolean(resolved.output.width) !== Boolean(resolved.output.height)) throw new Error('Укажите оба размера экспорта или оставьте оба автоматическими')
+  if (resolved.output.subjectHeight < 0 || resolved.output.subjectHeight > resolved.output.height || (resolved.objects === 'pair' && resolved.output.subjectHeight)) throw new Error('Высота продукта задаётся только для одиночного объекта внутри готового кадра')
   if (resolved.camera.halfHeight <= 0 || resolved.camera.near <= 0 || resolved.camera.far <= resolved.camera.near) throw new Error('Неверные границы камеры')
   if (resolved.camera.position.every((value, index) => value === resolved.camera.target[index])) throw new Error('Положение камеры совпало с её целью')
   if (resolved.shadow.opacity < 0 || resolved.shadow.opacity > 1 || resolved.background.opacity < 0 || resolved.background.opacity > 1) throw new Error('Прозрачность должна быть от 0 до 1')

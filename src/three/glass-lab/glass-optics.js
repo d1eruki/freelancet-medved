@@ -357,6 +357,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       refractionTexture: { value: refractionTexture || texture },
       backdropTexture: { value: texture }, screenToBackdrop: { value: screenToBackdrop },
       liquidAbsorption: { value: new THREE.Vector3(...drinkPresets.cider.absorption) },
+      glassAbsorption: { value: new THREE.Vector3(...(glass.userData.glassAbsorption || [0.012, 0.007, 0.004])) },
       liquidScattering: { value: drinkPresets.cider.scattering },
       liquidScatteringColor: { value: new THREE.Vector3(...drinkPresets.cider.scatteringColor) },
       foamShape: { value: foamShape }, foamWall: { value: foamWall }, foamEnabled: { value: false },
@@ -375,7 +376,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       uniform sampler2D profileTree;
       uniform int treeCount,traceSteps,reflectionSteps,bodySamples,baseSamples;
       uniform bool hasLiquid, perspective, foamEnabled;
-      uniform vec3 liquidAbsorption, liquidScatteringColor;
+      uniform vec3 liquidAbsorption, liquidScatteringColor, glassAbsorption;
       uniform float liquidScattering;
       uniform vec4 foamShape;
       uniform vec2 foamWall[8];
@@ -563,7 +564,7 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
       }
       vec3 absorption(int medium,float distance){
         if(medium==2)return exp(-(liquidAbsorption+vec3(liquidScattering))*distance);
-        if(medium==1)return exp(-vec3(0.012,0.007,0.004)*distance);
+        if(medium==1)return exp(-glassAbsorption*distance);
         return vec3(1.0);
       }
       // Приближение рассеянного света в мутной жидкости по длине сегмента.

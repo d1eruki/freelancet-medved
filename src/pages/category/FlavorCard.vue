@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import popularCardBackground from '../../assets/ui/popular-card-background.webp'
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -9,6 +10,33 @@ const activeVariantIndex = ref(0)
 const transitionDirection = ref('forward')
 const activeVariant = computed(() => props.item.variants[activeVariantIndex.value])
 const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
+const card = ref(null)
+const background = ref(null)
+const productViewport = ref(null)
+const productClip = ref({ clipPath: 'circle(50% at 50% 50%)' })
+let resizeObserver
+
+function updateProductClip() {
+  const image = background.value
+  if (!props.item.popular || !image?.naturalWidth || !productViewport.value) return
+  const frame = card.value.getBoundingClientRect()
+  const viewport = productViewport.value.getBoundingClientRect()
+  // В исходном плакате центр отверстия — (525, 378), радиус — 269 px.
+  // Повторяем object-cover/object-top фона, включая боковую обрезку.
+  const scale = Math.max(frame.width / image.naturalWidth, frame.height / image.naturalHeight)
+  const x = frame.left - viewport.left + (frame.width - image.naturalWidth * scale) / 2 + 525 * scale
+  const y = frame.top - viewport.top + 378 * scale
+  productClip.value = { clipPath: `circle(${269 * scale}px at ${x}px ${y}px)` }
+}
+
+onMounted(() => {
+  if (!props.item.popular) return
+  resizeObserver = new ResizeObserver(updateProductClip)
+  resizeObserver.observe(card.value)
+  resizeObserver.observe(productViewport.value)
+  updateProductClip()
+})
+onBeforeUnmount(() => resizeObserver?.disconnect())
 
 function selectVariant(index) {
   if (index === activeVariantIndex.value) return
@@ -19,27 +47,26 @@ function selectVariant(index) {
 
 <template>
   <li
+    ref="card"
     class="relative isolate flex min-h-80 flex-col overflow-hidden rounded-3xl bg-surface p-6 sm:p-8"
-    :class="{ 'bg-linear-to-b from-brand/15 to-brand/15': item.popular }"
   >
-    <!-- Google Material Symbols Rounded: star, filled (Apache-2.0). -->
-    <svg
+    <img
       v-if="item.popular"
-      class="pointer-events-none absolute -right-36 -bottom-36 -z-1 size-120 fill-current text-surface opacity-40"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 -960 960 960"
+      ref="background"
+      class="pointer-events-none absolute inset-0 -z-1 h-full w-full object-cover object-top"
+      :src="popularCardBackground"
+      alt=""
       aria-hidden="true"
-      focusable="false"
+      loading="lazy"
+      @load="updateProductClip"
     >
-      <path d="M480-269 314-169q-11 7-23 6t-21-8q-9-7-14-17.5t-2-23.5l44-189-147-127q-10-9-12.5-20.5T140-571q4-11 12-18t22-9l194-17 75-178q5-12 15.5-18t21.5-6q11 0 21.5 6t15.5 18l75 178 194 17q14 2 22 9t12 18q4 11 1.5 22.5T809-528L662-401l44 189q3 13-2 23.5T690-171q-9 7-21 8t-23-6L480-269Z" />
-    </svg>
     <span
       v-if="item.popular"
       class="absolute top-6 right-6 z-10 rounded-full bg-brand px-3 py-2 text-caption font-extrabold tracking-wide text-surface uppercase sm:top-8 sm:right-8"
     >
       Популярное
     </span>
-    <div class="relative h-64 w-full">
+    <div ref="productViewport" class="relative h-64 w-full" :style="item.popular ? productClip : undefined">
       <Transition
         enter-active-class="transition-[translate] duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
         leave-active-class="transition-[translate] duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"

@@ -3,7 +3,7 @@ import partnersHeroForeground from '../../assets/heroes/partners/foreground.png?
 import partnersHeroMiddle from '../../assets/heroes/partners/middle.png?responsive'
 import partnersHeroBackground from '../../assets/heroes/partners/background.png?responsive'
 import { computed, ref } from 'vue'
-import CircleArrow from '../../components/CircleArrow.vue'
+import BaseButton from '../../components/BaseButton.vue'
 import ActionTile from '../../components/ActionTile.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
@@ -137,10 +137,9 @@ const pointCountLabel = computed(() => {
           <p class="mt-6 max-w-2xl text-body-large font-medium text-subtle">
             Свяжитесь с отделом продаж — подскажем ближайшую точку или условия поставки.
           </p>
-          <a class="group mt-10 inline-flex items-center gap-5 text-label font-extrabold tracking-wide uppercase" :href="sitePath('/kontakty/')">
-            <span class="secondary-action py-3">Открыть контакты</span>
-            <CircleArrow hover="brand" size="action" />
-          </a>
+          <BaseButton class="mt-10 inline-flex items-center justify-center" :href="sitePath('/kontakty/')">
+            Открыть контакты
+          </BaseButton>
         </div>
       </div>
     </section>

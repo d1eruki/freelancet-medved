@@ -13,7 +13,7 @@
 <label>Сорт<select name="product"></select></label>
 <label>Тень<select name="shadow"><option value="contact">Мягкая под продуктом</option><option value="cast">Вбок, как в слайдере</option><option value="none">Без тени</option></select></label>
 <label>Фон<select name="background"><option value="white">Белый</option><option value="slider">Со слайдера</option><option value="hero">Из хиро категории сорта</option><option value="custom">Свой из файла настроек</option></select></label>
-<label>Композиция<select name="composition"><option value="glass">Стакан</option><option value="can-330">Банка маленькая</option><option value="can-450">Банка большая</option><option value="pair-330">Стакан и маленькая банка</option><option value="pair-450">Стакан и большая банка</option></select></label>
+<label>Композиция<select name="composition"><option value="glass">Стакан</option><option value="bottle-750">Бутылка 0,75 л</option><option value="can-330">Банка маленькая</option><option value="can-450">Банка большая</option><option value="pair-330">Стакан и маленькая банка</option><option value="pair-450">Стакан и большая банка</option></select></label>
 <label>Качество<select name="quality"><option value="standard">Обычное</option><option value="hero">Для крупного изображения</option></select></label>
 <button type="submit">Рендерить</button>
 <button type="button" id="save">Сохранить для этого назначения</button>
@@ -38,8 +38,9 @@ for(const [key,profile] of Object.entries(productRenderProfiles)) form.elements.
 for(const [key,recipe] of Object.entries(drinkPresets)) form.elements.product.add(new Option(recipe.name,key))
 function sync(){
  const hasLabel=Object.values(canLabelPresets).some(item=>item.drink===form.elements.product.value)
- for(const option of form.elements.composition.options) option.disabled=option.value!=='glass'&&!hasLabel
- if(!hasLabel) form.elements.composition.value='glass'
+ const hasBottle=['cider-antonovka','cider-cherry','perry-williams'].includes(form.elements.product.value)
+ for(const option of form.elements.composition.options) option.disabled=option.value==='bottle-750'?!hasBottle:option.value!=='glass'&&!hasLabel
+ if(form.elements.composition.selectedOptions[0]?.disabled) form.elements.composition.value='glass'
  form.elements.background.querySelector('[value="custom"]').disabled=!settings.background.source
 }
 function fill(){
@@ -56,12 +57,16 @@ function read(){
    result.background={...productRenderProfiles[background==='slider'?'slider':background==='hero'?'hero':'card'].settings.background,type:background,source:result.background.source}
  }
  const [objects,volume]=form.elements.composition.value.split('-')
- if(objects!==result.objects){result.composition=structuredClone(productRenderProfiles[objects==='pair'?'slider':'card'].settings.composition)}
- result.objects=objects; if(volume) result.volume=volume
+ if(objects!==result.objects){
+   result.composition=structuredClone(productRenderProfiles[objects==='pair'?'slider':'card'].settings.composition)
+   if(objects==='bottle') result.camera={...structuredClone(productRenderSettings.camera),position:[0,1.88,5],target:[0,1,0],halfHeight:2.35}
+   else if(result.objects==='bottle') result.camera=structuredClone(productRenderSettings.camera)
+ }
+ result.objects=objects; result.volume=volume||(result.volume==='750'?'450':result.volume)
  const quality=form.elements.quality.value==='hero'?productRenderSettings.heroQuality:productRenderSettings.quality
  if((result.quality.maxModelPixels>productRenderSettings.quality.maxModelPixels)!==(form.elements.quality.value==='hero')){
    result.quality=structuredClone(quality)
-   result.output=form.elements.quality.value==='hero'?{width:2508,height:2508}:{width:0,height:0}
+   result.output=form.elements.quality.value==='hero'?{width:2508,height:2508,subjectHeight:0}:{width:0,height:0,subjectHeight:0}
  }
  return result
 }

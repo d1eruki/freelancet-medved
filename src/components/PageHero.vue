@@ -15,6 +15,7 @@ const props = defineProps({
   layerLayout: { type: Object, default: null },
   layerEntrance: { type: String, default: 'rise', validator: (value) => Object.hasOwn(layerEntranceTimings, value) },
   animateCopy: { type: Boolean, default: false },
+  mobileActionsBottom: { type: Boolean, default: false },
 })
 
 const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } = usePointerParallax({
@@ -48,7 +49,7 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
     </figure>
 
     <div class="site-container relative flex min-h-svh flex-col justify-center pt-28 pb-8 sm:pt-32 sm:pb-12">
-      <div class="flex flex-col gap-6" :class="{ 'items-center text-center': contentAlign === 'center' }">
+      <div class="flex flex-col gap-6" :class="{ 'items-center text-center': contentAlign === 'center', 'my-auto sm:my-0': mobileActionsBottom && $slots.actions }">
         <h1 :id="titleId" class="relative font-display text-h1 uppercase" :class="{ 'hero-copy-rise': layers || animateCopy }" :style="{ zIndex: titleZIndex }">
           <slot name="title" />
         </h1>

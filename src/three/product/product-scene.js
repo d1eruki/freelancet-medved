@@ -10,7 +10,7 @@ import { warmupWebGL } from './webgl-warmup.js'
 export const productSceneKey = Symbol('product-scene')
 
 // Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
-export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
+export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, vessel = 'glass', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
   let currentView = null, closed = false, failed = false
   let bankOptics = null
   const sceneSettings = cameraSettings
@@ -111,7 +111,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
       const loader = new GLTFLoader()
       const slots = (hasGlass ? [glassSlot, canSlot] : [canSlot]).map(slot => modelSource && slot.props.bank ? { ...slot, props: { ...slot.props, source: modelSource } } : slot)
-      const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl)
+      const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl, vessel)
       canSlot = currentView?.can || canSlot; glassSlot = currentView?.glass || canSlot
       article = currentView?.root || article
       article.appendChild(renderer.domElement)
@@ -123,6 +123,20 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       const bankDisplay = { value: false }
       const items = prepareProductModels(THREE, models, hasGlass ? [glassSlot, canSlot] : [canSlot])
       const glassItem = hasGlass ? items[0] : null, canItem = items[items.length - 1]
+      const accessoryPlacement = new THREE.Group()
+      accessoryPlacement.matrixAutoUpdate = false
+      if (glassItem) {
+        const accessories = []
+        glassItem.product.traverse(node => { if (node.userData.opticalAccessory) accessories.push(node) })
+        for (const node of accessories) {
+          node.updateWorldMatrix(true, false)
+          const clone = node.clone()
+          clone.matrixAutoUpdate = false
+          clone.matrix.copy(node.matrixWorld)
+          accessoryPlacement.add(clone)
+        }
+      }
+      scene.add(accessoryPlacement)
       // У меньшей банки размеры записаны в GLB. Сохраняем единый масштаб лабы,
       // вместо растягивания 330 мл до размеров принятого эталона 450 мл.
       const canMetadata = models[models.length - 1].userData
@@ -159,6 +173,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         center: canItem.productBounds.getCenter(new THREE.Vector3()),
       } : null
       const labelMaterials = prepareProductMaterials(THREE, canItem.model, environment.texture, lightSource, bankDisplay)
+      if (accessoryPlacement.children.length) prepareProductMaterials(THREE, accessoryPlacement, environment.texture, lightSource, bankDisplay)
       const labels = createProductLabels({
         THREE, renderer, labelMaterials, preloadLabelUrls,
         onPending() { items.forEach(item => { item.slot.ready.value = false }) },
@@ -225,6 +240,10 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         if (glassShadowPlacement) {
           glassShadowPlacement.matrix.copy(restOnCounter(placementMatrix(glassSlot, capture, 0), glassItem.productBounds))
           glassShadowPlacement.matrixWorldNeedsUpdate = true
+        }
+        if (accessoryPlacement.children.length) {
+          accessoryPlacement.matrix.copy(placementMatrix(glassSlot, capture, 0))
+          accessoryPlacement.matrixWorldNeedsUpdate = true
         }
         lightSource.invalidate()
       }
@@ -494,7 +513,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
           const lightPosition = lightSource.spotlight.position.clone()
           const targetPosition = lightSource.spotlight.target.position.clone()
           const previousTarget = renderer.getRenderTarget()
-          const visibility = { can: canPlacement.visible, receiver: lightSource.receiver.visible, glass: glassShadowPlacement?.visible, display: displayMesh?.visible }
+          const visibility = { can: canPlacement.visible, receiver: lightSource.receiver.visible, glass: glassShadowPlacement?.visible, display: displayMesh?.visible, accessories: accessoryPlacement.visible }
           const previousDisplay = bankDisplay.value
           try {
             if (hasGlass) {
@@ -504,6 +523,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
               save(glassOnly ? 'glass' : 'pair')
             }
             if (displayMesh) displayMesh.visible = false
+            accessoryPlacement.visible = false
             setView(false); placeBank(false)
             bankDisplay.value = true
             renderer.setRenderTarget(null)
@@ -552,6 +572,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
             canPlacement.visible = visibility.can
             if (glassShadowPlacement) glassShadowPlacement.visible = visibility.glass
             if (displayMesh) displayMesh.visible = visibility.display
+            accessoryPlacement.visible = visibility.accessories
             bankDisplay.value = previousDisplay
             renderer.setRenderTarget(previousTarget)
             lightSource.invalidate()

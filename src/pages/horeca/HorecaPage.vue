@@ -5,7 +5,7 @@ import horecaHeroMiddle from '../../assets/heroes/horeca/middle.png?responsive'
 import horecaHeroBackground from '../../assets/heroes/horeca/background.png?responsive'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
-import ActionTile from '../../components/ActionTile.vue'
+import ContactActionSection from '../../components/contact-action-section.vue'
 import InfoCard from '../../components/InfoCard.vue'
 import BaseButton from '../../components/BaseButton.vue'
 import ContactFormDialog from '../../components/contact-form-dialog.vue'
@@ -21,7 +21,7 @@ const isTastingFormOpen = ref(false)
 const horecaHeroLayout = {
   mobile: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2.5, x: 100, y: -100 },
+    middle: { enabled: false, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2.5, x: 100, y: -100 },
     foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2, x: 0, y: -50 },
   },
   tablet: {
@@ -60,6 +60,7 @@ const horecaHeroLayers = {
   <div>
     <PageHero
       title-id="horeca-page-title"
+      mobile-actions-bottom
       :title-z-index="0"
       :layers="horecaHeroLayers"
       :layer-layout="horecaHeroLayout"
@@ -168,27 +169,19 @@ const horecaHeroLayers = {
       </div>
     </section>
 
-    <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="horeca-start-title">
-      <div class="site-container">
-        <h2 id="horeca-start-title" class="font-display text-h2 break-words hyphens-auto uppercase">Начнём со знакомства</h2>
-        <div class="mt-12 grid gap-10 sm:mt-16 site-grid nav:gap-6">
-          <div class="grid content-start gap-6 nav:col-span-5">
-            <p class="text-body-large font-medium text-surface/85">
-              Расскажите о своём заведении: в каком городе работаете, какие напитки ищете и какой формат поставки вам нужен.
-            </p>
-            <p class="text-body-large font-medium text-surface/85">
-              Обсудим ассортимент и оптовые цены. Перед поставкой подготовим выбранные напитки для дегустации в ПЭТ-бутылках.
-            </p>
-          </div>
-          <ActionTile
-            class="nav:col-span-7"
-            :href="sitePath('/kontakty/')"
-            label="Обсудить поставку и дегустацию"
-            title="Связаться с отделом продаж"
-            compact
-          />
-        </div>
-      </div>
-    </section>
+    <ContactActionSection
+      title-id="horeca-start-title"
+      title="Начнём со знакомства"
+      :href="sitePath('/kontakty/')"
+      action-label="Обсудить поставку и дегустацию"
+      action-title="Связаться с отделом продаж"
+    >
+      <p>
+        Расскажите о своём заведении: в каком городе работаете, какие напитки ищете и какой формат поставки вам нужен.
+      </p>
+      <p>
+        Обсудим ассортимент и оптовые цены. Перед поставкой подготовим выбранные напитки для дегустации в ПЭТ-бутылках.
+      </p>
+    </ContactActionSection>
   </div>
 </template>

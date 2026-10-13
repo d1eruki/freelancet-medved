@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "product": "cider-antonovka",
+  "preset": "card",
+  "settings": {
+    "objects": "bottle",
+    "volume": "750",
+    "camera": {
+      "position": [
+        0,
+        1.88,
+        5
+      ],
+      "target": [
+        0,
+        1,
+        0
+      ],
+      "halfHeight": 2.35,
+      "near": 0.1,
+      "far": 20
+    },
+    "light": {
+      "position": [
+        -1.2,
+        3.8,
+        2
+      ],
+      "target": [
+        0,
+        -0.15,
+        0
+      ],
+      "width": 1.5,
+      "height": 2.5,
+      "radiance": 0,
+      "intensity": 48
+    },
+    "quality": {
+      "maxModelPixels": 720,
+      "maxPixelRatio": 1.5,
+      "maxFramePixels": 2048,
+      "samples": 4,
+      "bodySamples": 4,
+      "baseSamples": 8,
+      "traceSteps": 18,
+      "reflectionSteps": 6,
+      "backdropScale": 1.5,
+      "backdropPixels": 2048
+    },
+    "shadow": {
+      "type": "contact",
+      "position": [
+        0,
+        8,
+        0
+      ],
+      "mapSize": 1024,
+      "extent": 1.2,
+      "bias": -0.00008,
+      "normalBias": 0.002,
+      "radius": 18,
+      "blurSamples": 16,
+      "opacity": 0.2,
+      "blurSigma": 8,
+      "referenceHeight": 1118,
+      "target": [
+        0,
+        -0.15,
+        0
+      ],
+      "softness": 1
+    },
+    "background": {
+      "type": "white",
+      "source": "",
+      "refractionSource": "",
+      "reflections": "studio",
+      "opacity": 0.15,
+      "counter": false,
+      "counterHeight": 0.3
+    },
+    "preview": {
+      "background": "#ffffff"
+    },
+    "composition": {
+      "width": 1024,
+      "height": 768,
+      "modelHeight": 576,
+      "modelBottom": 96,
+      "canOffset": 0,
+      "canBottom": 96,
+      "offset": 0
+    },
+    "output": {
+      "width": 0,
+      "height": 0,
+      "subjectHeight": 0
+    }
+  },
+  "model": {
+    "reference": "src/assets/products/cider/antonovka-750ml.png",
+    "nominalVolumeMl": 750,
+    "dimensionsVerified": false,
+    "heightMeters": 0.3,
+    "diameterMeters": 0.087,
+    "wallMeters": 0.0028,
+    "bottomMeters": 0.007,
+    "unitsPerMeter": 13.377926421404682,
+    "radialSegments": 128,
+    "glass": {
+      "absorption": [
+        18,
+        2.5,
+        23
+      ],
+      "ior": 1.52
+    },
+    "liquid": {
+      "preset": "cider-antonovka",
+      "ior": 1.333
+    }
+  },
+  "recipe": {
+    "foam": false,
+    "absorption": [
+      0.03,
+      0.3,
+      2
+    ],
+    "scattering": 0,
+    "scatteringColor": [
+      0,
+      0,
+      0
+    ]
+  },
+  "sources": {
+    "model": "procedural:antonovka-750ml",
+    "label": "",
+    "refraction": "",
+    "reflections": "",
+    "counter": ""
+  },
+  "frame": {
+    "width": 2048,
+    "height": 840,
+    "sourceWidth": 2048,
+    "sourceHeight": 840,
+    "scale": 1,
+    "heightScale": 1.4,
+    "topOffset": -20,
+    "center": 50.014350313690436,
+    "origins": {
+      "glass": "50.014350313690436% 76.70343961444351%",
+      "can": "50.014350313690436% 76.70343961444351%"
+    },
+    "centering": {
+      "x": 604,
+      "y": -2
+    }
+  }
+}

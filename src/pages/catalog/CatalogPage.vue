@@ -5,9 +5,8 @@ import catalogHeroBackground from '../../assets/heroes/catalog/background.png?re
 import CatalogCategoryCard from './CatalogCategoryCard.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
-import SectionLink from '../../components/SectionLink.vue'
+import SupplySection from '../../components/supply-section.vue'
 import { catalogCategories } from '../../data/catalog'
-import { sitePath } from '../../utils/site-path'
 import catalogDividerUrl from '../../assets/heroes/catalog/divider.png'
 
 const catalogHeroLayout = {
@@ -23,7 +22,7 @@ const catalogHeroLayout = {
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1.1, x: 0, y: -50 },
+    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1, x: 500, y: 250 },
     foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 225, y: -50 },
   },
 }
@@ -79,13 +78,6 @@ const catalogHeroLayers = {
       </div>
     </section>
 
-    <SectionLink
-      heading-id="catalog-contact-title"
-      title="Нужна поставка?"
-      description="Свяжитесь с отделом оптовых продаж, чтобы обсудить ассортимент и условия сотрудничества."
-      :href="sitePath('/kontakty/')"
-      label="Контакты"
-      :background="'foreground'"
-    />
+    <SupplySection heading-id="catalog-contact-title" />
   </div>
 </template>

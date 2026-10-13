@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
         aria-label="Основная навигация"
       >
         <img
-          class="pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
+          class="header-ribbon pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
           :src="headerRibbonUrl"
           width="2172"
           height="756"
@@ -149,8 +149,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.site-header {
-  background: linear-gradient(to bottom, rgb(16 16 16 / 72%) 0%, rgb(16 16 16 / 40%) 42%, transparent 100%);
+.header-ribbon {
+  filter: drop-shadow(0 8px 12px rgb(0 0 0 / 35%));
 }
 
 .menu-icon,

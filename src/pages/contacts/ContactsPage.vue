@@ -1,23 +1,54 @@
 <script setup>
 import contactsHeroImageUrl from '../../assets/heroes/contacts/hero.png'
+import contactsHeroMiddleUrl from '../../assets/heroes/contacts/middle.png'
+import drinksStillLifeUrl from '../../assets/heroes/contacts/drinks-still-life.png'
 import contactsDividerUrl from '../../assets/heroes/contacts/divider.png'
-import CircleArrow from '../../components/CircleArrow.vue'
+import BaseButton from '../../components/BaseButton.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import ContactSection from '../../components/ContactSection.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
-import SectionLink from '../../components/SectionLink.vue'
+import SupplySection from '../../components/supply-section.vue'
 import { contacts } from '../../data/contacts.js'
 import { sitePath } from '../../utils/site-path'
+
+const contactsHeroLayers = {
+  background: {
+    src: contactsHeroImageUrl,
+    className: 'absolute inset-0 size-full object-cover object-center',
+    alt: 'Иллюстрация кирпичного промышленного здания у воды',
+  },
+  middle: {
+    src: contactsHeroMiddleUrl,
+    className: 'absolute left-0 h-auto w-[82vw] sm:w-[55vw] wide:w-[44vw]',
+    alt: 'Рабочие загружают бочки в деревянную повозку у завода',
+  },
+}
+
+const contactsHeroLayout = {
+  mobile: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, scale: 1, x: '-8vw', y: '3svh', constraints: { horizontal: 'left', vertical: 'bottom' } },
+  },
+  tablet: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, scale: 1, x: '2vw', y: '6svh', constraints: { horizontal: 'left', vertical: 'bottom' } },
+  },
+  desktop: {
+    background: { enabled: true, scale: 1, x: 0, y: 0 },
+    middle: { enabled: true, scale: 1.5, x: -100, y: -200, constraints: { horizontal: 'left', vertical: 'bottom' } },
+  },
+}
 
 </script>
 
 <template>
   <div>
     <PageHero
+      class="contacts-hero"
       title-id="contacts-title"
-      :image-url="contactsHeroImageUrl"
-      image-alt="Иллюстрация кирпичного промышленного здания у воды"
+      :layers="contactsHeroLayers"
+      :layer-layout="contactsHeroLayout"
       animate-copy
     >
       <template #title>Будем<br>знакомы</template>
@@ -60,23 +91,40 @@ import { sitePath } from '../../utils/site-path'
           <div class="nav:col-span-7 nav:pt-12">
             <address class="max-w-3xl text-body-large font-bold not-italic">{{ contacts.address }}</address>
             <p class="mt-6 max-w-2xl text-body font-medium text-subtle">Въезд со стороны набережной Обводного канала, между домами 205А и 207Б.</p>
-            <a class="group mt-10 inline-flex items-center gap-5 text-label font-extrabold tracking-wide text-brand uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" :href="contacts.routeUrl" target="_blank" rel="noopener noreferrer">
-              <span class="secondary-action py-3">Построить маршрут</span>
-              <CircleArrow hover="brand" size="action" />
-            </a>
+            <BaseButton class="mt-10 inline-flex items-center justify-center" :href="contacts.routeUrl" target="_blank" rel="noopener noreferrer">
+              Построить маршрут
+            </BaseButton>
           </div>
         </div>
         <iframe class="mt-12 h-96 w-full rounded-3xl border-0" :src="contacts.mapEmbedUrl" :title="contacts.mapTitle" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
     </section>
 
-    <SectionLink
+    <SupplySection
+      class="contacts-drinks"
       heading-id="contacts-catalog-title"
       title="Наши напитки"
       description="Познакомьтесь с ассортиментом медовухи, сидра и пуаре."
       :href="sitePath('/katalog/')"
       label="В каталог"
-      :background="'foreground'"
+      :image-url="drinksStillLifeUrl"
     />
   </div>
 </template>
+
+<style scoped>
+.contacts-drinks :deep(img) {
+  width: 75%;
+  margin-left: auto;
+}
+
+.contacts-hero :deep(.hero-overlay-bottom),
+.contacts-hero :deep(.hero-overlay-center) {
+  transform: scaleX(-1);
+}
+
+.contacts-hero :deep(.site-container > .flex) {
+  align-items: flex-end;
+  text-align: right;
+}
+</style>

@@ -1,8 +1,7 @@
 <script setup>
 import DrinkCategoryHero from './DrinkCategoryHero.vue'
 import FlavorCard from './FlavorCard.vue'
-import SectionLink from '../../components/SectionLink.vue'
-import { sitePath } from '../../utils/site-path'
+import SupplySection from '../../components/supply-section.vue'
 
 defineProps({
   category: { type: Object, required: true },
@@ -31,13 +30,6 @@ defineProps({
       </div>
     </section>
 
-    <SectionLink
-      :heading-id="`${category.slug}-contact-title`"
-      title="Обсудим поставку"
-      description="По вопросам оптовых заказов и сотрудничества обращайтесь в отдел продаж."
-      :href="sitePath('/kontakty/')"
-      label="Контакты"
-      :background="'foreground'"
-    />
+    <SupplySection :heading-id="`${category.slug}-contact-title`" />
   </div>
 </template>

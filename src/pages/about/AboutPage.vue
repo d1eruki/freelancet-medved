@@ -16,7 +16,7 @@ import awardMedovukhaFest2017ParticipantUrl from '../../assets/awards/award-medo
 import awardMedovukhaFest2017TastingUrl from '../../assets/awards/award-medovukha-fest-2017-tasting.jpg'
 import CircleArrow from '../../components/CircleArrow.vue'
 import BaseButton from '../../components/BaseButton.vue'
-import ActionTile from '../../components/ActionTile.vue'
+import ContactActionSection from '../../components/contact-action-section.vue'
 import AwardCard from './AwardCard.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
@@ -109,8 +109,8 @@ const aboutHeroLayout = {
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1.1, x: 50, y: 150 },
-    foreground: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1.1, x: 0, y: -75 },
+    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 0.9, x: 0, y: -50 },
   },
 }
 
@@ -348,21 +348,16 @@ const awards = [
       </div>
     </section>
 
-    <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="partnership-title">
-      <div class="site-container">
-        <div class="grid gap-6 site-grid">
-          <div class="nav:col-span-7">
-            <h2 id="partnership-title" class="max-w-5xl font-display text-h2 uppercase">Работаем с теми, кто знает толк</h2>
-          </div>
-          <p class="max-w-xl text-body-large font-medium text-surface/65 nav:col-span-5 nav:self-end">
-            Поставляем напитки оптом в многооборотных кегах и одноразовой ПЭТ-таре. Доставляем по Санкт-Петербургу и Ленинградской области, работаем с региональными дистрибьюторами.
-          </p>
-        </div>
-
-        <div class="mt-12 sm:mt-16">
-          <ActionTile :href="sitePath('/kontakty/')" label="Начать сотрудничество" title="Связаться" />
-        </div>
-      </div>
-    </section>
+    <ContactActionSection
+      title-id="partnership-title"
+      title="Работаем с теми, кто знает толк"
+      :href="sitePath('/kontakty/')"
+      action-label="Начать сотрудничество"
+      action-title="Связаться"
+    >
+      <p>
+        Поставляем напитки оптом в многооборотных кегах и одноразовой ПЭТ-таре. Доставляем по Санкт-Петербургу и Ленинградской области, работаем с региональными дистрибьюторами.
+      </p>
+    </ContactActionSection>
   </div>
 </template>

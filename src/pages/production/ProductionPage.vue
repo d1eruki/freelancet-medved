@@ -305,7 +305,7 @@ const qualityPoints = [
     <div ref="processScrollSection" class="nav:h-[400svh]">
       <div class="nav:sticky nav:top-0 nav:h-svh">
         <section
-          class="section-decorated bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:py-8"
+          class="section-decorated bg-panel overflow-hidden py-20 text-foreground sm:py-24 nav:h-full nav:overflow-visible nav:py-8"
           aria-labelledby="production-process-title"
           @keydown="handleProcessKeydown"
         >
@@ -342,7 +342,7 @@ const qualityPoints = [
 
             <div
               id="production-step-images"
-              class="relative mt-10 aspect-[4/3] overflow-hidden touch-pan-y nav:mt-0 nav:aspect-auto nav:h-full nav:touch-auto"
+              class="relative mt-10 aspect-[4/3] overflow-hidden touch-pan-y nav:mt-0 nav:aspect-auto nav:h-full nav:overflow-visible nav:touch-auto"
             >
               <img
                 v-for="(step, index) in processSteps"

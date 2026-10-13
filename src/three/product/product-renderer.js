@@ -1,5 +1,6 @@
 import { canLabelPresets, resolveProductRender } from '../../data/product-render-settings.js'
 import { catalogCategoryDefinitions } from '../../data/catalog-categories.js'
+import { bottlePrototype } from './product-models.js'
 
 const sliderBackground = new URL('../../assets/home/product-slider-background.png', import.meta.url).href
 const counterTexture = new URL('../../assets/home/bar-counter-texture.png', import.meta.url).href
@@ -23,7 +24,7 @@ export async function mountProductRender(options = {}) {
   const configuration = resolveProductRender(options)
   const { product, preset, settings } = configuration
   const { objects, composition, background, quality, shadow } = settings
-  const pair = objects === 'pair', canOnly = objects === 'can'
+  const pair = objects === 'pair', canOnly = objects === 'can', bottle = objects === 'bottle'
   const [{ createApp, h }, { default: ProductScene }, { createProductScene, productSceneKey }, { drinkPresets }] = await Promise.all([
     import('vue'), import('../../components/product-scene/ProductScene.vue'),
     import('./product-scene.js'), import('../../data/drink-presets.js'),
@@ -31,8 +32,8 @@ export async function mountProductRender(options = {}) {
   const recipe = drinkPresets[product]
   if (!recipe) throw new Error(`Неизвестный напиток: ${product}`)
   const labelPreset = Object.values(canLabelPresets).find(item => item.drink === product)
-  if (objects !== 'glass' && !labelPreset) throw new Error('Для этого сорта нет этикетки банки')
-  const modelSource = new URL(`../../assets/models/can-${settings.volume}ml.glb`, import.meta.url).href
+  if (objects !== 'glass' && !bottle && !labelPreset) throw new Error('Для этого сорта нет этикетки банки')
+  const modelSource = new URL(`../../assets/models/can-${bottle ? '450' : settings.volume}ml.glb`, import.meta.url).href
   const label = labelPreset ? new URL(`../../../materials/customer-design/labels/cans-330ml-500ml/${labelPreset.label}.png`, import.meta.url).href : ''
   const refractionSource = backgroundSource(background.type, background.source, product)
   const reflectionSource = backgroundSource(background.reflections, background.source, product)
@@ -83,10 +84,10 @@ export async function mountProductRender(options = {}) {
   section.append(host)
   document.body.append(section)
   const owner = createProductScene({ loadGlassOptics: () => import('../glass-lab/glass-optics.js'), exportRender: true, modelSource,
-    shadowStyle: shadow.type, shadowSettings: shadow, glassOnly: objects === 'glass', quality,
+    shadowStyle: shadow.type, shadowSettings: shadow, glassOnly: objects === 'glass' || bottle, vessel: bottle ? 'bottle' : 'glass', quality,
     cameraSettings: settings.camera, lightSettings: settings.light })
   const app = createApp({ render: () => h(ProductScene, { active: true, paused: true, canOnly,
-    loadGlassOptics: () => import('../glass-lab/glass-optics.js'), drink: product, foam: recipe.foam, canLabel: label, patternSlug: 'render' }) })
+    loadGlassOptics: () => import('../glass-lab/glass-optics.js'), drink: product, foam: bottle ? false : recipe.foam, canLabel: label, patternSlug: 'render' }) })
   app.provide(productSceneKey, owner)
   window.renderReady = false
   try {
@@ -103,24 +104,48 @@ export async function mountProductRender(options = {}) {
       poll()
     })
     const raw = owner.exportLayers()
+    // Центрируем одиночный продукт по его силуэту, не по полям буфера
+    // или вытянутой тени. Камера и масштаб сцены остаются прежними.
+    const name = pair ? 'pair' : canOnly ? 'can' : 'glass'
+    let offsetX = 0, offsetY = 0, subjectHeight = 0
+    if (!pair) {
+      const pixels = raw.canvases[name].getContext('2d').getImageData(0, 0, raw.width, raw.height).data
+      let left = raw.width, right = -1, top = raw.height, bottom = -1
+      for (let y = 0; y < raw.height; y++) for (let x = 0; x < raw.width; x++) {
+        if (pixels[(y * raw.width + x) * 4 + 3] < 128) continue
+        left = Math.min(left, x); right = Math.max(right, x)
+        top = Math.min(top, y); bottom = Math.max(bottom, y)
+      }
+      if (right >= left) {
+        subjectHeight = bottom - top + 1
+        offsetX = Math.round((raw.width - left - right - 1) / 2)
+        offsetY = Math.round((raw.height - top - bottom - 1) / 2)
+      }
+    }
     const frame = settings.output
-    const scale = frame.width ? Math.min(frame.width / raw.width, frame.height / raw.height) : 1
+    const scale = frame.subjectHeight && subjectHeight ? frame.subjectHeight / subjectHeight : frame.width ? Math.min(frame.width / raw.width, frame.height / raw.height) : 1
     const width = frame.width || raw.width, height = frame.height || raw.height
     const canvases = Object.fromEntries(Object.entries(raw.canvases).map(([key, original]) => {
       const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height
-      canvas.getContext('2d').drawImage(original, (width - raw.width * scale) / 2, (height - raw.height * scale) / 2, raw.width * scale, raw.height * scale)
+      canvas.getContext('2d').drawImage(original, (width - raw.width * scale) / 2 + offsetX * scale, (height - raw.height * scale) / 2 + offsetY * scale, raw.width * scale, raw.height * scale)
       return [key, canvas]
     }))
-    const layers = { ...raw, width, height, canvases }
-    const metadata = { ...configuration, recipe: { foam: recipe.foam, absorption: recipe.absorption, scattering: recipe.scattering, scatteringColor: recipe.scatteringColor },
-      sources: { model: modelSource, label, refraction: background.refractionSource || refractionSource, reflections: reflectionSource, counter: background.counter ? counterTexture : '' },
-      frame: { width, height, sourceWidth: raw.width, sourceHeight: raw.height, scale, heightScale: raw.heightScale, topOffset: raw.topOffset, center: raw.center, origins: raw.origins } }
+    const frameX = (width - raw.width * scale) / 2 + offsetX * scale
+    const frameY = (height - raw.height * scale) / 2 + offsetY * scale
+    const center = (frameX + raw.center / 100 * raw.width * scale) / width * 100
+    const origins = Object.fromEntries(Object.entries(raw.origins).map(([key, value]) => {
+      const [x, y] = value.split(' ').map(Number.parseFloat)
+      return [key, `${(frameX + x / 100 * raw.width * scale) / width * 100}% ${(frameY + y / 100 * raw.height * scale) / height * 100}%`]
+    }))
+    const layers = { ...raw, width, height, center, origins, canvases }
+    const metadata = { ...configuration, ...(bottle ? { model: bottlePrototype } : {}), recipe: { foam: bottle ? false : recipe.foam, absorption: recipe.absorption, scattering: recipe.scattering, scatteringColor: recipe.scatteringColor },
+      sources: { model: bottle ? 'procedural:antonovka-750ml' : modelSource, label: bottle ? '' : label, refraction: background.refractionSource || refractionSource, reflections: reflectionSource, counter: background.counter ? counterTexture : '' },
+      frame: { width, height, sourceWidth: raw.width, sourceHeight: raw.height, scale, heightScale: raw.heightScale, topOffset: raw.topOffset, center, origins, centering: { x: offsetX, y: offsetY } } }
     window.exportLayers = () => layers
     window.renderInfo = metadata
     window.exportSettings = () => JSON.stringify(metadata, null, 2)
     const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height
     const context = canvas.getContext('2d')
-    const name = pair ? 'pair' : canOnly ? 'can' : 'glass'
     for (const key of [`${name}-shadow`, name]) context.drawImage(canvases[key], 0, 0)
     const png = canvas.toDataURL('image/png')
     window.exportPng = () => png
