@@ -1,7 +1,7 @@
 <script setup>
-import productionImageUrl from '../../assets/production-real.png'
+import productionImage from '../../assets/production-real.png?responsive'
 import marionLogoUrl from '../../assets/home/marion-logo.png'
-import marionPromoUrl from '../../assets/home/marion-promo.webp'
+import marionPromo from '../../assets/home/marion-promo.webp?responsive'
 import { catalogCategories } from '../../data/catalog'
 import SectionWatermark from '../../components/SectionWatermark.vue'
 </script>
@@ -22,7 +22,10 @@ import SectionWatermark from '../../components/SectionWatermark.vue'
         <figure class="about-feature group relative min-h-120 overflow-hidden rounded-3xl nav:min-h-160">
           <img
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
-            :src="productionImageUrl"
+            :src="productionImage.src"
+            :srcset="productionImage.srcset"
+            sizes="(min-width: 80rem) 746px, (min-width: 54rem) max(calc(58.33vw - 48px), 507px), max(calc(100vw - 32px), 381px)"
+            loading="lazy"
             alt="Производственный цех с ёмкостями из нержавеющей стали"
           >
           <span class="absolute inset-0 bg-linear-to-t from-foreground via-foreground/5 to-transparent" aria-hidden="true" />
@@ -108,7 +111,9 @@ import SectionWatermark from '../../components/SectionWatermark.vue'
         <figure class="relative isolate overflow-hidden rounded-2xl">
           <img
             class="block h-auto w-full"
-            :src="marionPromoUrl"
+            :src="marionPromo.src"
+            :srcset="marionPromo.srcset"
+            sizes="(min-width: 54rem) calc((min(100vw, 1480px) - 152px) / 2), (min-width: 40rem) calc(100vw - 112px), calc(100vw - 80px)"
             alt="Девушка с бокалом сидра MARION на красном фоне"
             width="1530"
             height="1000"

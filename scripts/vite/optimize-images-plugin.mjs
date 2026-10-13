@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 
-const rasterExtensions = new Set(['.png', '.jpg', '.jpeg'])
+const rasterExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp'])
 const assetsRoot = fileURLToPath(new URL('../../src/assets/', import.meta.url))
 
 function responsiveModule(resourcePath, originalWidth) {
@@ -43,6 +43,10 @@ export function optimizeImagesPlugin() {
       const lossless = params.has('lossless')
 
       if ((!resourcePath.startsWith(assetsRoot) && !lossless) || !rasterExtensions.has(extension)) {
+        return null
+      }
+      // Existing WebP assets stay untouched unless a conversion is requested.
+      if (extension === '.webp' && !['responsive', 'width', 'format', 'lossless'].some(param => params.has(param))) {
         return null
       }
 
