@@ -3,7 +3,7 @@
 const recipes = {
   "mead-berry": {
     "name": "Медовуха «Мэрион» Берри",
-    "target": "src/assets/products/mead/marion-pomegranate-berry-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/marion-pomegranate-berry-glass.png",
     "foam": true,
     "absorption": [
       0.35,
@@ -20,7 +20,7 @@ const recipes = {
   },
   "mead-mango": {
     "name": "Медовуха «Мэрион» Манго",
-    "target": "src/assets/products/mead/marion-mango-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/marion-mango-glass.png",
     "foam": true,
     "absorption": [
       0.1,
@@ -37,7 +37,7 @@ const recipes = {
   },
   "mead-cranberry": {
     "name": "Медовуха «Мёдведь» Клюквенная",
-    "target": "src/assets/products/mead/medved-cranberry-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-cranberry-glass.png",
     "foam": true,
     "absorption": [
       0.3,
@@ -54,7 +54,7 @@ const recipes = {
   },
   "mead-forest-berries": {
     "name": "Медовуха «Мёдведь» с лесными ягодами",
-    "target": "src/assets/products/mead/medved-forest-berries-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-forest-berries-glass.png",
     "foam": true,
     "absorption": [
       0.3,
@@ -71,7 +71,7 @@ const recipes = {
   },
   "mead-sea-buckthorn": {
     "name": "Медовуха «Мёдведь» Облепиховая",
-    "target": "src/assets/products/mead/medved-sea-buckthorn-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-sea-buckthorn-glass.png",
     "foam": true,
     "absorption": [
       0.08,
@@ -88,7 +88,7 @@ const recipes = {
   },
   "mead-plum": {
     "name": "Медовуха «Мёдведь» Сливовая",
-    "target": "src/assets/products/mead/medved-plum-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-plum-glass.png",
     "foam": true,
     "absorption": [
       0.28,
@@ -105,7 +105,7 @@ const recipes = {
   },
   "mead-blackcurrant": {
     "name": "Медовуха «Мэрион» Черносмородиновая",
-    "target": "src/assets/products/mead/medved-blackcurrant-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-blackcurrant-glass.png",
     "foam": true,
     "absorption": [
       0.55,
@@ -122,7 +122,7 @@ const recipes = {
   },
   "cider-khmelyar": {
     "name": "Сидр «Хмеляр»",
-    "target": "src/assets/products/cider/khmelyar-glass.png",
+    "target": "src/assets/products/cards/cider/glasses/khmelyar-glass.png",
     "foam": false,
     "absorption": [
       0.1,
@@ -139,7 +139,7 @@ const recipes = {
   },
   "cider-woodstock": {
     "name": "Сидр «Вудсток»",
-    "target": "src/assets/products/cider/woodstock-glass.png",
+    "target": "src/assets/products/cards/cider/glasses/woodstock-glass.png",
     "foam": false,
     "absorption": [
       0.08,
@@ -156,7 +156,7 @@ const recipes = {
   },
   "cider-cherry": {
     "name": "Сидр Вишневый",
-    "target": "src/assets/products/cider/cherry-glass.png",
+    "target": "src/assets/products/cards/cider/glasses/cherry-glass.png",
     "foam": false,
     "absorption": [
       0.12,
@@ -173,7 +173,7 @@ const recipes = {
   },
   "cider-antonovka": {
     "name": "Сидр «Ветка Антоновки»",
-    "target": "src/assets/products/cider/antonovka-glass.png",
+    "target": "src/assets/products/cards/cider/glasses/antonovka-glass.png",
     "foam": false,
     "absorption": [
       0.03,
@@ -190,7 +190,7 @@ const recipes = {
   },
   "perry-williams": {
     "name": "Пуаре «Мистер Вильямс»",
-    "target": "src/assets/products/perry/mister-williams-glass.png",
+    "target": "src/assets/products/cards/perry/glasses/mister-williams-glass.png",
     "foam": false,
     "absorption": [
       0.05,
@@ -207,7 +207,7 @@ const recipes = {
   },
   "mead-dark": {
     "name": "Медовуха «Мёдведь» Тёмная",
-    "target": "src/assets/products/mead/medved-dark-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-dark-glass.png",
     "foam": true,
     "absorption": [
       2.5,
@@ -224,7 +224,7 @@ const recipes = {
   },
   "mead-light": {
     "name": "Медовуха «Мёдведь» Светлая",
-    "target": "src/assets/products/mead/medved-light-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-light-glass.png",
     "foam": true,
     "absorption": [
       0.08,
@@ -241,7 +241,7 @@ const recipes = {
   },
   "mead-cherry": {
     "name": "Медовуха «Мёдведь» Вишнёвая",
-    "target": "src/assets/products/mead/medved-cherry-glass.png",
+    "target": "src/assets/products/cards/mead/glasses/medved-cherry-glass.png",
     "foam": true,
     "absorption": [
       0.12,
@@ -258,7 +258,7 @@ const recipes = {
   },
   "cider-valentine": {
     "name": "Сидр «Валентайн»",
-    "target": "src/assets/products/cider/valentine-glass.png",
+    "target": "src/assets/products/cards/cider/glasses/valentine-glass.png",
     "foam": false,
     "absorption": [
       0.03,

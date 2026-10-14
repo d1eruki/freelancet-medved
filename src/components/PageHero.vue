@@ -54,7 +54,7 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
           <slot name="title" />
         </h1>
 
-        <p class="hero-description relative z-4 max-w-xl text-surface/80 nav:max-w-md" :class="{ 'hero-copy-rise': layers || animateCopy }">
+        <p class="hero-description relative z-4 max-w-xl text-surface/80 sm:max-w-md" :class="{ 'hero-copy-rise': layers || animateCopy }">
           <slot />
         </p>
       </div>

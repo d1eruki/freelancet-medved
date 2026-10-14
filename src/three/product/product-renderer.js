@@ -37,7 +37,7 @@ export async function mountProductRender(options = {}) {
   const label = labelPreset ? new URL(`../../../materials/customer-design/labels/cans-330ml-500ml/${labelPreset.label}.png`, import.meta.url).href : ''
   // Пробная этикетка именно с изображения бутылки 0,75 л, не с другой упаковки.
   const bottleLabelPhoto = bottle && product === 'perry-williams'
-    ? new URL('../../assets/products/perry/mister-williams-750ml.png', import.meta.url).href : ''
+    ? new URL('../../assets/products/standalone/perry/bottles/mister-williams-750ml.png', import.meta.url).href : ''
   let bottleLabelSource = ''
   if (bottleLabelPhoto) {
     const photo = new Image()

@@ -104,8 +104,8 @@ const aboutHeroLayout = {
   },
   tablet: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 40, y: -100 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.1, x: -50, y: 100 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2.3, x: -200, y: -50 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.7, x: -50, y: -50 },
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },

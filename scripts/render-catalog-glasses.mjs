@@ -20,7 +20,9 @@ const legacyProducts = [
   { product: 'mead-berry', name: 'marion-berry-glass', target: 'src/assets/products/cider/marion-berry-glass.png' },
   { product: 'mead-blackcurrant', name: 'marion-blackcurrant-berry-glass', target: 'src/assets/products/cider/marion-blackcurrant-berry-glass.png' },
 ]
-const products = process.argv.includes('--remaining') ? [...categoryProducts, ...legacyProducts] : [...catalogProducts, ...categoryProducts, ...legacyProducts]
+// Обычный запуск обновляет только стаканы карточек. Бокалы категорий
+// и старые варианты запускаются отдельно через --remaining.
+const products = process.argv.includes('--remaining') ? [...categoryProducts, ...legacyProducts] : catalogProducts
 const backupDirectory = process.env.MEDVED_RENDER_BACKUP
 if (backupDirectory) {
   for (const item of products) {

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import popularCardBackground from '../../assets/ui/popular-card-background.webp'
+import regularCardBackground from '../../assets/ui/regular-card-background.png'
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -61,10 +62,9 @@ function selectVariant(index) {
     class="relative isolate flex min-h-80 flex-col overflow-hidden rounded-3xl bg-surface p-6 sm:p-8"
   >
     <img
-      v-if="item.popular"
       ref="background"
       class="pointer-events-none absolute inset-0 -z-1 h-full w-full object-cover object-top"
-      :src="popularCardBackground"
+      :src="item.popular ? popularCardBackground : regularCardBackground"
       alt=""
       aria-hidden="true"
       loading="lazy"

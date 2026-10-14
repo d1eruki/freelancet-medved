@@ -34,7 +34,7 @@ export function createStructuredData(page, assetUrl) {
       description: `${item.description} ${variant.details ?? item.details}`,
       category: page.category.name,
       size: variant.volume,
-      ...(variant.image ? { image: assetUrl(variant.image) } : {}),
+      ...(variant.searchImage ? { image: assetUrl(variant.searchImage) } : {}),
       url: page.canonicalUrl,
       manufacturer: { '@id': organizationId },
     })))

@@ -28,11 +28,11 @@ const contactsHeroLayers = {
 const contactsHeroLayout = {
   mobile: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, scale: 1, x: '-8vw', y: '3svh', constraints: { horizontal: 'left', vertical: 'bottom' } },
+    middle: { enabled: true, scale: 3, x: -500, y: -200, constraints: { horizontal: 'left', vertical: 'bottom' } },
   },
   tablet: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, scale: 1, x: '2vw', y: '6svh', constraints: { horizontal: 'left', vertical: 'bottom' } },
+    middle: { enabled: true, scale: 3, x: -600, y: -300, constraints: { horizontal: 'left', vertical: 'bottom' } },
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
@@ -49,6 +49,7 @@ const contactsHeroLayout = {
       title-id="contacts-title"
       :layers="contactsHeroLayers"
       :layer-layout="contactsHeroLayout"
+      layer-entrance="split-slide"
       animate-copy
     >
       <template #title>Будем<br>знакомы</template>

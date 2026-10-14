@@ -63,7 +63,7 @@ export function prepareProductModels(THREE, models, slots) {
 // Профиль задаёт внешнюю стенку, венчик, внутреннюю стенку и дно.
 // Материалы маркируют среды для общего трассировщика стекла.
 export const bottlePrototype = Object.freeze({
-  reference: 'src/assets/products/cider/antonovka-750ml.png',
+  reference: 'src/assets/products/standalone/cider/bottles/antonovka-750ml.png',
   nominalVolumeMl: 750,
   dimensionsVerified: false,
   heightMeters: 0.3,

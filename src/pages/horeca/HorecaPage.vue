@@ -26,8 +26,8 @@ const horecaHeroLayout = {
   },
   tablet: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 50, y: 100 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 100, y: 0 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.65, x: 100, y: 0 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.65, x: 300, y: -50 },
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },

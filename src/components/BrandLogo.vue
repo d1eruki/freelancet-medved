@@ -5,7 +5,7 @@ import smallLogoUrl from '../assets/branding/brand-logo-seal-lithograph.png?widt
 
 <template>
   <img
-    class="block aspect-1224/1285 h-33 w-auto shrink-0 object-contain sm:h-40"
+    class="block aspect-1224/1285 h-33 w-auto shrink-0 object-cover sm:h-40"
     :src="logoUrl"
     :srcset="`${smallLogoUrl} 160w, ${logoUrl} 320w`"
     sizes="(min-width: 40rem) 153px, 126px"

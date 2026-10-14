@@ -71,15 +71,19 @@ function select(id){
   for(const [index,[key,g]] of Object.entries(models).entries()){
     g.visible=id==='all'||id===key;
     g.position.set(id==='all'?(index-1.5)*3.3:0,0,0);
-    g.rotation.set(key==='original'?0:-.14,key==='original'?0:.2,0);
+    const straight=key==='original'||key==='wax';
+    g.rotation.set(straight?0:-.14,straight?0:.2,0);
   }
   const isOriginal=id==='original';
   variantsLights.visible=!isOriginal;originalLights.visible=isOriginal;
   scene.environment=isOriginal?null:environment.texture;
   renderer.toneMapping=isOriginal?THREE.NoToneMapping:THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=isOriginal?1:.85;
-  camera.position.set(0,isOriginal?0:-.7,id==='all'?overviewDistance():6.5);
-  controls.target.set(0,0,0);controls.update();
+  camera.position.set(0,isOriginal||id==='wax'?0:-.7,id==='all'?overviewDistance():6.5);
+  // Clear residual orbit damping before restoring the exact camera pose.
+  const damping=controls.enableDamping;controls.enableDamping=false;controls.update();
+  camera.position.set(0,isOriginal||id==='wax'?0:-.7,id==='all'?overviewDistance():6.5);
+  camera.up.set(0,1,0);controls.target.set(0,0,0);camera.lookAt(0,0,0);controls.update();controls.enableDamping=damping;
   for(const b of document.querySelectorAll('[data-variant]'))b.setAttribute('aria-pressed',String(b.dataset.variant===id));
 }
 

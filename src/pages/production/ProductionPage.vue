@@ -20,7 +20,7 @@ import ProductionProcessStep from './ProductionProcessStep.vue'
 
 const middleTankLayout = {
   mobile: { enabled: false, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
-  tablet: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.05, x: 0, y: 75 },
+  tablet: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.75, x: -150, y: 0 },
   desktop: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.05, x: -300, y: -100 },
 }
 

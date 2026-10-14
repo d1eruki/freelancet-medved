@@ -16,17 +16,17 @@ const heroLayerLayout = {
   mobile: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
     middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: 0, y: -50 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: 0, y: -50 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: -50, y: 0 },
   },
   tablet: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: 200 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.85, x: 0, y: 100 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.2, x: 0, y: -50 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.2, x: -100, y: -50 },
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
     middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: -150 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.85, x: 0, y: -25 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: -100, y: -100 },
   },
 }
 
@@ -103,19 +103,17 @@ onBeforeUnmount(() => {
 
 <template>
   <section
-    class="relative isolate min-h-svh overflow-hidden bg-brand text-surface"
+    class="relative min-h-svh overflow-hidden bg-brand text-surface"
     aria-labelledby="hero-title"
   >
-    <span class="home-hero-overlay pointer-events-none absolute inset-0 z-1" aria-hidden="true" />
-    <span class="home-hero-corner-overlay pointer-events-none absolute inset-0 z-1" aria-hidden="true" />
-    <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-104 nav:pb-0 wide:pt-36">
-      <h1 id="hero-title" class="home-hero-title absolute top-62 left-0 z-2 w-full -translate-y-full px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6" :style="layerEntranceTimings.rise">
+    <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-0 wide:pt-36">
+      <h1 id="hero-title" class="home-hero-title absolute top-62 left-0 z-20 w-full -translate-y-full px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6" :style="layerEntranceTimings.rise">
         <span class="font-normal">Лапу приложили</span><br>
         к напиткам
       </h1>
 
-      <div class="home-hero-details relative z-1 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-rows-none sm:items-end sm:pt-0 nav:grid-cols-[1fr_1.4fr_1fr] nav:gap-6" :style="layerEntranceTimings.rise">
-        <div class="max-w-sm nav:mb-12 wide:mb-16">
+      <div class="home-hero-details relative z-20 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-cols-[1fr_1.4fr_1fr] sm:grid-rows-none sm:items-end sm:gap-6 sm:pt-0" :style="layerEntranceTimings.rise">
+        <div class="max-w-sm sm:mb-12 wide:mb-16">
           <p class="hero-description text-center sm:text-left">
             <span class="wide:block wide:whitespace-nowrap">Пиво-медоваренный завод «Медведь». </span>
             <span class="wide:block wide:whitespace-nowrap">Производим медовуху, сидр и пуаре </span>
@@ -123,7 +121,7 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
-        <div class="flex w-full flex-col items-start self-end gap-4 sm:w-auto sm:flex-row sm:items-center sm:self-auto nav:col-start-3 nav:row-start-1 nav:mb-12 nav:w-max nav:justify-self-end wide:mb-16">
+        <div class="flex w-full flex-col items-start self-end gap-4 sm:col-start-3 sm:row-start-1 sm:mb-12 sm:w-max sm:flex-row sm:items-center sm:self-auto sm:justify-self-end wide:mb-16">
           <BaseButton
             variant="surface"
             class="w-full focus-visible:-translate-y-1 focus-visible:shadow-xl sm:w-auto"
@@ -160,22 +158,6 @@ onBeforeUnmount(() => {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.home-hero-overlay {
-  background: radial-gradient(ellipse 56% 80% at 50% 24%, rgb(16 16 16 / 28%) 0%, rgb(16 16 16 / 12%) 48%, transparent 100%);
-}
-
-.home-hero-corner-overlay {
-  background:
-    radial-gradient(ellipse 55% 55% at 0% 90%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 28%) 48%, transparent 100%),
-    radial-gradient(ellipse 55% 55% at 100% 90%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 28%) 48%, transparent 100%);
-}
-
-@media (min-width: 40rem) {
-  .home-hero-overlay {
-    background: radial-gradient(ellipse 56% 80% at 50% 48%, rgb(16 16 16 / 28%) 0%, rgb(16 16 16 / 12%) 48%, transparent 100%);
   }
 }
 

@@ -112,7 +112,7 @@ function finishTouch(event) {
 
 <template>
   <section
-    class="cocktail-book relative isolate h-svh overflow-hidden text-[#49382c]"
+    class="cocktail-book relative isolate mx-auto h-svh w-full max-w-[1680px] overflow-hidden text-[#49382c]"
     :data-direction="direction > 0 ? 'forward' : 'backward'"
     :data-page-turn="switching && !mobileSlide"
     :data-mobile-turn="switching && mobileSlide"
