@@ -3,6 +3,8 @@ import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import sharp from 'sharp'
+import Typograf from 'typograf'
+import { preventHangingPrepositions } from '../src/directives/typography.js'
 import { contacts } from '../src/data/contacts.js'
 import { metrikaCounterId } from '../src/utils/metrika.js'
 import { runInNewContext } from 'node:vm'
@@ -28,6 +30,34 @@ function collectChunks(id, collected = new Set()) {
   for (const dependency of manifest[id].imports || []) collectChunks(dependency, collected)
   return collected
 }
+
+test('text formatting preserves the two enabled typography rules', () => {
+  Typograf.addRule({
+    name: 'common/nbsp/nonBreakingHyphenatedWord',
+    handler: text => text.replace(/([0-9A-Za-zА-Яа-яЁё])-(?=[0-9A-Za-zА-Яа-яЁё])/g, '$1‑'),
+  })
+  const reference = new Typograf({ locale: ['ru'] })
+  reference.disableRule('*')
+  reference.enableRule('common/nbsp/afterShortWordByList')
+  reference.enableRule('common/nbsp/nonBreakingHyphenatedWord')
+  const samples = [
+    'В Санкт-Петербурге с 2006 года',
+    'И в городе, и за городом',
+    '«О компании» и «О нас»',
+    '(Для партнёров) — по всей России',
+    'Для   партнёров и\nдля клиентов',
+    'На\u00a0сайте уже есть неразрывные пробелы',
+    'Пиво-медоваренный завод, 0.45-л, A-B-C и 12-34',
+    'https://medved.beer/sankt-peterburg/ и http://example.com/a-b?q=c-d',
+    'МЁДВЕДЬ — работает для вас',
+    '',
+  ]
+  for (const sample of samples) {
+    const expected = reference.execute(sample)
+    assert.equal(preventHangingPrepositions(sample), expected, sample)
+    assert.equal(preventHangingPrepositions(expected), expected, `Repeated formatting: ${sample}`)
+  }
+})
 
 test('page code is separate from the shared client entry', () => {
   const initialChunks = collectChunks(entry)

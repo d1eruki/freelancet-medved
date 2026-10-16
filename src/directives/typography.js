@@ -1,20 +1,23 @@
-import Typograf from 'typograf'
+const shortWords = 'а|без|в|во|если|да|до|для|за|и|или|из|к|ко|как|ли|на|но|не|ни|о|об|обо|от|по|про|при|под|с|со|то|у'
+const afterShortWord = new RegExp(`(^|[ \u00a0(«‹»›„“‟”"])(${shortWords}) `, 'gim')
+const protectedText = /(?:https?|file|ftp):\/\/[a-zA-Z0-9/+-=%&:_.~?]+[a-zA-Z0-9#+]*/g
 
-Typograf.addRule({
-  name: 'common/nbsp/nonBreakingHyphenatedWord',
-  handler(text) {
-    return text.replace(/([0-9A-Za-zА-Яа-яЁё])-(?=[0-9A-Za-zА-Яа-яЁё])/g, '$1‑')
-  },
-})
+function formatPlainText(text) {
+  return text
+    .replace(afterShortWord, '$1$2\u00a0')
+    .replace(afterShortWord, '$1$2\u00a0')
+    .replace(/([0-9A-Za-zА-Яа-яЁё])-(?=[0-9A-Za-zА-Яа-яЁё])/g, '$1‑')
+}
 
-const typograf = new Typograf({ locale: ['ru'] })
-
-typograf.disableRule('*')
-typograf.enableRule('common/nbsp/afterShortWordByList')
-typograf.enableRule('common/nbsp/nonBreakingHyphenatedWord')
-
+// This directive receives DOM text nodes, not HTML markup. Keep URL text intact.
 export function preventHangingPrepositions(text) {
-  return typograf.execute(text)
+  let offset = 0
+  let result = ''
+  for (const match of text.matchAll(protectedText)) {
+    result += formatPlainText(text.slice(offset, match.index)) + match[0]
+    offset = match.index + match[0].length
+  }
+  return result + formatPlainText(text.slice(offset))
 }
 
 const observers = new WeakMap()
