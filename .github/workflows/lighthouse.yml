@@ -23,8 +23,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  pages:
+    name: Select published pages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.routes.outputs.matrix }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install project dependencies
+        run: npm ci
+      - name: Read route registry
+        id: routes
+        run: node scripts/check-lighthouse.mjs --list-pages
+
   audit:
-    name: Published ${{ inputs.environment }}, mobile and desktop
+    name: ${{ inputs.environment }} ${{ matrix.path }}, mobile and desktop
+    needs: pages
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.pages.outputs.matrix) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -43,14 +68,15 @@ jobs:
       - name: Audit published site sequentially
         env:
           SITE_ENV: ${{ inputs.environment }}
+          LIGHTHOUSE_PAGE_PATH: ${{ matrix.path }}
           LIGHTHOUSE_MODULES: ${{ runner.temp }}/medved-lighthouse/node_modules
-          LIGHTHOUSE_REPORTS: ${{ runner.temp }}/medved-lighthouse-${{ inputs.environment }}-reports
+          LIGHTHOUSE_REPORTS: ${{ runner.temp }}/medved-lighthouse-${{ inputs.environment }}-reports/${{ matrix.id }}
         run: node scripts/check-lighthouse.mjs
       - name: Save HTML and JSON reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: lighthouse-${{ inputs.environment }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/medved-lighthouse-${{ inputs.environment }}-reports
+          name: lighthouse-${{ inputs.environment }}-${{ matrix.id }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/medved-lighthouse-${{ inputs.environment }}-reports/${{ matrix.id }}
           retention-days: 14
           if-no-files-found: warn

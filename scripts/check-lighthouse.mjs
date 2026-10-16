@@ -9,12 +9,43 @@ const sites = {
   staging: { url: 'https://test.medved.beer/', analytics: 'Метрика отключена; результаты нельзя напрямую сравнивать с production.' },
 }
 if (!Object.hasOwn(sites, environment)) throw new Error('SITE_ENV must be production or staging')
-const { url, analytics } = sites[environment]
+const { url: siteUrl, analytics } = sites[environment]
+const pagePath = process.env.LIGHTHOUSE_PAGE_PATH || '/'
+const pageId = pageIdForPath(pagePath)
+const url = new URL(pagePath, siteUrl).href
 const includeSeo = environment === 'production'
 const profiles = ['mobile', 'desktop']
 const runs = 3
 const categories = ['performance', 'accessibility', 'best-practices', ...(includeSeo ? ['seo'] : [])]
-const directory = resolve(process.env.LIGHTHOUSE_REPORTS || `/tmp/medved-lighthouse-${environment}-reports`)
+const directory = resolve(process.env.LIGHTHOUSE_REPORTS || `/tmp/medved-lighthouse-${environment}-reports/${pageId}`)
+
+function pageIdForPath(path) {
+  if (!/^\/(?:[a-z0-9-]+\/)*$/.test(path)) throw new Error('Invalid LIGHTHOUSE_PAGE_PATH')
+  return path === '/' ? 'home' : path.slice(1, -1).replaceAll('/', '-')
+}
+
+async function listPages() {
+  const { createServer } = await import('vite')
+  const server = await createServer({
+    logLevel: 'silent',
+    server: { middlewareMode: true, hmr: false, watch: null },
+  })
+  try {
+    const { pageRoutes } = await server.ssrLoadModule('/src/data/page-routes.js')
+    const pages = pageRoutes.map(page => ({
+      path: page.path,
+      id: pageIdForPath(page.path),
+    }))
+    if (!pages.length || new Set(pages.map(page => page.id)).size !== pages.length) {
+      throw new Error('Audit page identifiers must be nonempty and unique')
+    }
+    const matrix = JSON.stringify({ include: pages })
+    if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `matrix=${matrix}\n`)
+    console.info(matrix)
+  } finally {
+    await server.close()
+  }
+}
 
 function median(values) {
   const sorted = values.filter(Number.isFinite).sort((a, b) => a - b)
@@ -29,7 +60,7 @@ function number(value, digits = 0) {
 async function summarize() {
   const columns = ['Профиль', 'Успешные замеры', 'Скорость: медиана (диапазон)', 'Доступность', 'Практики', ...(includeSeo ? ['SEO'] : []), 'LCP, с', 'TBT, мс', 'CLS']
   const lines = [
-    `# Lighthouse: ${environment} — опубликованная главная страница`, '', url, '',
+    `# Lighthouse: ${environment} — ${pagePath}`, '', url, '',
     `Возраст подтверждён заранее; холодный кеш. ${analytics} Каждый профиль измеряется трижды, последовательно.`, '',
     `| ${columns.join(' | ')} |`,
     `| ${columns.map(() => '---').join(' | ')} |`,
@@ -44,6 +75,9 @@ async function summarize() {
       try {
         const report = JSON.parse(await readFile(resolve(directory, `${name}.json`), 'utf8'))
         if (report.runtimeError) throw new Error(report.runtimeError.message)
+        if (report.requestedUrl !== url || (report.finalDisplayedUrl || report.finalUrl) !== url) {
+          throw new Error('Отчёт относится к другому адресу или страница перенаправила запрос')
+        }
         if (categories.some(category => !Number.isFinite(report.categories?.[category]?.score))) {
           throw new Error('В отчёте отсутствуют баллы обязательных категорий')
         }
@@ -105,8 +139,8 @@ async function collect() {
         // Подготовка хранилища без выполнения кода сайта, прогрева 3D или Метрики.
         await page.setJavaScriptEnabled(false)
         const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
-        if (!response?.ok() || new URL(page.url()).origin !== new URL(url).origin) {
-          throw new Error('Проверяемый сайт недоступен или перенаправил на другой домен')
+        if (!response?.ok() || page.url() !== url) {
+          throw new Error('Проверяемая страница недоступна или перенаправила на другой адрес')
         }
         await page.evaluate(() => localStorage.setItem('medved-age-confirmed', 'true'))
         await page.goto('about:blank')
@@ -137,6 +171,10 @@ async function collect() {
   }
 }
 
-await mkdir(directory, { recursive: true })
-if (!process.argv.includes('--summarize')) await collect()
-await summarize()
+if (process.argv.includes('--list-pages')) {
+  await listPages()
+} else {
+  await mkdir(directory, { recursive: true })
+  if (!process.argv.includes('--summarize')) await collect()
+  await summarize()
+}
