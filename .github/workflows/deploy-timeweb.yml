@@ -115,7 +115,9 @@ jobs:
           NODE
 
   lighthouse:
-    name: Lighthouse after production deployment
+    name: Lighthouse after deployment
     needs: deploy
-    if: ${{ github.ref == 'refs/heads/main' && needs.deploy.result == 'success' }}
+    if: ${{ needs.deploy.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
     uses: ./.github/workflows/lighthouse.yml
+    with:
+      environment: ${{ github.ref == 'refs/heads/develop' && 'staging' || 'production' }}

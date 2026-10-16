@@ -3,11 +3,18 @@ import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-const url = 'https://medved.beer/'
+const environment = process.env.SITE_ENV || 'production'
+const sites = {
+  production: { url: 'https://medved.beer/', analytics: 'Метрика включена.' },
+  staging: { url: 'https://test.medved.beer/', analytics: 'Метрика отключена; результаты нельзя напрямую сравнивать с production.' },
+}
+if (!Object.hasOwn(sites, environment)) throw new Error('SITE_ENV must be production or staging')
+const { url, analytics } = sites[environment]
+const includeSeo = environment === 'production'
 const profiles = ['mobile', 'desktop']
 const runs = 3
-const categories = ['performance', 'accessibility', 'best-practices', 'seo']
-const directory = resolve(process.env.LIGHTHOUSE_REPORTS || '/tmp/medved-lighthouse-reports')
+const categories = ['performance', 'accessibility', 'best-practices', ...(includeSeo ? ['seo'] : [])]
+const directory = resolve(process.env.LIGHTHOUSE_REPORTS || `/tmp/medved-lighthouse-${environment}-reports`)
 
 function median(values) {
   const sorted = values.filter(Number.isFinite).sort((a, b) => a - b)
@@ -20,11 +27,12 @@ function number(value, digits = 0) {
 }
 
 async function summarize() {
+  const columns = ['Профиль', 'Успешные замеры', 'Скорость: медиана (диапазон)', 'Доступность', 'Практики', ...(includeSeo ? ['SEO'] : []), 'LCP, с', 'TBT, мс', 'CLS']
   const lines = [
-    '# Lighthouse: опубликованная главная страница', '', url, '',
-    'Возраст подтверждён заранее; холодный кеш, Метрика включена. Каждый профиль измеряется трижды, последовательно.', '',
-    '| Профиль | Успешные замеры | Скорость: медиана (диапазон) | Доступность | Практики | SEO | LCP, с | TBT, мс | CLS |',
-    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
+    `# Lighthouse: ${environment} — опубликованная главная страница`, '', url, '',
+    `Возраст подтверждён заранее; холодный кеш. ${analytics} Каждый профиль измеряется трижды, последовательно.`, '',
+    `| ${columns.join(' | ')} |`,
+    `| ${columns.map(() => '---').join(' | ')} |`,
   ]
   let failed = false
   const failures = []
@@ -50,7 +58,14 @@ async function summarize() {
     const speed = scores('performance')
     const lcp = metric('largest-contentful-paint')
     const range = speed.length ? `${number(Math.min(...speed))}–${number(Math.max(...speed))}` : '—'
-    lines.push(`| ${profile} | ${reports.length}/${runs} | ${number(median(speed))} (${range}) | ${number(median(scores('accessibility')))} | ${number(median(scores('best-practices')))} | ${number(median(scores('seo')))} | ${number(lcp === null ? null : lcp / 1000, 2)} | ${number(metric('total-blocking-time'))} | ${number(metric('cumulative-layout-shift'), 3)} |`)
+    const values = [
+      profile, `${reports.length}/${runs}`, `${number(median(speed))} (${range})`,
+      number(median(scores('accessibility'))), number(median(scores('best-practices'))),
+      ...(includeSeo ? [number(median(scores('seo')))] : []),
+      number(lcp === null ? null : lcp / 1000, 2), number(metric('total-blocking-time')),
+      number(metric('cumulative-layout-shift'), 3),
+    ]
+    lines.push(`| ${values.join(' | ')} |`)
     if (reports.length) {
       const report = reports[0]
       metadata.push(`Профиль ${profile}: Lighthouse ${report.lighthouseVersion}; браузер ${report.environment?.hostUserAgent || report.userAgent}; начало ${report.fetchTime}.`)
@@ -91,7 +106,7 @@ async function collect() {
         await page.setJavaScriptEnabled(false)
         const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
         if (!response?.ok() || new URL(page.url()).origin !== new URL(url).origin) {
-          throw new Error('Основной сайт недоступен или перенаправил на другой домен')
+          throw new Error('Проверяемый сайт недоступен или перенаправил на другой домен')
         }
         await page.evaluate(() => localStorage.setItem('medved-age-confirmed', 'true'))
         await page.goto('about:blank')
