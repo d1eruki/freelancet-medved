@@ -124,7 +124,6 @@ onBeforeUnmount(() => {
       :class="entranceMotions[entrance][name]"
       :style="{ ...heroLayerVisibilityStyle(layerLayout, name), zIndex: layerZIndex?.[name] ?? layer.zIndex }"
     >
-      <source v-if="layer.avifSrcset" type="image/avif" :sizes="layer.sizes" :srcset="layer.avifSrcset">
       <img
         :class="['hero-composition-layer', layer.className, {
           'hero-composition-layer-complete': name !== 'background',

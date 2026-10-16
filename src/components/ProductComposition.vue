@@ -2,6 +2,9 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { productRenderFrame } from '../data/product-slider-renders.js'
 defineProps({ renders: { type: Object, required: true } })
+// Rendered pair width includes the transparent frame around the glass and can.
+const pairWidthScale = productRenderFrame.heightScale * productRenderFrame.width / productRenderFrame.height
+const imageSizes = `(min-width: 54rem) ${Math.ceil(576 * pairWidthScale)}px, (min-width: 40rem) ${Math.ceil(448 * pairWidthScale)}px, min(calc((100vw - 144px) * ${pairWidthScale}), ${Math.ceil(384 * pairWidthScale)}px)`
 const composition = ref(null)
 const shadowClip = ref({ visibility: 'hidden' })
 let resizeObserver
@@ -37,7 +40,10 @@ const layers = [
         class="product-layer"
         :class="['product-pair', layer.shadow ? 'product-shadow' : 'product-model']"
         :style="{ transformOrigin: productRenderFrame.origins.glass }"
-        :src="renders[layer.source]"
+        :src="renders[layer.source].src"
+        :srcset="renders[layer.source].srcset"
+        :sizes="imageSizes"
+        loading="lazy"
         alt=""
         draggable="false"
         decoding="async"

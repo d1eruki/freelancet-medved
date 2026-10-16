@@ -3,7 +3,7 @@ import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BrandLogo from './BrandLogo.vue'
 import { navigation } from '../data/navigation'
-import headerRibbonUrl from '../../materials/image-generation/header-ribbon.png'
+import headerRibbon from '../../materials/image-generation/header-ribbon.png?responsive&optimize'
 
 const props = defineProps({
   lenis: { type: Object, default: null },
@@ -102,14 +102,21 @@ onBeforeUnmount(() => {
         :class="isMenuOpen ? 'block' : 'hidden'"
         aria-label="Основная навигация"
       >
-        <img
-          class="header-ribbon pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
-          :src="headerRibbonUrl"
-          width="2172"
-          height="756"
-          alt=""
-          aria-hidden="true"
-        >
+        <picture class="contents">
+          <source
+            media="(min-width: 80rem)"
+            :srcset="headerRibbon.srcset"
+            sizes="min(calc(120vw - 58px), 1383px)"
+          >
+          <img
+            class="header-ribbon pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2172' height='756'/%3E"
+            width="2172"
+            height="756"
+            alt=""
+            aria-hidden="true"
+          >
+        </picture>
 
         <ul
           v-for="(group, groupIndex) in navigationGroups"

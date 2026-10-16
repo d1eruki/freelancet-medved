@@ -123,7 +123,6 @@ function finishTouch(event) {
     @touchcancel="touchStart = null"
   >
     <picture class="cocktail-binding pointer-events-none absolute overflow-hidden" aria-hidden="true">
-      <source type="image/avif" :srcset="bookCover.avifSrcset" sizes="(min-width: 54rem) 100vw, 200vw">
       <img class="h-full w-[200%] max-w-none nav:w-full" :src="bookCover.src" :srcset="bookCover.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async">
     </picture>
 
@@ -152,9 +151,7 @@ function finishTouch(event) {
           <div class="cocktail-face">
             <div class="cocktail-page">
               <picture class="cocktail-paper pointer-events-none absolute overflow-hidden" aria-hidden="true">
-                <source media="(min-width: 54rem)" type="image/avif" :srcset="bookPages.avifSrcset" sizes="100vw">
                 <source media="(min-width: 54rem)" :srcset="bookPages.srcset" sizes="100vw">
-                <source type="image/avif" :srcset="plainBookPages.avifSrcset" sizes="200vw">
                 <img class="h-full w-[200%] max-w-none nav:w-full" :src="plainBookPages.src" :srcset="plainBookPages.srcset" sizes="200vw" alt="" decoding="async">
               </picture>
               <svg

@@ -6,25 +6,19 @@ import sharp from 'sharp'
 const rasterExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp'])
 const assetsRoot = fileURLToPath(new URL('../../src/assets/', import.meta.url))
 
-function responsiveModule(resourcePath, originalWidth) {
-  const widths = [...[640, 960].filter((width) => width < originalWidth), originalWidth]
+function responsiveModule(resourcePath, originalWidth, explicitOptimization) {
+  const widths = [...[640, 960, 1440].filter((width) => width < originalWidth), originalWidth]
   const imports = []
-  const srcsets = []
-  for (const [prefix, formatQuery] of [['image', ''], ['avif', 'format=avif']]) {
-    const candidates = widths.map((width, index) => {
-      const query = [formatQuery, width === originalWidth ? '' : `width=${width}`].filter(Boolean).join('&')
-      const name = `${prefix}${index}`
-      imports.push(`import ${name} from ${JSON.stringify(`${resourcePath}${query ? `?${query}` : ''}`)};`)
-      return `${name} + ${JSON.stringify(` ${width}w`)}`
-    })
-    srcsets.push(`[${candidates.join(', ')}].join(', ')`)
-  }
+  const candidates = widths.map((width, index) => {
+    const query = [explicitOptimization ? 'optimize' : '', width === originalWidth ? '' : `width=${width}`].filter(Boolean).join('&')
+    const name = `image${index}`
+    imports.push(`import ${name} from ${JSON.stringify(`${resourcePath}${query ? `?${query}` : ''}`)};`)
+    return `${name} + ${JSON.stringify(` ${width}w`)}`
+  })
   return `${imports.join('\n')}
 export default {
   src: image${widths.length - 1},
-  avifSrc: avif${widths.length - 1},
-  srcset: ${srcsets[0]},
-  avifSrcset: ${srcsets[1]},
+  srcset: [${candidates.join(', ')}].join(', '),
 };`
 }
 
@@ -42,21 +36,21 @@ export function optimizeImagesPlugin() {
       const params = new URLSearchParams(query)
       const lossless = params.has('lossless')
 
-      if ((!resourcePath.startsWith(assetsRoot) && !lossless) || !rasterExtensions.has(extension)) {
+      if ((!resourcePath.startsWith(assetsRoot) && !lossless && !params.has('optimize')) || !rasterExtensions.has(extension)) {
         return null
       }
       // Existing WebP assets stay untouched unless a conversion is requested.
-      if (extension === '.webp' && !['responsive', 'width', 'format', 'lossless'].some(param => params.has(param))) {
+      if (extension === '.webp' && !['responsive', 'width', 'lossless', 'optimize'].some(param => params.has(param))) {
         return null
       }
 
-      if (lossless && (params.has('responsive') || params.has('width') || params.has('format'))) {
+      if (lossless && (params.has('responsive') || params.has('width'))) {
         this.error('Lossless textures cannot be resized or converted to a lossy format')
       }
       if (params.has('responsive')) {
         this.addWatchFile(resourcePath)
         const { width } = await sharp(resourcePath).metadata()
-        return responsiveModule(resourcePath, width)
+        return responsiveModule(resourcePath, width, params.has('optimize'))
       }
 
       if (!isBuild) return null
@@ -66,25 +60,19 @@ export function optimizeImagesPlugin() {
       if (widthParam !== null && (!Number.isInteger(width) || width < 1)) {
         this.error(`Invalid image width: ${widthParam}`)
       }
-      const format = params.get('format')
-      if (format !== null && format !== 'avif') {
-        this.error(`Invalid image format: ${format}`)
-      }
-
       const original = await readFile(resourcePath)
       const image = sharp(original)
       if (width !== null) image.resize({ width, withoutEnlargement: true })
-      const optimized = format === 'avif'
-        ? await image.avif({ quality: 65, effort: 4 }).toBuffer()
+      // Keep existing WebP pixels unless a resize or lossless encoding was requested.
+      const optimized = extension === '.webp' && width === null && !lossless
+        ? original
         : await image.webp(lossless
           ? { lossless: true, effort: 6 }
           : { quality: 82, effort: 4, alphaQuality: 100 }).toBuffer()
-      const useOptimized = format === 'avif' || width !== null || optimized.length < original.length
-      const outputExtension = useOptimized ? (format === 'avif' ? '.avif' : '.webp') : extension
       const referenceId = this.emitFile({
         type: 'asset',
-        name: `${path.basename(resourcePath, extension)}${width === null ? '' : `-${width}w`}${outputExtension}`,
-        source: useOptimized ? optimized : original,
+        name: `${path.basename(resourcePath, extension)}${width === null ? '' : `-${width}w`}.webp`,
+        source: optimized,
       })
 
       return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`

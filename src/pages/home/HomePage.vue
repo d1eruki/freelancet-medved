@@ -5,6 +5,8 @@ import HomeAboutSection from './HomeAboutSection.vue'
 import ContactSection from '../../components/ContactSection.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
 import homeDivider from '../../assets/heroes/home/divider.png?responsive'
+import homeDividerMaskSmall from '../../assets/heroes/home/divider.png?width=960'
+import homeDividerMaskMedium from '../../assets/heroes/home/divider.png?width=1440'
 </script>
 
 <template>
@@ -20,7 +22,7 @@ import homeDivider from '../../assets/heroes/home/divider.png?responsive'
     />
     <div
       class="home-hero-shading pointer-events-none absolute inset-x-0 top-0 z-11"
-      :style="{ '--home-grass-mask': `url(${homeDivider.src})` }"
+      :style="{ '--home-grass-mask': `url(${homeDivider.src})`, '--home-grass-mask-mobile': `image-set(url(${homeDividerMaskSmall}) 1x, url(${homeDividerMaskMedium}) 2x, url(${homeDivider.src}) 3x)` }"
       aria-hidden="true"
     >
       <span class="home-hero-overlay absolute inset-0" />
@@ -46,7 +48,7 @@ import homeDivider from '../../assets/heroes/home/divider.png?responsive'
   --home-grass-height: max(16rem, calc(100cqw / 3));
   --home-grass-tail: calc(var(--home-grass-height) * 0.309);
   bottom: calc(-1 * var(--home-grass-tail));
-  mask-image: linear-gradient(#000, #000), var(--home-grass-mask);
+  mask-image: linear-gradient(#000, #000), var(--home-grass-mask-mobile);
   mask-size: 100% calc(100% - var(--home-grass-tail)), max(100%, 48rem) auto;
   mask-position: center top, center bottom;
   mask-repeat: no-repeat;
@@ -60,6 +62,12 @@ import homeDivider from '../../assets/heroes/home/divider.png?responsive'
   background:
     radial-gradient(ellipse 55% 55% at 0% 90%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 28%) 48%, transparent 100%),
     radial-gradient(ellipse 55% 55% at 100% 90%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 28%) 48%, transparent 100%);
+}
+
+@media (min-width: 48rem) {
+  .home-hero-shading {
+    mask-image: linear-gradient(#000, #000), var(--home-grass-mask);
+  }
 }
 
 @media (min-width: 40rem) {

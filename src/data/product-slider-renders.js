@@ -1,9 +1,9 @@
-import meadPair from '../assets/home/product-renders/medovuha-pair.webp'
-import meadPairShadow from '../assets/home/product-renders/medovuha-pair-shadow.webp'
-import ciderPair from '../assets/home/product-renders/sidr-pair.webp'
-import ciderPairShadow from '../assets/home/product-renders/sidr-pair-shadow.webp'
-import perryPair from '../assets/home/product-renders/puare-pair.webp'
-import perryPairShadow from '../assets/home/product-renders/puare-pair-shadow.webp'
+import meadPair from '../assets/home/product-renders/medovuha-pair.webp?responsive'
+import meadPairShadow from '../assets/home/product-renders/medovuha-pair-shadow.webp?responsive'
+import ciderPair from '../assets/home/product-renders/sidr-pair.webp?responsive'
+import ciderPairShadow from '../assets/home/product-renders/sidr-pair-shadow.webp?responsive'
+import perryPair from '../assets/home/product-renders/puare-pair.webp?responsive'
+import perryPairShadow from '../assets/home/product-renders/puare-pair-shadow.webp?responsive'
 
 export const productSliderRenders = Object.freeze({
   medovuha: { pair: meadPair, pairShadow: meadPairShadow },

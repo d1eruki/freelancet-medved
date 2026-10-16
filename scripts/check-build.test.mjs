@@ -331,7 +331,10 @@ test('deployment environment preserves redirects and indexing policy', async () 
   }
 })
 
-test('image and script URLs resolve and srcset widths match the built images', async () => {
+test('image and script URLs resolve, raster output is WebP and srcset widths match the built images', async () => {
+  for (const file of await readdir(output, { recursive: true })) {
+    assert.doesNotMatch(file, /\.(?:png|jpe?g|avif)$/i, `Raster output must use WebP: ${file}`)
+  }
   const imageWidths = new Map()
   for (const url of [...urls, `${origin}/404.html`]) {
     const filePath = url.endsWith('/404.html')

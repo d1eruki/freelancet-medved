@@ -5,8 +5,8 @@ import CircleArrow from '../../components/CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { productSliderRenders } from '../../data/product-slider-renders.js'
 import { catalogCategories } from '../../data/catalog'
-import barCounterTexture from '../../assets/home/bar-counter-texture.png'
-import productSliderBackground from '../../assets/home/product-slider-background.png'
+import barCounterTexture from '../../assets/home/bar-counter-texture.png?responsive'
+import productSliderBackground from '../../assets/home/product-slider-background.png?responsive'
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
   name: category.name,
@@ -179,7 +179,11 @@ onBeforeUnmount(() => {
 <template>
   <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" aria-labelledby="products-title">
     <img
-      :src="barCounterTexture"
+      :src="barCounterTexture.src"
+      :srcset="barCounterTexture.srcset"
+      sizes="100vw"
+      loading="lazy"
+      decoding="async"
       data-product-counter
       alt=""
       aria-hidden="true"
@@ -187,7 +191,11 @@ onBeforeUnmount(() => {
     />
     <div class="pointer-events-none absolute inset-x-0 top-0 bottom-[30svh] z-1 overflow-hidden" aria-hidden="true">
       <img
-        :src="productSliderBackground"
+        :src="productSliderBackground.src"
+        :srcset="productSliderBackground.srcset"
+        sizes="max(100vw, calc(70svh * 1.5))"
+        loading="lazy"
+        decoding="async"
         data-product-background
         alt=""
         class="h-full w-full object-cover"

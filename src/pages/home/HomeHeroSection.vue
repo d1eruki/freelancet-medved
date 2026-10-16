@@ -10,6 +10,7 @@ import heroLayerMiddle from '../../assets/heroes/home/middle-layer.png?responsiv
 import heroLayerBackground from '../../assets/heroes/home/background-layer.png?responsive'
 
 const heroLayerSizes = 'max(100vw, calc((100svh + 8svh) * 1.3042))'
+const heroFigureSizes = '(min-width: 80rem) min(75vw, 105.48svh), (min-width: 40rem) min(120vw, 168.76svh), min(150vw, 210.95svh)'
 const heroLayerClassName = 'home-hero-layer absolute inset-x-0 top-0 w-full object-contain object-top'
 
 const heroLayerLayout = {
@@ -39,18 +40,20 @@ const heroLayers = computed(() => ({
   },
   middle: {
     ...(isBlinking.value ? heroLayerMiddleBlink : heroLayerMiddle),
-    sizes: heroLayerSizes,
+    sizes: heroFigureSizes,
     className: heroLayerClassName,
     alt: '',
   },
   foreground: {
     ...heroLayerForeground,
-    sizes: heroLayerSizes,
+    sizes: heroFigureSizes,
     className: heroLayerClassName,
     alt: 'Медведь с бутылкой напитка «Медведь»',
     fetchpriority: 'high',
   },
 }))
+let blinkIdleCallback
+let blinkLoadTimer
 let blinkTimer
 let blinkMedia
 let blinkReady = false
@@ -71,19 +74,16 @@ function scheduleBlink() {
   }, 4000 + Math.random() * 3000)
 }
 
-onMounted(() => {
-  blinkMedia = window.matchMedia('(prefers-reduced-motion: no-preference)')
-  blinkMedia.addEventListener('change', scheduleBlink)
-  document.addEventListener('visibilitychange', scheduleBlink)
+function loadBlinkFrame() {
+  if (isUnmounted) return
   const preloadBlink = (srcset, src) => {
     const image = new Image()
-    image.sizes = heroLayerSizes
+    image.sizes = heroFigureSizes
     image.srcset = srcset
     image.src = src
     return image.decode()
   }
-  preloadBlink(heroLayerMiddleBlink.avifSrcset, heroLayerMiddleBlink.avifSrc)
-    .catch(() => preloadBlink(heroLayerMiddleBlink.srcset, heroLayerMiddleBlink.src))
+  preloadBlink(heroLayerMiddleBlink.srcset, heroLayerMiddleBlink.src)
     .then(() => {
       if (isUnmounted) return
       blinkReady = true
@@ -91,10 +91,29 @@ onMounted(() => {
     }).catch(() => {
       // Keep the original image if the blink frame cannot be loaded.
     })
+}
+
+function deferBlinkLoad() {
+  if ('requestIdleCallback' in window) {
+    blinkIdleCallback = window.requestIdleCallback(loadBlinkFrame, { timeout: 2000 })
+  } else {
+    blinkLoadTimer = window.setTimeout(loadBlinkFrame, 0)
+  }
+}
+
+onMounted(() => {
+  blinkMedia = window.matchMedia('(prefers-reduced-motion: no-preference)')
+  blinkMedia.addEventListener('change', scheduleBlink)
+  document.addEventListener('visibilitychange', scheduleBlink)
+  if (document.readyState === 'complete') deferBlinkLoad()
+  else window.addEventListener('load', deferBlinkLoad, { once: true })
 })
 
 onBeforeUnmount(() => {
   isUnmounted = true
+  window.removeEventListener('load', deferBlinkLoad)
+  if (blinkIdleCallback !== undefined) window.cancelIdleCallback(blinkIdleCallback)
+  window.clearTimeout(blinkLoadTimer)
   stopBlinking()
   blinkMedia?.removeEventListener('change', scheduleBlink)
   document.removeEventListener('visibilitychange', scheduleBlink)
