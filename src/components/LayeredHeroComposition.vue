@@ -186,6 +186,13 @@ onBeforeUnmount(() => {
   transition: translate 500ms ease-out;
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .hero-composition-layer {
+    /* Diagnostic: isolate the cost of animated blurred shadows on touch devices. */
+    filter: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-composition-layer-moving {
     transition: none;
