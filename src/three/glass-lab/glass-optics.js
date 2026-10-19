@@ -1,6 +1,7 @@
 import { productRenderSettings } from '../../data/product-render-settings.js'
 import { drinkPresets } from '../../data/drink-presets.js'
 import glassModelUrl from '../../assets/models/glass.glb?url'
+import { BufferGeometry, Float32BufferAttribute, MeshPhysicalMaterial } from 'three'
 
 // Оптика и модель стакана подключаются только лабораторией.
 
@@ -347,6 +348,69 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
     modelOrigin.y += 0.0014 * modelScale
     const labToWorld = new THREE.Matrix4().compose(modelOrigin, new THREE.Quaternion(), new THREE.Vector3().setScalar(modelScale / 10))
     const worldToLab = labToWorld.clone().invert()
+    // Печать включается явно владельцем конкретного экспорта. Остальные
+    // рендеры не создают материал и не загружают изображение знака.
+    let glassPrintMesh = null
+    if (shared.glassPrint) {
+      const image = new Image()
+      image.src = new URL('../../assets/branding/brand-logo-mark.svg', import.meta.url).href
+      await image.decode()
+      const printCanvas = document.createElement('canvas')
+      printCanvas.width = 1024
+      printCanvas.height = Math.round(1024 * image.naturalHeight / image.naturalWidth)
+      const printContext = printCanvas.getContext('2d')
+      printContext.drawImage(image, 0, 0, printCanvas.width, printCanvas.height)
+      printContext.globalCompositeOperation = 'source-in'
+      printContext.fillStyle = '#ffffff'
+      printContext.fillRect(0, 0, printCanvas.width, printCanvas.height)
+      const printTexture = new THREE.CanvasTexture(printCanvas)
+      printTexture.colorSpace = THREE.SRGBColorSpace
+      const height = glassMax.y - glassMin.y
+      const positions = [], uvs = [], indices = []
+      const columns = 96, rows = 48
+      for (let row = 0; row <= rows; row++) {
+        const v = row / rows
+        const y = glassMin.y + height * (0.55 + (v - 0.5) * 0.22)
+        let radius = 0
+        for (let i = 0; i < glassProfile.length - 1; i++) {
+          const a = glassProfile[i], b = glassProfile[i + 1]
+          if (Math.abs(b.y - a.y) < 0.000001 || y < Math.min(a.y, b.y) || y > Math.max(a.y, b.y)) continue
+          radius = Math.max(radius, THREE.MathUtils.lerp(a.x, b.x, (y - a.y) / (b.y - a.y)))
+        }
+        radius += height * 0.00005
+        for (let column = 0; column <= columns; column++) {
+          const u = column / columns, angle = (u - 0.5) * 1.15
+          positions.push(Math.sin(angle) * radius, y, Math.cos(angle) * radius)
+          uvs.push(u, v)
+          if (row < rows && column < columns) {
+            const a = row * (columns + 1) + column, b = a + 1
+            const d = a + columns + 1, c = d + 1
+            indices.push(a, b, d, b, c, d)
+          }
+        }
+      }
+      const geometry = new BufferGeometry()
+      geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
+      geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
+      geometry.setIndex(indices)
+      geometry.computeVertexNormals()
+      const material = new MeshPhysicalMaterial({
+        name: 'glass-printed-label', color: shared.glassPrint.color || '#754023',
+        map: printTexture, roughness: shared.glassPrint.roughness ?? 0.4,
+        metalness: 0, ior: 1.5, clearcoat: 0.08, clearcoatRoughness: 0.35,
+        transparent: true, depthWrite: false,
+      })
+      glassPrintMesh = new THREE.Mesh(geometry, material)
+      glassPrintMesh.name = 'glass-bear-print'
+      glassPrintMesh.receiveShadow = true
+      glassPrintMesh.matrixAutoUpdate = false
+      glassPrintMesh.renderOrder = 101
+      glassPrintMesh.visible = false
+      scene.add(glassPrintMesh)
+      // Тот же свет, карта окружения и преобразование цвета, что у упаковки.
+      shared.prepareGlassPrint(glassPrintMesh)
+      material.envMapIntensity = 1
+    }
     const emptyBankTree = new THREE.DataTexture(new Float32Array(16), 4, 1, THREE.RGBAFormat, THREE.FloatType)
     emptyBankTree.needsUpdate = true
     const uniforms = {
@@ -1226,7 +1290,14 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
         screenMesh.material = displayMaterial
         screenMesh.renderOrder = 100
         shared.beginFinal(displayUniforms.glassToCanvas.value)
-        renderer.render(scene, camera)
+        if (glassPrintMesh) {
+          glassPrintMesh.matrix.copy(shared.glassPrintPlacement()).multiply(labToWorld)
+          glassPrintMesh.matrixWorldNeedsUpdate = true
+          glassPrintMesh.visible = true
+        }
+        try { renderer.render(scene, camera) } finally {
+          if (glassPrintMesh) glassPrintMesh.visible = false
+        }
         shared.finishFinal(screenMesh)
         screenMesh.renderOrder = 0
         onFrameReady()
@@ -1251,6 +1322,12 @@ export function createGlassOptics({ getView, getBankOptics, canvasToScreen }) {
         bubbleCache.dispose(); bubblePathMaterial.dispose(); bubblePositions.dispose()
         background.geometry.dispose(); backgroundMaterial.dispose()
         scene.remove(background, screenMesh)
+        if (glassPrintMesh) {
+          scene.remove(glassPrintMesh)
+          glassPrintMesh.geometry.dispose()
+          glassPrintMesh.material.map.dispose()
+          glassPrintMesh.material.dispose()
+        }
       },
     }
   }

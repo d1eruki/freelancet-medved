@@ -11,4 +11,4 @@ export const productSliderRenders = Object.freeze({
   puare: { pair: perryPair, pairShadow: perryPairShadow },
 })
 
-export const productRenderFrame = Object.freeze({"width":1833,"height":1243,"heightScale":1.3464444599994765,"topOffset":-17.322222999973828,"center":33.79354857521831,"origins":{"glass":"30.539560145890228% 77.24415821238256%","can":"39.265148759001725% 70.40954212376968%"}})
+export const productRenderFrame = Object.freeze({"width":1833,"height":1243,"heightScale":1.7921175762593038,"topOffset":-52.45976555304147,"center":30.523731587561375,"origins":{"glass":"30.539560145890228% 77.24415821238256%"}})
