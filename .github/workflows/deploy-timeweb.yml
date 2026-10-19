@@ -2,7 +2,7 @@ name: Deploy to Timeweb
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, staging]
   workflow_dispatch:
 
 permissions:
@@ -18,10 +18,10 @@ jobs:
 
   deploy:
     needs: checks
-    if: ${{ vars.TIMEWEB_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
+    if: ${{ vars.TIMEWEB_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') }}
     runs-on: ubuntu-latest
     env:
-      SITE_ENV: ${{ github.ref == 'refs/heads/develop' && 'staging' || 'production' }}
+      SITE_ENV: ${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -79,7 +79,7 @@ jobs:
           TIMEWEB_USER: ${{ vars.TIMEWEB_USER }}
         run: node scripts/deploy-timeweb.mjs
       - name: Verify staging HTTP responses
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/staging'
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict'
@@ -117,7 +117,7 @@ jobs:
   lighthouse:
     name: Lighthouse after deployment
     needs: deploy
-    if: ${{ needs.deploy.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
+    if: ${{ needs.deploy.result == 'success' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging') }}
     uses: ./.github/workflows/lighthouse.yml
     with:
-      environment: ${{ github.ref == 'refs/heads/develop' && 'staging' || 'production' }}
+      environment: ${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
