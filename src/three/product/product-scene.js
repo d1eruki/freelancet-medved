@@ -10,7 +10,7 @@ import { warmupWebGL } from './webgl-warmup.js'
 export const productSceneKey = Symbol('product-scene')
 
 // Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
-export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, vessel = 'glass', bottleLabelSource = '', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
+export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, glassPrint = null, vessel = 'glass', bottleLabelSource = '', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
   let currentView = null, closed = false, failed = false
   let bankOptics = null
   const sceneSettings = cameraSettings
@@ -452,6 +452,9 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         optics = await glassOptics.createGlassRenderer(THREE, renderer, scene, camera, glassSlot.host, sync,
           onFrameReady, {
             canPlacement: glassOnly ? new THREE.Group() : canPlacement, bankDisplay, setView, placeBank, lightSource,
+            glassPrint,
+            glassPrintPlacement: () => restOnCounter(placementMatrix(glassSlot, false, 0), glassItem.productBounds),
+            prepareGlassPrint: mesh => prepareProductMaterials(THREE, mesh, environment.texture, lightSource, bankDisplay),
             quality: sceneQuality,
             foamEnabled: () => glassSlot.props.foam,
             drinkPreset: () => glassOptics.drinkPreset(glassSlot.props.drink),
