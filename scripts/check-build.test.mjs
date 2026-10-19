@@ -423,7 +423,7 @@ async function assertTexturePreserved(original, optimized) {
 test('slider layers preserve visible pixels, alpha and a shared frame', async () => {
   for (const slug of ['medovuha', 'sidr', 'puare']) {
     let frame
-    for (const layer of ['pair', 'pair-shadow']) {
+    for (const layer of ['glass', 'can', 'glass-shadow', 'can-shadow']) {
       const source = `src/assets/home/product-renders/${slug}-${layer}.webp`
       const original = await readFile(source)
       const built = await builtAsset(source, '.webp')

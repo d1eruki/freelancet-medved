@@ -1,14 +1,20 @@
-import meadPair from '../assets/home/product-renders/medovuha-pair.webp?responsive'
-import meadPairShadow from '../assets/home/product-renders/medovuha-pair-shadow.webp?responsive'
-import ciderPair from '../assets/home/product-renders/sidr-pair.webp?responsive'
-import ciderPairShadow from '../assets/home/product-renders/sidr-pair-shadow.webp?responsive'
-import perryPair from '../assets/home/product-renders/puare-pair.webp?responsive'
-import perryPairShadow from '../assets/home/product-renders/puare-pair-shadow.webp?responsive'
+import meadGlass from '../assets/home/product-renders/medovuha-glass.webp?responsive'
+import meadCan from '../assets/home/product-renders/medovuha-can.webp?responsive'
+import meadGlassShadow from '../assets/home/product-renders/medovuha-glass-shadow.webp?responsive'
+import meadCanShadow from '../assets/home/product-renders/medovuha-can-shadow.webp?responsive'
+import ciderGlass from '../assets/home/product-renders/sidr-glass.webp?responsive'
+import ciderCan from '../assets/home/product-renders/sidr-can.webp?responsive'
+import ciderGlassShadow from '../assets/home/product-renders/sidr-glass-shadow.webp?responsive'
+import ciderCanShadow from '../assets/home/product-renders/sidr-can-shadow.webp?responsive'
+import perryGlass from '../assets/home/product-renders/puare-glass.webp?responsive'
+import perryCan from '../assets/home/product-renders/puare-can.webp?responsive'
+import perryGlassShadow from '../assets/home/product-renders/puare-glass-shadow.webp?responsive'
+import perryCanShadow from '../assets/home/product-renders/puare-can-shadow.webp?responsive'
 
 export const productSliderRenders = Object.freeze({
-  medovuha: { pair: meadPair, pairShadow: meadPairShadow },
-  sidr: { pair: ciderPair, pairShadow: ciderPairShadow },
-  puare: { pair: perryPair, pairShadow: perryPairShadow },
+  medovuha: { glass: meadGlass, can: meadCan, glassShadow: meadGlassShadow, canShadow: meadCanShadow },
+  sidr: { glass: ciderGlass, can: ciderCan, glassShadow: ciderGlassShadow, canShadow: ciderCanShadow },
+  puare: { glass: perryGlass, can: perryCan, glassShadow: perryGlassShadow, canShadow: perryCanShadow },
 })
 
-export const productRenderFrame = Object.freeze({"width":1833,"height":1243,"heightScale":1.3464444599994765,"topOffset":-17.322222999973828,"center":33.79354857521831,"origins":{"glass":"30.539560145890228% 77.24415821238256%","can":"39.265148759001725% 70.40954212376968%"}})
+export const productRenderFrame = Object.freeze({"width":1958,"height":1205,"heightScale":1.3052495840266223,"topOffset":-12.603660565723807,"center":54.70466250333419,"origins":{"glass":"51.65802236036996% 69.45997138611321%","can":"59.82760535584065% 76.51391329482689%"}})

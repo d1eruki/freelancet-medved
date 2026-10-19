@@ -21,7 +21,7 @@ async function switchDrink(page, isMobile, direction, slug) {
 
 async function expectComposition(panel) {
   const layers = panel.locator('.product-composition img')
-  await expect(layers).toHaveCount(2)
+  await expect(layers).toHaveCount(4)
   await expect.poll(() => layers.evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
 }
 
@@ -29,24 +29,33 @@ test('Статичные слои загружаются, а анимация н
   await openPage()
   await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
   await expectComposition(page.getByRole('tabpanel'))
-  // Общая пара и её тень должны оставаться совмещёнными во время наклона.
+  // Каждый объект остаётся совмещённым со своей тенью во время наклона.
   const current = page.getByRole('tabpanel')
   if (isMobile) await current.getByRole('button', { name: 'Следующий напиток' }).click()
   else { await page.getByRole('tab', { selected: true }).focus(); await page.keyboard.press('ArrowRight') }
   await expect(current).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
-  await expect.poll(() => current.locator('.product-model').evaluate(model =>
+  await expect.poll(() => current.locator('.product-model.product-can').evaluate(model =>
     model.getAnimations().some(animation => animation.playState === 'running'))).toBe(true)
+  const motion = await current.evaluate(panel => Object.fromEntries(['can', 'glass'].map(kind => {
+    const model = panel.querySelector(`.product-model.product-${kind}`)
+    const wrapper = model.closest('.product-motion-layer')
+    return [kind, { delay: getComputedStyle(wrapper).transitionDelay, tiltDelay: getComputedStyle(model).animationDelay }]
+  })))
+  expect(motion.can).toEqual({ delay: '0s', tiltDelay: '0s' })
+  expect(motion.glass).toEqual({ delay: '0.1s', tiltDelay: '0.1s' })
   for (let sample = 0; sample < 6; sample++) {
     const offset = await current.evaluate(panel => {
-      const model = panel.querySelector('.product-model.product-pair').getBoundingClientRect()
-      const shadow = panel.querySelector('.product-shadow.product-pair').getBoundingClientRect()
-      return Math.max(Math.abs(model.left - shadow.left), Math.abs(model.top - shadow.top))
+      return Math.max(...['can', 'glass'].map(kind => {
+        const model = panel.querySelector(`.product-model.product-${kind}`).getBoundingClientRect()
+        const shadow = panel.querySelector(`.product-shadow.product-${kind}`).getBoundingClientRect()
+        return Math.max(Math.abs(model.left - shadow.left), Math.abs(model.top - shadow.top))
+      }))
     })
     expect(offset).toBeLessThan(1)
     await page.waitForTimeout(50)
   }
   await expect(current).not.toHaveClass(/is-text-hidden/)
-  await expect.poll(() => current.locator('.product-model').evaluate(model =>
+  await expect.poll(() => current.locator('.product-model.product-can').evaluate(model =>
     model.getAnimations().some(animation => animation.playState === 'running'))).toBe(false)
   await expectComposition(await switchDrink(page, isMobile, 'next', 'puare'))
   const panel = await switchDrink(page, isMobile, 'previous', 'sidr')

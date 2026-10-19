@@ -17,6 +17,9 @@ export const productLightSettings = Object.freeze({
   position: [-1.2, 3.8, 2], target: [0, -0.15, 0],
   width: 1.5, height: 2.5, radiance: 0, intensity: 48,
 })
+// Общий фронтальный свет слайдера: упаковка, оптика бокала и тени.
+const sliderLightSettings = { ...productLightSettings, position: [0.6, 3, 5], target: [0.6, -0.15, 0],
+  width: 2.5, height: 2.5, radiance: 1, intensity: 80 }
 const opticalQuality = { bodySamples: 4, baseSamples: 8, traceSteps: 18, reflectionSteps: 6, backdropScale: 1.5, backdropPixels: 2048 }
 const contactShadow = {
   type: 'contact', position: [0, 8, 0], mapSize: 1024, extent: 1.2,
@@ -34,7 +37,8 @@ export const productRenderSettings = Object.freeze({
   shadows: { contact: contactShadow, cast: castShadow },
 })
 const baseProfile = {
-  objects: 'glass', volume: '450',
+  objects: 'glass', volume: '450', layers: 'combined',
+  glassPrint: { enabled: false, color: '#754023', roughness: 0.4 },
   camera: productRenderSettings.camera, light: productLightSettings,
   quality: productRenderSettings.quality,
   shadow: { ...contactShadow, ...Object.fromEntries(Object.entries(castShadow).filter(([key]) => !(key in contactShadow))) },
@@ -45,10 +49,14 @@ const baseProfile = {
 }
 export const productRenderProfiles = Object.freeze({
   card: { label: 'Карточки товаров', settings: baseProfile },
-  slider: { label: 'Слайдер', settings: { ...baseProfile, objects: 'pair',
-    shadow: { ...baseProfile.shadow, ...castShadow },
+  slider: { label: 'Слайдер', settings: { ...baseProfile, objects: 'pair', layers: 'separate',
+    // Видимая высота бокала и основание передней банки в квадрате композиции.
+    presentation: { glassHeight: 0.651, baseline: 0.89 },
+    glassPrint: { ...baseProfile.glassPrint, enabled: true },
+    light: sliderLightSettings,
+    shadow: { ...baseProfile.shadow, ...castShadow, position: sliderLightSettings.position, target: sliderLightSettings.target },
     background: { ...baseProfile.background, type: 'slider', reflections: 'slider', counter: true },
-    composition: { ...baseProfile.composition, modelBottom: 12, canOffset: 128, canBottom: 80 } } },
+    composition: { ...baseProfile.composition, modelBottom: 80, canOffset: 128, canBottom: 12 } } },
   hero: { label: 'Хиро категорий', settings: { ...baseProfile,
     quality: productRenderSettings.heroQuality,
     background: { ...baseProfile.background, type: 'hero', reflections: 'hero', counter: true },
@@ -77,6 +85,7 @@ export function resolveProductRender({ product = 'cider-antonovka', preset = 'ca
   const resolved = mergeSettings(productRenderProfiles[preset].settings, settings)
   for (const [value, choices, name] of [
     [resolved.objects, ['glass', 'can', 'pair', 'bottle'], 'Объекты'],
+    [resolved.layers, ['combined', 'separate'], 'Слои'],
     [resolved.volume, ['330', '450', '750'], 'Объём'],
     [resolved.shadow.type, ['contact', 'cast', 'none'], 'Тень'],
     [resolved.background.type, ['white', 'slider', 'hero', 'custom'], 'Фон'],

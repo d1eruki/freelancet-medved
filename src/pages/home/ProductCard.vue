@@ -123,6 +123,10 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 .is-moving-backward :deep(.product-layer) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
+.is-moving-forward :deep(.product-layer.product-glass), .is-moving-backward :deep(.product-layer.product-glass) {
+  animation-delay: 100ms;
+  animation-fill-mode: backwards;
+}
 .is-dragging :deep(.product-composition), .is-dragging :deep(.product-motion-layer), .is-dragging :deep(.product-layer) { transition: none; }
 .is-dragging :deep(.product-layer) { rotate: v-bind(dragAngleCss); }
 
