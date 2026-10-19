@@ -289,7 +289,7 @@ onBeforeUnmount(() => {
               class="rounded-full px-5 py-3 text-label font-bold uppercase transition focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
               :class="index === activeIndex
                 ? 'bg-brand text-surface'
-                : 'bg-surface text-foreground hover:bg-[#37513e] hover:text-surface'"
+                : 'bg-surface text-foreground hover:bg-brand hover:text-surface'"
               type="button"
               role="tab"
               :aria-controls="`home-product-panel-${product.slug}`"

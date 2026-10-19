@@ -158,7 +158,7 @@ onBeforeUnmount(() => {
 .product-scene-fallback { position: absolute; inset: 0 auto auto 0; width: auto; max-width: none; height: 100%; object-fit: contain; }
 .product-scene-error { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
 .product-scene-loader { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; }
-.product-scene-spinner { width: 44px; height: 44px; border: 3px solid rgb(61 90 69 / 0.18); border-top-color: #3d5a45; border-radius: 50%; animation: product-scene-spin 800ms linear infinite; }
+.product-scene-spinner { width: 44px; height: 44px; border: 3px solid color-mix(in srgb, var(--color-brand) 18%, transparent); border-top-color: var(--color-brand); border-radius: 50%; animation: product-scene-spin 800ms linear infinite; }
 @keyframes product-scene-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   .product-scene-spinner { animation-duration: 2s; }
