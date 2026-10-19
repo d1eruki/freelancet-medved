@@ -62,13 +62,15 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
           {{ product.varieties }}
         </p>
 
-        <BaseButton
-          class="product-copy product-interactive relative z-2 order-3 -mt-6 inline-flex items-center justify-center nav:mt-10"
-          :href="product.href"
-          :tabindex="active ? 0 : -1"
-        >
-          Подробнее
-        </BaseButton>
+        <div class="product-copy relative z-2 order-3 -mt-6 inline-flex nav:mt-10">
+          <BaseButton
+            class="product-interactive inline-flex items-center justify-center"
+            :href="product.href"
+            :tabindex="active ? 0 : -1"
+          >
+            Подробнее
+          </BaseButton>
+        </div>
       </div>
 
       <div class="relative -top-4 order-2 mt-8 flex w-full items-center justify-center gap-2 nav:static nav:top-auto nav:contents">

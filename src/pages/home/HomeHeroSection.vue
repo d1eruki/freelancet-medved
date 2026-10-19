@@ -26,8 +26,8 @@ const heroLayerLayout = {
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: -150 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: -100, y: -100 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.65, x: 0, y: -100 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.65, x: -100, y: -50 },
   },
 }
 
@@ -122,10 +122,10 @@ onBeforeUnmount(() => {
 
 <template>
   <section
-    class="relative min-h-svh overflow-hidden bg-brand text-surface"
+    class="relative isolate h-svh overflow-hidden bg-brand text-surface"
     aria-labelledby="hero-title"
   >
-    <div class="site-container flex min-h-svh flex-col gap-10 pt-24 pb-8 sm:pt-32 sm:pb-0 wide:pt-36">
+    <div class="site-container flex h-full flex-col gap-10 pt-24 pb-16 sm:pt-32 sm:pb-8 wide:pt-36">
       <h1 id="hero-title" class="home-hero-title absolute top-62 left-0 z-20 w-full -translate-y-full px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6" :style="layerEntranceTimings.rise">
         <span class="font-normal">Лапу приложили</span><br>
         к напиткам
@@ -153,10 +153,28 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <LayeredHeroComposition :layers="heroLayers" :layer-layout="heroLayerLayout" />
+    <span class="home-hero-overlay pointer-events-none absolute inset-0 z-11" aria-hidden="true" />
+    <span class="home-hero-corner-overlay pointer-events-none absolute inset-0 z-11" aria-hidden="true" />
   </section>
 </template>
 
 <style scoped>
+.home-hero-overlay {
+  background: radial-gradient(ellipse 56% 80% at 50% 24%, rgb(16 16 16 / 28%) 0%, rgb(16 16 16 / 12%) 48%, transparent 100%);
+}
+
+.home-hero-corner-overlay {
+  background:
+    radial-gradient(ellipse 55% 55% at 0% 90%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 28%) 48%, transparent 100%),
+    radial-gradient(ellipse 55% 55% at 100% 90%, rgb(16 16 16 / 56%) 0%, rgb(16 16 16 / 28%) 48%, transparent 100%);
+}
+
+@media (min-width: 40rem) {
+  .home-hero-overlay {
+    background: radial-gradient(ellipse 56% 80% at 50% 48%, rgb(16 16 16 / 28%) 0%, rgb(16 16 16 / 12%) 48%, transparent 100%);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .home-hero-title,
   .home-hero-details {

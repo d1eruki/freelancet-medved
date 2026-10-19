@@ -2,7 +2,7 @@ name: Project checks
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main, staging]
   workflow_call:
   workflow_dispatch:
 
