@@ -120,9 +120,14 @@ import SectionWatermark from '../../components/SectionWatermark.vue'
             loading="lazy"
           >
           <figcaption class="absolute right-6 bottom-6 left-6 sm:right-8 sm:bottom-8 sm:left-8">
-            <span class="inline-block rounded-full bg-brand px-6 py-3 text-label font-extrabold text-surface uppercase">
-              Скоро
-            </span>
+            <a
+              href="https://marionciders.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-block rounded-full bg-brand px-6 py-3 text-label font-extrabold text-surface uppercase"
+            >
+              Перейти на сайт
+            </a>
           </figcaption>
         </figure>
       </article>
