@@ -4,13 +4,15 @@ defineProps({
   imageSrcset: { type: String, default: undefined },
   imageSizes: { type: String, default: undefined },
   fetchpriority: { type: String, default: undefined },
+  naturalHeight: { type: Boolean, default: false },
 })
 </script>
 
 <template>
   <div class="pointer-events-none relative z-10 h-0" aria-hidden="true">
     <img
-      class="absolute inset-x-0 top-0 h-64 w-full -translate-y-1/2 object-cover object-center"
+      class="hero-divider-image absolute inset-x-0 w-full"
+      :class="{ 'hero-divider-image-natural': naturalHeight }"
       :src="imageUrl"
       :srcset="imageSrcset"
       :sizes="imageSizes"
@@ -20,3 +22,16 @@ defineProps({
     >
   </div>
 </template>
+
+<style scoped>
+.hero-divider-image {
+  top: -128px;
+  height: 256px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-divider-image-natural {
+  height: auto;
+}
+</style>
