@@ -48,17 +48,17 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   >
     <div class="site-container relative flex flex-col items-center py-8 text-center sm:py-12 nav:grid nav:h-full nav:min-h-0 site-grid nav:grid-rows-2 nav:text-left">
       <div class="product-copy relative z-0 w-full max-w-md nav:col-span-4 nav:row-span-2 nav:max-w-none nav:self-center">
-        <h3 class="font-display text-product-title text-brand uppercase">
+        <h3 class="font-display text-product-title text-surface uppercase">
           {{ product.name }}
         </h3>
 
-        <p class="mx-auto mt-6 max-w-sm text-body font-medium nav:mx-0">
+        <p class="mx-auto mt-6 max-w-sm text-body font-medium text-surface nav:mx-0">
           {{ product.description }}
         </p>
       </div>
 
       <div class="contents nav:relative nav:z-2 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:block nav:w-full nav:self-center">
-        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium nav:mx-0 nav:mt-0">
+        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium text-surface nav:mx-0 nav:mt-0">
           {{ product.varieties }}
         </p>
 

@@ -29,7 +29,11 @@ const socialLinks = [
     <div class="site-container">
       <div class="grid gap-12 border-b border-surface/40 pb-12 wide:grid-cols-3 wide:gap-12 wide:pb-20">
         <a class="inline-flex w-max" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
-          <img class="h-auto w-64 object-contain brightness-0 invert sm:w-80" :src="logoUrl" alt="МЁДВЕДЬ" width="511" height="133">
+          <span
+            class="block aspect-511/133 w-64 bg-surface sm:w-80"
+            :style="{ mask: `url('${logoUrl}') center / contain no-repeat` }"
+            aria-hidden="true"
+          />
         </a>
 
         <div>

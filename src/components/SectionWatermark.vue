@@ -57,7 +57,7 @@ onBeforeUnmount(() => { mounted = false })
 
 <style scoped>
 span {
-  color: rgb(255 255 255 / 4%);
+  color: color-mix(in srgb, var(--color-surface) 4%, transparent);
   line-height: 0.75;
 }
 

@@ -11,8 +11,8 @@
 @theme {
   --color-brand: #3d5a45;
   --color-foreground: #101010;
-  --color-surface: #ffffff;
-  --color-panel: #efefef;
+  --color-surface: #fff4df;
+  --color-panel: #f0e2c9;
   --color-subtle: #686868;
   --font-body: Georgia, serif;
   --font-display: "Gabin", Georgia, serif;
@@ -100,7 +100,8 @@
     z-index: 0;
     width: min(85vw, 60rem);
     aspect-ratio: 162 / 133;
-    background: url("../assets/ui/section-bear-mark.svg") right bottom / contain no-repeat;
+    background-color: var(--color-surface);
+    mask: url("../assets/ui/section-bear-mark.svg") right bottom / contain no-repeat;
     content: '';
     opacity: 1;
     pointer-events: none;
