@@ -1,7 +1,6 @@
 <script setup>
 import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import CircleArrow from '../../components/CircleArrow.vue'
 import ProductCard from './ProductCard.vue'
 import { productSliderRenders } from '#product-slider-renders'
 import { catalogCategories } from '../../data/catalog'
@@ -216,10 +215,10 @@ onBeforeUnmount(() => {
       <span class="absolute inset-0 bg-black/75" />
     </div>
 
-    <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24 wide:pt-40">
-      <div class="grid items-end gap-6 pb-8 wide:grid-cols-3 wide:gap-12 wide:pb-10">
-        <h2 id="products-title" class="min-w-0 font-display text-h2 text-center text-surface uppercase nav:text-left wide:col-span-2">
-          Продукция
+    <div class="site-container relative z-2 shrink-0 pt-20 sm:pt-24">
+      <div class="grid items-end gap-6 pb-6 wide:grid-cols-3 wide:gap-12">
+        <h2 id="products-title" class="min-h-[1em] min-w-0 font-display text-h2 text-center text-surface uppercase nav:text-left wide:col-span-2">
+          <span class="sr-only">Продукция</span>
         </h2>
 
       </div>
@@ -265,17 +264,8 @@ onBeforeUnmount(() => {
 
       <span class="sr-only" aria-live="polite">Выбран напиток: {{ products[activeIndex].name }}</span>
 
-      <div class="site-container relative z-2 hidden shrink-0 -translate-y-12 pb-8 nav:block">
-        <div class="flex flex-wrap items-center justify-center gap-3 pt-6">
-          <button
-            class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            type="button"
-            aria-label="Предыдущий напиток"
-            @click="showPrevious"
-          >
-            <CircleArrow direction="left" hover="control" tone="surface" />
-          </button>
-
+      <div class="site-container relative z-2 hidden shrink-0 -translate-y-8 pb-8 nav:block">
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
           <div
             ref="tabList"
             class="hidden flex-wrap items-center justify-center gap-3 nav:flex"
@@ -302,14 +292,6 @@ onBeforeUnmount(() => {
             </button>
           </div>
 
-          <button
-            class="group rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
-            type="button"
-            aria-label="Следующий напиток"
-            @click="showNext"
-          >
-            <CircleArrow hover="control" tone="surface" />
-          </button>
         </div>
       </div>
     </div>
