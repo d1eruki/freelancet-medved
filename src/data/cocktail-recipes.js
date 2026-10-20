@@ -10,8 +10,8 @@ export const cocktailRecipes = [
     englishName: 'Orchard Spritz',
     base: 'На основе сухого сидра',
     image: orchardSpritz,
-    imageFrame: { width: 1448, height: 1086, bounds: [358, 28, 788, 1035] },
-    imageAlt: 'Орчард Спритц в винном бокале со льдом и зелёным яблоком рядом с банкой сухого сидра',
+    imageFrame: { width: 1448, height: 1086, bounds: [397, 22, 593, 1038] },
+    imageAlt: 'Орчард Спритц в винном бокале со льдом, зелёным яблоком и мятой',
     description: 'Элегантный твист на классические спритцы. Идеальный летний аперитив, который легко готовится «из-под ножа» при полной посадке.',
     ingredients: [
       'Сухой сидр «Медведь» — 120 мл',
@@ -28,8 +28,8 @@ export const cocktailRecipes = [
     englishName: 'Wild Honey Sour',
     base: 'На основе медовухи',
     image: wildHoneySour,
-    imageFrame: { width: 1448, height: 1086, bounds: [173, 18, 1174, 1036] },
-    imageAlt: 'Дикий Сауэр в бокале рокс с розмарином и сотами рядом с банкой тёмной медовухи',
+    imageFrame: { width: 1448, height: 1086, bounds: [315, 0, 801, 1042] },
+    imageAlt: 'Дикий Сауэр в бокале рокс со льдом, розмарином и сотами',
     description: 'Плотный, кисло-сладкий и гастрономичный коктейль. Обожженный розмарин отлично подчеркивает концепцию «дико и натурально».',
     ingredients: [
       'Медовуха — 100 мл',
@@ -46,8 +46,8 @@ export const cocktailRecipes = [
     englishName: 'Poiré Blanc',
     base: 'На основе пуаре',
     image: poireBlanc,
-    imageFrame: { width: 1448, height: 1086, bounds: [261, 44, 874, 1029] },
-    imageAlt: 'Грушевый Френч в бокале флюте с грушей и тимьяном рядом с бутылкой пуаре',
+    imageFrame: { width: 1448, height: 1086, bounds: [321, 20, 658, 1052] },
+    imageAlt: 'Грушевый Френч в бокале флюте с грушей и тимьяном',
     description: 'Тонкий, изящный и сухой коктейль с низким содержанием алкоголя (Low-ABV). Отличный выбор для бранчей и светских вечеров.',
     ingredients: [
       'Пуаре «Медведь» — 100 мл',
@@ -64,8 +64,8 @@ export const cocktailRecipes = [
     englishName: 'Spiced SPb',
     base: 'Согревающий спешл',
     image: spicedSpb,
-    imageFrame: { width: 1448, height: 1086, bounds: [56, 34, 1340, 1023] },
-    imageAlt: 'Пряный Петербург в керамической кружке с апельсином, корицей и бадьяном рядом с сидром и медовухой',
+    imageFrame: { width: 1448, height: 1086, bounds: [189, 4, 1056, 1060] },
+    imageAlt: 'Пряный Петербург в керамической кружке с апельсином, корицей, бадьяном и паром',
     description: 'Зимний хит, который бары могут готовить в больших объемах (в термопоте) или порционно.',
     ingredients: [
       'Полусладкий сидр или медовуха — 150 мл',
