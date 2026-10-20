@@ -2,6 +2,7 @@
 import { contacts } from '../data/contacts.js'
 import { sitePath } from '../utils/site-path'
 import logoUrl from '../assets/branding/brand-logo.svg'
+import ContactForm from './ContactForm.vue'
 
 const showSocialLinks = false
 
@@ -25,68 +26,88 @@ const socialLinks = [
 </script>
 
 <template>
-  <footer class="bg-brand py-20 text-surface sm:py-24 wide:py-28">
-    <div class="site-container">
-      <div class="grid gap-12 border-b border-surface/40 pb-12 wide:grid-cols-3 wide:gap-12 wide:pb-20">
-        <a class="inline-flex w-max" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
-          <img class="h-auto w-64 object-contain brightness-0 invert sm:w-80" :src="logoUrl" alt="МЁДВЕДЬ" width="511" height="133">
-        </a>
+  <footer id="contact-form" class="scroll-mt-20 bg-brand text-surface" aria-label="Связь и контакты">
+    <div class="site-container py-20 sm:py-24 wide:py-28">
 
-        <div>
-          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Адрес</span>
-          <address class="max-w-xl text-body-large font-semibold not-italic">
-            <a class="border-b border-surface/60" :href="contacts.addressMapUrl" target="_blank" rel="noopener noreferrer">
-              {{ contacts.footerAddress }}
-            </a>
-          </address>
-        </div>
+      <div class="grid items-start gap-12 sm:gap-16 nav:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div class="min-w-0">
+          <a class="block w-80 max-w-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
+            <span
+              class="block aspect-511/133 w-full bg-surface"
+              :style="{ mask: `url('${logoUrl}') center / contain no-repeat` }"
+              aria-hidden="true"
+            />
+          </a>
+          <div class="mt-10 grid gap-10">
+            <div>
+              <p class="font-display text-label uppercase text-panel">Контакты</p>
+              <ul class="mt-4 grid gap-3 text-body-large font-semibold">
+                <li><a class="footer-link" :href="contacts.general.phoneHref">{{ contacts.general.phone }}</a></li>
+                <li><a class="footer-link" :href="contacts.general.emailHref">{{ contacts.general.email }}</a></li>
+              </ul>
+            </div>
 
-        <div>
-          <span class="mb-4 block text-caption font-extrabold tracking-widest uppercase">Контакты</span>
-          <ul class="grid gap-3">
-            <li>
-              <a class="border-b border-surface/60 text-body-large font-semibold" :href="contacts.general.phoneHref">
-                {{ contacts.general.phone }}
-              </a>
-            </li>
-            <li>
-              <a class="border-b border-surface/60 text-body-large font-semibold" :href="contacts.general.emailHref">
-                {{ contacts.general.email }}
-              </a>
-            </li>
-          </ul>
+            <div>
+              <p class="font-display text-label uppercase text-panel">Адрес</p>
+              <address class="mt-4 max-w-md text-body-large font-semibold not-italic">
+                <a class="footer-link" :href="contacts.addressMapUrl" target="_blank" rel="noopener noreferrer">{{ contacts.footerAddress }}</a>
+              </address>
+            </div>
+          </div>
           <ul v-if="showSocialLinks" class="mt-6 flex items-center gap-3" aria-label="Социальные сети">
             <li v-for="social in socialLinks" :key="social.label">
               <a
-                class="grid size-11 place-items-center transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
+                class="grid size-11 place-items-center rounded-full transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
                 :href="social.href"
                 target="_blank"
                 rel="nofollow noopener noreferrer"
                 :aria-label="social.label"
               >
-                <svg class="size-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                  <path :d="social.path" />
-                </svg>
+                <svg class="size-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path :d="social.path" /></svg>
               </a>
             </li>
           </ul>
         </div>
+
+        <div class="min-w-0">
+          <h2 id="footer-contact-title" class="font-display text-h3 uppercase">Напишите нам</h2>
+          <ContactForm
+            class="mt-10"
+            aria-labelledby="footer-contact-title"
+            compact
+            source="footer-contact"
+            id-prefix="footer-contact"
+            tone="dark"
+            submit-variant="surface"
+          />
+        </div>
       </div>
 
-      <div class="border-t border-surface/40 pt-6 text-label">
-        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-8">
-          <p>© 2017 ООО «ФАРТ СПБ».</p>
-          <a class="hover:underline hover:underline-offset-4" :href="sitePath('/disclaimer/')">
-            Ограничение ответственности
-          </a>
-          <a class="hover:underline hover:underline-offset-4" :href="sitePath('/politika-konfidencialnosti/')">
-            Политика конфиденциальности
-          </a>
-          <a class="hover:underline hover:underline-offset-4" href="https://medved.beer/files/requisites_ooo_fart_spb_jan2018.pdf" target="_blank" rel="noopener noreferrer">
-            Реквизиты ООО «ФАРТ СПБ»
-          </a>
-        </div>
+      <div class="mt-12 flex flex-col items-start gap-6 border-t border-surface/30 pt-6 text-label sm:mt-16 wide:flex-row wide:items-center wide:justify-between">
+        <p class="shrink-0 text-surface/65">© 2017 ООО «ФАРТ СПБ».</p>
+        <nav aria-label="Юридическая информация">
+          <ul class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-x-8">
+            <li><a class="footer-link" :href="sitePath('/disclaimer/')">Ограничение ответственности</a></li>
+            <li><a class="footer-link" :href="sitePath('/politika-konfidencialnosti/')">Политика конфиденциальности</a></li>
+            <li><a class="footer-link" href="https://medved.beer/files/requisites_ooo_fart_spb_jan2018.pdf" target="_blank" rel="noopener noreferrer">Реквизиты ООО «ФАРТ СПБ»</a></li>
+          </ul>
+        </nav>
       </div>
     </div>
   </footer>
 </template>
+
+<style scoped>
+.footer-link {
+  text-underline-offset: 4px;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+.footer-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+</style>

@@ -3,8 +3,10 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { build } from 'vite'
 import { getMetrikaMarkup } from '../src/utils/metrika.js'
+import { getSiteVariant } from '../src/data/site-variants.js'
 
 const root = process.cwd()
+const variant = getSiteVariant(process.env.SITE_VARIANT)
 const siteEnvironment = process.env.SITE_ENV || 'production'
 if (!['production', 'staging'].includes(siteEnvironment)) throw new Error('SITE_ENV must be production or staging')
 const staging = siteEnvironment === 'staging'
@@ -147,6 +149,10 @@ try {
     await writeFile(path.join(output, 'robots.txt'), 'User-agent: *\nAllow: /\nDisallow: /api/\n')
   }
   await writeFile(configPath, generatedConfig)
+  await writeFile(path.join(output, 'site-variant.json'), JSON.stringify({
+    version: 1, variant: variant.name, environment: siteEnvironment,
+    base: process.env.SITE_BASE || '/freelancet-medved/',
+  }, null, 2) + '\n')
 } finally {
   await rm(serverOutput, { recursive: true, force: true })
 }

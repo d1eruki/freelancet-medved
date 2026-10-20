@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SITE_ENV: ${{ github.ref == 'refs/heads/testing' && 'staging' || 'production' }}
+      SITE_VARIANT: client
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -58,7 +59,7 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV, `TIMEWEB_PATH=${environment === 'staging' ? staging : production}\n`)
           NODE
       - name: Build for domain root
-        run: npm run build
+        run: npm run build:client
         env:
           SITE_BASE: /
       - name: Configure SSH

@@ -10,6 +10,12 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  compact: { type: Boolean, default: false },
+  submitVariant: {
+    type: String,
+    default: 'brand',
+    validator: (value) => ['brand', 'surface', 'outline'].includes(value),
+  },
   tone: {
     type: String,
     default: 'light',
@@ -175,7 +181,7 @@ async function submitForm() {
 </script>
 
 <template>
-  <form class="grid min-w-0 gap-6 nav:grid-cols-2" @submit.prevent="submitForm">
+  <form class="grid min-w-0" :class="compact ? 'gap-4 sm:grid-cols-2 wide:grid-cols-3' : 'gap-6 nav:grid-cols-2'" @submit.prevent="submitForm">
     <div>
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-name`">Ваше имя *</label>
       <input :id="`${idPrefix}-name`" v-model.trim="fields.name" class="min-h-14 w-full rounded-xl border px-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="name" type="text" autocomplete="name" maxlength="120" required>
@@ -188,13 +194,13 @@ async function submitForm() {
       </div>
       <p v-if="phoneError" :id="`${idPrefix}-phone-error`" class="mt-2 text-body font-semibold" :class="isDark ? 'text-red-300' : 'text-red-700'" role="alert">{{ phoneError }}</p>
     </div>
-    <div class="nav:col-span-2">
+    <div :class="compact ? 'sm:col-span-2 wide:col-span-1' : 'nav:col-span-2'">
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-email`">Электронная почта</label>
       <input :id="`${idPrefix}-email`" v-model.trim="fields.email" class="min-h-14 w-full rounded-xl border px-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="email" type="email" autocomplete="email" maxlength="254">
     </div>
-    <div class="nav:col-span-2">
+    <div class="col-span-full">
       <label class="mb-3 block text-label font-extrabold tracking-wide uppercase" :class="labelClass" :for="`${idPrefix}-message`">Сообщение</label>
-      <textarea :id="`${idPrefix}-message`" v-model.trim="fields.message" class="min-h-36 w-full rounded-xl border p-5 text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="fieldClass" name="message" rows="5" maxlength="4000"></textarea>
+      <textarea :id="`${idPrefix}-message`" v-model.trim="fields.message" class="w-full rounded-xl border text-body font-medium focus-visible:outline-4 focus-visible:outline-offset-2" :class="[fieldClass, compact ? 'min-h-24 px-5 py-3' : 'min-h-36 p-5']" name="message" :rows="compact ? 2 : 5" maxlength="4000"></textarea>
     </div>
 
     <div class="absolute -left-[10000px] size-px overflow-hidden" aria-hidden="true">
@@ -202,19 +208,21 @@ async function submitForm() {
       <input :id="`${idPrefix}-website`" v-model="fields.website" name="website" type="text" tabindex="-1" autocomplete="off">
     </div>
 
-    <div class="nav:col-span-2">
-      <label class="flex items-start gap-3 text-body font-medium" :class="consentClass">
-        <input v-model="fields.consent" class="mt-1 size-5 shrink-0 accent-brand" name="consent" type="checkbox" required>
-        <span>Я согласен(а) с условиями обработки персональных данных согласно <a class="underline underline-offset-4" :class="isDark ? 'hover:text-surface' : 'hover:text-foreground'" :href="sitePath('/politika-konfidencialnosti/')">политике конфиденциальности</a>.</span>
-      </label>
-    </div>
-    <div class="flex flex-col items-start gap-4 nav:col-span-2 sm:flex-row sm:items-center">
-      <BaseButton class="w-full py-4 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60 disabled:shadow-none sm:w-auto" type="submit" :disabled="status === 'sending'">
-        {{ status === 'sending' ? 'Отправляем…' : 'Отправить' }}
-      </BaseButton>
-      <p v-if="feedback" class="text-body font-semibold" :class="status === 'error' ? (isDark ? 'text-red-300' : 'text-red-700') : (isDark ? 'text-surface' : 'text-brand')" role="status" aria-live="polite">
-        {{ feedback }}
-      </p>
+    <div class="col-span-full grid gap-6" :class="compact ? 'sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center' : ''">
+      <div>
+        <label class="flex items-start gap-3 font-medium" :class="[consentClass, compact ? 'text-label' : 'text-body']">
+          <input v-model="fields.consent" class="mt-1 size-5 shrink-0 accent-brand" name="consent" type="checkbox" required>
+          <span>Я согласен(а) с условиями обработки персональных данных согласно <a class="underline underline-offset-4" :class="isDark ? 'hover:text-surface' : 'hover:text-foreground'" :href="sitePath('/politika-konfidencialnosti/')">политике конфиденциальности</a>.</span>
+        </label>
+      </div>
+      <div class="flex flex-col items-start gap-4" :class="compact ? 'sm:items-end' : 'sm:flex-row sm:items-center'">
+        <BaseButton :variant="submitVariant" class="w-full py-4 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-60 disabled:shadow-none sm:w-auto" type="submit" :disabled="status === 'sending'">
+          {{ status === 'sending' ? 'Отправляем…' : 'Отправить' }}
+        </BaseButton>
+        <p v-if="feedback" class="text-body font-semibold" :class="status === 'error' ? (isDark ? 'text-red-300' : 'text-red-700') : (isDark ? 'text-surface' : 'text-brand')" role="status" aria-live="polite">
+          {{ feedback }}
+        </p>
+      </div>
     </div>
   </form>
 </template>

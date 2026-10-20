@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import ProductComposition from '../../components/ProductComposition.vue'
+import ProductComposition from '#product-composition'
 import CircleArrow from '../../components/CircleArrow.vue'
 import BaseButton from '../../components/BaseButton.vue'
 
@@ -46,19 +46,19 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
     }"
     :aria-label="product.name"
   >
-    <div class="site-container relative flex flex-col items-center py-8 text-center sm:py-12 nav:grid nav:h-full nav:min-h-0 site-grid nav:grid-rows-2 nav:text-left">
+    <div class="site-container relative flex flex-col items-center py-6 text-center sm:py-8 nav:grid nav:h-full nav:min-h-0 site-grid nav:grid-rows-2 nav:text-left">
       <div class="product-copy relative z-0 w-full max-w-md nav:col-span-4 nav:row-span-2 nav:max-w-none nav:self-center">
-        <h3 class="font-display text-product-title text-brand uppercase">
+        <h3 class="font-display text-product-title text-surface uppercase">
           {{ product.name }}
         </h3>
 
-        <p class="mx-auto mt-6 max-w-sm text-body font-medium nav:mx-0">
+        <p class="mx-auto mt-6 max-w-sm text-body font-medium text-surface nav:mx-0">
           {{ product.description }}
         </p>
       </div>
 
       <div class="contents nav:relative nav:z-2 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:block nav:w-full nav:self-center">
-        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium nav:mx-0 nav:mt-0">
+        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium text-surface nav:mx-0 nav:mt-0">
           {{ product.varieties }}
         </p>
 
@@ -75,7 +75,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 
       <div class="relative -top-4 order-2 mt-8 flex w-full items-center justify-center gap-2 nav:static nav:top-auto nav:contents">
         <button
-          class="group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
+          class="product-copy group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
           type="button"
           aria-label="Предыдущий напиток"
           :tabindex="active ? 0 : -1"
@@ -85,7 +85,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
         </button>
 
         <a
-          class="product-interactive product-visual relative z-1 min-w-0 max-w-96 flex-1 aspect-square focus-visible:outline-4 focus-visible:outline-brand sm:max-w-112 nav:absolute nav:bottom-3 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
+          class="product-interactive product-visual relative z-1 min-w-0 max-w-96 flex-1 aspect-square focus-visible:outline-4 focus-visible:outline-brand sm:max-w-112 nav:absolute nav:-bottom-1 nav:left-1/2 nav:size-auto nav:h-11/12 nav:max-h-144 nav:max-w-none nav:aspect-square nav:flex-none nav:-translate-x-1/2"
           draggable="false"
           :href="product.href"
           :tabindex="active ? 0 : -1"
@@ -95,7 +95,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
         </a>
 
         <button
-          class="group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
+          class="product-copy group shrink-0 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand nav:hidden"
           type="button"
           aria-label="Следующий напиток"
           :tabindex="active ? 0 : -1"
@@ -122,6 +122,10 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
 }
 .is-moving-backward :deep(.product-layer) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.is-moving-forward :deep(.product-layer.product-glass), .is-moving-backward :deep(.product-layer.product-glass) {
+  animation-delay: 100ms;
+  animation-fill-mode: backwards;
 }
 .is-dragging :deep(.product-composition), .is-dragging :deep(.product-motion-layer), .is-dragging :deep(.product-layer) { transition: none; }
 .is-dragging :deep(.product-layer) { rotate: v-bind(dragAngleCss); }

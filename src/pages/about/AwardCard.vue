@@ -8,7 +8,7 @@ defineProps({
   <li class="group w-[78vw] max-w-96 shrink-0 snap-start text-foreground sm:w-80 nav:w-96">
     <a class="block h-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" :href="award.image" target="_blank" rel="noopener">
       <figure class="flex h-full flex-col gap-6">
-        <div class="h-80 overflow-hidden sm:h-96">
+        <div class="h-80 sm:h-96">
           <img
             class="size-full object-contain transition duration-500 group-hover:scale-105"
             :src="award.image"

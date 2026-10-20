@@ -26,22 +26,22 @@ jobs:
       - run: npm run test:deploy
 
   pages:
-    name: Pages (${{ matrix.environment }}, ${{ matrix.base }})
+    name: Pages (${{ matrix.variant }}, ${{ matrix.environment }}, ${{ matrix.base }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - environment: production
-            base: /
-          - environment: production
-            base: /freelancet-medved/
+        variant: [original, client]
+        environment: [production, staging]
+        base: [/, /freelancet-medved/]
+        exclude:
           - environment: staging
-            base: /
+            base: /freelancet-medved/
     env:
       SITE_ENV: ${{ matrix.environment }}
       SITE_BASE: ${{ matrix.base }}
+      SITE_VARIANT: ${{ matrix.variant }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7

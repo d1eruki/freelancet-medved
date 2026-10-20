@@ -7,7 +7,6 @@
     "npm": "11.x"
   },
   "scripts": {
-    "dev": "vite",
     "build": "node scripts/build.mjs",
     "preview": "vite preview",
     "test": "node --test scripts/check-build.test.mjs",
@@ -15,7 +14,11 @@
     "test:deploy": "node --test scripts/deploy-timeweb.test.mjs",
     "test:browser": "playwright test",
     "lint": "eslint src scripts tests *.mjs vite.config.js",
-    "audit": "npm audit --audit-level=high"
+    "audit": "npm audit --audit-level=high",
+    "dev:original": "SITE_VARIANT=original vite",
+    "dev:client": "SITE_VARIANT=client vite",
+    "build:original": "SITE_VARIANT=original node scripts/build.mjs",
+    "build:client": "SITE_VARIANT=client node scripts/build.mjs"
   },
   "dependencies": {
     "@mdi/js": "^7.4.47",

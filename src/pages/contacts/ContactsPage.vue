@@ -4,8 +4,8 @@ import contactsHeroMiddleUrl from '../../assets/heroes/contacts/middle.png'
 import drinksStillLifeUrl from '../../assets/heroes/contacts/drinks-still-life.png'
 import contactsDividerUrl from '../../assets/heroes/contacts/divider.png'
 import BaseButton from '../../components/BaseButton.vue'
+import BrandedMap from '../../components/branded-map.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
-import ContactSection from '../../components/ContactSection.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
 import SupplySection from '../../components/supply-section.vue'
@@ -74,30 +74,19 @@ const contactsHeroLayout = {
       </div>
     </section>
 
-    <ContactSection
-      source="contacts-inquiry"
-      title="Запрос на поставку"
-      description="Расскажите о вашем вопросе."
-      heading-id="contacts-inquiry-title"
-      id-prefix="inquiry"
-      tone="dark"
-    />
-
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="contacts-address-title">
       <div class="site-container">
-        <div class="grid gap-6 site-grid nav:gap-10">
+        <div class="grid gap-12 site-grid nav:gap-10">
           <div class="nav:col-span-5">
             <h2 id="contacts-address-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase">Наш адрес</h2>
-          </div>
-          <div class="nav:col-span-7 nav:pt-12">
-            <address class="max-w-3xl text-body-large font-bold not-italic">{{ contacts.address }}</address>
+            <address class="mt-6 max-w-3xl text-body-large font-bold not-italic">{{ contacts.address }}</address>
             <p class="mt-6 max-w-2xl text-body font-medium text-subtle">Въезд со стороны набережной Обводного канала, между домами 205А и 207Б.</p>
             <BaseButton class="mt-10 inline-flex items-center justify-center" :href="contacts.routeUrl" target="_blank" rel="noopener noreferrer">
               Построить маршрут
             </BaseButton>
           </div>
+          <BrandedMap class="nav:col-span-7" :embed-url="contacts.mapEmbedUrl" :title="contacts.mapTitle" :marker-url="contacts.addressMapUrl" />
         </div>
-        <iframe class="mt-12 h-96 w-full rounded-3xl border-0" :src="contacts.mapEmbedUrl" :title="contacts.mapTitle" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
     </section>
 

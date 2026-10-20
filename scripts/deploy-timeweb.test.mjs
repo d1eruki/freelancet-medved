@@ -17,6 +17,9 @@ function execute(command, args, input) {
   })
 }
 
+const clientHtml = '<html data-site-variant="client">new site</html>'
+const buildInfo = { version: 1, variant: 'client', base: '/', environment: 'production' }
+
 async function fixture(t) {
   const root = await realpath(await mkdtemp(path.join(os.tmpdir(), 'medved-deploy-')))
   t.after(() => rm(root, { recursive: true, force: true }))
@@ -29,7 +32,8 @@ async function fixture(t) {
     await mkdir(path.dirname(path.join(directory, file)), { recursive: true })
     await writeFile(path.join(directory, file), content)
   }
-  await put(source, 'index.html', '<html>new site</html>')
+  await put(source, 'index.html', clientHtml)
+  await put(source, 'site-variant.json', JSON.stringify(buildInfo))
   await put(source, '.htaccess', 'RewriteEngine On')
   let uploads = 0
   const run = async (command, args, input) => {
@@ -59,8 +63,8 @@ test('first publication preserves untracked server files and creates a private m
   for (const file of ['uploads/customer.pdf', 'old-page/index.html', 'api/settings.php']) {
     assert.ok(await readFile(path.join(f.destination, file), 'utf8'))
   }
-  assert.equal(await readFile(path.join(f.destination, 'index.html'), 'utf8'), '<html>new site</html>')
-  assert.deepEqual(JSON.parse(await readFile(f.manifest, 'utf8')).files, ['.htaccess', 'index.html'])
+  assert.equal(await readFile(path.join(f.destination, 'index.html'), 'utf8'), clientHtml)
+  assert.deepEqual(JSON.parse(await readFile(f.manifest, 'utf8')).files, ['.htaccess', 'index.html', 'site-variant.json'])
   await assert.rejects(readFile(path.join(f.destination, '.medved-deploy-manifest.json')), { code: 'ENOENT' })
 })
 
@@ -80,7 +84,7 @@ test('next publication removes only obsolete tracked files and keeps current fil
   }
   assert.equal(await readFile(path.join(f.destination, 'assets/manual.txt'), 'utf8'), 'keep me')
   assert.equal(await readFile(path.join(f.destination, 'assets/new.js'), 'utf8'), 'assets/new.js')
-  assert.deepEqual(JSON.parse(await readFile(f.manifest, 'utf8')).files, ['.htaccess', 'assets/new.js', 'index.html'])
+  assert.deepEqual(JSON.parse(await readFile(f.manifest, 'utf8')).files, ['.htaccess', 'assets/new.js', 'index.html', 'site-variant.json'])
 })
 
 test('failed upload preserves obsolete files and the previous manifest', async (t) => {
@@ -139,4 +143,26 @@ test('invalid destination and incomplete builds stop before remote access', asyn
   }
   await rm(path.join(f.source, 'index.html'))
   await assert.rejects(deployTimeweb(f.config, unexpected), /Missing or empty build/)
+})
+
+// Проверка выполняется до первого SSH/rsync, включая ручной запуск скрипта.
+test('Timeweb rejects original, unmarked and inconsistent builds before remote access', async (t) => {
+  const f = await fixture(t)
+  let calls = 0
+  const unexpected = () => { calls++; throw new Error('Unexpected remote access') }
+  for (const invalid of [
+    { ...buildInfo, variant: 'original' },
+    { ...buildInfo, base: '/freelancet-medved/' },
+    { ...buildInfo, environment: 'invalid' },
+    { ...buildInfo, version: 2 },
+  ]) {
+    await f.put(f.source, 'site-variant.json', JSON.stringify(invalid))
+    await assert.rejects(deployTimeweb(f.config, unexpected), /requires a client build/)
+  }
+  await rm(path.join(f.source, 'site-variant.json'))
+  await assert.rejects(deployTimeweb(f.config, unexpected), { code: 'ENOENT' })
+  await f.put(f.source, 'site-variant.json', JSON.stringify(buildInfo))
+  await f.put(f.source, 'index.html', '<html data-site-variant="original">Original</html>')
+  await assert.rejects(deployTimeweb(f.config, unexpected), /requires client HTML/)
+  assert.equal(calls, 0)
 })

@@ -23,7 +23,7 @@ export async function renderProductBatch({ preset = 'card', products = Object.ke
   const renders = []
   try {
     if (!origin) {
-      server = spawn('npm',['run','dev','--','--host','127.0.0.1','--port',String(port),'--strictPort'],{cwd:fileURLToPath(new URL('..',import.meta.url)),env:{...process.env,SITE_BASE:'/'},stdio:'ignore'})
+      server = spawn('npm',['run','dev:original','--','--host','127.0.0.1','--port',String(port),'--strictPort'],{cwd:fileURLToPath(new URL('..',import.meta.url)),env:{...process.env,SITE_BASE:'/'},stdio:'ignore'})
       let ready = false
       for (let attempt = 0; attempt < 100; attempt++) {
         if (server.exitCode !== null) throw new Error('Сервер экспорта не запустился')

@@ -1,92 +1,38 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { productRenderFrame } from '../data/product-slider-renders.js'
-defineProps({ renders: { type: Object, required: true } })
-// Rendered pair width includes the transparent frame around the glass and can.
-const pairWidthScale = productRenderFrame.heightScale * productRenderFrame.width / productRenderFrame.height
-const imageSizes = `(min-width: 54rem) ${Math.ceil(576 * pairWidthScale)}px, (min-width: 40rem) ${Math.ceil(448 * pairWidthScale)}px, min(calc((100vw - 144px) * ${pairWidthScale}), ${Math.ceil(384 * pairWidthScale)}px)`
-const composition = ref(null)
-const shadowClip = ref({ visibility: 'hidden' })
-let resizeObserver
-onMounted(() => {
-  const element = composition.value
-  const section = element.closest('section')
-  const counter = section?.querySelector('[data-product-counter]')
-  if (!counter) return
-  const updateClip = () => {
-    const frame = element.getBoundingClientRect()
-    const surface = counter.getBoundingClientRect()
-    // Маска находится снаружи движущегося слоя: наклон не уводит тень за стойку.
-    shadowClip.value = {
-      clipPath: `inset(${surface.top - frame.top}px ${frame.right - surface.right}px ${frame.bottom - surface.bottom}px ${surface.left - frame.left}px)`,
-    }
+import { computed } from 'vue'
+import ProductCompositionFrame from './product-composition-frame.vue'
+import { productRenderFrame } from '#product-slider-renders'
+
+const props = defineProps({ renders: { type: Object, required: true } })
+const canStyle = computed(() => {
+  const frame = props.renders.canFrame
+  if (!frame) return { transformOrigin: productRenderFrame.origins.can }
+  const [originX, originY] = productRenderFrame.origins.can.split(' ').map(parseFloat)
+  return {
+    '--frame-center': `${(frame.left - productRenderFrame.center / 100 * productRenderFrame.width) / frame.width * 100}%`,
+    '--frame-height': `${productRenderFrame.heightScale * frame.height / productRenderFrame.height * 100}%`,
+    '--frame-top': `${productRenderFrame.topOffset + frame.top / productRenderFrame.height * productRenderFrame.heightScale * 100}%`,
+    transformOrigin: `${(originX / 100 * productRenderFrame.width - frame.left) / frame.width * 100}% ${(originY / 100 * productRenderFrame.height - frame.top) / frame.height * 100}%`,
   }
-  resizeObserver = new ResizeObserver(updateClip)
-  for (const target of [element, counter, section]) resizeObserver.observe(target)
-  updateClip()
 })
-onBeforeUnmount(() => resizeObserver?.disconnect())
-const layers = [
-  { source: 'pairShadow', shadow: true },
-  { source: 'pair', shadow: false },
-]
+const canImageSizes = computed(() => {
+  const frame = props.renders.canFrame
+  if (!frame) return undefined
+  const widthScale = productRenderFrame.heightScale * frame.width / productRenderFrame.height
+  return `(min-width: 54rem) ${Math.ceil(576 * widthScale)}px, (min-width: 40rem) ${Math.ceil(448 * widthScale)}px, min(calc((100vw - 144px) * ${widthScale}), ${Math.ceil(384 * widthScale)}px)`
+})
+
+const glassMotion = { '--layer-motion-duration': '700ms', '--layer-motion-delay': '100ms' }
+const layers = computed(() => [
+  { source: 'glassShadow', kind: 'glass', shadow: true, image: props.renders.glassShadow,
+    style: { transformOrigin: productRenderFrame.origins.glass }, motion: glassMotion },
+  { source: 'canShadow', kind: 'can', shadow: true, image: props.renders.canShadow,
+    style: { transformOrigin: productRenderFrame.origins.can } },
+  { source: 'glass', kind: 'glass', glass: props.renders.glass, motion: glassMotion },
+  { source: 'can', kind: 'can', image: props.renders.can, style: canStyle.value, sizes: canImageSizes.value },
+])
 </script>
 
 <template>
-  <span ref="composition" class="product-composition" :style="{ '--frame-center': `${-productRenderFrame.center}%`, '--frame-height': `${productRenderFrame.heightScale * 100}%`, '--frame-top': `${productRenderFrame.topOffset}%` }" aria-hidden="true">
-    <span v-for="layer in layers" :key="layer.source" class="product-layer-clip" :style="layer.shadow ? shadowClip : undefined">
-      <span class="product-motion-layer product-pair">
-      <img
-        class="product-layer"
-        :class="['product-pair', layer.shadow ? 'product-shadow' : 'product-model']"
-        :style="{ transformOrigin: productRenderFrame.origins.glass }"
-        :src="renders[layer.source].src"
-        :srcset="renders[layer.source].srcset"
-        :sizes="imageSizes"
-        loading="lazy"
-        alt=""
-        draggable="false"
-        decoding="async"
-      >
-      </span>
-    </span>
-  </span>
+  <ProductCompositionFrame :frame="productRenderFrame" :layers="layers" />
 </template>
-
-<style scoped>
-.product-composition {
-  display: block;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  transform: translateX(calc(-1 * var(--product-translation, 0px)));
-  transition: transform var(--product-track-duration) var(--product-track-easing);
-}
-.product-layer-clip {
-  position: absolute;
-  inset: 0;
-}
-/* Трек компенсируется тем же движением; пара и её тень едут вместе.
-   Перемещение снаружи вращения не меняет путь при наклоне изображения. */
-.product-motion-layer {
-  position: absolute;
-  inset: 0;
-  transform: translateX(var(--product-translation, 0px));
-  transition: transform 600ms var(--product-track-easing);
-}
-/* У всех изображений один кадр; дополнительные поля не меняют масштаб пары. */
-.product-layer {
-  position: absolute;
-  top: var(--frame-top);
-  left: 50%;
-  width: auto;
-  height: var(--frame-height);
-  translate: var(--frame-center) 0;
-  max-width: none;
-  transition: rotate 500ms;
-}
-@media (prefers-reduced-motion: reduce) {
-  .product-composition, .product-motion-layer, .product-layer { transition: none; }
-}
-</style>

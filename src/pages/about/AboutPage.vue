@@ -285,6 +285,7 @@ const awards = [
         <img :src="threeCategoryGlassesUrl" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full">
         <CategoryGlass v-for="glass in categoryGlasses" :key="glass.label" v-bind="glass" />
       </div>
+      <span class="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/75 via-transparent to-transparent" aria-hidden="true" />
       <div class="site-container pointer-events-none relative z-10 flex flex-1 flex-col items-center text-center">
         <h2 id="products-title" class="font-display text-h2 uppercase">Три категории</h2>
         <p id="products-description" class="mt-6 max-w-3xl text-body-large font-medium">Медовуха, сидр и пуаре — три характера напитков «МЁДВЕДЬ».</p>
@@ -332,7 +333,7 @@ const awards = [
         <ul
           id="awards-track"
           ref="awardsTrack"
-          class="mt-12 ml-[calc(50%-50vw)] flex w-screen snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto overscroll-x-contain px-4 py-2 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-brand sm:mt-16 sm:scroll-px-[max(24px,calc((100vw-1480px)/2+24px))] sm:gap-8 sm:px-[max(24px,calc((100vw-1480px)/2+24px))] [&::-webkit-scrollbar]:hidden"
+          class="mt-12 ml-[calc(50%-50vw)] flex w-screen snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto overscroll-x-contain px-4 py-3 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-brand sm:mt-16 sm:scroll-px-[max(24px,calc((100vw-1480px)/2+24px))] sm:gap-8 sm:px-[max(24px,calc((100vw-1480px)/2+24px))] [&::-webkit-scrollbar]:hidden"
           tabindex="0"
           aria-label="Дипломы и награды"
           data-lenis-prevent-touch

@@ -23,7 +23,8 @@ function coverImage(context, image, width, height) {
 export async function mountProductRender(options = {}) {
   const configuration = resolveProductRender(options)
   const { product, preset, settings } = configuration
-  const { objects, composition, background, quality, shadow } = settings
+  const { objects, composition, background, quality, shadow, glassPrint } = settings
+  const separateLayers = objects === 'pair' && settings.layers === 'separate'
   const pair = objects === 'pair', canOnly = objects === 'can', bottle = objects === 'bottle'
   const [{ createApp, h }, { default: ProductScene }, { createProductScene, productSceneKey }, { drinkPresets }] = await Promise.all([
     import('vue'), import('../../components/product-scene/ProductScene.vue'),
@@ -98,7 +99,8 @@ export async function mountProductRender(options = {}) {
   host.style.cssText = `position:absolute;inset:0;--composition-offset:${composition.offset}px;--product-model-height:${composition.modelHeight}px;--product-model-bottom:${composition.modelBottom}px;--product-can-offset:${composition.canOffset}px;--product-can-bottom:${composition.canBottom}px`
   section.append(host)
   document.body.append(section)
-  const owner = createProductScene({ loadGlassOptics: () => import('../glass-lab/glass-optics.js'), exportRender: true, modelSource,
+  const owner = createProductScene({ loadGlassOptics: () => import('../glass-lab/glass-optics.js'), exportRender: true, separateLayers, modelSource,
+    glassPrint: glassPrint.enabled ? glassPrint : null,
     shadowStyle: shadow.type, shadowSettings: shadow, glassOnly: objects === 'glass' || bottle, vessel: bottle ? 'bottle' : 'glass', bottleLabelSource, quality,
     cameraSettings: settings.camera, lightSettings: settings.light })
   const app = createApp({ render: () => h(ProductScene, { active: true, paused: true, canOnly,
@@ -163,7 +165,9 @@ export async function mountProductRender(options = {}) {
     window.exportSettings = () => JSON.stringify(metadata, null, 2)
     const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height
     const context = canvas.getContext('2d')
-    for (const key of [`${name}-shadow`, name]) context.drawImage(canvases[key], 0, 0)
+    // Назначение определяет слои, независимо от выбранного варианта сайта.
+    const order = separateLayers ? ['glass-shadow', 'can-shadow', 'glass', 'can'] : [`${name}-shadow`, name]
+    for (const key of order) context.drawImage(canvases[key], 0, 0)
     const png = canvas.toDataURL('image/png')
     window.exportPng = () => png
     const image = new Image(); image.src = png; image.alt = recipe.name

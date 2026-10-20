@@ -21,7 +21,7 @@
 <details><summary>Настройки и отдельные слои</summary>
 <button type="button" id="reset">Вернуть исходный вариант</button>
 <button type="button" id="json" disabled>Скачать настройки</button>
-<button type="button" id="layers" disabled>Скачать продукт и тень отдельно</button>
+<button type="button" id="layers" disabled>Скачать отдельные слои</button>
 <label>Открыть сохранённые настройки<input id="import" type="file" accept=".json,application/json"></label>
 <p class="hint">Сохранение меняет только выбранное назначение в этом браузере. Для пакетного рендера используйте скачанный файл настроек.</p>
 </details>
@@ -58,7 +58,8 @@ function read(){
  }
  const [objects,volume]=form.elements.composition.value.split('-')
  if(objects!==result.objects){
-   result.composition=structuredClone(productRenderProfiles[objects==='pair'?'slider':'card'].settings.composition)
+   const pairPreset=form.elements.preset.value==='slider-combined'?'slider-combined':'slider'
+   result.composition=structuredClone(productRenderProfiles[objects==='pair'?pairPreset:'card'].settings.composition)
    if(objects==='bottle') result.camera={...structuredClone(productRenderSettings.camera),position:[0,1.88,5],target:[0,1,0],halfHeight:2.35}
    else if(result.objects==='bottle') result.camera=structuredClone(productRenderSettings.camera)
  }

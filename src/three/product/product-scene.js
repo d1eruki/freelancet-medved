@@ -10,7 +10,8 @@ import { warmupWebGL } from './webgl-warmup.js'
 export const productSceneKey = Symbol('product-scene')
 
 // Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
-export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, glassPrint = null, vessel = 'glass', bottleLabelSource = '', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
+export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, separateLayers = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, glassPrint = null, vessel = 'glass', bottleLabelSource = '', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
+  // Оба назначения мастерской используют одну сцену: раздельные слои или общую пару.
   let currentView = null, closed = false, failed = false
   let bankOptics = null
   const sceneSettings = cameraSettings
@@ -108,7 +109,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       cleanup = () => { aborted = true; lightSource?.dispose(); environment.dispose(); renderer.dispose(); renderer.domElement.remove(); sharedScene = null }
       sharedScene.dispose = cleanup
       scene.environment = environment.texture
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
+      if (!separateLayers) scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 0.65))
       const loader = new GLTFLoader()
       const slots = (hasGlass ? [glassSlot, canSlot] : [canSlot]).map(slot => modelSource && slot.props.bank ? { ...slot, props: { ...slot.props, source: modelSource } } : slot)
       const models = await loadProductModels(loader, slots, glassOptics?.glassModelUrl, vessel, bottleLabelSource)
@@ -173,7 +174,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
         scene.add(glassShadowPlacement)
       }
       const profile = hasGlass ? glassOptics.createBankProfile(THREE, canItem.product, canItem.productBounds) : null
-      bankOptics = hasGlass && !glassOnly ? { product: canItem.product, placement: canPlacement, profile,
+      bankOptics = hasGlass && !glassOnly && !separateLayers ? { product: canItem.product, placement: canPlacement, profile,
         height: canItem.productBounds.max.y - canItem.productBounds.min.y,
         center: canItem.productBounds.getCenter(new THREE.Vector3()),
       } : null
@@ -451,7 +452,7 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
       if (hasGlass) {
         optics = await glassOptics.createGlassRenderer(THREE, renderer, scene, camera, glassSlot.host, sync,
           onFrameReady, {
-            canPlacement: glassOnly ? new THREE.Group() : canPlacement, bankDisplay, setView, placeBank, lightSource,
+            canPlacement: glassOnly || separateLayers ? new THREE.Group() : canPlacement, bankDisplay, setView, placeBank, lightSource,
             glassPrint,
             glassPrintPlacement: () => restOnCounter(placementMatrix(glassSlot, false, 0), glassItem.productBounds),
             prepareGlassPrint: mesh => prepareProductMaterials(THREE, mesh, environment.texture, lightSource, bankDisplay),
@@ -531,10 +532,12 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
           const previousDisplay = bankDisplay.value
           try {
             if (hasGlass) {
-              exportLayer = glassOnly ? 'glass' : 'pair'
+              exportLayer = glassOnly || separateLayers ? 'glass' : 'pair'
+              // Раздельный бокал запекает только фон и стойку, без соседней банки.
+              if (separateLayers) canPlacement.visible = false
               optics.invalidate()
               optics.render()
-              save(glassOnly ? 'glass' : 'pair')
+              save(glassOnly || separateLayers ? 'glass' : 'pair')
             }
             if (displayMesh) displayMesh.visible = false
             setView(false); placeBank(false)
@@ -542,11 +545,13 @@ export function createProductScene({ loadGlassOptics, staticMode = () => false, 
             renderer.setRenderTarget(null)
             lightSource.receiver.visible = false
             canPlacement.visible = true
-            if (glassShadowPlacement) glassShadowPlacement.visible = true
+            // Отдельная банка сохраняет объёмное освещение:
+            // тень соседнего бокала не должна двигаться вместе с её спрайтом.
+            if (glassShadowPlacement) glassShadowPlacement.visible = !separateLayers
             lightSource.invalidate()
             renderPass()
-            if (!hasGlass) save('can')
-            for (const kind of glassOnly ? ['glass'] : hasGlass ? ['pair'] : ['can']) {
+            if (!hasGlass || separateLayers) save('can')
+            for (const kind of glassOnly ? ['glass'] : hasGlass ? (separateLayers ? ['glass', 'can'] : ['pair']) : ['can']) {
               accessoryPlacement.visible = false
               canPlacement.visible = kind === 'can' || kind === 'pair'
               if (glassShadowPlacement) glassShadowPlacement.visible = kind === 'glass' || kind === 'pair'

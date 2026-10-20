@@ -226,7 +226,7 @@ onBeforeUnmount(() => {
   height: 38px;
   place-items: center;
   border-radius: 50%;
-  background: rgb(255 255 255 / 94%);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
   box-shadow: 0 8px 24px rgb(16 16 16 / 16%);
   transform: rotate(-12deg) scale(1);
   transition: width 180ms ease, height 180ms ease, top 180ms ease, left 180ms ease,

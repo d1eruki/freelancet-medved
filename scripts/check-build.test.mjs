@@ -8,8 +8,13 @@ import { preventHangingPrepositions } from '../src/directives/typography.js'
 import { contacts } from '../src/data/contacts.js'
 import { metrikaCounterId } from '../src/utils/metrika.js'
 import { runInNewContext } from 'node:vm'
+import { getSiteVariant } from '../src/data/site-variants.js'
+import { resolveProductRender } from '../src/data/product-render-settings.js'
 
 const output = path.resolve('dist')
+const buildInfo = JSON.parse(await readFile(path.join(output, 'site-variant.json'), 'utf8'))
+const variant = getSiteVariant(process.env.SITE_VARIANT || buildInfo.variant)
+assert.equal(buildInfo.variant, variant.name, 'Tests must use the built variant')
 const staging = process.env.SITE_ENV === 'staging'
 const origin = 'https://medved.beer'
 const sitemap = await readFile(path.join(output, 'sitemap.xml'), 'utf8')
@@ -402,7 +407,14 @@ test('published output excludes sourcemaps and their references', async () => {
 })
 
 async function builtAsset(source, extension) {
-  const asset = manifest[source]
+  let asset = manifest[source]
+  if (!asset) {
+    // Конвертированные PNG плагин публикует как именованные WebP без исходного пути.
+    const prefix = `_${path.basename(source, path.extname(source))}-`
+    const candidates = Object.entries(manifest).filter(([key, item]) => key.startsWith(prefix) && item.file.endsWith(extension))
+    assert.equal(candidates.length, 1, `expected one built asset for ${source}`)
+    asset = candidates[0][1]
+  }
   assert.ok(asset?.file.endsWith(extension), `missing built asset for ${source}`)
   return readFile(path.join(output, asset.file))
 }
@@ -420,22 +432,50 @@ async function assertTexturePreserved(original, optimized) {
   assert.ok(before.data.equals(after.data), 'texture pixels or transparency changed')
 }
 
-test('slider layers preserve visible pixels, alpha and a shared frame', async () => {
+test('selected variant is present in prerendered HTML and excludes the other slider', async () => {
+  assert.equal(buildInfo.version, 1)
+  for (const url of [...urls, `${origin}/404.html`]) {
+    const pathname = new URL(url).pathname
+    const file = pathname === '/404.html' ? '404.html' : `${pathname.slice(1)}index.html`
+    const html = await readFile(path.join(output, file), 'utf8')
+    assert.ok(html.includes(`data-site-variant="${variant.name}"`), file)
+  }
+  const compact = homeHtml.replace(/\s+/g, '')
+  assert.ok(compact.includes(variant.slogan.replace(/\s+/g, '')))
+  assert.match(homeHtml, /href="https:\/\/marionciders\.com\/"/)
+  const cssFiles = [...new Set(Object.values(manifest).flatMap(item => item.css || []))]
+  const css = (await Promise.all(cssFiles.map(file => readFile(path.join(output, file), 'utf8')))).join('\n')
+  const motionScope = css.match(/\.is-moving-forward\[data-v-([0-9a-f]+)\]/)?.[1]
+  const firstPanel = homeHtml.match(/<article\b[^>]*id="home-product-panel-medovuha"[^>]*>/)?.[0]
+  assert.ok(motionScope && firstPanel?.includes(`data-v-${motionScope}`), 'Prerendered slider must match its scoped animation rules')
+  assert.equal((homeHtml.match(/class="product-layer-clip"/g) || []).length, variant.name === 'client' ? 6 : 12)
+  const sources = Object.keys(manifest).join('\n')
+  if (variant.name === 'client') {
+    assert.doesNotMatch(sources, /product-renders\/[^/]+-can(?:-shadow)?\.webp/)
+    assert.ok(!manifest['src/components/ProductComposition.vue'])
+  } else {
+    assert.doesNotMatch(sources, /product-renders\/[^/]+-pair(?:-shadow)?\.webp/)
+    assert.ok(!manifest['src/components/product-composition-client.vue'])
+  }
+})
+
+test('active slider images retain dimensions and transparent shadows', async () => {
   for (const slug of ['medovuha', 'sidr', 'puare']) {
-    let frame
-    for (const layer of ['pair', 'pair-shadow']) {
+    const glassSource = `src/assets/home/product-renders/${slug}-glass-clean.png`
+    const glass = await sharp(await builtAsset(glassSource, '.webp')).metadata()
+    const originalGlass = await sharp(glassSource).metadata()
+    assert.deepEqual([glass.width, glass.height], [originalGlass.width, originalGlass.height])
+    assert.ok(glass.hasAlpha, glassSource)
+    const layers = variant.name === 'client' ? ['pair-shadow'] : ['can', 'glass-shadow', 'can-shadow']
+    for (const layer of layers) {
       const source = `src/assets/home/product-renders/${slug}-${layer}.webp`
       const original = await readFile(source)
       const built = await builtAsset(source, '.webp')
       await assertTexturePreserved(original, built)
-      const metadata = await sharp(built).metadata()
-      const size = [metadata.width, metadata.height]
-      if (frame) assert.deepEqual(size, frame)
-      frame = size
       const stats = await sharp(built).stats()
       assert.ok(stats.channels[3]?.max > 0 && !stats.isOpaque, source)
+      if (!layer.endsWith('shadow')) continue
       const { data, info } = await sharp(built).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
-      // Для всех моделей и теней сохраняется прозрачное поле по краям кадра.
       for (let x = 0; x < info.width; x++) {
         assert.equal(data[x * info.channels + 3], 0, source)
         assert.equal(data[((info.height - 1) * info.width + x) * info.channels + 3], 0, source)
@@ -455,4 +495,23 @@ test('published site excludes Three, models and the removed WebGL mode', async (
     const source = await readFile(path.join(output, chunk.file), 'utf8')
     assert.doesNotMatch(source, /WebGLRenderer|Картинки вместо 3D/)
   }
+})
+
+test('render workshop retains independent separate and combined purposes', () => {
+  const separate = resolveProductRender({ preset: 'slider' }).settings
+  const combined = resolveProductRender({ preset: 'slider-combined' }).settings
+  assert.equal(separate.layers, 'separate')
+  assert.equal(combined.layers, 'combined')
+  assert.equal(separate.glassPrint.enabled, true)
+  assert.equal(combined.glassPrint.enabled, false)
+  assert.equal(separate.light.intensity, 80)
+  assert.equal(combined.light.intensity, 48)
+  assert.deepEqual(separate.light.position, separate.shadow.position)
+  assert.deepEqual([separate.composition.modelBottom, separate.composition.canBottom], [80, 12])
+  assert.deepEqual([combined.composition.modelBottom, combined.composition.canBottom], [12, 80])
+  assert.deepEqual(separate.camera, combined.camera)
+  const custom = resolveProductRender({ preset: 'slider-combined', settings: { glassPrint: { enabled: true } } }).settings
+  assert.equal(custom.layers, 'combined')
+  assert.equal(custom.glassPrint.enabled, true)
+  assert.equal(resolveProductRender({ preset: 'slider-combined' }).settings.glassPrint.enabled, false)
 })

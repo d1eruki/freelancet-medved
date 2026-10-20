@@ -86,6 +86,7 @@ if (!$consent) {
 
 // Источник определяет серверное название и тип заявки, а не текст посетителя.
 $sources = array(
+    'footer-contact' => array('label' => 'Футер → «Связаться с нами»', 'type' => 'Общее обращение'),
     'home-contact' => array('label' => 'Главная → «Связаться с нами»', 'type' => 'Общее обращение'),
     'contacts-inquiry' => array('label' => 'Контакты → «Запрос на поставку»', 'type' => 'Запрос на поставку'),
     'horeca-hero-tasting' => array('label' => 'HoReCa → первый экран', 'type' => 'Дегустационный сет'),

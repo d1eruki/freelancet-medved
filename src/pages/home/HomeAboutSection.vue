@@ -4,6 +4,7 @@ import marionLogoUrl from '../../assets/home/marion-logo.png'
 import marionPromo from '../../assets/home/marion-promo.webp?responsive'
 import { catalogCategories } from '../../data/catalog'
 import SectionWatermark from '../../components/SectionWatermark.vue'
+import { siteVariant } from '../../data/site-variants.js'
 </script>
 
 <template>
@@ -36,7 +37,7 @@ import SectionWatermark from '../../components/SectionWatermark.vue'
 
           <figcaption class="absolute right-6 bottom-6 left-6 sm:right-8 sm:bottom-8 sm:left-8">
             <p class="font-display text-h3 uppercase">
-              Варим с душой
+              {{ siteVariant.slogan }}
             </p>
           </figcaption>
         </figure>
@@ -120,9 +121,14 @@ import SectionWatermark from '../../components/SectionWatermark.vue'
             loading="lazy"
           >
           <figcaption class="absolute right-6 bottom-6 left-6 sm:right-8 sm:bottom-8 sm:left-8">
-            <span class="inline-block rounded-full bg-brand px-6 py-3 text-label font-extrabold text-surface uppercase">
-              Скоро
-            </span>
+            <a
+              href="https://marionciders.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-block rounded-full bg-brand px-6 py-3 text-label font-extrabold text-surface uppercase"
+            >
+              Перейти на сайт
+            </a>
           </figcaption>
         </figure>
       </article>
