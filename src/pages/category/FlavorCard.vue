@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { mdiChartBubble, mdiCubeOffOutline, mdiCubeOutline, mdiFilterOffOutline, mdiLeaf, mdiPercent, mdiWaterOpacity, mdiWaterOutline } from '@mdi/js'
+import ProductAttribute from '../../components/product-attribute.vue'
 import popularCardBackground from '../../assets/ui/popular-card-background.webp'
 import regularCardBackground from '../../assets/ui/regular-card-background.png'
 
@@ -20,6 +22,24 @@ const sortedVariants = computed(() => {
   })
 })
 const activeVariant = computed(() => sortedVariants.value[activeVariantIndex.value])
+const attributeIcons = {
+  нефильтрованная: mdiFilterOffOutline,
+  нефильтрованный: mdiFilterOffOutline,
+  неосветлённая: mdiWaterOpacity,
+  неосветлённый: mdiWaterOpacity,
+  негазированный: mdiWaterOutline,
+  газированный: mdiChartBubble,
+  полусладкий: mdiCubeOutline,
+  полусухой: mdiCubeOutline,
+  сухой: mdiCubeOffOutline,
+  жемчужный: mdiChartBubble,
+  традиционный: mdiLeaf,
+}
+const attributes = computed(() => (activeVariant.value.details ?? props.item.details ?? '')
+  .split(',')
+  .map(detail => detail.trim())
+  .filter(Boolean)
+  .map(label => ({ label: label.charAt(0).toUpperCase() + label.slice(1), icon: attributeIcons[label] ?? mdiLeaf })))
 const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
 const card = ref(null)
 const background = ref(null)
@@ -120,7 +140,10 @@ function selectVariant(index) {
     <div class="mt-auto pt-8">
       <h3 class="wrap-break-word font-display text-h4 hyphens-auto uppercase">{{ displayName }}</h3>
       <p class="mt-6 text-body font-medium" :class="item.popular ? 'text-foreground/70' : 'text-subtle'">{{ item.description }}</p>
-      <p class="mt-10 text-label font-extrabold tracking-wide text-brand uppercase" aria-live="polite">{{ activeVariant.details ?? item.details }}</p>
+      <div :key="activeVariant.volume" class="relative mt-10 flex flex-wrap gap-3" role="group" :aria-label="`Характеристики: ${item.name}`">
+        <ProductAttribute v-for="attribute in attributes" :key="attribute.label" :label="attribute.label" :icon="attribute.icon" />
+        <ProductAttribute label="Крепость: 49%" :icon="mdiPercent" />
+      </div>
     </div>
   </li>
 </template>

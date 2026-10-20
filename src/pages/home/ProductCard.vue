@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import ProductComposition from '#product-composition'
 import CircleArrow from '../../components/CircleArrow.vue'
 import BaseButton from '../../components/BaseButton.vue'
+import { siteVariant } from '../../data/site-variants.js'
 
 const props = defineProps({
   product: {
@@ -29,10 +30,14 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  pawMotion: { type: Object, default: undefined },
 })
 const emit = defineEmits(['previous', 'next'])
 
 const dragAngleCss = computed(() => `${props.dragAngle}deg`)
+const compositionMotion = computed(() => siteVariant.name === 'client' ? {
+  pawMotion: props.pawMotion,
+} : {})
 </script>
 
 <template>
@@ -40,8 +45,8 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
     class="product-card relative isolate block bg-transparent"
     :class="{
       'is-text-hidden': textHidden,
-      'is-moving-forward': motionDirection === 'forward',
-      'is-moving-backward': motionDirection === 'backward',
+      'is-moving-forward': siteVariant.name !== 'client' && motionDirection === 'forward',
+      'is-moving-backward': siteVariant.name !== 'client' && motionDirection === 'backward',
       'is-dragging': dragging,
     }"
     :aria-label="product.name"
@@ -91,7 +96,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
           :tabindex="active ? 0 : -1"
           :aria-label="`Подробнее о напитке «${product.name}»`"
         >
-          <ProductComposition :renders="product.renders" />
+          <ProductComposition :renders="product.renders" v-bind="compositionMotion" />
         </a>
 
         <button
@@ -117,10 +122,10 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   opacity: 0;
 }
 
-.is-moving-forward :deep(.product-layer) {
+.is-moving-forward :deep(.product-layer:not(.product-grip)) {
   animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.is-moving-backward :deep(.product-layer) {
+.is-moving-backward :deep(.product-layer:not(.product-grip)) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .is-moving-forward :deep(.product-layer.product-glass), .is-moving-backward :deep(.product-layer.product-glass) {
@@ -128,7 +133,7 @@ const dragAngleCss = computed(() => `${props.dragAngle}deg`)
   animation-fill-mode: backwards;
 }
 .is-dragging :deep(.product-composition), .is-dragging :deep(.product-motion-layer), .is-dragging :deep(.product-layer) { transition: none; }
-.is-dragging :deep(.product-layer) { rotate: v-bind(dragAngleCss); }
+.is-dragging :deep(.product-layer:not(.product-grip)) { rotate: v-bind(dragAngleCss); }
 
 @keyframes product-inertia-forward {
   0% {

@@ -28,13 +28,14 @@ function layerStyle(layer) {
     '--frame-center': `${-slider.center}%`,
     '--frame-height': `${slider.heightScale * 100}%`,
     '--frame-top': `${slider.topOffset}%`,
-    left: `${slider.leftOffset}%`,
+    left: `${slider.leftOffset ?? 50}%`,
     transformOrigin: slider.origin,
   }
 }
 
 const composition = ref(null)
 const shadowClip = ref({ visibility: 'hidden' })
+const counterClip = ref({ visibility: 'hidden' })
 let resizeObserver
 onMounted(() => {
   const element = composition.value
@@ -48,6 +49,11 @@ onMounted(() => {
     shadowClip.value = {
       clipPath: `inset(${surface.top - frame.top}px ${frame.right - surface.right}px ${frame.bottom - surface.bottom}px ${surface.left - frame.left}px)`,
     }
+    // Предплечье остаётся за дальней кромкой стойки даже при движении кисти.
+    counterClip.value = {
+      '--counter-edge': `${surface.top - frame.top}px`,
+      maskImage: 'linear-gradient(to bottom, #000 calc(var(--counter-edge) - 1px), transparent var(--counter-edge))',
+    }
   }
   resizeObserver = new ResizeObserver(updateClip)
   for (const target of [element, counter, section]) resizeObserver.observe(target)
@@ -58,29 +64,31 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 <template>
   <span ref="composition" class="product-composition" :style="compositionStyle" aria-hidden="true">
-    <span v-for="layer in layers" :key="layer.source" class="product-layer-clip" :style="layer.shadow ? shadowClip : undefined">
+    <span v-for="layer in layers" :key="layer.source" class="product-layer-clip" :class="layer.classes" :style="layer.shadow ? shadowClip : layer.behindCounter ? counterClip : undefined">
       <span class="product-motion-layer" :class="`product-${layer.kind}`" :style="layer.motion">
-        <BrandedGlass
-          v-if="layer.glass"
-          class="product-layer product-model"
-          :class="`product-${layer.kind}`"
-          :style="layerStyle(layer)"
-          :glass="layer.glass"
-          :sizes="layerSizes(layer)"
-        />
-        <img
-          v-else
-          class="product-layer"
-          :class="[`product-${layer.kind}`, layer.shadow ? 'product-shadow' : 'product-model']"
-          :style="layerStyle(layer)"
-          :src="layer.image.src"
-          :srcset="layer.image.srcset"
-          :sizes="layerSizes(layer)"
-          loading="lazy"
-          alt=""
-          draggable="false"
-          decoding="async"
-        >
+        <span class="product-layer-content" :class="{ 'product-catch-layer': layer.catch }" :style="layer.contentStyle">
+          <BrandedGlass
+            v-if="layer.glass"
+            class="product-layer product-model"
+            :class="`product-${layer.kind}`"
+            :style="[layerStyle(layer), layer.poseStyle]"
+            :glass="layer.glass"
+            :sizes="layerSizes(layer)"
+          />
+          <img
+            v-else
+            class="product-layer"
+            :class="[`product-${layer.kind}`, layer.shadow ? 'product-shadow' : 'product-model', { 'product-grip': layer.catch }]"
+            :style="[layerStyle(layer), layer.poseStyle]"
+            :src="layer.image.src"
+            :srcset="layer.image.srcset"
+            :sizes="layerSizes(layer)"
+            loading="lazy"
+            alt=""
+            draggable="false"
+            decoding="async"
+          >
+        </span>
       </span>
     </span>
   </span>
@@ -97,6 +105,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   transition: transform var(--product-track-duration) var(--product-track-easing);
 }
 .product-layer-clip {
+  position: absolute;
+  inset: 0;
+}
+.product-layer-content {
   position: absolute;
   inset: 0;
 }

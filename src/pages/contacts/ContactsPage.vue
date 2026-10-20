@@ -1,14 +1,13 @@
 <script setup>
 import contactsHeroImageUrl from '../../assets/heroes/contacts/hero.png'
 import contactsHeroMiddleUrl from '../../assets/heroes/contacts/middle.png'
-import drinksStillLifeUrl from '../../assets/heroes/contacts/drinks-still-life.png'
 import contactsDividerUrl from '../../assets/heroes/contacts/divider.png'
 import BaseButton from '../../components/BaseButton.vue'
 import BrandedMap from '../../components/branded-map.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
-import SupplySection from '../../components/supply-section.vue'
+import ActionTile from '../../components/ActionTile.vue'
 import { contacts } from '../../data/contacts.js'
 import { sitePath } from '../../utils/site-path'
 
@@ -90,24 +89,22 @@ const contactsHeroLayout = {
       </div>
     </section>
 
-    <SupplySection
-      class="contacts-drinks"
-      heading-id="contacts-catalog-title"
-      title="Наши напитки"
-      description="Познакомьтесь с ассортиментом медовухи, сидра и пуаре."
-      :href="sitePath('/katalog/')"
-      label="В каталог"
-      :image-url="drinksStillLifeUrl"
-    />
+    <section class="bg-foreground py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="contacts-catalog-title">
+      <div class="site-container">
+        <div class="grid items-end gap-6 site-grid nav:gap-8">
+          <h2 id="contacts-catalog-title" class="font-display text-h2 uppercase nav:col-span-7">Наши напитки</h2>
+          <p class="max-w-md text-body-large font-medium text-surface/75 nav:col-span-5">Выберите формат поставки — покажем подходящий ассортимент.</p>
+        </div>
+        <div class="mt-12 grid gap-4 sm:mt-16 site-grid">
+          <ActionTile class="nav:col-span-6" :href="sitePath('/katalog/?packaging=kegs#assortment')" label="Оптовые поставки" title="Кеги 30 л" compact />
+          <ActionTile class="nav:col-span-6" :href="sitePath('/katalog/?packaging=packaged#assortment')" label="Бутылки и банки" title="Фасовка" tone="surface" compact />
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.contacts-drinks :deep(img) {
-  width: 75%;
-  margin-left: auto;
-}
-
 .contacts-hero :deep(.hero-overlay-bottom),
 .contacts-hero :deep(.hero-overlay-center) {
   transform: scaleX(-1);

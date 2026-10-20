@@ -279,3 +279,27 @@ export const catalogCategories = catalogCategoryDefinitions.map(({ products, ...
     .sort((a, b) => Number(Boolean(b.popular)) - Number(Boolean(a.popular))),
 }))
 
+export const catalogPackagingOptions = [
+  { value: 'all', label: 'Вся упаковка' },
+  { value: 'kegs', label: 'Кеги 30 л' },
+  { value: 'packaged', label: 'Фасовка' },
+  ...[...new Set(catalogCategories.flatMap((category) => category.items.flatMap((item) =>
+    item.variants.filter((variant) => variant.volume !== '30 л').map((variant) => variant.volume))))]
+    .sort((a, b) => Number.parseFloat(a.replace(',', '.')) - Number.parseFloat(b.replace(',', '.')))
+    .map((volume) => ({ value: volume.replace(',', '.').replace(' л', ''), label: volume, volume })),
+]
+
+export function filterCatalogItems(categorySlug = 'all', packaging = 'all') {
+  const option = catalogPackagingOptions.find((entry) => entry.value === packaging)
+  return catalogCategories
+    .filter((category) => categorySlug === 'all' || category.slug === categorySlug)
+    .flatMap((category) => category.items.map((item) => ({
+      ...item,
+      variants: item.variants.filter((variant) => {
+        if (packaging === 'kegs') return variant.volume === '30 л'
+        if (packaging === 'packaged') return variant.volume !== '30 л'
+        return option?.volume ? variant.volume === option.volume : true
+      }),
+    })))
+    .filter((item) => item.variants.length)
+}

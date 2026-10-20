@@ -50,7 +50,7 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
 
     <div class="site-container relative flex min-h-svh flex-col justify-center pt-28 pb-8 sm:pt-32 sm:pb-12">
       <div class="flex flex-col gap-6" :class="{ 'items-center text-center': contentAlign === 'center', 'my-auto sm:my-0': mobileActionsBottom && $slots.actions }">
-        <h1 :id="titleId" class="relative font-display text-h1 uppercase" :class="{ 'hero-copy-rise': layers || animateCopy }" :style="{ zIndex: titleZIndex }">
+        <h1 :id="titleId" class="relative z-4 font-display text-h1 uppercase sm:z-(--hero-title-z-index)" :class="{ 'hero-copy-rise': layers || animateCopy }" :style="{ '--hero-title-z-index': titleZIndex }">
           <slot name="title" />
         </h1>
 
@@ -83,10 +83,6 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
 }
 
 @media (width < 40rem) {
-  .hero-overlay-center {
-    display: none;
-  }
-
   .hero-description::before {
     content: '';
     position: absolute;

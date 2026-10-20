@@ -8,6 +8,8 @@ const props = defineProps({
 const emit = defineEmits(['previous', 'next'])
 
 const activeTab = ref('description')
+let tabDrag = null
+let suppressTabClick = false
 const tabs = computed(() => [
   { id: 'description', label: 'Описание', text: props.recipe.description },
   { id: 'ingredients', label: 'Ингредиенты', text: props.recipe.ingredients.join('; ') },
@@ -22,11 +24,54 @@ const mobileForegroundTransform = computed(() => {
   return `translate(${375 - width * scale / 2} ${640 - height * scale}) scale(${scale})`
 })
 
+function selectTab(id, button) {
+  activeTab.value = id
+  const list = button.parentElement
+  const buttonBounds = button.getBoundingClientRect()
+  const listBounds = list.getBoundingClientRect()
+  const offset = buttonBounds.left < listBounds.left
+    ? buttonBounds.left - listBounds.left
+    : Math.max(0, buttonBounds.right - listBounds.right)
+  list.scrollTo({ left: list.scrollLeft + offset, behavior: 'instant' })
+}
+
 function moveTab(event, step) {
   const index = tabs.value.findIndex(tab => tab.id === selectedTab.value.id)
   const nextIndex = (index + step + tabs.value.length) % tabs.value.length
-  activeTab.value = tabs.value[nextIndex].id
-  event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[nextIndex].focus()
+  const button = event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[nextIndex]
+  selectTab(tabs.value[nextIndex].id, button)
+  button.focus({ preventScroll: true })
+}
+
+function startTabDrag(event) {
+  if (event.pointerType !== 'mouse' || event.button !== 0) return
+  suppressTabClick = false
+  tabDrag = { id: event.pointerId, x: event.clientX, scrollLeft: event.currentTarget.scrollLeft }
+}
+
+function dragTabs(event) {
+  if (!tabDrag || tabDrag.id !== event.pointerId) return
+  const distance = event.clientX - tabDrag.x
+  if (!suppressTabClick && Math.abs(distance) < 5) return
+  suppressTabClick = true
+  event.currentTarget.setPointerCapture(event.pointerId)
+  event.currentTarget.scrollLeft = tabDrag.scrollLeft - distance
+  event.preventDefault()
+}
+
+function finishTabDrag(event) {
+  if (!tabDrag || tabDrag.id !== event.pointerId) return
+  tabDrag = null
+  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+    event.currentTarget.releasePointerCapture(event.pointerId)
+  }
+}
+
+function preventTabDragClick(event) {
+  if (!suppressTabClick) return
+  suppressTabClick = false
+  event.preventDefault()
+  event.stopPropagation()
 }
 </script>
 
@@ -36,20 +81,32 @@ function moveTab(event, step) {
       <h3 :id="`${recipe.id}-title`" class="font-display text-h3 break-words uppercase">{{ recipe.name }}</h3>
     </div>
 
-    <div class="flex min-h-0 flex-col nav:hidden">
-      <div class="flex shrink-0 flex-wrap gap-3" role="tablist" aria-label="Разделы рецепта">
+    <div class="flex min-h-0 min-w-0 flex-col nav:hidden">
+      <div
+        class="-mx-6 flex shrink-0 gap-3 overflow-x-auto overscroll-x-contain px-6 py-1 select-none"
+        role="tablist"
+        aria-label="Разделы рецепта"
+        @touchstart.stop
+        @touchend.stop
+        @pointerdown="startTabDrag"
+        @pointermove="dragTabs"
+        @pointerup="finishTabDrag"
+        @pointercancel="finishTabDrag"
+        @lostpointercapture="finishTabDrag"
+        @click.capture="preventTabDragClick"
+      >
         <button
           v-for="tab in tabs"
           :id="`${recipe.id}-tab-${tab.id}`"
           :key="tab.id"
-          class="min-h-11 rounded-full px-3 py-2 text-label font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          class="min-h-11 shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-label font-bold focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand"
           :class="selectedTab.id === tab.id ? 'bg-brand text-surface' : 'bg-brand/10 text-brand'"
           type="button"
           role="tab"
           :aria-selected="selectedTab.id === tab.id"
           :aria-controls="`${recipe.id}-mobile-panel`"
           :tabindex="selectedTab.id === tab.id ? 0 : -1"
-          @click="activeTab = tab.id"
+          @click="selectTab(tab.id, $event.currentTarget)"
           @keydown.right.stop.prevent="moveTab($event, 1)"
           @keydown.left.stop.prevent="moveTab($event, -1)"
         >{{ tab.label }}</button>

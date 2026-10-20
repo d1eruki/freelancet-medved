@@ -150,10 +150,10 @@ function finishTouch(event) {
         >
           <div class="cocktail-face">
             <div class="cocktail-page">
-              <picture class="cocktail-paper pointer-events-none absolute overflow-hidden" aria-hidden="true">
-                <source media="(min-width: 54rem)" :srcset="bookPages.srcset" sizes="100vw">
-                <img class="h-full w-[200%] max-w-none nav:w-full" :src="plainBookPages.src" :srcset="plainBookPages.srcset" sizes="200vw" alt="" decoding="async">
-              </picture>
+              <div class="cocktail-paper pointer-events-none absolute overflow-hidden" aria-hidden="true">
+                <img class="h-full w-[200%] max-w-none nav:hidden" :src="plainBookPages.src" :srcset="plainBookPages.srcset" sizes="200vw" alt="" decoding="async">
+                <img class="absolute bottom-0 left-0 h-auto w-[200%] max-w-none nav:inset-0 nav:h-full nav:w-full" :src="bookPages.src" :srcset="bookPages.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async">
+              </div>
               <svg
                 class="cocktail-scene pointer-events-none hidden nav:block"
                 viewBox="0 0 1672 941"

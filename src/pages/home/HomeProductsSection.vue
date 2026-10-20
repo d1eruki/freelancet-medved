@@ -6,6 +6,7 @@ import { productSliderRenders } from '#product-slider-renders'
 import { catalogCategories } from '../../data/catalog'
 import barCounterTexture from '../../assets/home/bar-counter-texture.png?responsive'
 import productSliderBackground from '../../assets/home/product-slider-background.png?responsive'
+import { siteVariant } from '../../data/site-variants.js'
 const products = catalogCategories.map((category) => ({
   slug: category.slug,
   name: category.name,
@@ -47,6 +48,9 @@ const isTextHidden = ref(false)
 const motionDirection = ref('')
 const dragOffset = ref(0)
 const isDragging = ref(false)
+const clientSlider = siteVariant.name === 'client'
+const restingPawSide = ref('right')
+const pawTransition = ref(null)
 const trackTransform = computed(() => `translate3d(calc(-${activeIndex.value * 100}% + ${dragOffset.value}px), 0, 0)`)
 let gesture = null
 let suppressClick = false
@@ -55,6 +59,127 @@ const textFadeDuration = 360
 const imageMotionDuration = 920
 let slideTimer
 let revealTimer
+let pawFrame
+
+const clampProgress = value => Math.max(0, Math.min(1, value))
+const smoothProgress = value => {
+  const t = clampProgress(value)
+  return t * t * (3 - 2 * t)
+}
+
+function productPawMotion(index) {
+  if (!clientSlider) return undefined
+  const width = panelWidth.value
+  const emptyHand = () => ({ x: 0, angle: 0, withdraw: 1, thumb: 0 })
+  const pose = {
+    anchor: -index * width,
+    glassX: -activeIndex.value * width + dragOffset.value,
+    angle: 0,
+    left: emptyHand(), right: emptyHand(),
+  }
+  const showHand = (side, values = {}) => { pose[side] = { ...emptyHand(), withdraw: 0, ...values } }
+  if (isDragging.value && index === activeIndex.value) {
+    const side = dragOffset.value < 0 ? 'right' : 'left'
+    const amount = Math.min(Math.abs(dragOffset.value) / 40, 1)
+    pose.angle = -Math.sign(dragOffset.value) * 4 * amount
+    showHand(side, { x: Math.max(-40, Math.min(40, dragOffset.value)), angle: pose.angle, withdraw: 1 - amount })
+    return pose
+  }
+  const transition = pawTransition.value
+  if (!transition) {
+    if (index === activeIndex.value) showHand(restingPawSide.value, { thumb: 1 })
+    return pose
+  }
+  const pushSide = transition.direction === 'forward' ? 'right' : 'left'
+  const catchSide = pushSide === 'right' ? 'left' : 'right'
+  const drive = pushSide === 'right' ? -1 : 1
+  const distance = Math.max(24, Math.min(48, width * 0.024))
+  const { elapsed, releaseAt, contactAt } = transition
+  if (elapsed < releaseAt) {
+    if (index === transition.from) {
+      const preparation = smoothProgress(elapsed / 200)
+      const push = clampProgress((elapsed - 200) / 240)
+      const x = drive * distance * push * push
+      pose.glassX = pose.anchor + x
+      pose.angle = -drive * 4 * push
+      showHand(pushSide, {
+        x, angle: pose.angle, thumb: 1 - preparation,
+        withdraw: transition.previousSide === pushSide ? 0 : 1 - smoothProgress((elapsed - 60) / 140),
+      })
+      if (transition.previousSide !== pushSide) {
+        showHand(transition.previousSide, { withdraw: preparation, thumb: 1 - preparation })
+      }
+    }
+    return pose
+  }
+  const flight = clampProgress((elapsed - releaseAt) / 600)
+  if (index === transition.from && transition.from !== transition.to) {
+    const startX = transition.dragRelease ? transition.fromOffset : drive * distance
+    const handStartX = transition.dragRelease ? Math.max(-40, Math.min(40, startX)) : startX
+    pose.glassX = pose.anchor + startX + drive * (width + distance) * flight * (0.2 + 0.8 * flight)
+    pose.angle = -drive * 4 * (1 - flight)
+    showHand(pushSide, {
+      x: handStartX + drive * 8 * smoothProgress((elapsed - releaseAt) / 280),
+      angle: -drive * 4,
+      withdraw: smoothProgress((elapsed - releaseAt - 220) / 360),
+    })
+  }
+  if (index === transition.to) {
+    const returning = transition.from === transition.to
+    const compression = clampProgress((elapsed - contactAt) / 160)
+    const settling = clampProgress((elapsed - contactAt - 160) / 420)
+    const spring = settling === 1 ? 0 : Math.exp(-5 * settling)
+      * (Math.cos(3 * Math.PI * settling) + 5 / (3 * Math.PI) * Math.sin(3 * Math.PI * settling))
+    const contact = elapsed >= contactAt
+    const impact = settling > 0 ? spring : compression * (2 - compression)
+    const x = contact ? drive * distance * impact : transition.toOffset * (1 - flight * (1.8 - 0.8 * flight))
+    pose.glassX = pose.anchor + x
+    pose.angle = contact ? drive * 6 * impact : -drive * 4 * (1 - flight)
+    showHand(catchSide, {
+      x: contact || returning ? x : 0,
+      angle: contact || returning ? pose.angle : 0,
+      withdraw: returning ? 0 : 1 - smoothProgress((flight - 0.55) / 0.32),
+      thumb: smoothProgress((elapsed - contactAt - 80) / 120),
+    })
+  }
+  return pose
+}
+
+function beginClientTransition(index, dragRelease = false) {
+  const from = activeIndex.value
+  const direction = index === from
+    ? (dragOffset.value < 0 ? 'backward' : 'forward')
+    : (index > from ? 'forward' : 'backward')
+  const drive = direction === 'forward' ? -1 : 1
+  const releaseAt = dragRelease ? 0 : 440
+  pawTransition.value = {
+    from, to: index, direction, previousSide: restingPawSide.value,
+    dragRelease, fromOffset: dragOffset.value,
+    toOffset: dragRelease ? (index - from) * panelWidth.value + dragOffset.value : -drive * panelWidth.value,
+    releaseAt, contactAt: releaseAt + 600, elapsed: 0,
+  }
+  dragOffset.value = 0
+  isDragging.value = false
+  isTransitioning.value = true
+  isTextHidden.value = true
+  let startedAt
+  const advance = now => {
+    startedAt ??= now
+    const transition = pawTransition.value
+    transition.elapsed = now - startedAt
+    if (transition.elapsed >= releaseAt) activeIndex.value = index
+    if (transition.elapsed >= transition.contactAt + 580) {
+      restingPawSide.value = direction === 'forward' ? 'left' : 'right'
+      pawTransition.value = null
+      isTextHidden.value = false
+      isTransitioning.value = false
+      pawFrame = undefined
+      return
+    }
+    pawFrame = window.requestAnimationFrame(advance)
+  }
+  pawFrame = window.requestAnimationFrame(advance)
+}
 
 watch(activeIndex, () => {
   if (tabList.value?.contains(document.activeElement)) {
@@ -78,6 +203,7 @@ function handleTabKeydown(event, index) {
 function clearTransitionTimers() {
   window.clearTimeout(slideTimer)
   window.clearTimeout(revealTimer)
+  if (pawFrame) window.cancelAnimationFrame(pawFrame)
 }
 
 function showProduct(index) {
@@ -87,6 +213,10 @@ function showProduct(index) {
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     activeIndex.value = index
+    return
+  }
+  if (clientSlider) {
+    beginClientTransition(index)
     return
   }
 
@@ -99,6 +229,10 @@ function showProduct(index) {
 }
 
 function settleProduct(index) {
+  if (clientSlider && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    beginClientTransition(index, true)
+    return
+  }
   const direction = index === activeIndex.value
     ? (dragOffset.value < 0 ? 'backward' : 'forward')
     : (index > activeIndex.value ? 'forward' : 'backward')
@@ -255,6 +389,7 @@ onBeforeUnmount(() => {
             :motion-direction="motionDirection"
             :dragging="isDragging"
             :drag-angle="dragOffset < 0 ? 3 : -3"
+            :paw-motion="productPawMotion(index)"
             :aria-hidden="index !== activeIndex"
             @previous="showPrevious"
             @next="showNext"
