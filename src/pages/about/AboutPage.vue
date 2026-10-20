@@ -285,6 +285,7 @@ const awards = [
         <img :src="threeCategoryGlassesUrl" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full">
         <CategoryGlass v-for="glass in categoryGlasses" :key="glass.label" v-bind="glass" />
       </div>
+      <span class="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/75 via-transparent to-transparent" aria-hidden="true" />
       <div class="site-container pointer-events-none relative z-10 flex flex-1 flex-col items-center text-center">
         <h2 id="products-title" class="font-display text-h2 uppercase">Три категории</h2>
         <p id="products-description" class="mt-6 max-w-3xl text-body-large font-medium">Медовуха, сидр и пуаре — три характера напитков «МЁДВЕДЬ».</p>
