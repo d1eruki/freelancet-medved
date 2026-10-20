@@ -91,17 +91,36 @@ onBeforeUnmount(() => {
     :class="isHeaderVisible ? 'translate-y-0' : '-translate-y-full'"
     :inert="!isHeaderVisible || undefined"
   >
+    <div class="pointer-events-none absolute inset-0 z-10 overflow-hidden wide:hidden" aria-hidden="true">
+      <picture class="contents">
+        <source
+          media="(width < 80rem)"
+          :srcset="headerRibbon.srcset"
+          sizes="200vw"
+        >
+        <img
+          class="header-ribbon absolute top-14 left-0 h-112 w-[200%] max-w-none -translate-y-1/2 sm:top-16"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2172' height='756'/%3E"
+          width="2172"
+          height="756"
+          alt=""
+        >
+      </picture>
+    </div>
+
     <div class="site-container pointer-events-auto relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
-      <a class="absolute left-1/2 z-10 inline-flex -translate-x-1/2 wide:static wide:col-start-4 wide:row-start-1 wide:justify-self-center wide:translate-x-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
-        <BrandLogo />
+      <a class="absolute left-1/2 z-20 inline-flex -translate-x-1/2 wide:static wide:col-start-4 wide:row-start-1 wide:justify-self-center wide:translate-x-0" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
+        <BrandLogo class="max-h-28 sm:max-h-35 wide:max-h-none" />
       </a>
 
       <nav
         id="main-navigation"
-        class="absolute inset-x-4 top-20 rounded-2xl bg-surface p-5 text-foreground shadow-xl transition-colors duration-300 ease-out wide:relative wide:inset-auto wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:w-full wide:max-w-6xl wide:grid-cols-7 wide:items-center wide:justify-self-center wide:bg-transparent wide:p-0 wide:shadow-none"
+        class="absolute inset-x-4 top-12 z-0 rounded-2xl rounded-tl-[4rem] bg-surface px-5 pt-12 pb-5 text-foreground shadow-xl transition-colors duration-300 ease-out sm:top-16 sm:pt-16 wide:relative wide:inset-auto wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:w-full wide:max-w-6xl wide:grid-cols-7 wide:items-center wide:justify-self-center wide:rounded-tl-2xl wide:bg-transparent wide:p-0 wide:shadow-none"
         :class="isMenuOpen ? 'block' : 'hidden'"
         aria-label="Основная навигация"
       >
+        <div class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" aria-hidden="true"></div>
+
         <picture class="contents">
           <source
             media="(min-width: 80rem)"
@@ -126,7 +145,7 @@ onBeforeUnmount(() => {
         >
           <li v-for="item in group" :key="item.href">
             <a
-              class="nav-link block py-3 font-display text-label font-normal tracking-wide uppercase wide:whitespace-nowrap"
+              class="nav-link block py-3 font-display text-xl font-normal tracking-wide uppercase wide:text-label wide:whitespace-nowrap"
               :class="{ 'nav-link--current': isCurrentPage(item.href) }"
               :href="item.href"
               :aria-current="isCurrentPage(item.href) ? 'page' : undefined"
@@ -138,7 +157,7 @@ onBeforeUnmount(() => {
         </ul>
       </nav>
 
-      <div class="ml-auto flex shrink-0 items-center gap-4 wide:hidden">
+      <div class="relative z-20 ml-auto flex shrink-0 items-center gap-4 text-foreground wide:hidden">
         <button
           class="menu-button grid size-12 place-items-center rounded-full"
           type="button"
@@ -156,6 +175,13 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.mobile-menu-surface {
+  background-image: url('../assets/ui/mobile-menu-paper.png?optimize');
+  background-position: center;
+  background-size: 24rem auto;
+  background-repeat: repeat;
+}
+
 .header-ribbon {
   filter: drop-shadow(0 8px 12px rgb(0 0 0 / 35%));
 }

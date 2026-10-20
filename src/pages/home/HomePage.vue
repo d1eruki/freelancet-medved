@@ -4,6 +4,8 @@ import HomeProductsSection from './HomeProductsSection.vue'
 import HomeAboutSection from './HomeAboutSection.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
 import homeDivider from '../../assets/heroes/home/divider.png?responsive'
+import restingPaw from '../../assets/heroes/home/resting-paw.png?responsive'
+import { siteVariant } from '../../data/site-variants.js'
 </script>
 
 <template>
@@ -35,11 +37,42 @@ import homeDivider from '../../assets/heroes/home/divider.png?responsive'
     image-sizes="(max-width: 639px) max(130vw, 412px), 100vw"
     fetchpriority="high"
   />
+  <div v-if="siteVariant.homeRestingPaw" class="home-resting-paw pointer-events-none relative z-10 h-0" aria-hidden="true">
+    <img
+      class="home-resting-paw-image absolute"
+      :src="restingPaw.src"
+      :srcset="restingPaw.srcset"
+      sizes="(min-width: 80rem) min(25.35vw, 35.646svh), (min-width: 40rem) min(40.56vw, 57.031svh), 50.7vw"
+      alt=""
+      decoding="async"
+    >
+  </div>
   <HomeProductsSection />
   <HomeAboutSection />
 </template>
 
 <style scoped>
+.home-resting-paw-image {
+  /* Только пальцы выглядывают из-за верхнего края козырька. */
+  top: -1px;
+  left: 74%;
+  width: 50.7vw;
+  transform: translate(-50%, -45%);
+}
+
+@media (min-width: 40rem) {
+  .home-resting-paw-image {
+    left: calc(50% + min(20vw, 28.12svh));
+    width: min(40.56vw, 57.031svh);
+  }
+}
+
+@media (min-width: 80rem) {
+  .home-resting-paw-image {
+    width: min(25.35vw, 35.646svh);
+  }
+}
+
 .home-products-divider :deep(.hero-divider-image) {
   top: -1px;
   right: auto;

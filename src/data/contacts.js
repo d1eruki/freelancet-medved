@@ -22,6 +22,11 @@ export const contacts = Object.freeze({
     hours: 'Пн–пт, 9:30–20:00',
     phone: '+7 (963) 312-89-39',
     phoneHref: 'tel:+79633128939',
+    additionalContact: Object.freeze({
+      name: 'Дмитрий',
+      phone: '+7 (999) 100-18-90',
+      phoneHref: 'tel:+79991001890',
+    }),
     email: 'opt@medved.beer',
     emailHref: `mailto:opt@medved.beer?subject=${encodeURIComponent('Запрос о сотрудничестве')}`,
     tone: 'brand',

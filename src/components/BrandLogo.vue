@@ -1,6 +1,12 @@
 <script setup>
-import logoUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=320'
-import smallLogoUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=160'
+import sealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=320'
+import smallSealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=160'
+import barrelUrl from '../assets/branding/brand-logo-barrel.png?width=320'
+import smallBarrelUrl from '../assets/branding/brand-logo-barrel.png?width=160'
+import { siteVariant } from '../data/site-variants.js'
+
+const logoUrl = siteVariant.headerLogo === 'barrel' ? barrelUrl : sealUrl
+const smallLogoUrl = siteVariant.headerLogo === 'barrel' ? smallBarrelUrl : smallSealUrl
 </script>
 
 <template>
