@@ -26,8 +26,15 @@ async function switchDrink(page, isMobile, direction, slug) {
 
 async function expectComposition(panel) {
   const layers = panel.locator('.product-composition img')
-  await expect(layers).toHaveCount(client ? 2 : 4)
+  if (client) await expect(layers).not.toHaveCount(0)
+  else await expect(layers).toHaveCount(4)
   await expect.poll(() => layers.evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
+}
+
+function modelIsMoving(model, isClient) {
+  // Клиентский бокал и кисть получают общий угол из расчёта инерции.
+  if (isClient) return Math.abs(Number.parseFloat(globalThis.getComputedStyle(model).rotate) || 0) > 0.1
+  return model.getAnimations().some(animation => animation.playState === 'running')
 }
 
 test('Статичные слои загружаются, а анимация не блокирует переключение и переход в каталог', async ({ page, openPage, isMobile }) => {
@@ -42,8 +49,7 @@ test('Статичные слои загружаются, а анимация н
   if (isMobile) await current.getByRole('button', { name: 'Следующий напиток' }).click()
   else { await page.getByRole('tab', { selected: true }).focus(); await page.keyboard.press('ArrowRight') }
   await expect(current).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
-  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(model =>
-    model.getAnimations().some(animation => animation.playState === 'running'))).toBe(true)
+  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(modelIsMoving, client)).toBe(true)
   const motion = await current.evaluate((panel, kinds) => Object.fromEntries(kinds.map(kind => {
     const model = panel.querySelector(`.product-model.product-${kind}`)
     const wrapper = model.closest('.product-motion-layer')
@@ -71,9 +77,34 @@ test('Статичные слои загружаются, а анимация н
     }
     await page.waitForTimeout(50)
   }
+  if (client) {
+    // При ловле бокал и видимая кисть должны отклоняться вместе.
+    await expect.poll(() => current.locator('.product-model.product-pair').evaluate(model =>
+      Number.parseFloat(globalThis.getComputedStyle(model).rotate) || 0)).toBeLessThan(-0.5)
+    for (let sample = 0; sample < 4; sample++) {
+      const contact = await current.evaluate(panel => {
+        const style = element => globalThis.getComputedStyle(element)
+        const matrix = element => new globalThis.DOMMatrix(style(element).transform)
+        const model = panel.querySelector('.product-model.product-pair')
+        const fingers = [...panel.querySelectorAll('.paw-fingers .product-grip')].find(image =>
+          Math.abs(matrix(image.closest('.product-layer-content')).m42) < 0.1)
+        if (!fingers) return null
+        return {
+          positionDifference: matrix(model.closest('.product-motion-layer')).m41
+            - matrix(fingers.closest('.paw-hand')).m41
+            - matrix(fingers.closest('.product-layer-content')).m41,
+          angleDifference: (Number.parseFloat(style(model).rotate) || 0)
+            - (Number.parseFloat(style(fingers).rotate) || 0),
+        }
+      })
+      expect(contact).not.toBeNull()
+      expect(Math.abs(contact.positionDifference)).toBeLessThan(0.1)
+      expect(Math.abs(contact.angleDifference)).toBeLessThan(0.1)
+      await page.waitForTimeout(50)
+    }
+  }
   await expect(current).not.toHaveClass(/is-text-hidden/)
-  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(model =>
-    model.getAnimations().some(animation => animation.playState === 'running'))).toBe(false)
+  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(modelIsMoving, client)).toBe(false)
   await expectComposition(await switchDrink(page, isMobile, 'next', 'puare'))
   const panel = await switchDrink(page, isMobile, 'previous', 'sidr')
   await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
