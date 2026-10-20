@@ -165,6 +165,7 @@ export async function mountProductRender(options = {}) {
     window.exportSettings = () => JSON.stringify(metadata, null, 2)
     const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height
     const context = canvas.getContext('2d')
+    // Назначение определяет слои, независимо от выбранного варианта сайта.
     const order = separateLayers ? ['glass-shadow', 'can-shadow', 'glass', 'can'] : [`${name}-shadow`, name]
     for (const key of order) context.drawImage(canvases[key], 0, 0)
     const png = canvas.toDataURL('image/png')

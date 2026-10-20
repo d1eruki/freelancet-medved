@@ -9,7 +9,7 @@
 }
 
 @theme {
-  --color-brand: #3d5a45;
+  --color-brand: var(--site-brand); /* Vite подставляет цвет из site-variants.js. */
   --color-foreground: #101010;
   --color-surface: #fff4df;
   --color-panel: #f0e2c9;

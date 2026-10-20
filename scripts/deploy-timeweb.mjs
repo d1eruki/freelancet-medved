@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { readdir, stat } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -57,6 +57,17 @@ export async function deployTimeweb({ host, user, destination, source = path.res
     if (!files.includes(required) || !(await stat(path.join(source, required))).size) {
       throw new Error(`Missing or empty build file: ${required}`)
     }
+  }
+
+  // Оба домена Timeweb получают только клиентскую сборку для корня домена.
+  const buildInfo = JSON.parse(await readFile(path.join(source, 'site-variant.json'), 'utf8'))
+  if (buildInfo.version !== 1 || buildInfo.variant !== 'client' || buildInfo.base !== '/'
+    || !['production', 'staging'].includes(buildInfo.environment)) {
+    throw new Error('Timeweb requires a client build with SITE_BASE=/')
+  }
+  const html = await readFile(path.join(source, 'index.html'), 'utf8')
+  if (!/<html\b[^>]*\bdata-site-variant="client"/.test(html)) {
+    throw new Error('Timeweb requires client HTML matching site-variant.json')
   }
 
   const manifestPath = path.posix.join(path.posix.dirname(destination), manifestName)

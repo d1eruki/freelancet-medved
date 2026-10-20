@@ -1,4 +1,9 @@
 import { test, expect } from './fixtures.mjs'
+import { readFile } from 'node:fs/promises'
+
+const buildInfo = JSON.parse(await readFile(new URL('../../dist/site-variant.json', import.meta.url), 'utf8'))
+const client = buildInfo.variant === 'client'
+const kinds = client ? ['pair'] : ['can', 'glass']
 
 test.use({ reducedMotion: 'no-preference' })
 
@@ -21,41 +26,53 @@ async function switchDrink(page, isMobile, direction, slug) {
 
 async function expectComposition(panel) {
   const layers = panel.locator('.product-composition img')
-  await expect(layers).toHaveCount(4)
+  await expect(layers).toHaveCount(client ? 2 : 4)
   await expect.poll(() => layers.evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
 }
 
 test('Статичные слои загружаются, а анимация не блокирует переключение и переход в каталог', async ({ page, openPage, isMobile }) => {
   await openPage()
   await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  await expect(page.locator('html')).toHaveAttribute('data-site-variant', buildInfo.variant)
+  await expect(page.getByRole('link', { name: 'Перейти на сайт', exact: true })).toHaveAttribute('href', 'https://marionciders.com/')
   await expectComposition(page.getByRole('tabpanel'))
-  // Каждый объект остаётся совмещённым со своей тенью во время наклона.
+  // Обрезанные модели и полноразмерные тени имеют разные прямоугольники,
+  // но их обёртки должны двигаться одинаково, а наклон — оставаться синхронным.
   const current = page.getByRole('tabpanel')
   if (isMobile) await current.getByRole('button', { name: 'Следующий напиток' }).click()
   else { await page.getByRole('tab', { selected: true }).focus(); await page.keyboard.press('ArrowRight') }
   await expect(current).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
-  await expect.poll(() => current.locator('.product-model.product-can').evaluate(model =>
+  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(model =>
     model.getAnimations().some(animation => animation.playState === 'running'))).toBe(true)
-  const motion = await current.evaluate(panel => Object.fromEntries(['can', 'glass'].map(kind => {
+  const motion = await current.evaluate((panel, kinds) => Object.fromEntries(kinds.map(kind => {
     const model = panel.querySelector(`.product-model.product-${kind}`)
     const wrapper = model.closest('.product-motion-layer')
-    return [kind, { delay: getComputedStyle(wrapper).transitionDelay, tiltDelay: getComputedStyle(model).animationDelay }]
-  })))
-  expect(motion.can).toEqual({ delay: '0s', tiltDelay: '0s' })
-  expect(motion.glass).toEqual({ delay: '0.1s', tiltDelay: '0.1s' })
+    return [kind, { delay: globalThis.getComputedStyle(wrapper).transitionDelay, tiltDelay: globalThis.getComputedStyle(model).animationDelay }]
+  })), kinds)
+  if (client) expect(motion.pair).toEqual({ delay: '0s', tiltDelay: '0s' })
+  else {
+    expect(motion.can).toEqual({ delay: '0s', tiltDelay: '0s' })
+    expect(motion.glass).toEqual({ delay: '0.1s', tiltDelay: '0.1s' })
+  }
   for (let sample = 0; sample < 6; sample++) {
-    const offset = await current.evaluate(panel => {
-      return Math.max(...['can', 'glass'].map(kind => {
-        const model = panel.querySelector(`.product-model.product-${kind}`).getBoundingClientRect()
-        const shadow = panel.querySelector(`.product-shadow.product-${kind}`).getBoundingClientRect()
-        return Math.max(Math.abs(model.left - shadow.left), Math.abs(model.top - shadow.top))
-      }))
-    })
-    expect(offset).toBeLessThan(1)
+    const layers = await current.evaluate((panel, kinds) => kinds.map(kind => {
+      const model = panel.querySelector(`.product-model.product-${kind}`)
+      const shadow = panel.querySelector(`.product-shadow.product-${kind}`)
+      return {
+        modelMotion: globalThis.getComputedStyle(model.closest('.product-motion-layer')).transform,
+        shadowMotion: globalThis.getComputedStyle(shadow.closest('.product-motion-layer')).transform,
+        modelTilt: Number.parseFloat(globalThis.getComputedStyle(model).rotate) || 0,
+        shadowTilt: Number.parseFloat(globalThis.getComputedStyle(shadow).rotate) || 0,
+      }
+    }), kinds)
+    for (const layer of layers) {
+      expect(layer.modelMotion).toBe(layer.shadowMotion)
+      expect(Math.abs(layer.modelTilt - layer.shadowTilt)).toBeLessThan(0.1)
+    }
     await page.waitForTimeout(50)
   }
   await expect(current).not.toHaveClass(/is-text-hidden/)
-  await expect.poll(() => current.locator('.product-model.product-can').evaluate(model =>
+  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(model =>
     model.getAnimations().some(animation => animation.playState === 'running'))).toBe(false)
   await expectComposition(await switchDrink(page, isMobile, 'next', 'puare'))
   const panel = await switchDrink(page, isMobile, 'previous', 'sidr')

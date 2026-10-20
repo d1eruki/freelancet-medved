@@ -49,7 +49,7 @@ const baseProfile = {
 }
 export const productRenderProfiles = Object.freeze({
   card: { label: 'Карточки товаров', settings: baseProfile },
-  slider: { label: 'Слайдер', settings: { ...baseProfile, objects: 'pair', layers: 'separate',
+  slider: { label: 'Слайдер: отдельные объекты', settings: { ...baseProfile, objects: 'pair', layers: 'separate',
     // Видимая высота бокала и основание передней банки в квадрате композиции.
     presentation: { glassHeight: 0.651, baseline: 0.89 },
     glassPrint: { ...baseProfile.glassPrint, enabled: true },
@@ -57,6 +57,10 @@ export const productRenderProfiles = Object.freeze({
     shadow: { ...baseProfile.shadow, ...castShadow, position: sliderLightSettings.position, target: sliderLightSettings.target },
     background: { ...baseProfile.background, type: 'slider', reflections: 'slider', counter: true },
     composition: { ...baseProfile.composition, modelBottom: 80, canOffset: 128, canBottom: 12 } } },
+  'slider-combined': { label: 'Слайдер: цельная композиция', settings: { ...baseProfile, objects: 'pair', layers: 'combined',
+    shadow: { ...baseProfile.shadow, ...castShadow },
+    background: { ...baseProfile.background, type: 'slider', reflections: 'slider', counter: true },
+    composition: { ...baseProfile.composition, modelBottom: 12, canOffset: 128, canBottom: 80 } } },
   hero: { label: 'Хиро категорий', settings: { ...baseProfile,
     quality: productRenderSettings.heroQuality,
     background: { ...baseProfile.background, type: 'hero', reflections: 'hero', counter: true },

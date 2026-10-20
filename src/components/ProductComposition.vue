@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BrandedGlass from './branded-glass.vue'
-import { productRenderFrame } from '../data/product-slider-renders.js'
+import { productRenderFrame } from '#product-slider-renders'
 const props = defineProps({ renders: { type: Object, required: true } })
 // Тени сохраняют исходный кадр; обрезанные изображения используют свою геометрию.
 const pairWidthScale = productRenderFrame.heightScale * productRenderFrame.width / productRenderFrame.height

@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import ProductComposition from '../../components/ProductComposition.vue'
+import ProductComposition from '#product-composition'
 import CircleArrow from '../../components/CircleArrow.vue'
 import BaseButton from '../../components/BaseButton.vue'
 

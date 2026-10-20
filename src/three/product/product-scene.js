@@ -11,6 +11,7 @@ export const productSceneKey = Symbol('product-scene')
 
 // Общая сцена лабы и служебных рендеров. На опубликованном сайте используется статика.
 export function createProductScene({ loadGlassOptics, staticMode = () => false, exportRender = false, separateLayers = false, modelSource = '', shadowStyle = 'cast', glassOnly = false, glassPrint = null, vessel = 'glass', bottleLabelSource = '', quality = productRenderSettings.quality, cameraSettings = productRenderSettings.camera, lightSettings, shadowSettings = productRenderSettings.shadows[shadowStyle] || productRenderSettings.shadows.cast } = {}) {
+  // Оба назначения мастерской используют одну сцену: раздельные слои или общую пару.
   let currentView = null, closed = false, failed = false
   let bankOptics = null
   const sceneSettings = cameraSettings
