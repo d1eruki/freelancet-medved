@@ -3,7 +3,7 @@ import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BrandLogo from './BrandLogo.vue'
 import { navigation } from '../data/navigation'
-import headerRibbon from '../../materials/image-generation/header-ribbon.png?responsive&optimize'
+import headerRibbon from '../assets/ui/header-ribbon.png?responsive&optimize'
 
 const props = defineProps({
   lenis: { type: Object, default: null },
