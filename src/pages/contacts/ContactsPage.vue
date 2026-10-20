@@ -5,7 +5,6 @@ import drinksStillLifeUrl from '../../assets/heroes/contacts/drinks-still-life.p
 import contactsDividerUrl from '../../assets/heroes/contacts/divider.png'
 import BaseButton from '../../components/BaseButton.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
-import ContactSection from '../../components/ContactSection.vue'
 import PageHero from '../../components/PageHero.vue'
 import HeroDivider from '../../components/HeroDivider.vue'
 import SupplySection from '../../components/supply-section.vue'
@@ -73,15 +72,6 @@ const contactsHeroLayout = {
         </div>
       </div>
     </section>
-
-    <ContactSection
-      source="contacts-inquiry"
-      title="Запрос на поставку"
-      description="Расскажите о вашем вопросе."
-      heading-id="contacts-inquiry-title"
-      id-prefix="inquiry"
-      tone="dark"
-    />
 
     <section class="bg-surface py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="contacts-address-title">
       <div class="site-container">

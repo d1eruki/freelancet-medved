@@ -164,6 +164,7 @@ try {
   await expectStatus(json + ' '.repeat(16384 - Buffer.byteLength(json)), 200)
 
   for (const { source, label, type, pageUrl, subject } of [
+    { source: 'footer-contact', label: 'Футер → «Связаться с нами»', type: 'Общее обращение', pageUrl: 'https://medved.beer/o-kompanii/', subject: 'Новая заявка с сайта medved.beer' },
     { source: 'home-contact', label: 'Главная → «Связаться с нами»', type: 'Общее обращение', pageUrl: 'https://medved.beer/', subject: 'Новая заявка с сайта medved.beer' },
     { source: 'contacts-inquiry', label: 'Контакты → «Запрос на поставку»', type: 'Запрос на поставку', pageUrl: 'https://medved.beer/kontakty/', subject: 'Новая заявка с сайта medved.beer' },
     { source: 'horeca-hero-tasting', label: 'HoReCa → первый экран', type: 'Дегустационный сет', pageUrl: 'https://medved.beer/horeca/', subject: 'Заявка на дегустационный сет — medved.beer' },
