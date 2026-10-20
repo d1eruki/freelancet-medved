@@ -31,7 +31,9 @@ export default defineConfig(() => {
       transformIndexHtml(html) {
         return html.replace('<html ', `<html data-site-variant="${variant.name}" `)
       },
-    }, optimizeImagesPlugin(), optimizeModelsPlugin(), vue(), tailwindcss()],
+    }, optimizeImagesPlugin(), optimizeModelsPlugin(), vue({
+      features: { componentIdGenerator: 'filepath' },
+    }), tailwindcss()],
     build: { sourcemap: false },
   }
 })

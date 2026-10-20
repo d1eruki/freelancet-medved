@@ -27,7 +27,7 @@ npm run dev:original
 npm run dev:client
 ```
 
-Обе команды используют один код рабочей ветки `staging`. По умолчанию `npm run dev` и `npm run build` выбирают `original`; переменная `SITE_VARIANT` принимает только `original` или `client`. Для сборки доступны `npm run build:original` и `npm run build:client`. Цвет и слоган заданы в `src/data/site-variants.js`; aliases Vite подключают только выбранные компонент и данные слайдера. Настройка одинакова для готового HTML и браузера, переключателя для посетителей нет.
+Обе команды используют один код рабочей ветки `staging`. Вариант запуска выбирается явно: `dev:original` или `dev:client`. Команда `npm run build` по умолчанию выбирает `original`; переменная `SITE_VARIANT` принимает только `original` или `client`. Для сборки доступны `npm run build:original` и `npm run build:client`. Цвет и слоган заданы в `src/data/site-variants.js`; aliases Vite подключают только выбранные компонент и данные слайдера. Настройка одинакова для готового HTML и браузера, переключателя для посетителей нет.
 
 Если Node 24 установлен через Homebrew, выберите его для текущей сессии терминала перед командами проекта:
 

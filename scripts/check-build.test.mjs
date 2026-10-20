@@ -407,7 +407,14 @@ test('published output excludes sourcemaps and their references', async () => {
 })
 
 async function builtAsset(source, extension) {
-  const asset = manifest[source]
+  let asset = manifest[source]
+  if (!asset) {
+    // Конвертированные PNG плагин публикует как именованные WebP без исходного пути.
+    const prefix = `_${path.basename(source, path.extname(source))}-`
+    const candidates = Object.entries(manifest).filter(([key, item]) => key.startsWith(prefix) && item.file.endsWith(extension))
+    assert.equal(candidates.length, 1, `expected one built asset for ${source}`)
+    asset = candidates[0][1]
+  }
   assert.ok(asset?.file.endsWith(extension), `missing built asset for ${source}`)
   return readFile(path.join(output, asset.file))
 }
@@ -436,6 +443,11 @@ test('selected variant is present in prerendered HTML and excludes the other sli
   const compact = homeHtml.replace(/\s+/g, '')
   assert.ok(compact.includes(variant.slogan.replace(/\s+/g, '')))
   assert.match(homeHtml, /href="https:\/\/marionciders\.com\/"/)
+  const cssFiles = [...new Set(Object.values(manifest).flatMap(item => item.css || []))]
+  const css = (await Promise.all(cssFiles.map(file => readFile(path.join(output, file), 'utf8')))).join('\n')
+  const motionScope = css.match(/\.is-moving-forward\[data-v-([0-9a-f]+)\]/)?.[1]
+  const firstPanel = homeHtml.match(/<article\b[^>]*id="home-product-panel-medovuha"[^>]*>/)?.[0]
+  assert.ok(motionScope && firstPanel?.includes(`data-v-${motionScope}`), 'Prerendered slider must match its scoped animation rules')
   assert.equal((homeHtml.match(/class="product-layer-clip"/g) || []).length, variant.name === 'client' ? 6 : 12)
   const sources = Object.keys(manifest).join('\n')
   if (variant.name === 'client') {

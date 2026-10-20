@@ -26,8 +26,8 @@ const heroLayerLayout = {
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.65, x: 0, y: -100 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.65, x: -100, y: -50 },
+    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: -175 },
+    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: -100, y: -125 },
   },
 }
 
