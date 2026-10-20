@@ -333,7 +333,7 @@ const awards = [
         <ul
           id="awards-track"
           ref="awardsTrack"
-          class="mt-12 ml-[calc(50%-50vw)] flex w-screen snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto overscroll-x-contain px-4 py-2 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-brand sm:mt-16 sm:scroll-px-[max(24px,calc((100vw-1480px)/2+24px))] sm:gap-8 sm:px-[max(24px,calc((100vw-1480px)/2+24px))] [&::-webkit-scrollbar]:hidden"
+          class="mt-12 ml-[calc(50%-50vw)] flex w-screen snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto overscroll-x-contain px-4 py-3 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-brand sm:mt-16 sm:scroll-px-[max(24px,calc((100vw-1480px)/2+24px))] sm:gap-8 sm:px-[max(24px,calc((100vw-1480px)/2+24px))] [&::-webkit-scrollbar]:hidden"
           tabindex="0"
           aria-label="Дипломы и награды"
           data-lenis-prevent-touch
