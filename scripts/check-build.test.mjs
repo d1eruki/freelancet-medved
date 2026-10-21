@@ -361,6 +361,24 @@ test('Apache route rules cover every published page', async () => {
   assert.ok(!routePattern.test('missing-page/'))
 })
 
+test('HTML revalidates its cache without changing asset or API caching', async () => {
+  const config = await readFile(path.join(output, '.htaccess'), 'utf8')
+  const blocks = [...config.matchAll(/<FilesMatch "([^"]+)">([\s\S]*?)<\/FilesMatch>/g)]
+    .filter((match) => /Header\s+always\s+set\s+Cache-Control\s+"no-cache"/.test(match[2]))
+  assert.equal(blocks.length, 1, 'expected one scoped HTML cache rule')
+  const [block, pattern] = blocks[0]
+  assert.doesNotMatch(config.replace(block, ''), /^\s*Header\s+.*Cache-Control/gm, 'cache rule must stay scoped')
+  const matchesFile = new RegExp(pattern)
+  const files = await readdir(output, { recursive: true })
+  const htmlFiles = files.filter(file => file.endsWith('.html'))
+  assert.ok(htmlFiles.includes('index.html'))
+  assert.ok(htmlFiles.includes('404.html'))
+  for (const file of htmlFiles) assert.ok(matchesFile.test(path.basename(file)), file)
+  for (const file of files.filter(file => !file.endsWith('.html'))) {
+    assert.ok(!matchesFile.test(path.basename(file)), `HTML cache rule must not affect ${file}`)
+  }
+})
+
 test('deployment environment preserves redirects and indexing policy', async () => {
   const config = await readFile(path.join(output, '.htaccess'), 'utf8')
   const robots = await readFile(path.join(output, 'robots.txt'), 'utf8')
@@ -409,6 +427,29 @@ test('image and script URLs resolve, raster output is WebP and srcset widths mat
         }
       }
     }
+  }
+})
+
+test('responsive images include small candidates and Gabin uses one preloaded WOFF2', async () => {
+  const files = await readdir(path.join(output, 'assets'))
+  assert.ok(files.some(file => /-320w-[^.]+\.webp$/.test(file)), 'missing 320 px images')
+  assert.ok(files.some(file => /-480w-[^.]+\.webp$/.test(file)), 'missing 480 px images')
+  assert.ok(!files.some(file => /\.ttf$/i.test(file)), 'TTF must not be published')
+  const fontFiles = files.filter(file => /^gabin-.*\.woff2$/.test(file))
+  assert.equal(fontFiles.length, 1)
+  const font = await readFile(path.join(output, 'assets', fontFiles[0]))
+  assert.equal(font.toString('ascii', 0, 4), 'wOF2')
+  assert.ok(font.length < (await stat('src/assets/fonts/gabin.ttf')).size)
+  const css = (await Promise.all(files.filter(file => file.endsWith('.css')).map(file =>
+    readFile(path.join(output, 'assets', file), 'utf8')))).join('\n')
+  assert.ok(css.includes(fontFiles[0]), 'CSS and preload must use the same font')
+  for (const url of [...urls, `${origin}/404.html`]) {
+    const route = new URL(url).pathname.slice(1)
+    const html = await readFile(path.join(output, route, route.endsWith('.html') ? '' : 'index.html'), 'utf8')
+    const preloads = [...html.matchAll(/<link\b[^>]*rel="preload"[^>]*as="font"[^>]*>/g)]
+    assert.equal(preloads.length, 1, url)
+    assert.ok(preloads[0][0].includes(fontFiles[0]), url)
+    assert.match(preloads[0][0], /type="font\/woff2"/)
   }
 })
 

@@ -3,20 +3,38 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 export function usePointerParallax({ range, enabled = () => true }) {
   const offset = ref({ x: 0, y: 0 })
   let media
+  let frame = 0
+  let pointer
+
+  function cancelUpdate() {
+    if (frame) window.cancelAnimationFrame(frame)
+    frame = 0
+    pointer = undefined
+  }
 
   function reset() {
+    cancelUpdate()
     offset.value = { x: 0, y: 0 }
   }
 
-  function update(event) {
-    if (!enabled() || !media?.matches || event.pointerType === 'touch') return
-    const bounds = event.currentTarget.getBoundingClientRect()
+  function render() {
+    frame = 0
+    const latest = pointer
+    pointer = undefined
+    if (!latest || !enabled() || !media?.matches || document.hidden || !latest.target.isConnected) return
+    const bounds = latest.target.getBoundingClientRect()
     if (!bounds.width || !bounds.height) return
     const normalize = (position, size) => Math.max(-1, Math.min(1, position / size * 2 - 1))
     offset.value = {
-      x: normalize(event.clientX - bounds.left, bounds.width) * range.x,
-      y: normalize(event.clientY - bounds.top, bounds.height) * range.y,
+      x: normalize(latest.x - bounds.left, bounds.width) * range.x,
+      y: normalize(latest.y - bounds.top, bounds.height) * range.y,
     }
+  }
+
+  function update(event) {
+    if (!enabled() || !media?.matches || event.pointerType === 'touch' || document.hidden) return
+    pointer = { target: event.currentTarget, x: event.clientX, y: event.clientY }
+    if (!frame) frame = window.requestAnimationFrame(render)
   }
 
   onMounted(() => {
@@ -27,6 +45,7 @@ export function usePointerParallax({ range, enabled = () => true }) {
   })
 
   onBeforeUnmount(() => {
+    cancelUpdate()
     media?.removeEventListener('change', reset)
     window.removeEventListener('blur', reset)
   })

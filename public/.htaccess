@@ -1,6 +1,11 @@
 RewriteEngine On
 ErrorDocument 404 /404.html
 
+# Сохранённые HTML-страницы проверяются на обновления перед использованием.
+<FilesMatch "\.html$">
+  Header always set Cache-Control "no-cache"
+</FilesMatch>
+
 # Use one canonical host.
 RewriteCond %{HTTP_HOST} ^www\.medved\.beer$ [NC]
 RewriteRule ^ https://medved.beer%{REQUEST_URI} [R=301,L,NE]
