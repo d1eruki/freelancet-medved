@@ -1,7 +1,7 @@
 <script setup>
 import productionImage from '../../assets/production-real.png?responsive'
 import marionLogoUrl from '../../assets/home/marion-logo.png'
-import marionPromo from '../../assets/home/marion-promo.webp?responsive'
+import marionWoman from '../../assets/home/marion-woman.png?responsive'
 import { catalogCategories } from '../../data/catalog'
 import SectionWatermark from '../../components/SectionWatermark.vue'
 import { siteVariant } from '../../data/site-variants.js'
@@ -87,10 +87,10 @@ import { siteVariant } from '../../data/site-variants.js'
       </div>
 
       <article
-        class="mt-10 grid gap-10 rounded-3xl bg-surface p-6 text-foreground sm:p-8 nav:grid-cols-2 nav:items-center wide:p-10"
+        class="marion-promo relative isolate mt-10 grid gap-10 overflow-hidden rounded-3xl text-surface nav:grid-cols-2"
         aria-labelledby="marion-title"
       >
-        <div>
+        <div class="relative z-10 p-6 pb-0 sm:p-8 sm:pb-0 nav:pb-8 wide:p-10">
           <h3 id="marion-title">
             <img
               class="h-auto w-full max-w-sm"
@@ -101,42 +101,56 @@ import { siteVariant } from '../../data/site-variants.js'
               loading="lazy"
             >
           </h3>
-          <p class="mt-6 font-display text-h4 text-brand uppercase">
+          <p class="mt-6 font-display text-h4 text-surface uppercase">
             Когда мёда становится мало — мы идём в дикие яблочные сады
           </p>
-          <p class="mt-6 text-body text-subtle">
-            <strong class="font-extrabold text-foreground">MARION CIDERS</strong> — наш сайд-проект, в котором мы исследуем чистую эстетику натурального сидроделия. 100% натуральные ингредиенты, устойчивая технология, баланс между классическими сидровыми традициями и смелыми крафтовыми релизами: от сухих охмелённых сортов до сочных ягодных профилей.
+          <p class="mt-6 text-body text-surface">
+            <strong class="font-extrabold">MARION CIDERS</strong> — наш сайд-проект, в котором мы исследуем чистую эстетику натурального сидроделия. 100% натуральные ингредиенты, устойчивая технология, баланс между классическими сидровыми традициями и смелыми крафтовыми релизами: от сухих охмелённых сортов до сочных ягодных профилей.
           </p>
         </div>
 
-        <figure class="relative isolate overflow-hidden rounded-2xl">
+        <figure class="relative z-10 flex items-end pt-8 nav:pt-10">
           <img
-            class="block h-auto w-full"
-            :src="marionPromo.src"
-            :srcset="marionPromo.srcset"
-            sizes="(min-width: 54rem) calc((min(100vw, 1480px) - 152px) / 2), (min-width: 40rem) calc(100vw - 112px), calc(100vw - 80px)"
-            alt="Девушка с бокалом сидра MARION на красном фоне"
-            width="1530"
-            height="1000"
+            class="block h-auto w-full origin-bottom translate-x-10 scale-125 nav:-translate-x-28"
+            :src="marionWoman.src"
+            :srcset="marionWoman.srcset"
+            sizes="(min-width: 54rem) calc((min(100vw, 1480px) - 72px) / 2), calc(100vw - 32px)"
+            alt="Девушка с бокалом сидра MARION"
+            width="1536"
+            height="1024"
             loading="lazy"
           >
-          <figcaption class="absolute right-6 bottom-6 left-6 sm:right-8 sm:bottom-8 sm:left-8">
-            <a
-              href="https://marionciders.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-block rounded-full bg-brand px-6 py-3 text-label font-extrabold text-surface uppercase"
-            >
-              Перейти на сайт
-            </a>
-          </figcaption>
         </figure>
+        <a
+          href="https://marionciders.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="absolute right-6 bottom-6 left-6 z-20 inline-block rounded-full bg-white px-6 py-3 text-center text-label font-extrabold text-foreground uppercase sm:right-8 sm:bottom-8 sm:left-8 nav:left-auto wide:right-10 wide:bottom-10"
+        >
+          Перейти на сайт
+        </a>
       </article>
     </div>
   </section>
 </template>
 
 <style scoped>
+.marion-promo {
+  background:
+    radial-gradient(ellipse at 65% 15%, #b52e32 0%, transparent 65%),
+    linear-gradient(115deg, #83191d 0%, #a71f26 55%, #330e1a 100%);
+}
+
+.marion-promo::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  opacity: 0.55;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+}
+
 @media (min-width: 54rem) {
   .about-feature {
     grid-column: 1 / span 7;

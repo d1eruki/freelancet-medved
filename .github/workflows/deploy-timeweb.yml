@@ -19,7 +19,7 @@ jobs:
   deploy:
     needs: checks
     if: ${{ vars.TIMEWEB_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/testing') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       SITE_ENV: ${{ github.ref == 'refs/heads/testing' && 'staging' || 'production' }}
       SITE_VARIANT: client

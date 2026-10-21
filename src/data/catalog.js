@@ -291,7 +291,7 @@ export const catalogPackagingOptions = [
 
 export function filterCatalogItems(categorySlug = 'all', packaging = 'all') {
   const option = catalogPackagingOptions.find((entry) => entry.value === packaging)
-  return catalogCategories
+  const items = catalogCategories
     .filter((category) => categorySlug === 'all' || category.slug === categorySlug)
     .flatMap((category) => category.items.map((item) => ({
       ...item,
@@ -302,4 +302,8 @@ export function filterCatalogItems(categorySlug = 'all', packaging = 'all') {
       }),
     })))
     .filter((item) => item.variants.length)
+
+  return categorySlug === 'all'
+    ? items.sort((a, b) => Number(Boolean(b.popular)) - Number(Boolean(a.popular)))
+    : items
 }

@@ -187,7 +187,7 @@ test('structured data describes the organization and only the products on each c
   const catalog = runInNewContext(catalogSource
     .replace(/^import \{ catalogCategoryDefinitions \}.*$/m, '')
     .replace(/^import (\w+) from '([^']+)'$/gm, (_, name, image) => `const ${name} = ${JSON.stringify(image)}`)
-    .replace(/export const /g, 'const ') + '; catalogCategories', { catalogCategoryDefinitions: categories })
+    .replace(/^export (?=(?:const|function)\b)/gm, '') + '; catalogCategories', { catalogCategoryDefinitions: categories })
   const categoryPaths = urls.filter((url) => /^\/katalog\/[^/]+\/$/.test(new URL(url).pathname))
   for (const url of urls) {
     const html = await readFile(path.join(output, new URL(url).pathname.slice(1), 'index.html'), 'utf8')
@@ -312,7 +312,7 @@ test('temporarily hidden page is absent from output and blocked before existing 
 
 test('published pages match the documented structure', async () => {
   const structure = await readFile('docs/site-structure.md', 'utf8')
-  const documentedPaths = [...structure.matchAll(/`(\/(?:[^`]+\/)?)`/g)].map((match) => match[1])
+  const documentedPaths = new Set([...structure.matchAll(/`(\/(?:[^`]+\/)?)`/g)].map((match) => match[1]))
   const publishedPaths = urls.map((url) => new URL(url).pathname)
   assert.deepEqual([...documentedPaths].sort(), [...publishedPaths].sort())
 })

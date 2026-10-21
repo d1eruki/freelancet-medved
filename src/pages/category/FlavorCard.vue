@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { mdiChartBubble, mdiCubeOffOutline, mdiCubeOutline, mdiFilterOffOutline, mdiLeaf, mdiPercent, mdiWaterOpacity, mdiWaterOutline } from '@mdi/js'
+import { IconBlur, IconCandy, IconCandyOff, IconCircles, IconDroplet, IconDropletHalf2, IconFilterOff, IconLeaf, IconPercentage, IconSparkles } from '@tabler/icons-vue'
 import ProductAttribute from '../../components/product-attribute.vue'
 import popularCardBackground from '../../assets/ui/popular-card-background.webp'
 import regularCardBackground from '../../assets/ui/regular-card-background.png'
@@ -23,23 +23,23 @@ const sortedVariants = computed(() => {
 })
 const activeVariant = computed(() => sortedVariants.value[activeVariantIndex.value])
 const attributeIcons = {
-  нефильтрованная: mdiFilterOffOutline,
-  нефильтрованный: mdiFilterOffOutline,
-  неосветлённая: mdiWaterOpacity,
-  неосветлённый: mdiWaterOpacity,
-  негазированный: mdiWaterOutline,
-  газированный: mdiChartBubble,
-  полусладкий: mdiCubeOutline,
-  полусухой: mdiCubeOutline,
-  сухой: mdiCubeOffOutline,
-  жемчужный: mdiChartBubble,
-  традиционный: mdiLeaf,
+  нефильтрованная: IconFilterOff,
+  нефильтрованный: IconFilterOff,
+  неосветлённая: IconBlur,
+  неосветлённый: IconBlur,
+  негазированный: IconDroplet,
+  газированный: IconCircles,
+  полусладкий: IconCandy,
+  полусухой: IconDropletHalf2,
+  сухой: IconCandyOff,
+  жемчужный: IconSparkles,
+  традиционный: IconLeaf,
 }
 const attributes = computed(() => (activeVariant.value.details ?? props.item.details ?? '')
   .split(',')
   .map(detail => detail.trim())
   .filter(Boolean)
-  .map(label => ({ label: label.charAt(0).toUpperCase() + label.slice(1), icon: attributeIcons[label] ?? mdiLeaf })))
+  .map(label => ({ label: label.charAt(0).toUpperCase() + label.slice(1), icon: attributeIcons[label] ?? IconLeaf })))
 const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
 const card = ref(null)
 const background = ref(null)
@@ -142,7 +142,7 @@ function selectVariant(index) {
       <p class="mt-6 text-body font-medium" :class="item.popular ? 'text-foreground/70' : 'text-subtle'">{{ item.description }}</p>
       <div :key="activeVariant.volume" class="relative mt-10 flex flex-wrap gap-3" role="group" :aria-label="`Характеристики: ${item.name}`">
         <ProductAttribute v-for="attribute in attributes" :key="attribute.label" :label="attribute.label" :icon="attribute.icon" />
-        <ProductAttribute label="Крепость: 49%" :icon="mdiPercent" />
+        <ProductAttribute label="Крепость: 4,9%" :icon="IconPercentage" />
       </div>
     </div>
   </li>
