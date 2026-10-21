@@ -1,7 +1,9 @@
+<!-- Первый экран главной страницы с анимированной многослойной иллюстрацией. -->
 <script setup>
 import BaseButton from '../../components/BaseButton.vue'
 import { sitePath } from '../../utils/site-path'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useImageLoading } from '../../composables/use-image-loading.js'
 import LayeredHeroComposition from '../../components/LayeredHeroComposition.vue'
 import { layerEntranceTimings } from '../../utils/hero-entrance'
 import heroLayerForeground from '../../assets/heroes/home/foreground-layer.png?responsive'
@@ -32,6 +34,10 @@ const heroLayerLayout = {
 }
 
 const isBlinking = ref(false)
+const hero = ref(null)
+const { shouldLoad: canLoadBlink } = useImageLoading(hero, {
+  media: '(prefers-reduced-motion: no-preference)',
+})
 const heroLayers = computed(() => ({
   background: {
     ...heroLayerBackground,
@@ -57,6 +63,7 @@ let blinkLoadTimer
 let blinkTimer
 let blinkMedia
 let blinkReady = false
+let blinkLoading = false
 let isUnmounted = false
 
 function stopBlinking() {
@@ -75,7 +82,8 @@ function scheduleBlink() {
 }
 
 function loadBlinkFrame() {
-  if (isUnmounted) return
+  if (isUnmounted || blinkReady || blinkLoading || !canLoadBlink.value) return
+  blinkLoading = true
   const preloadBlink = (srcset, src) => {
     const image = new Image()
     image.sizes = heroFigureSizes
@@ -90,7 +98,7 @@ function loadBlinkFrame() {
       scheduleBlink()
     }).catch(() => {
       // Keep the original image if the blink frame cannot be loaded.
-    })
+    }).finally(() => { blinkLoading = false })
 }
 
 function deferBlinkLoad() {
@@ -109,6 +117,10 @@ onMounted(() => {
   else window.addEventListener('load', deferBlinkLoad, { once: true })
 })
 
+watch(canLoadBlink, allowed => {
+  if (allowed && document.readyState === 'complete') deferBlinkLoad()
+})
+
 onBeforeUnmount(() => {
   isUnmounted = true
   window.removeEventListener('load', deferBlinkLoad)
@@ -122,6 +134,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section
+    ref="hero"
     class="relative isolate h-svh overflow-hidden bg-brand text-surface"
     aria-labelledby="hero-title"
   >

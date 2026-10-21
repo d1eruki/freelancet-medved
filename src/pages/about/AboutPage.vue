@@ -1,4 +1,6 @@
+<!-- Страница компании с историей, напитками и наградами. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import aboutHeroForeground from '../../assets/heroes/about/foreground.png?responsive'
 import aboutHeroMiddle from '../../assets/heroes/about/middle.png?responsive'
@@ -218,13 +220,12 @@ const awards = [
               <p class="font-display text-h1 text-surface">1874</p>
               <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
             </div>
-            <img
+            <SiteImage width="1024" height="1536"
               class="order-last mx-auto -mb-10 block h-auto w-full max-w-64 -scale-x-100 nav:absolute nav:order-none nav:mt-75 nav:mb-0 nav:ml-35 nav:max-w-sm nav:-scale-x-250 nav:scale-250"
               :src="durdinPortraitUrl"
               alt="Стилизованный портрет Ивана Алексеевича Дурдина с подмигиванием"
-              loading="lazy"
               decoding="async"
-            >
+            />
           </div>
 
           <div class="nav:col-span-7">
@@ -253,11 +254,11 @@ const awards = [
     <section class="section-decorated bg-panel py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="today-title">
       <div class="site-container grid gap-4 site-grid">
         <figure class="relative min-h-120 overflow-hidden rounded-3xl nav:col-span-5 nav:min-h-160">
-          <img
+          <SiteImage width="1024" height="1536"
             class="absolute inset-0 size-full object-cover"
             :src="aboutCompanyImageUrl"
             alt="Напитки «МЁДВЕДЬ» в фирменных бокалах"
-          >
+          />
           <span class="absolute inset-0 bg-linear-to-t from-foreground/75 via-transparent to-transparent" aria-hidden="true" />
           <figcaption class="absolute right-6 bottom-6 left-6 text-label font-extrabold tracking-widest text-surface uppercase sm:right-8 sm:bottom-8 sm:left-8">
             Петербургский характер
@@ -282,7 +283,7 @@ const awards = [
 
     <section ref="categoriesSection" class="relative isolate flex min-h-svh flex-col overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="products-title" aria-describedby="products-description">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" :style="categoriesStageStyle">
-        <img :src="threeCategoryGlassesUrl" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full">
+        <SiteImage width="1536" height="1024" :src="threeCategoryGlassesUrl" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full"/>
         <CategoryGlass v-for="glass in categoryGlasses" :key="glass.label" v-bind="glass" />
       </div>
       <span class="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/75 via-transparent to-transparent" aria-hidden="true" />

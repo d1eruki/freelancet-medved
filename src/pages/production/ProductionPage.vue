@@ -1,4 +1,6 @@
+<!-- Страница производства с ингредиентами и этапами изготовления напитков. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { ref, watch } from 'vue'
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-vue'
 import Snap from 'lenis/snap'
@@ -267,13 +269,12 @@ const qualityPoints = [
     </section>
 
     <section class="relative flex min-h-svh items-center overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="production-ingredients-title">
-      <img
+      <SiteImage width="1903" height="826"
         :src="ingredientsBackgroundUrl"
         alt=""
         aria-hidden="true"
-        loading="lazy"
         class="pointer-events-none absolute inset-0 size-full object-cover object-center"
-      >
+      />
       <div class="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent from-15% via-black/60 via-45% to-black/60" aria-hidden="true" />
 
       <div class="site-container relative z-10 grid site-grid">
@@ -344,7 +345,7 @@ const qualityPoints = [
               id="production-step-images"
               class="relative mt-10 aspect-[4/3] overflow-hidden touch-pan-y nav:mt-0 nav:aspect-auto nav:h-full nav:overflow-visible nav:touch-auto"
             >
-              <img
+              <SiteImage
                 v-for="(step, index) in processSteps"
                 :key="step.number"
                 class="absolute left-0 top-1/2 h-full w-full -translate-y-1/2 translate-x-[calc(var(--step-offset)*110%)] object-contain transition-[translate,opacity] duration-700 ease-in-out motion-reduce:transition-none nav:top-[calc(50%_+_var(--step-offset)*77%)] nav:h-[70%] nav:translate-x-0 nav:object-cover nav:transition-[top,opacity]"
@@ -352,8 +353,7 @@ const qualityPoints = [
                 :style="{ '--step-offset': index - activeStepIndex }"
                 :src="step.image"
                 :alt="index === activeStepIndex ? `Иллюстрация этапа «${step.title}»` : ''"
-                :loading="index === 0 ? 'eager' : 'lazy'"
-              >
+              />
             </div>
 
             <div class="mt-10 grid w-full grid-cols-[3rem_1fr_3rem] items-center gap-4 nav:hidden" role="group" aria-label="Переключение этапов производства">

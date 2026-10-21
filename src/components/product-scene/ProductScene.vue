@@ -1,4 +1,6 @@
+<!-- Интерактивная 3D-сцена продукции с загрузкой моделей и запасным изображением. -->
 <script setup>
+import SiteImage from '../site-image.vue'
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createProductScene, productSceneKey } from '../../three/product/product-scene.js'
 import { drinkPresets } from '../../data/drink-presets.js'
@@ -83,7 +85,7 @@ onBeforeUnmount(() => {
 
 <template>
   <span ref="root" class="product-scene" :class="{ 'is-loading': !ready, 'has-error': error, 'is-can-only': canOnly }">
-    <img v-if="error && fallback" class="product-scene-fallback" :src="fallback" alt="" draggable="false" decoding="async">
+    <SiteImage v-if="error && fallback" class="product-scene-fallback" :src="fallback" alt="" draggable="false" decoding="async"/>
     <span v-if="active && !ready && !error" class="product-scene-loader" role="status" aria-label="Загрузка моделей">
       <span class="product-scene-spinner" aria-hidden="true" />
     </span>

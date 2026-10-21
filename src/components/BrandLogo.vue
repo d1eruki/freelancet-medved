@@ -1,4 +1,6 @@
+<!-- Логотип бренда для выбранной версии сайта. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import sealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=320'
 import smallSealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=160'
 import barrelUrl from '../assets/branding/brand-logo-barrel.png?width=320'
@@ -10,7 +12,8 @@ const smallLogoUrl = siteVariant.headerLogo === 'barrel' ? smallBarrelUrl : smal
 </script>
 
 <template>
-  <img
+  <SiteImage
+    critical
     class="block aspect-1224/1285 h-33 w-auto shrink-0 object-cover sm:h-40"
     :src="logoUrl"
     :srcset="`${smallLogoUrl} 160w, ${logoUrl} 320w`"
@@ -19,6 +22,5 @@ const smallLogoUrl = siteVariant.headerLogo === 'barrel' ? smallBarrelUrl : smal
     height="1285"
     alt=""
     aria-hidden="true"
-    loading="eager"
-  >
+  />
 </template>

@@ -1,3 +1,4 @@
+<!-- Иконка характеристики напитка со всплывающей подписью. -->
 <script setup>
 import { nextTick, ref, useId } from 'vue'
 

@@ -1,3 +1,4 @@
+<!-- Секция с заголовком, описанием и кнопкой перехода. -->
 <script setup>
 import BaseButton from './BaseButton.vue'
 

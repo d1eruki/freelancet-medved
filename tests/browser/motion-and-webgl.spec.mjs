@@ -28,7 +28,10 @@ async function expectComposition(panel) {
   const layers = panel.locator('.product-composition img')
   if (client) await expect(layers).not.toHaveCount(0)
   else await expect(layers).toHaveCount(4)
-  await expect.poll(() => layers.evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
+  await expect.poll(() => layers.evaluateAll(images => {
+    const visible = images.filter(image => image.checkVisibility())
+    return visible.length > 0 && visible.every(image => image.complete && image.naturalWidth > 0)
+  })).toBe(true)
 }
 
 function modelIsMoving(model, isClient) {
@@ -46,9 +49,11 @@ test('Статичные слои загружаются, а анимация н
   // Обрезанные модели и полноразмерные тени имеют разные прямоугольники,
   // но их обёртки должны двигаться одинаково, а наклон — оставаться синхронным.
   const current = page.getByRole('tabpanel')
+  const visibleHands = client && await current.locator('.paw-hand').evaluateAll(hands =>
+    hands.some(hand => hand.checkVisibility()))
   // Записываем кадры до действия: короткая фаза ловли не должна зависеть
   // от скорости команд Playwright и интервалов expect.poll.
-  const catchSamples = client ? await page.evaluateHandle(() => {
+  const catchSamples = visibleHands ? await page.evaluateHandle(() => {
     const recording = { samples: [], frame: 0 }
     const sample = () => {
       const panel = globalThis.document.querySelector('[role="tabpanel"][aria-hidden="false"]')

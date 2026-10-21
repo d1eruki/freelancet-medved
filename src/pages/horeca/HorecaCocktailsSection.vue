@@ -1,4 +1,6 @@
+<!-- Книга рецептов коктейлей с анимированным перелистыванием. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import bookCover from '../../assets/horeca/cocktails/cocktails-book-cover.png?responsive'
 import bookPages from '../../assets/horeca/cocktails/cocktails-book-pages-ink.png?responsive'
@@ -123,7 +125,7 @@ function finishTouch(event) {
     @touchcancel="touchStart = null"
   >
     <picture class="cocktail-binding pointer-events-none absolute overflow-hidden" aria-hidden="true">
-      <img class="h-full w-[200%] max-w-none nav:w-full" :src="bookCover.src" :srcset="bookCover.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async">
+      <SiteImage width="1671" height="941" class="h-full w-[200%] max-w-none nav:w-full" :src="bookCover.src" :srcset="bookCover.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async"/>
     </picture>
 
       <div
@@ -151,8 +153,8 @@ function finishTouch(event) {
           <div class="cocktail-face">
             <div class="cocktail-page">
               <div class="cocktail-paper pointer-events-none absolute overflow-hidden" aria-hidden="true">
-                <img class="h-full w-[200%] max-w-none nav:hidden" :src="plainBookPages.src" :srcset="plainBookPages.srcset" sizes="200vw" alt="" decoding="async">
-                <img class="absolute bottom-0 left-0 h-auto w-[200%] max-w-none nav:inset-0 nav:h-full nav:w-full" :src="bookPages.src" :srcset="bookPages.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async">
+                <SiteImage width="1672" height="941" media="(width < 54rem)" class="h-full w-[200%] max-w-none nav:hidden" :src="plainBookPages.src" :srcset="plainBookPages.srcset" sizes="200vw" alt="" decoding="async"/>
+                <SiteImage width="1672" height="941" class="absolute bottom-0 left-0 h-auto w-[200%] max-w-none nav:inset-0 nav:h-full nav:w-full" :src="bookPages.src" :srcset="bookPages.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async"/>
               </div>
               <svg
                 class="cocktail-scene pointer-events-none hidden nav:block"
@@ -162,8 +164,8 @@ function finishTouch(event) {
                 :aria-label="frame.recipe.imageAlt"
               >
                 <g :transform="foregroundTransform(frame.recipe)">
-                  <image
-                    :href="frame.recipe.image.src"
+                  <SiteImage as="image" media="(width >= 54rem)"
+                    :src="frame.recipe.image.src"
                     :x="-frame.recipe.imageFrame.bounds[0]"
                     :y="-frame.recipe.imageFrame.bounds[1]"
                     :width="frame.recipe.imageFrame.width"

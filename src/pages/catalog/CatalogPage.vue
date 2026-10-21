@@ -1,3 +1,4 @@
+<!-- Страница каталога с категориями напитков и ассортиментом. -->
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import catalogHeroForeground from '../../assets/heroes/catalog/foreground.png?responsive'

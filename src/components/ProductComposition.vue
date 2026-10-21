@@ -1,3 +1,4 @@
+<!-- Композиция изображений продукции в оригинальной версии слайдера. -->
 <script setup>
 import { computed } from 'vue'
 import ProductCompositionFrame from './product-composition-frame.vue'

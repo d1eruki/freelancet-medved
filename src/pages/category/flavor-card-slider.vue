@@ -1,3 +1,4 @@
+<!-- Слайдер карточек напитков с навигацией и перелистыванием. -->
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import FlavorCard from './FlavorCard.vue'

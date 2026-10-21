@@ -1,3 +1,4 @@
+<!-- Форма обратной связи с проверкой полей и отправкой заявки. -->
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import BaseButton from './BaseButton.vue'

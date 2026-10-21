@@ -1,3 +1,4 @@
+<!-- Проверка совершеннолетия перед доступом к сайту. -->
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import BaseButton from './BaseButton.vue'

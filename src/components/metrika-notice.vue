@@ -1,3 +1,4 @@
+<!-- Закрываемое уведомление об использовании Яндекс Метрики и cookies. -->
 <script setup>
 import { onMounted, ref } from 'vue'
 import BaseButton from './BaseButton.vue'

@@ -1,4 +1,6 @@
+<!-- Интерактивная область бокала со ссылкой на категорию напитков. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { computed, useId } from 'vue'
 
 const props = defineProps({
@@ -40,7 +42,7 @@ const viewBox = computed(() => {
           <path :d="contour" />
         </clipPath>
       </defs>
-      <image :href="image" width="1536" height="1024" :clip-path="`url(#${clipId})`" />
+      <SiteImage as="image" :src="image" width="1536" height="1024" :clip-path="`url(#${clipId})`" />
     </svg>
   </a>
 </template>

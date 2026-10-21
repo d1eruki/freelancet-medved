@@ -1,3 +1,4 @@
+<!-- Декоративная фоновая надпись секции. -->
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { vFitty } from '../directives/fitty'

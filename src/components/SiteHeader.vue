@@ -1,4 +1,6 @@
+<!-- Шапка сайта с логотипом, навигацией и мобильным меню. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BrandLogo from './BrandLogo.vue'
@@ -12,6 +14,7 @@ const props = defineProps({
 })
 
 const isMenuOpen = ref(false)
+const hasMenuOpened = ref(false)
 const isHeaderVisible = ref(true)
 const navigationGroups = [navigation.slice(0, 2), navigation.slice(2)]
 
@@ -57,6 +60,7 @@ watch(() => props.lenis, (lenis, _previous, onCleanup) => {
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
+  hasMenuOpened.value = true
   isHeaderVisible.value = true
 }
 
@@ -93,20 +97,12 @@ onBeforeUnmount(() => {
     :inert="!isHeaderVisible || undefined"
   >
     <div class="pointer-events-none absolute inset-0 z-10 overflow-hidden wide:hidden" aria-hidden="true">
-      <picture class="contents">
-        <source
-          media="(width < 80rem)"
-          :srcset="headerRibbon.srcset"
-          sizes="200vw"
-        >
-        <img
-          class="header-ribbon absolute top-14 left-0 h-112 w-[200%] max-w-none -translate-y-1/2 sm:top-16"
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2172' height='756'/%3E"
-          width="2172"
-          height="756"
-          alt=""
-        >
-      </picture>
+      <SiteImage
+        picture critical media="(width < 80rem)"
+        :src="headerRibbon.src" :srcset="headerRibbon.srcset" sizes="200vw"
+        class="header-ribbon absolute top-14 left-0 h-112 w-[200%] max-w-none -translate-y-1/2 sm:top-16"
+        width="2172" height="756" fetchpriority="high" alt=""
+      />
     </div>
 
     <div class="site-container pointer-events-auto relative flex h-16 items-center sm:h-20 wide:grid wide:grid-cols-7 wide:grid-rows-[minmax(0,1fr)]">
@@ -120,23 +116,15 @@ onBeforeUnmount(() => {
         :class="{ 'mobile-navigation--open': isMenuOpen }"
         aria-label="Основная навигация"
       >
-        <div class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" :style="{ backgroundImage: `url(${mobileMenuPaper})` }" aria-hidden="true"></div>
+        <SiteImage as="div" class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" :src="mobileMenuPaper" :enabled="hasMenuOpened" media="(width < 80rem)" aria-hidden="true" />
 
-        <picture class="contents">
-          <source
-            media="(min-width: 80rem)"
-            :srcset="headerRibbon.srcset"
-            sizes="min(calc(120vw - 58px), 1383px)"
-          >
-          <img
-            class="header-ribbon pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2172' height='756'/%3E"
-            width="2172"
-            height="756"
-            alt=""
-            aria-hidden="true"
-          >
-        </picture>
+        <SiteImage
+          picture critical media="(width >= 80rem)"
+          :src="headerRibbon.src" :srcset="headerRibbon.srcset"
+          sizes="min(calc(120vw - 58px), 1383px)"
+          class="header-ribbon pointer-events-none absolute top-1/2 left-1/2 hidden h-auto w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 wide:block"
+          width="2172" height="756" fetchpriority="high" alt="" aria-hidden="true"
+        />
 
         <ul
           v-for="(group, groupIndex) in navigationGroups"
@@ -206,7 +194,7 @@ onBeforeUnmount(() => {
   background-repeat: repeat;
 }
 
-.header-ribbon {
+:deep(.header-ribbon) {
   filter: drop-shadow(0 8px 12px rgb(0 0 0 / 35%));
 }
 

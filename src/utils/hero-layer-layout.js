@@ -35,6 +35,18 @@ export function heroLayerVisibilityStyle(layout, name) {
   ]))
 }
 
+export function heroLayerMedia(layout, name) {
+  const settings = layerLayouts(layout, name)
+  const ranges = {
+    mobile: '(width < 40rem)',
+    tablet: '(40rem <= width < 80rem)',
+    desktop: '(width >= 80rem)',
+  }
+  const enabled = Object.entries(settings).filter(([, value]) => value.enabled !== false)
+  if (enabled.length === 3) return ''
+  return enabled.map(([device]) => ranges[device]).join(', ') || 'not all'
+}
+
 export function heroLayerStyle(layout, name, parallaxX = 0, parallaxY = 0) {
   const { mobile, tablet, desktop } = layerLayouts(layout, name)
 

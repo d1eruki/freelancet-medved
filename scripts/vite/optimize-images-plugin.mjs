@@ -7,7 +7,7 @@ const rasterExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp'])
 const assetsRoot = fileURLToPath(new URL('../../src/assets/', import.meta.url))
 
 function responsiveModule(resourcePath, originalWidth, explicitOptimization) {
-  const widths = [...[640, 960, 1440].filter((width) => width < originalWidth), originalWidth]
+  const widths = [...[320, 480, 640, 960, 1440].filter((width) => width < originalWidth), originalWidth]
   const imports = []
   const candidates = widths.map((width, index) => {
     const query = [explicitOptimization ? 'optimize' : '', width === originalWidth ? '' : `width=${width}`].filter(Boolean).join('&')

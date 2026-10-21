@@ -1,3 +1,4 @@
+<!-- Модальное окно с формой обратной связи. -->
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { IconX } from '@tabler/icons-vue'

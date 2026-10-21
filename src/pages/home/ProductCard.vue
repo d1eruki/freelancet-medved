@@ -1,3 +1,4 @@
+<!-- Слайд категории продукции с описанием, композицией и навигацией. -->
 <script setup>
 import { computed } from 'vue'
 import ProductComposition from '#product-composition'

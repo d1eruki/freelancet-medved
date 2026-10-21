@@ -1,4 +1,6 @@
+<!-- Слайдер продукции на главной странице с переключением категорий. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ProductCard from './ProductCard.vue'
@@ -21,27 +23,19 @@ const activeIndex = ref(0)
 const tabList = ref(null)
 const track = ref(null)
 const panelWidth = ref(0)
-const counterVisible = ref(false)
 const counterCandidates = barCounterTexture.srcset.split(',').map(candidate => {
   const [url, descriptor] = candidate.trim().split(/\s+/)
   return { url, width: Number.parseInt(descriptor, 10) }
 })
 const counterBackground = computed(() => {
-  if (!counterVisible.value || !panelWidth.value) return undefined
+  if (!panelWidth.value) return undefined
   const candidates = counterCandidates.map(({ url, width }) => `url("${url}") ${width / panelWidth.value}x`)
   return { backgroundImage: `image-set(${candidates.join(', ')})` }
 })
-let counterObserver
 let resizeObserver
 onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => { panelWidth.value = entry.contentRect.width })
   resizeObserver.observe(track.value)
-  counterObserver = new IntersectionObserver(([entry]) => {
-    if (!entry.isIntersecting) return
-    counterVisible.value = true
-    counterObserver.disconnect()
-  }, { rootMargin: '1250px' })
-  counterObserver.observe(track.value.closest('section'))
 })
 const isTransitioning = ref(false)
 const isTextHidden = ref(false)
@@ -323,24 +317,23 @@ function showNext() {
 onBeforeUnmount(() => {
   clearTransitionTimers()
   resizeObserver?.disconnect()
-  counterObserver?.disconnect()
 })
 </script>
 
 <template>
   <section class="relative isolate flex min-h-svh flex-col overflow-hidden bg-surface text-foreground nav:h-svh" aria-labelledby="products-title">
-    <div
-      :style="counterBackground"
+    <SiteImage
+      as="div"
+      :background="counterBackground?.backgroundImage"
       data-product-counter
       aria-hidden="true"
       class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[30svh] w-full bg-size-[100%_100%] bg-no-repeat"
     />
     <div class="pointer-events-none absolute inset-x-0 top-0 bottom-[30svh] z-1 overflow-hidden" aria-hidden="true">
-      <img
+      <SiteImage width="1536" height="1024"
         :src="productSliderBackground.src"
         :srcset="productSliderBackground.srcset"
         sizes="max(100vw, calc(70svh * 1.5))"
-        loading="lazy"
         decoding="async"
         data-product-background
         alt=""

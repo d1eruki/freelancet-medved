@@ -1,4 +1,6 @@
+<!-- Карточка напитка с характеристиками и переключением вариантов упаковки. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { IconBlur, IconCandy, IconCandyOff, IconCircles, IconDroplet, IconDropletHalf2, IconFilterOff, IconLeaf, IconPercentage, IconSparkles } from '@tabler/icons-vue'
 import ProductAttribute from '../../components/product-attribute.vue'
@@ -81,15 +83,14 @@ function selectVariant(index) {
     ref="card"
     class="relative isolate flex min-h-80 flex-col overflow-hidden rounded-3xl bg-surface p-6 sm:p-8"
   >
-    <img
-      ref="background"
+    <SiteImage
+      :ref="node => background = node?.element"
       class="pointer-events-none absolute inset-0 -z-1 h-full w-full object-cover object-top"
       :src="item.popular ? popularCardBackground : regularCardBackground"
       alt=""
       aria-hidden="true"
-      loading="lazy"
       @load="updateProductClip"
-    >
+    />
     <span
       v-if="item.popular"
       class="absolute top-6 right-6 z-10 rounded-full bg-brand px-3 py-2 text-caption font-extrabold tracking-wide text-surface uppercase sm:top-8 sm:right-8"
@@ -103,14 +104,13 @@ function selectVariant(index) {
         :enter-from-class="transitionDirection === 'backward' ? '-translate-x-[150%]' : 'translate-x-[150%]'"
         :leave-to-class="transitionDirection === 'backward' ? 'translate-x-[150%]' : '-translate-x-[150%]'"
       >
-        <img
+        <SiteImage
           v-if="activeVariant.image"
           :key="activeVariant.volume"
           class="absolute inset-0 h-full w-full object-contain"
           :src="activeVariant.image"
           :alt="`${item.name}, ${activeVariant.volume}`"
-          loading="lazy"
-        >
+        />
         <div
           v-else
           :key="activeVariant.volume"

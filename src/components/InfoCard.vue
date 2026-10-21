@@ -1,3 +1,4 @@
+<!-- Информационная карточка с заголовком, описанием и иконками. -->
 <script setup>
 import { IconApple, IconHexagons, IconLeaf, IconWheat } from '@tabler/icons-vue'
 

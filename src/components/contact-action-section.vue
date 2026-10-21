@@ -1,3 +1,4 @@
+<!-- Контактная секция с пояснением и карточкой перехода. -->
 <script setup>
 import ActionTile from './ActionTile.vue'
 

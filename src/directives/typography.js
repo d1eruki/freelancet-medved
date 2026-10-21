@@ -21,17 +21,21 @@ export function preventHangingPrepositions(text) {
 }
 
 const observers = new WeakMap()
+const formattedValues = new WeakMap()
+const ignoredElements = 'code, pre, script, style, textarea, [data-typography-ignore]'
 
 function shouldIgnoreTextNode(node) {
-  return !node.nodeValue?.trim() || node.parentElement?.closest('code, pre, script, style, textarea, [data-typography-ignore]')
+  return !node.nodeValue?.trim() || node.parentElement?.closest(ignoredElements)
 }
 
-function formatTextNode(node) {
-  if (shouldIgnoreTextNode(node)) {
+function formatTextNode(node, checkIgnored = true) {
+  if (formattedValues.get(node) === node.nodeValue || (checkIgnored && shouldIgnoreTextNode(node))) {
     return
   }
 
   const formattedText = preventHangingPrepositions(node.nodeValue)
+  // Собственная запись порождает characterData: повторно её не обрабатываем.
+  formattedValues.set(node, formattedText)
 
   if (formattedText !== node.nodeValue) {
     node.nodeValue = formattedText
@@ -39,17 +43,17 @@ function formatTextNode(node) {
 }
 
 function formatTextNodes(element) {
+  if (element.closest(ignoredElements)) return
   const nodeFilter = element.ownerDocument.defaultView.NodeFilter
   const walker = element.ownerDocument.createTreeWalker(
     element,
-    nodeFilter.SHOW_TEXT,
+    nodeFilter.SHOW_ELEMENT | nodeFilter.SHOW_TEXT,
     {
       acceptNode(node) {
-        if (shouldIgnoreTextNode(node)) {
-          return nodeFilter.FILTER_REJECT
+        if (node.nodeType === node.ELEMENT_NODE) {
+          return node.matches(ignoredElements) ? nodeFilter.FILTER_REJECT : nodeFilter.FILTER_SKIP
         }
-
-        return nodeFilter.FILTER_ACCEPT
+        return node.nodeValue?.trim() ? nodeFilter.FILTER_ACCEPT : nodeFilter.FILTER_REJECT
       },
     },
   )
@@ -57,7 +61,7 @@ function formatTextNodes(element) {
   let textNode = walker.nextNode()
 
   while (textNode) {
-    formatTextNode(textNode)
+    formatTextNode(textNode, false)
     textNode = walker.nextNode()
   }
 }
@@ -66,19 +70,27 @@ function observeTextNodes(element) {
   const MutationObserver = element.ownerDocument.defaultView.MutationObserver
   const Node = element.ownerDocument.defaultView.Node
   const observer = new MutationObserver((mutations) => {
+    const changed = new Set()
     for (const mutation of mutations) {
       if (mutation.type === 'characterData') {
-        formatTextNode(mutation.target)
+        changed.add(mutation.target)
         continue
       }
 
       for (const node of mutation.addedNodes) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          formatTextNode(node)
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          formatTextNodes(node)
+        if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.ELEMENT_NODE) {
+          changed.add(node)
         }
       }
+    }
+    for (const node of changed) {
+      if (!element.contains(node)) continue
+      // Добавленный родитель уже включает все изменённые дочерние узлы.
+      let parent = node.parentNode
+      while (parent && parent !== element && !changed.has(parent)) parent = parent.parentNode
+      if (parent !== element && changed.has(parent)) continue
+      if (node.nodeType === Node.TEXT_NODE) formatTextNode(node)
+      else formatTextNodes(node)
     }
   })
 
