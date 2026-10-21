@@ -281,11 +281,11 @@ export const catalogCategories = catalogCategoryDefinitions.map(({ products, ...
 
 export const catalogPackagingOptions = [
   { value: 'all', label: 'Вся упаковка' },
-  { value: 'kegs', label: 'Кеги 30 л' },
   { value: 'packaged', label: 'Фасовка' },
+  { value: 'kegs', label: 'Кеги 30 л' },
   ...[...new Set(catalogCategories.flatMap((category) => category.items.flatMap((item) =>
     item.variants.filter((variant) => variant.volume !== '30 л').map((variant) => variant.volume))))]
-    .sort((a, b) => Number.parseFloat(a.replace(',', '.')) - Number.parseFloat(b.replace(',', '.')))
+    .sort((a, b) => Number.parseFloat(b.replace(',', '.')) - Number.parseFloat(a.replace(',', '.')))
     .map((volume) => ({ value: volume.replace(',', '.').replace(' л', ''), label: volume, volume })),
 ]
 
