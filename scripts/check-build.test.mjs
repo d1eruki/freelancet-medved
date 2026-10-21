@@ -10,6 +10,7 @@ import { metrikaCounterId } from '../src/utils/metrika.js'
 import { runInNewContext } from 'node:vm'
 import { getSiteVariant } from '../src/data/site-variants.js'
 import { resolveProductRender } from '../src/data/product-render-settings.js'
+import { heroLayerMedia } from '../src/utils/hero-layer-layout.js'
 
 const output = path.resolve('dist')
 const buildInfo = JSON.parse(await readFile(path.join(output, 'site-variant.json'), 'utf8'))
@@ -27,6 +28,21 @@ const entryUrl = [...homeHtml.matchAll(/<script\b[^>]*src="([^"]+)"/g)]
   .map((match) => match[1]).find((url) => url.endsWith(manifest[entry].file))
 assert.ok(entryUrl, 'missing client script in HTML')
 const basePath = entryUrl.slice(0, -manifest[entry].file.length).replace(/\/$/, '')
+
+test('hero image media queries follow the existing visibility settings', () => {
+  assert.equal(heroLayerMedia(null, 'background'), '')
+  assert.equal(heroLayerMedia({ mobile: { middle: { enabled: false } }, tablet: { middle: { enabled: true } } }, 'middle'), '(40rem <= width < 80rem), (width >= 80rem)')
+  assert.equal(heroLayerMedia({ mobile: { middle: { enabled: false } } }, 'middle'), 'not all')
+})
+
+test('server HTML keeps critical sources and defers lower production images', async () => {
+  const html = await readFile(path.join(output, 'proizvodstvo/index.html'), 'utf8')
+  assert.match(html, /<source[^>]+media="\(40rem &lt;= width &lt; 80rem\), \(width &gt;= 80rem\)"[^>]+srcset=/)
+  const stepImages = [...html.matchAll(/<img\b[^>]*data-src="([^"]*production-brewing[^"]*)"[^>]*>/g)]
+  assert.equal(stepImages.length, 1)
+  assert.doesNotMatch(stepImages[0][0], /(?:\s)src=/)
+  assert.ok(homeHtml.includes('loading="eager"'))
+})
 
 function collectChunks(id, collected = new Set()) {
   if (collected.has(id)) return collected

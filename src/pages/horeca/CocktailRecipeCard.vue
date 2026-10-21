@@ -1,5 +1,6 @@
 <!-- Карточка коктейля с ингредиентами, приготовлением и подачей. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { computed, ref } from 'vue'
 import CircleArrow from '../../components/CircleArrow.vue'
 
@@ -156,8 +157,8 @@ function preventTabDragClick(event) {
       <div class="relative h-full w-full">
       <svg class="pointer-events-none size-full" viewBox="0 0 750 660" preserveAspectRatio="xMidYMax meet" role="img" :aria-label="recipe.imageAlt">
         <g :transform="mobileForegroundTransform">
-          <image
-            :href="recipe.image.src"
+          <SiteImage as="image" media="(width < 54rem)"
+            :src="recipe.image.src"
             :x="-recipe.imageFrame.bounds[0]"
             :y="-recipe.imageFrame.bounds[1]"
             :width="recipe.imageFrame.width"

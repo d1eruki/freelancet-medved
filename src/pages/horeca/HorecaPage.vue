@@ -1,5 +1,6 @@
 <!-- Страница сотрудничества с барами и ресторанами с заявкой на дегустацию. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import { ref } from 'vue'
 import horecaHeroForeground from '../../assets/heroes/horeca/foreground.png?responsive'
 import horecaHeroMiddle from '../../assets/heroes/horeca/middle.png?responsive'
@@ -133,16 +134,15 @@ const horecaHeroLayers = {
     </section>
 
     <section class="relative isolate overflow-hidden bg-panel py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="horeca-delivery-title">
-      <img
+      <SiteImage
         :src="deliveryHorseCartUrl"
         alt=""
         aria-hidden="true"
-        loading="lazy"
         decoding="async"
         width="1776"
         height="888"
         class="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-right nav:object-center"
-      >
+      />
       <div
         aria-hidden="true"
         class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-l from-transparent from-15% via-black/60 via-45% to-black/60"

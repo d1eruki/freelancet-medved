@@ -1,5 +1,6 @@
 <!-- Изображение бокала с фирменным рисунком на стекле. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import { useId } from 'vue'
 import bearMark from '../assets/branding/brand-logo-mark.svg'
 
@@ -29,20 +30,19 @@ defineProps({
 
 <template>
   <span class="branded-glass" :style="{ aspectRatio: `${glass.width} / ${glass.height}` }" aria-hidden="true">
-    <img
+    <SiteImage
       class="glass-image"
       :src="glass.image.src"
       :srcset="glass.image.srcset"
       :sizes="sizes"
-      loading="lazy"
       decoding="async"
       draggable="false"
       alt=""
-    >
+    />
     <svg v-if="showLogo" class="glass-print" viewBox="0 -4 162 141" aria-hidden="true">
       <defs>
         <mask :id="printMaskId" maskUnits="userSpaceOnUse" x="0" y="0" width="162" height="133" style="mask-type: alpha">
-          <image :href="bearMark" width="162" height="133" />
+          <SiteImage as="image" :src="bearMark" width="162" height="133" />
         </mask>
       </defs>
       <svg

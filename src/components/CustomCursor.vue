@@ -1,5 +1,6 @@
 <!-- Курсор в виде медвежьей лапы с контекстной подписью. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import pawUrl from '../assets/ui/paw-cursor.svg'
 
@@ -180,7 +181,7 @@ onBeforeUnmount(() => {
 <template>
   <div ref="cursorElement" class="custom-cursor" popover="manual" aria-hidden="true">
     <span class="custom-cursor__visual">
-      <img class="custom-cursor__paw" :src="pawUrl" alt="">
+      <SiteImage critical media="(hover: hover) and (pointer: fine)" class="custom-cursor__paw" :src="pawUrl" alt=""/>
       <span ref="cursorLabel" class="custom-cursor__label"></span>
     </span>
   </div>

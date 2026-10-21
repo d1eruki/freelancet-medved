@@ -1,5 +1,6 @@
 <!-- Общая рамка композиции продукции с размещением и анимацией слоёв. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BrandedGlass from './branded-glass.vue'
 
@@ -76,7 +77,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             :glass="layer.glass"
             :sizes="layerSizes(layer)"
           />
-          <img
+          <SiteImage
             v-else
             class="product-layer"
             :class="[`product-${layer.kind}`, layer.shadow ? 'product-shadow' : 'product-model', { 'product-grip': layer.catch }]"
@@ -84,11 +85,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             :src="layer.image.src"
             :srcset="layer.image.srcset"
             :sizes="layerSizes(layer)"
-            loading="lazy"
             alt=""
             draggable="false"
             decoding="async"
-          >
+          />
         </span>
       </span>
     </span>

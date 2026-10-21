@@ -1,5 +1,6 @@
 <!-- Секция обращения в отдел оптовых поставок. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import SectionLink from './SectionLink.vue'
 import { sitePath } from '../utils/site-path'
 import deliveryHorseCartUrl from '../assets/horeca/delivery-horse-cart-catalog.png'
@@ -34,13 +35,12 @@ defineProps({
       <span v-for="(line, index) in description.split('\n')" :key="index" class="nav:block">{{ `${line} ` }}</span>
     </template>
     <template #illustration>
-      <img
+      <SiteImage
         :src="imageUrl"
         alt=""
-        loading="lazy"
         decoding="async"
         class="block h-auto w-full"
-      >
+      />
     </template>
   </SectionLink>
 </template>

@@ -1,5 +1,6 @@
 <!-- Главная страница с первым экраном, слайдером продукции и секцией о компании. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import HomeHeroSection from './HomeHeroSection.vue'
 import HomeProductsSection from './HomeProductsSection.vue'
 import HomeAboutSection from './HomeAboutSection.vue'
@@ -19,14 +20,15 @@ import { siteVariant } from '../../data/site-variants.js'
         class="home-products-awning-part relative overflow-hidden"
         :class="`home-products-awning-${part}`"
       >
-        <img
+        <SiteImage width="2172" height="724"
+          media="(width >= 40rem)"
           class="absolute top-0 h-full max-w-none"
           :src="homeDivider.src"
           :srcset="homeDivider.srcset"
           sizes="100vw"
           alt=""
           decoding="async"
-        >
+        />
       </div>
     </div>
   </div>
@@ -37,16 +39,17 @@ import { siteVariant } from '../../data/site-variants.js'
     :image-srcset="homeDivider.srcset"
     image-sizes="(max-width: 639px) max(130vw, 412px), 100vw"
     fetchpriority="high"
+    media="(width < 40rem)"
   />
   <div v-if="siteVariant.homeRestingPaw" class="home-resting-paw pointer-events-none relative z-10 h-0" aria-hidden="true">
-    <img
+    <SiteImage width="2100" height="749"
       class="home-resting-paw-image absolute"
       :src="restingPaw.src"
       :srcset="restingPaw.srcset"
       sizes="(min-width: 80rem) min(25.35vw, 35.646svh), (min-width: 40rem) min(40.56vw, 57.031svh), 50.7vw"
       alt=""
       decoding="async"
-    >
+    />
   </div>
   <HomeProductsSection />
   <HomeAboutSection />

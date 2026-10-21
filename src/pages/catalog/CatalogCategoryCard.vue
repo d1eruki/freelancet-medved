@@ -1,5 +1,6 @@
 <!-- Карточка категории напитков со ссылкой на её каталог. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import CircleArrow from '../../components/CircleArrow.vue'
 import { sitePath } from '../../utils/site-path'
 
@@ -15,7 +16,7 @@ defineProps({
       :href="sitePath(`/katalog/${category.slug}/`)"
     >
       <div class="relative grid min-h-20 place-items-center overflow-hidden rounded-2xl">
-        <img class="h-64 w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105" :src="category.cardImage" :alt="category.imageAlt">
+        <SiteImage class="h-64 w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105" :src="category.cardImage" :alt="category.imageAlt"/>
       </div>
       <div class="mt-10">
         <h3 class="font-display text-h4 uppercase">{{ category.name }}</h3>

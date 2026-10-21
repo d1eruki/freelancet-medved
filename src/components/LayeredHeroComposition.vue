@@ -1,8 +1,9 @@
 <!-- Многослойная композиция первого экрана с анимацией и параллаксом. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { usePointerParallax } from '../composables/use-pointer-parallax.js'
-import { heroLayerStyle, heroLayerVisibilityStyle } from '../utils/hero-layer-layout'
+import { heroLayerMedia, heroLayerStyle, heroLayerVisibilityStyle } from '../utils/hero-layer-layout'
 import { entranceMotions } from '../utils/hero-entrance'
 
 const pointerRange = { x: 12, y: 12 }
@@ -118,28 +119,27 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="host" class="layered-hero-composition">
-    <picture
+    <SiteImage
       v-for="(layer, name) in layers"
       :key="name"
-      class="hero-composition-plane hero-composition-visibility"
-      :class="entranceMotions[entrance][name]"
-      :style="{ ...heroLayerVisibilityStyle(layerLayout, name), zIndex: layerZIndex?.[name] ?? layer.zIndex }"
-    >
-      <img
-        :class="['hero-composition-layer', layer.className, {
-          'hero-composition-layer-complete': name !== 'background',
-          'hero-composition-layer-moving': name !== 'background',
-          'hero-composition-layer-float': layerMotion[name]?.floatDuration,
-        }]"
-        :style="layerStyle(layer, name)"
-        :sizes="layer.sizes"
-        :srcset="layer.srcset"
-        :src="layer.src"
-        :fetchpriority="layer.fetchpriority"
-        :alt="layer.alt ?? ''"
-        :aria-hidden="layer.alt ? undefined : 'true'"
-      >
-    </picture>
+      picture
+      critical
+      :media="heroLayerMedia(layerLayout, name)"
+      :picture-class="['hero-composition-plane', 'hero-composition-visibility', entranceMotions[entrance][name]]"
+      :picture-style="{ ...heroLayerVisibilityStyle(layerLayout, name), zIndex: layerZIndex?.[name] ?? layer.zIndex }"
+      :class="['hero-composition-layer', layer.className, {
+        'hero-composition-layer-complete': name !== 'background',
+        'hero-composition-layer-moving': name !== 'background',
+        'hero-composition-layer-float': layerMotion[name]?.floatDuration,
+      }]"
+      :style="layerStyle(layer, name)"
+      :sizes="layer.sizes"
+      :srcset="layer.srcset"
+      :src="layer.src"
+      :fetchpriority="layer.fetchpriority"
+      :alt="layer.alt ?? ''"
+      :aria-hidden="layer.alt ? undefined : 'true'"
+    />
   </div>
 </template>
 
@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
   display: var(--hero-layer-mobile-display, block);
 }
 
-.hero-composition-layer {
+:deep(.hero-composition-layer) {
   --hero-layer-scale: var(--hero-layer-mobile-scale);
   --hero-layer-x: var(--hero-layer-mobile-x);
   --hero-layer-y: var(--hero-layer-mobile-y);
@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
   translate: calc(var(--hero-layer-base-x) + var(--hero-layer-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-y) + var(--hero-layer-parallax-y) + var(--hero-layer-scroll-y));
 }
 
-.hero-composition-layer-complete {
+:deep(.hero-composition-layer-complete) {
   top: var(--hero-layer-top);
   bottom: var(--hero-layer-bottom);
   object-fit: contain;
@@ -183,19 +183,19 @@ onBeforeUnmount(() => {
   translate: calc(var(--hero-layer-base-x) + var(--hero-layer-x) + var(--hero-layer-parallax-x)) calc(var(--hero-layer-anchor-shift-y) - var(--hero-layer-y) + var(--hero-layer-parallax-y) + var(--hero-layer-scroll-y));
 }
 
-.hero-composition-layer-moving {
+:deep(.hero-composition-layer-moving) {
   transition: translate 500ms ease-out;
 }
 
 @media (hover: none) and (pointer: coarse) {
-  .hero-composition-layer {
+  :deep(.hero-composition-layer) {
     /* Diagnostic: isolate the cost of animated blurred shadows on touch devices. */
     filter: none !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-composition-layer-moving {
+  :deep(.hero-composition-layer-moving) {
     transition: none;
   }
 }
@@ -205,7 +205,7 @@ onBeforeUnmount(() => {
     display: var(--hero-layer-tablet-display, block);
   }
 
-  .hero-composition-layer {
+  :deep(.hero-composition-layer) {
     --hero-layer-scale: var(--hero-layer-tablet-scale);
     --hero-layer-x: var(--hero-layer-tablet-x);
     --hero-layer-y: var(--hero-layer-tablet-y);
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
     display: var(--hero-layer-desktop-display, block);
   }
 
-  .hero-composition-layer {
+  :deep(.hero-composition-layer) {
     --hero-layer-scale: var(--hero-layer-desktop-scale);
     --hero-layer-x: var(--hero-layer-desktop-x);
     --hero-layer-y: var(--hero-layer-desktop-y);
@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
     animation-name: hero-layer-slide-in-left;
   }
 
-  .hero-composition-layer-float {
+  :deep(.hero-composition-layer-float) {
     animation: hero-layer-float var(--float-duration) ease-in-out infinite;
   }
 }

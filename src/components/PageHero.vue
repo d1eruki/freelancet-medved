@@ -1,5 +1,6 @@
 <!-- Общий первый экран страницы с заголовком и иллюстрацией. -->
 <script setup>
+import SiteImage from './site-image.vue'
 import { usePointerParallax } from '../composables/use-pointer-parallax.js'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'
 import { layerEntranceTimings, imageCopyTiming } from '../utils/hero-entrance'
@@ -35,13 +36,14 @@ const { offset: parallaxOffset, reset: resetParallax, update: updateParallax } =
     @pointercancel="!layers && resetParallax()"
   >
     <figure v-if="!layers && imageUrl" class="absolute inset-0 -z-1">
-      <img
+      <SiteImage
+        critical
         class="object-cover object-center"
         :class="pointerParallax ? 'absolute -inset-x-12 -inset-y-8 h-[calc(100%+4rem)] w-[calc(100%+6rem)] transition-[translate] duration-500 ease-out motion-reduce:transition-none' : 'size-full'"
         :style="pointerParallax ? { translate: `${parallaxOffset.x}px ${parallaxOffset.y}px` } : undefined"
         :src="imageUrl"
         :alt="imageAlt"
-      >
+      />
     </figure>
     <LayeredHeroComposition v-if="layers" :layers="layers" :layer-layout="layerLayout" :layer-z-index="pageHeroLayerZIndex" :entrance="layerEntrance" />
     <figure class="pointer-events-none absolute inset-0 -z-1">

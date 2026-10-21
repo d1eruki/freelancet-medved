@@ -1,5 +1,6 @@
 <!-- Карточка награды со ссылкой на изображение диплома. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 defineProps({
   award: { type: Object, required: true },
 })
@@ -10,12 +11,11 @@ defineProps({
     <a class="block h-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" :href="award.image" target="_blank" rel="noopener">
       <figure class="flex h-full flex-col gap-6">
         <div class="h-80 sm:h-96">
-          <img
+          <SiteImage
             class="size-full object-contain transition duration-500 group-hover:scale-105"
             :src="award.image"
             :alt="`Диплом: ${award.title}, ${award.year} год`"
-            loading="lazy"
-          >
+          />
         </div>
         <figcaption class="flex flex-col gap-6">
           <span class="block font-display text-h5 text-brand uppercase">{{ award.title }}</span>

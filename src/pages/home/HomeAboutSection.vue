@@ -1,5 +1,6 @@
 <!-- Секция главной страницы о компании и её направлениях. -->
 <script setup>
+import SiteImage from '../../components/site-image.vue'
 import productionImage from '../../assets/production-real.png?responsive'
 import marionLogoUrl from '../../assets/home/marion-logo.png'
 import marionWoman from '../../assets/home/marion-woman.png?responsive'
@@ -22,14 +23,13 @@ import { siteVariant } from '../../data/site-variants.js'
 
       <div class="about-grid site-grid mt-12 grid gap-4 sm:mt-16">
         <figure class="about-feature group relative min-h-120 overflow-hidden rounded-3xl nav:min-h-160">
-          <img
+          <SiteImage width="1672" height="941"
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
             :src="productionImage.src"
             :srcset="productionImage.srcset"
             sizes="(min-width: 80rem) 746px, (min-width: 54rem) max(calc(58.33vw - 48px), 507px), max(calc(100vw - 32px), 381px)"
-            loading="lazy"
             alt="Производственный цех с ёмкостями из нержавеющей стали"
-          >
+          />
           <span class="absolute inset-0 bg-linear-to-t from-foreground via-foreground/5 to-transparent" aria-hidden="true" />
 
           <span class="absolute top-5 left-5 rounded-full bg-surface px-4 py-2 text-caption font-extrabold tracking-wider text-foreground uppercase sm:top-7 sm:left-7">
@@ -93,14 +93,13 @@ import { siteVariant } from '../../data/site-variants.js'
       >
         <div class="relative z-10 p-6 pb-0 sm:p-8 sm:pb-0 nav:pb-8 wide:p-10">
           <h3 id="marion-title">
-            <img
+            <SiteImage
               class="h-auto w-full max-w-sm"
               :src="marionLogoUrl"
               alt="MARION"
               width="897"
               height="260"
-              loading="lazy"
-            >
+            />
           </h3>
           <p class="mt-6 font-display text-h4 text-surface uppercase">
             Когда мёда становится мало — мы идём в дикие яблочные сады
@@ -111,7 +110,7 @@ import { siteVariant } from '../../data/site-variants.js'
         </div>
 
         <figure class="relative z-10 flex items-end pt-8 nav:pt-10">
-          <img
+          <SiteImage
             class="block h-auto w-full origin-bottom translate-x-10 scale-125 nav:-translate-x-28"
             :src="marionWoman.src"
             :srcset="marionWoman.srcset"
@@ -119,8 +118,7 @@ import { siteVariant } from '../../data/site-variants.js'
             alt="Девушка с бокалом сидра MARION"
             width="1536"
             height="1024"
-            loading="lazy"
-          >
+          />
         </figure>
         <a
           href="https://marionciders.com/"
