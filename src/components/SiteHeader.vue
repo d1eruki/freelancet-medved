@@ -4,6 +4,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BrandLogo from './BrandLogo.vue'
 import { navigation } from '../data/navigation'
 import headerRibbon from '../assets/ui/header-ribbon.png?responsive&optimize'
+import mobileMenuPaper from '../assets/ui/mobile-menu-paper.png?optimize'
 
 const props = defineProps({
   lenis: { type: Object, default: null },
@@ -115,11 +116,11 @@ onBeforeUnmount(() => {
 
       <nav
         id="main-navigation"
-        class="absolute inset-x-4 top-12 z-0 rounded-2xl rounded-tl-[4rem] bg-surface px-5 pt-12 pb-5 text-foreground shadow-xl transition-colors duration-300 ease-out sm:top-16 sm:pt-16 wide:relative wide:inset-auto wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:w-full wide:max-w-6xl wide:grid-cols-7 wide:items-center wide:justify-self-center wide:rounded-tl-2xl wide:bg-transparent wide:p-0 wide:shadow-none"
-        :class="isMenuOpen ? 'block' : 'hidden'"
+        class="mobile-navigation absolute inset-x-4 top-12 z-0 rounded-2xl rounded-tl-[4rem] bg-surface px-5 pt-12 pb-5 text-foreground shadow-xl transition-colors duration-300 ease-out sm:top-16 sm:pt-16 wide:relative wide:inset-auto wide:col-span-7 wide:col-start-1 wide:row-start-1 wide:grid wide:w-full wide:max-w-6xl wide:grid-cols-7 wide:items-center wide:justify-self-center wide:rounded-tl-2xl wide:bg-transparent wide:p-0 wide:shadow-none"
+        :class="{ 'mobile-navigation--open': isMenuOpen }"
         aria-label="Основная навигация"
       >
-        <div class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" aria-hidden="true"></div>
+        <div class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" :style="{ backgroundImage: `url(${mobileMenuPaper})` }" aria-hidden="true"></div>
 
         <picture class="contents">
           <source
@@ -175,8 +176,31 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+@media (width < 80rem) {
+  .mobile-navigation {
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(calc(-100% - 6rem));
+    transition:
+      transform 300ms ease-out,
+      visibility 0s 300ms;
+  }
+
+  .mobile-navigation--open {
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-navigation {
+      transition: none;
+    }
+  }
+}
+
 .mobile-menu-surface {
-  background-image: url('../assets/ui/mobile-menu-paper.png?optimize');
   background-position: center;
   background-size: 24rem auto;
   background-repeat: repeat;

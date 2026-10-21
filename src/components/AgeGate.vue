@@ -53,7 +53,7 @@ onBeforeUnmount(() => {
           На сайте представлена информация об алкогольной продукции.
         </p>
 
-        <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+        <div class="mx-auto mt-10 grid gap-3 sm:w-fit sm:grid-cols-2">
           <BaseButton
             ref="confirmButton"
             type="button"
@@ -61,13 +61,13 @@ onBeforeUnmount(() => {
           >
             Да, мне есть 18
           </BaseButton>
-          <button
-            class="secondary-action min-w-36 py-3 text-label font-extrabold tracking-wide text-brand uppercase focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          <BaseButton
+            variant="ghost"
             type="button"
             @click="denyAge"
           >
             Нет
-          </button>
+          </BaseButton>
         </div>
       </template>
 
@@ -80,7 +80,6 @@ onBeforeUnmount(() => {
         </p>
         <BaseButton
           ref="confirmButton"
-          variant="outline"
           class="mt-10 w-full sm:w-auto"
           type="button"
           @click="resetAnswer"

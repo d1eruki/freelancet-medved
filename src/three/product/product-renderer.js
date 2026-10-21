@@ -22,7 +22,7 @@ function coverImage(context, image, width, height) {
 // Единственный вход экспорта: тот же профиль для формы, URL и пакетного рендера.
 export async function mountProductRender(options = {}) {
   const configuration = resolveProductRender(options)
-  const { product, preset, settings } = configuration
+  const { product, settings } = configuration
   const { objects, composition, background, quality, shadow, glassPrint } = settings
   const separateLayers = objects === 'pair' && settings.layers === 'separate'
   const pair = objects === 'pair', canOnly = objects === 'can', bottle = objects === 'bottle'

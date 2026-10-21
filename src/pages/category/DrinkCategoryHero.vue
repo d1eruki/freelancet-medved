@@ -1,7 +1,6 @@
 <script setup>
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'
-import CategoryPattern from '../../components/CategoryPattern.vue'
 
 defineProps({
   category: { type: Object, required: true },
@@ -12,7 +11,6 @@ defineProps({
 <template>
   <section class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface" :aria-labelledby="`${category.slug}-title`">
     <img v-if="category.heroBackground" :src="category.heroBackground" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full object-cover object-center">
-    <CategoryPattern v-else :slug="category.slug" id-prefix="hero" class="pointer-events-none absolute inset-0 size-full text-surface opacity-[0.07]" />
 
     <div class="site-container absolute inset-x-0 top-28 z-2 sm:top-40">
       <nav class="mx-auto mt-6 flex w-max max-w-full gap-3 overflow-x-auto nav:absolute nav:top-0 nav:left-1/2 nav:mt-0 nav:-translate-x-1/2" aria-label="Виды напитков">

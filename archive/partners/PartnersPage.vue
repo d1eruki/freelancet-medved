@@ -1,17 +1,17 @@
 <script setup>
-import partnersHeroForeground from '../../assets/heroes/partners/foreground.png?responsive'
-import partnersHeroMiddle from '../../assets/heroes/partners/middle.png?responsive'
-import partnersHeroBackground from '../../assets/heroes/partners/background.png?responsive'
+import partnersHeroForeground from './assets/foreground.png?responsive'
+import partnersHeroMiddle from './assets/middle.png?responsive'
+import partnersHeroBackground from './assets/background.png?responsive'
 import { computed, ref } from 'vue'
-import BaseButton from '../../components/BaseButton.vue'
-import ActionTile from '../../components/ActionTile.vue'
-import PageHero from '../../components/PageHero.vue'
-import HeroDivider from '../../components/HeroDivider.vue'
+import BaseButton from '../../src/components/BaseButton.vue'
+import ActionTile from '../../src/components/ActionTile.vue'
+import PageHero from '../../src/components/PageHero.vue'
+import HeroDivider from '../../src/components/HeroDivider.vue'
 import PartnerCard from './PartnerCard.vue'
-import SectionWatermark from '../../components/SectionWatermark.vue'
-import { partnerCities, partners } from '../../data/partners'
-import { sitePath } from '../../utils/site-path'
-import partnersDividerUrl from '../../assets/heroes/partners/divider.png'
+import SectionWatermark from '../../src/components/SectionWatermark.vue'
+import { partnerCities, partners } from './partners.js'
+import { sitePath } from '../../src/utils/site-path'
+import partnersDividerUrl from './assets/divider.png'
 
 const partnersHeroLayout = {
   mobile: {

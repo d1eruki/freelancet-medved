@@ -1,21 +1,31 @@
 <script setup>
-import { ref, useId } from 'vue'
+import { nextTick, ref, useId } from 'vue'
 
 defineProps({
   label: { type: String, required: true },
-  icon: { type: String, required: true },
+  icon: { type: [Object, Function], required: true },
 })
 
 const tooltipId = useId()
 const open = ref(false)
 const trigger = ref(null)
+const tooltip = ref(null)
+const tooltipLeft = ref(0)
 const arrowLeft = ref(0)
 
-function showTooltip() {
-  const buttonBounds = trigger.value.getBoundingClientRect()
-  const rowBounds = trigger.value.parentElement.parentElement.getBoundingClientRect()
-  arrowLeft.value = buttonBounds.left + buttonBounds.width / 2 - rowBounds.left
+async function showTooltip() {
   open.value = true
+  await nextTick()
+  if (!tooltip.value) return
+
+  const buttonBounds = trigger.value.getBoundingClientRect()
+  const container = tooltip.value.offsetParent
+  const containerBounds = container.getBoundingClientRect()
+  const scale = containerBounds.width / container.offsetWidth
+  const buttonCenter = (buttonBounds.left + buttonBounds.width / 2 - containerBounds.left) / scale
+  const width = tooltip.value.offsetWidth
+  tooltipLeft.value = Math.max(0, Math.min(buttonCenter - width / 2, container.clientWidth - width))
+  arrowLeft.value = buttonCenter - tooltipLeft.value
 }
 </script>
 
@@ -36,19 +46,19 @@ function showTooltip() {
       @focus="showTooltip"
       @click="showTooltip"
     >
-      <svg class="size-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-        <path :d="icon" />
-      </svg>
+      <component :is="icon" class="size-6" :stroke-width="2" aria-hidden="true" focusable="false" />
     </button>
     <span
       v-if="open"
+      ref="tooltip"
       :id="tooltipId"
       role="tooltip"
-      class="absolute inset-x-0 bottom-full z-20 pb-4 drop-shadow-xl"
+      class="absolute bottom-full z-20 w-max max-w-full pb-3 drop-shadow-lg"
+      :style="{ left: `${tooltipLeft}px` }"
     >
-      <span class="block rounded-2xl border border-surface/20 bg-foreground px-4 py-4 text-center text-body font-medium text-surface">{{ label }}</span>
+      <span class="block rounded-xl bg-foreground px-4 py-3 text-center text-label font-medium text-surface">{{ label }}</span>
       <svg
-        class="absolute bottom-0 h-5 w-8 -translate-x-1/2 text-foreground"
+        class="absolute bottom-0 h-4 w-5 -translate-x-1/2 text-foreground"
         :style="{ left: `${arrowLeft}px` }"
         viewBox="0 0 32 20"
         fill="currentColor"
