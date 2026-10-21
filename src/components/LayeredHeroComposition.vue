@@ -39,7 +39,7 @@ const layersVisible = ref(true)
 let section
 let scrollMotionMedia
 let visibilityObserver
-let inViewport = true
+let inViewport = false
 let scrollFrame = 0
 let trackingScroll = false
 
@@ -59,17 +59,28 @@ function syncLayerMotion() {
     }
   }
   if (!scrollMotionMedia.matches) scrollProgress.value = 0
-  if (trackingScroll) scheduleScrollProgress()
+}
+
+function refreshLayerMotion() {
+  syncLayerMotion()
+  if (trackingScroll) {
+    // Новая запись содержит свежую геометрию без синхронного чтения layout.
+    visibilityObserver.unobserve(section)
+    visibilityObserver.observe(section)
+  }
+}
+
+function applyScrollProgress(bounds) {
+  scrollProgress.value = bounds.height
+    ? Math.max(0, Math.min(1, -bounds.top / bounds.height))
+    : 0
 }
 
 function updateScrollProgress() {
   scrollFrame = 0
   if (!trackingScroll) return
 
-  const bounds = section.getBoundingClientRect()
-  scrollProgress.value = bounds.height
-    ? Math.max(0, Math.min(1, -bounds.top / bounds.height))
-    : 0
+  applyScrollProgress(section.getBoundingClientRect())
 }
 
 function scheduleScrollProgress() {
@@ -105,26 +116,27 @@ onMounted(() => {
   section.addEventListener('pointerleave', resetParallax)
   section.addEventListener('pointercancel', resetParallax)
   scrollMotionMedia = window.matchMedia('(prefers-reduced-motion: no-preference)')
-  scrollMotionMedia.addEventListener('change', syncLayerMotion)
+  scrollMotionMedia.addEventListener('change', refreshLayerMotion)
   syncLayerMotion()
   visibilityObserver = new IntersectionObserver(([entry]) => {
     inViewport = entry.isIntersecting
     syncLayerMotion()
+    if (trackingScroll) applyScrollProgress(entry.boundingClientRect)
   })
   visibilityObserver.observe(section)
-  document.addEventListener('visibilitychange', syncLayerMotion)
+  document.addEventListener('visibilitychange', refreshLayerMotion)
 })
 
 onBeforeUnmount(() => {
   section?.removeEventListener('pointermove', updateParallax)
   section?.removeEventListener('pointerleave', resetParallax)
   section?.removeEventListener('pointercancel', resetParallax)
-  scrollMotionMedia?.removeEventListener('change', syncLayerMotion)
+  scrollMotionMedia?.removeEventListener('change', refreshLayerMotion)
   window.removeEventListener('scroll', scheduleScrollProgress)
   window.removeEventListener('resize', scheduleScrollProgress)
   if (scrollFrame) cancelAnimationFrame(scrollFrame)
   visibilityObserver?.disconnect()
-  document.removeEventListener('visibilitychange', syncLayerMotion)
+  document.removeEventListener('visibilitychange', refreshLayerMotion)
 })
 </script>
 

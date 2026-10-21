@@ -65,21 +65,81 @@ test('Hero останавливает расчёты вне экрана и в �
   expect(await idleReads()).toBe(0)
   await page.evaluate(() => globalThis.scrollTo({ top: 0, behavior: 'instant' }))
   await expect.poll(() => layer.evaluate(image => image.style.animationPlayState)).toBe('running')
-  await expect.poll(() => composition.evaluate(element => element.parentElement.runtimeReads)).toBeGreaterThan(0)
+  await expect.poll(() => layer.evaluate(image => image.style.getPropertyValue('--hero-layer-scroll-y'))).toBe('0px')
+  await page.evaluate(() => globalThis.scrollTo({ top: 120, behavior: 'instant' }))
+  await expect.poll(() => layer.evaluate(image => Number.parseFloat(image.style.getPropertyValue('--hero-layer-scroll-y')))).toBeLessThan(0)
   await page.evaluate(() => {
     Object.defineProperty(globalThis.document, 'hidden', { configurable: true, value: true })
     globalThis.document.dispatchEvent(new globalThis.Event('visibilitychange'))
   })
+  const hiddenOffset = await layer.evaluate(image => Number.parseFloat(image.style.getPropertyValue('--hero-layer-scroll-y')))
+  await page.evaluate(() => globalThis.scrollTo({ top: 240, behavior: 'instant' }))
+  await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBeGreaterThan(120)
   expect(await idleReads()).toBe(0)
   await page.evaluate(() => {
     delete globalThis.document.hidden
     globalThis.document.dispatchEvent(new globalThis.Event('visibilitychange'))
   })
   await expect.poll(() => layer.evaluate(image => image.style.animationPlayState)).toBe('running')
-  await expect.poll(() => composition.evaluate(element => element.parentElement.runtimeReads)).toBeGreaterThan(0)
+  await expect.poll(() => layer.evaluate(image => Number.parseFloat(image.style.getPropertyValue('--hero-layer-scroll-y')))).toBeLessThan(hiddenOffset)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect.poll(() => layer.evaluate(image => image.style.getPropertyValue('--hero-layer-scroll-y'))).toBe('0px')
   expect(await idleReads()).toBe(0)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await expect.poll(() => layer.evaluate(image => Number.parseFloat(image.style.getPropertyValue('--hero-layer-scroll-y')))).toBeLessThan(0)
+})
+
+test('Hero получает стартовую геометрию без синхронного запроса и сохраняет прокрутку после перезагрузки', async ({ page, openPage }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.addInitScript(() => {
+    globalThis.heroGeometryReads = 0
+    const original = globalThis.Element.prototype.getBoundingClientRect
+    globalThis.Element.prototype.getBoundingClientRect = function () {
+      if (this.matches('section[aria-labelledby="hero-title"], section[aria-labelledby="catalog-title"]')) {
+        globalThis.heroGeometryReads++
+      }
+      return original.call(this)
+    }
+  })
+  for (const path of ['', 'katalog/']) {
+    await openPage(path)
+    const layer = page.locator('.hero-composition-layer-float').first()
+    await expect.poll(() => layer.evaluate(image => image.style.animationPlayState)).toBe('running')
+    await page.evaluate(() => new Promise(resolve => globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve))))
+    expect(await page.evaluate(() => globalThis.heroGeometryReads)).toBe(0)
+    await page.evaluate(() => globalThis.scrollTo({ top: 160, behavior: 'instant' }))
+    await expect.poll(() => layer.evaluate(image => Number.parseFloat(image.style.getPropertyValue('--hero-layer-scroll-y')))).toBeLessThan(0)
+    await page.reload()
+    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBeGreaterThan(0)
+    await expect.poll(() => layer.evaluate(image => Number.parseFloat(image.style.getPropertyValue('--hero-layer-scroll-y')))).toBeLessThan(0)
+  }
+})
+
+test('Декоративная надпись измеряется один раз рядом с секцией и подгоняется при изменении ширины', async ({ page, openPage }) => {
+  await page.addInitScript(() => {
+    globalThis.watermarkMeasurements = 0
+    const original = globalThis.SVGTextContentElement.prototype.getComputedTextLength
+    globalThis.SVGTextContentElement.prototype.getComputedTextLength = function () {
+      if (/^(МЁДВЕДЬ|ДУРДИН)$/.test(this.textContent.trim())) globalThis.watermarkMeasurements++
+      return original.call(this)
+    }
+  })
+  for (const path of ['', 'o-kompanii/']) {
+    await openPage(path)
+    await page.evaluate(() => globalThis.document.fonts.ready)
+    const text = page.locator('svg text').filter({ hasText: /^(МЁДВЕДЬ|ДУРДИН)$/ })
+    expect(await page.evaluate(() => globalThis.watermarkMeasurements)).toBe(0)
+    expect(await text.evaluate(element => element.closest('span').style.fontSize)).toBe('')
+    await text.evaluate(element => element.closest('section').scrollIntoView({ block: 'start', behavior: 'instant' }))
+    await expect.poll(() => page.evaluate(() => globalThis.watermarkMeasurements)).toBe(1)
+    await expect.poll(() => text.evaluate(element => Number.parseFloat(element.closest('span').style.fontSize))).toBeGreaterThan(0)
+    const initial = await text.evaluate(element => element.closest('span').style.fontSize)
+    const viewport = page.viewportSize()
+    await page.setViewportSize({ ...viewport, width: viewport.width + 60 })
+    await expect.poll(() => text.evaluate(element => element.closest('span').style.fontSize)).not.toBe(initial)
+    expect(await page.evaluate(() => globalThis.watermarkMeasurements)).toBe(1)
+    await page.setViewportSize(viewport)
+  }
 })
 
 test('Типографика сохраняет динамический текст, адреса и исключённые фрагменты', async ({ page, openPage }) => {
