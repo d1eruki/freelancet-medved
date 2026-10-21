@@ -1,3 +1,4 @@
+<!-- Карточка награды со ссылкой на изображение диплома. -->
 <script setup>
 defineProps({
   award: { type: Object, required: true },

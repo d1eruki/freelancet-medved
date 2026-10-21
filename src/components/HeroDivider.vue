@@ -1,3 +1,4 @@
+<!-- Декоративное изображение на границе первого экрана и следующей секции. -->
 <script setup>
 defineProps({
   imageUrl: { type: String, required: true },

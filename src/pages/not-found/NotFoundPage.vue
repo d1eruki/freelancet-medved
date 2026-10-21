@@ -1,3 +1,4 @@
+<!-- Страница ошибки 404 со ссылкой на главную. -->
 <script setup>
 import BaseButton from '../../components/BaseButton.vue'
 import { sitePath } from '../../utils/site-path'

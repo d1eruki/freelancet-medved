@@ -1,3 +1,4 @@
+<!-- Страница категории напитков с ассортиментом и обращением по поставкам. -->
 <script setup>
 import DrinkCategoryHero from './DrinkCategoryHero.vue'
 import CatalogAssortment from '../catalog/catalog-assortment.vue'

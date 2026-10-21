@@ -1,3 +1,4 @@
+<!-- Карточка коктейля с ингредиентами, приготовлением и подачей. -->
 <script setup>
 import { computed, ref } from 'vue'
 import CircleArrow from '../../components/CircleArrow.vue'

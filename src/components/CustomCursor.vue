@@ -1,3 +1,4 @@
+<!-- Курсор в виде медвежьей лапы с контекстной подписью. -->
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import pawUrl from '../assets/ui/paw-cursor.svg'

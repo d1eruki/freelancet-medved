@@ -1,3 +1,4 @@
+<!-- Карточка-ссылка с призывом к действию. -->
 <script setup>
 import CircleArrow from './CircleArrow.vue'
 

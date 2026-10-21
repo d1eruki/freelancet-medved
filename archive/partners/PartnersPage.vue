@@ -1,3 +1,4 @@
+<!-- Архивная страница точек продаж с фильтром по городам. -->
 <script setup>
 import partnersHeroForeground from './assets/foreground.png?responsive'
 import partnersHeroMiddle from './assets/middle.png?responsive'

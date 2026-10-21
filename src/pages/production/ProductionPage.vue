@@ -1,3 +1,4 @@
+<!-- Страница производства с ингредиентами и этапами изготовления напитков. -->
 <script setup>
 import { ref, watch } from 'vue'
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-vue'

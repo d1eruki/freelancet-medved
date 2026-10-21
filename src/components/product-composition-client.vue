@@ -1,3 +1,4 @@
+<!-- Композиция продукции и движущейся лапы в клиентском слайдере. -->
 <script setup>
 import { computed } from 'vue'
 import ProductCompositionFrame from './product-composition-frame.vue'
@@ -47,7 +48,7 @@ const layers = computed(() => {
       // В покое маска касается предплечья; пальцы перед бокалом видны целиком.
       behindCounter: !front || hand.withdraw > 0,
       catch: true,
-      classes: ['paw-hand', `paw-${part}`],
+      classes: ['paw-hand', `paw-${part}`, 'hidden', 'sm:block'],
       contentStyle: { transform: `translate(${hand.x}px, ${hand.withdraw * 65}%)` },
     }
   }

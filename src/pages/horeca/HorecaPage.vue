@@ -1,3 +1,4 @@
+<!-- Страница сотрудничества с барами и ресторанами с заявкой на дегустацию. -->
 <script setup>
 import { ref } from 'vue'
 import horecaHeroForeground from '../../assets/heroes/horeca/foreground.png?responsive'

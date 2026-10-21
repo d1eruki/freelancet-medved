@@ -1,3 +1,4 @@
+<!-- Слайдер продукции на главной странице с переключением категорий. -->
 <script setup>
 import { sitePath } from '../../utils/site-path'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'

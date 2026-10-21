@@ -1,3 +1,4 @@
+<!-- Изображение бокала с фирменным рисунком на стекле. -->
 <script setup>
 import { useId } from 'vue'
 import bearMark from '../assets/branding/brand-logo-mark.svg'

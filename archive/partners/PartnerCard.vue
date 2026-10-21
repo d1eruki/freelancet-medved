@@ -1,3 +1,4 @@
+<!-- Карточка партнёра с адресом, контактами и маршрутом. -->
 <script setup>
 import { computed } from 'vue'
 import CircleArrow from '../../src/components/CircleArrow.vue'

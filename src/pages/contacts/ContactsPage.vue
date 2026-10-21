@@ -1,3 +1,4 @@
+<!-- Страница контактов с данными отделов и картой проезда. -->
 <script setup>
 import contactsHeroImageUrl from '../../assets/heroes/contacts/hero.png'
 import contactsHeroMiddleUrl from '../../assets/heroes/contacts/middle.png'

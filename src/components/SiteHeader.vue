@@ -1,3 +1,4 @@
+<!-- Шапка сайта с логотипом, навигацией и мобильным меню. -->
 <script setup>
 import { sitePath } from '../utils/site-path'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -12,6 +13,7 @@ const props = defineProps({
 })
 
 const isMenuOpen = ref(false)
+const hasMenuOpened = ref(false)
 const isHeaderVisible = ref(true)
 const navigationGroups = [navigation.slice(0, 2), navigation.slice(2)]
 
@@ -57,6 +59,7 @@ watch(() => props.lenis, (lenis, _previous, onCleanup) => {
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
+  hasMenuOpened.value = true
   isHeaderVisible.value = true
 }
 
@@ -104,6 +107,7 @@ onBeforeUnmount(() => {
           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2172' height='756'/%3E"
           width="2172"
           height="756"
+          fetchpriority="high"
           alt=""
         >
       </picture>
@@ -120,7 +124,7 @@ onBeforeUnmount(() => {
         :class="{ 'mobile-navigation--open': isMenuOpen }"
         aria-label="Основная навигация"
       >
-        <div class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" :style="{ backgroundImage: `url(${mobileMenuPaper})` }" aria-hidden="true"></div>
+        <div class="mobile-menu-surface pointer-events-none absolute inset-0 rounded-[inherit] wide:hidden" :style="hasMenuOpened ? { backgroundImage: `url(${mobileMenuPaper})` } : undefined" aria-hidden="true"></div>
 
         <picture class="contents">
           <source
@@ -133,6 +137,7 @@ onBeforeUnmount(() => {
             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2172' height='756'/%3E"
             width="2172"
             height="756"
+            fetchpriority="high"
             alt=""
             aria-hidden="true"
           >

@@ -1,3 +1,4 @@
+<!-- Книга рецептов коктейлей с анимированным перелистыванием. -->
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import bookCover from '../../assets/horeca/cocktails/cocktails-book-cover.png?responsive'

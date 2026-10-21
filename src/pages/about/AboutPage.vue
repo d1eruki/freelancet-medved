@@ -1,3 +1,4 @@
+<!-- Страница компании с историей, напитками и наградами. -->
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import aboutHeroForeground from '../../assets/heroes/about/foreground.png?responsive'

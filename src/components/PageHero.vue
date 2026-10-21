@@ -1,3 +1,4 @@
+<!-- Общий первый экран страницы с заголовком и иллюстрацией. -->
 <script setup>
 import { usePointerParallax } from '../composables/use-pointer-parallax.js'
 import LayeredHeroComposition from './LayeredHeroComposition.vue'

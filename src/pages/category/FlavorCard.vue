@@ -1,3 +1,4 @@
+<!-- Карточка напитка с характеристиками и переключением вариантов упаковки. -->
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { IconBlur, IconCandy, IconCandyOff, IconCircles, IconDroplet, IconDropletHalf2, IconFilterOff, IconLeaf, IconPercentage, IconSparkles } from '@tabler/icons-vue'

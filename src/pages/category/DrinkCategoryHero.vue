@@ -1,3 +1,4 @@
+<!-- Первый экран категории напитков с иллюстрацией и навигацией по категориям. -->
 <script setup>
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'

@@ -1,3 +1,4 @@
+<!-- Ассортимент напитков с фильтрами по категории и упаковке. -->
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { catalogCategories, catalogPackagingOptions, filterCatalogItems } from '../../data/catalog.js'

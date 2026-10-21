@@ -1,3 +1,4 @@
+<!-- Интерактивная Яндекс Карта с фирменным оформлением и запасным встраиванием. -->
 <script>
 let apiPromise
 
@@ -48,11 +49,13 @@ const props = defineProps({
 const container = ref(null)
 const canvas = ref(null)
 const ready = ref(false)
+const activated = ref(false)
 let map
 let observer
 let disposed = false
 
 async function initialize() {
+  activated.value = true
   const apiKey = import.meta.env.VITE_YANDEX_MAPS_API_KEY?.trim()
   if (!apiKey) return
 
@@ -115,7 +118,6 @@ function changeZoom(amount) {
 }
 
 onMounted(() => {
-  if (!import.meta.env.VITE_YANDEX_MAPS_API_KEY?.trim()) return
   if (!('IntersectionObserver' in window)) {
     initialize()
     return
@@ -139,7 +141,7 @@ onBeforeUnmount(() => {
   <div ref="container" class="relative isolate h-96 w-full overflow-hidden rounded-3xl bg-panel" data-lenis-prevent>
     <div ref="canvas" class="absolute inset-0" :aria-label="title" role="region" :inert="!ready" :aria-hidden="!ready" />
     <iframe
-      v-if="!ready"
+      v-if="activated && !ready"
       class="absolute inset-0 size-full border-0"
       :src="embedUrl"
       :title="title"

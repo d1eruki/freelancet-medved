@@ -1,3 +1,4 @@
+<!-- Общая рамка композиции продукции с размещением и анимацией слоёв. -->
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import BrandedGlass from './branded-glass.vue'

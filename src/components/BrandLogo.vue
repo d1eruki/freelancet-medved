@@ -1,3 +1,4 @@
+<!-- Логотип бренда для выбранной версии сайта. -->
 <script setup>
 import sealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=320'
 import smallSealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=160'

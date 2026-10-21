@@ -1,3 +1,4 @@
+<!-- Многослойная композиция первого экрана с анимацией и параллаксом. -->
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { usePointerParallax } from '../composables/use-pointer-parallax.js'

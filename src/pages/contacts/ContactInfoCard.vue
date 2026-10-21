@@ -1,3 +1,4 @@
+<!-- Карточка контактных данных отдела с телефоном и временем работы. -->
 <script setup>
 defineProps({
   label: { type: String, required: true },

@@ -1,3 +1,4 @@
+<!-- Карточка категории напитков со ссылкой на её каталог. -->
 <script setup>
 import CircleArrow from '../../components/CircleArrow.vue'
 import { sitePath } from '../../utils/site-path'

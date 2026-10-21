@@ -1,3 +1,4 @@
+<!-- Подвал сайта с контактами, формой обратной связи и ссылками. -->
 <script setup>
 import { contacts } from '../data/contacts.js'
 import { sitePath } from '../utils/site-path'

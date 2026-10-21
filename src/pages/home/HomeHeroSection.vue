@@ -1,3 +1,4 @@
+<!-- Первый экран главной страницы с анимированной многослойной иллюстрацией. -->
 <script setup>
 import BaseButton from '../../components/BaseButton.vue'
 import { sitePath } from '../../utils/site-path'

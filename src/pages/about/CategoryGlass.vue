@@ -1,3 +1,4 @@
+<!-- Интерактивная область бокала со ссылкой на категорию напитков. -->
 <script setup>
 import { computed, useId } from 'vue'
 

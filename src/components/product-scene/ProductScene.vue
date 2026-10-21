@@ -1,3 +1,4 @@
+<!-- Интерактивная 3D-сцена продукции с загрузкой моделей и запасным изображением. -->
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createProductScene, productSceneKey } from '../../three/product/product-scene.js'

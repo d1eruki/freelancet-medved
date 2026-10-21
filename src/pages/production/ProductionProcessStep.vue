@@ -1,3 +1,4 @@
+<!-- Переключаемый этап производственного процесса с описанием. -->
 <script setup>
 defineProps({
   number: { type: String, required: true },

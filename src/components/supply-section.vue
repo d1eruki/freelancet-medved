@@ -1,3 +1,4 @@
+<!-- Секция обращения в отдел оптовых поставок. -->
 <script setup>
 import SectionLink from './SectionLink.vue'
 import { sitePath } from '../utils/site-path'

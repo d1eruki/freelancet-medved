@@ -1,3 +1,4 @@
+<!-- Общая оболочка сайта со страницей, навигацией и проверкой возраста. -->
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import Lenis from 'lenis'

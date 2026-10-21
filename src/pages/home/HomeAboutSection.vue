@@ -1,3 +1,4 @@
+<!-- Секция главной страницы о компании и её направлениях. -->
 <script setup>
 import productionImage from '../../assets/production-real.png?responsive'
 import marionLogoUrl from '../../assets/home/marion-logo.png'

@@ -1,3 +1,4 @@
+<!-- Круглая стрелка для ссылок и элементов управления. -->
 <script setup>
 const toneClasses = {
   brand: 'bg-brand text-surface',
