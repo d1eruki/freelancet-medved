@@ -46,6 +46,33 @@ test('Статичные слои загружаются, а анимация н
   // Обрезанные модели и полноразмерные тени имеют разные прямоугольники,
   // но их обёртки должны двигаться одинаково, а наклон — оставаться синхронным.
   const current = page.getByRole('tabpanel')
+  // Записываем кадры до действия: короткая фаза ловли не должна зависеть
+  // от скорости команд Playwright и интервалов expect.poll.
+  const catchSamples = client ? await page.evaluateHandle(() => {
+    const recording = { samples: [], frame: 0 }
+    const sample = () => {
+      const panel = globalThis.document.querySelector('[role="tabpanel"][aria-hidden="false"]')
+      const model = panel?.querySelector('.product-model.product-pair')
+      if (panel?.getAttribute('aria-labelledby') === 'home-product-tab-sidr' && model) {
+        const style = element => globalThis.getComputedStyle(element)
+        const matrix = element => new globalThis.DOMMatrix(style(element).transform)
+        const angle = Number.parseFloat(style(model).rotate) || 0
+        if (angle < -0.1) {
+          const fingers = [...panel.querySelectorAll('.paw-fingers .product-grip')].find(image =>
+            Math.abs(matrix(image.closest('.product-layer-content')).m42) < 0.1)
+          recording.samples.push(fingers ? {
+            positionDifference: matrix(model.closest('.product-motion-layer')).m41
+              - matrix(fingers.closest('.paw-hand')).m41
+              - matrix(fingers.closest('.product-layer-content')).m41,
+            angleDifference: angle - (Number.parseFloat(style(fingers).rotate) || 0),
+          } : null)
+        }
+      }
+      recording.frame = globalThis.requestAnimationFrame(sample)
+    }
+    recording.frame = globalThis.requestAnimationFrame(sample)
+    return recording
+  }) : null
   if (isMobile) await current.getByRole('button', { name: 'Следующий напиток' }).click()
   else { await page.getByRole('tab', { selected: true }).focus(); await page.keyboard.press('ArrowRight') }
   await expect(current).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
@@ -77,33 +104,20 @@ test('Статичные слои загружаются, а анимация н
     }
     await page.waitForTimeout(50)
   }
-  if (client) {
-    // При ловле бокал и видимая кисть должны отклоняться вместе.
-    await expect.poll(() => current.locator('.product-model.product-pair').evaluate(model =>
-      Number.parseFloat(globalThis.getComputedStyle(model).rotate) || 0)).toBeLessThan(-0.5)
-    for (let sample = 0; sample < 4; sample++) {
-      const contact = await current.evaluate(panel => {
-        const style = element => globalThis.getComputedStyle(element)
-        const matrix = element => new globalThis.DOMMatrix(style(element).transform)
-        const model = panel.querySelector('.product-model.product-pair')
-        const fingers = [...panel.querySelectorAll('.paw-fingers .product-grip')].find(image =>
-          Math.abs(matrix(image.closest('.product-layer-content')).m42) < 0.1)
-        if (!fingers) return null
-        return {
-          positionDifference: matrix(model.closest('.product-motion-layer')).m41
-            - matrix(fingers.closest('.paw-hand')).m41
-            - matrix(fingers.closest('.product-layer-content')).m41,
-          angleDifference: (Number.parseFloat(style(model).rotate) || 0)
-            - (Number.parseFloat(style(fingers).rotate) || 0),
-        }
-      })
+  await expect(current).not.toHaveClass(/is-text-hidden/)
+  if (catchSamples) {
+    const contacts = await catchSamples.evaluate(recording => {
+      globalThis.cancelAnimationFrame(recording.frame)
+      return recording.samples
+    })
+    await catchSamples.dispose()
+    expect(contacts.length, 'Должна наблюдаться фаза ловли движущегося бокала').toBeGreaterThan(0)
+    for (const contact of contacts) {
       expect(contact).not.toBeNull()
       expect(Math.abs(contact.positionDifference)).toBeLessThan(0.1)
       expect(Math.abs(contact.angleDifference)).toBeLessThan(0.1)
-      await page.waitForTimeout(50)
     }
   }
-  await expect(current).not.toHaveClass(/is-text-hidden/)
   await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(modelIsMoving, client)).toBe(false)
   await expectComposition(await switchDrink(page, isMobile, 'next', 'puare'))
   const panel = await switchDrink(page, isMobile, 'previous', 'sidr')
