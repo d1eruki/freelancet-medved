@@ -400,9 +400,9 @@ test('deployment environment preserves redirects and indexing policy', async () 
   }
 })
 
-test('image and script URLs resolve, raster output is WebP and srcset widths match the built images', async () => {
+test('image and script URLs resolve, raster output uses WebP/AVIF and srcset widths match the built images', async () => {
   for (const file of await readdir(output, { recursive: true })) {
-    assert.doesNotMatch(file, /\.(?:png|jpe?g|avif)$/i, `Raster output must use WebP: ${file}`)
+    assert.doesNotMatch(file, /\.(?:png|jpe?g)$/i, `Raster output must use WebP/AVIF: ${file}`)
   }
   const imageWidths = new Map()
   for (const url of [...urls, `${origin}/404.html`]) {
@@ -434,6 +434,8 @@ test('responsive images include small candidates and Gabin uses one preloaded WO
   const files = await readdir(path.join(output, 'assets'))
   assert.ok(files.some(file => /-320w-[^.]+\.webp$/.test(file)), 'missing 320 px images')
   assert.ok(files.some(file => /-480w-[^.]+\.webp$/.test(file)), 'missing 480 px images')
+  assert.ok(files.some(file => /-320w-[^.]+\.avif$/.test(file)), 'missing 320 px AVIF images')
+  assert.ok(files.some(file => /-480w-[^.]+\.avif$/.test(file)), 'missing 480 px AVIF images')
   assert.ok(!files.some(file => /\.ttf$/i.test(file)), 'TTF must not be published')
   const fontFiles = files.filter(file => /^gabin-.*\.woff2$/.test(file))
   assert.equal(fontFiles.length, 1)
@@ -453,6 +455,40 @@ test('responsive images include small candidates and Gabin uses one preloaded WO
   }
 })
 
+test('critical HTML images offer AVIF with matching WebP fallback before JavaScript', async () => {
+  const html = await readFile(path.join(output, 'index.html'), 'utf8')
+  const pictures = [...html.matchAll(/<picture\b[^>]*>([\s\S]*?)<\/picture>/g)]
+    .map(([, content]) => content).filter(content => content.includes('type="image/avif"'))
+  assert.ok(pictures.length > 0, 'Missing AVIF sources in prerendered HTML')
+  for (const content of pictures) {
+    const avif = content.match(/<source\b[^>]*type="image\/avif"[^>]*srcset="([^"]+)"/)
+    if (!avif) continue // Отложенные изображения пока не имеют адреса.
+    const fallback = content.match(/<img\b[^>]*src="([^"]+)"/)
+    assert.ok(fallback, 'Missing fallback img')
+    assert.match(content, /(?:src|srcset)="[^"]+\.webp(?:[\s,"])/)
+    assert.match(avif[1], /\.avif(?:\s|,|$)/)
+    const avifDescriptors = avif[1].split(',').map(candidate => candidate.trim().split(/\s+/)[1])
+    const webpSet = content.match(/<img\b[^>]*srcset="([^"]+)"/)
+      || content.match(/<source\b(?![^>]*type=)[^>]*srcset="([^"]+)"/)
+    if (webpSet) assert.deepEqual(avifDescriptors,
+      webpSet[1].split(',').map(candidate => candidate.trim().split(/\s+/)[1]))
+  }
+})
+
+test('image formats preserve responsive descriptors and CSS density fallbacks', async () => {
+  const { registerImageFormats, getAvifSource, getAvifSrcset, getImageBackground } = await import('../src/utils/image-formats.js')
+  registerImageFormats('/test-320.webp', '/test-320.avif')
+  registerImageFormats('/test-640.webp', '/test-640.avif')
+  assert.equal(getAvifSource('/lossless.webp'), undefined)
+  assert.equal(getAvifSrcset('/test-320.webp 320w, /test-640.webp 640w'), '/test-320.avif 320w, /test-640.avif 640w')
+  assert.equal(getAvifSrcset('/test-320.webp 320w, /unknown.webp 640w'), undefined)
+  assert.equal(getImageBackground('/test-320.webp'), 'image-set(url("/test-320.avif") type("image/avif"), url("/test-320.webp") type("image/webp"))')
+  assert.equal(getImageBackground(undefined, 'image-set(url("/test-320.webp") 0.5x, url("/test-640.webp") 1x)'),
+    'image-set(url("/test-320.avif") 0.5x type("image/avif"), url("/test-320.webp") 0.5x type("image/webp"), url("/test-640.avif") 1x type("image/avif"), url("/test-640.webp") 1x type("image/webp"))')
+  assert.equal(getImageBackground('/lossless.webp'), 'url("/lossless.webp")')
+  assert.equal(getImageBackground(undefined, 'linear-gradient(red, blue)'), 'linear-gradient(red, blue)')
+})
+
 // В публикацию не должны попадать исходники через карты сборки.
 test('published output excludes sourcemaps and their references', async () => {
   const files = await readdir(output, { recursive: true })
@@ -468,7 +504,18 @@ async function builtAsset(source, extension) {
   if (!asset) {
     // Конвертированные PNG плагин публикует как именованные WebP без исходного пути.
     const prefix = `_${path.basename(source, path.extname(source))}-`
-    const candidates = Object.entries(manifest).filter(([key, item]) => key.startsWith(prefix) && item.file.endsWith(extension))
+    let candidates = Object.entries(manifest).filter(([key, item]) => key.startsWith(prefix)
+      && !/^\d+w-/.test(key.slice(prefix.length)) && item.file.endsWith(extension))
+    // Rollup объединяет побайтово одинаковые WebP под одним из исходных имён.
+    if (source.endsWith('.webp')) {
+      const original = await readFile(source)
+      candidates = []
+      for (const entry of Object.entries(manifest).filter(([, item]) => item.file.endsWith(extension))) {
+        const file = path.join(output, entry[1].file)
+        if ((await stat(file)).size === original.length && original.equals(await readFile(file))) candidates.push(entry)
+      }
+    }
+    candidates = [...new Map(candidates.map(entry => [entry[1].file, entry])).values()]
     assert.equal(candidates.length, 1, `expected one built asset for ${source}`)
     asset = candidates[0][1]
   }
