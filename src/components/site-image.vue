@@ -1,7 +1,8 @@
 <!-- Единая загрузка обычных, фоновых и SVG-изображений. -->
 <script setup>
-import { computed, mergeProps, ref, useAttrs } from 'vue'
+import { computed, getCurrentInstance, mergeProps, ref, useAttrs } from 'vue'
 import { useImageLoading } from '../composables/use-image-loading.js'
+import { getAvifSource, getAvifSrcset, getImageBackground } from '../utils/image-formats.js'
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps({
@@ -18,6 +19,7 @@ const props = defineProps({
   background: { type: String, default: undefined },
 })
 const attrs = useAttrs()
+const instance = getCurrentInstance()
 const image = ref(null)
 defineExpose({ element: image })
 const { shouldLoad } = useImageLoading(image, {
@@ -26,12 +28,19 @@ const { shouldLoad } = useImageLoading(image, {
   enabled: () => props.enabled,
 })
 const placeholder = computed(() => `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${Number(attrs.width) || 1}' height='${Number(attrs.height) || 1}'/%3E`)
+const avifSource = computed(() => getAvifSource(props.src))
+const avifSrcset = computed(() => getAvifSrcset(props.srcset) || avifSource.value)
+const usesPicture = computed(() => props.picture || (props.as === 'img' && Boolean(avifSrcset.value)))
+const sourceEnabled = computed(() => props.enabled && (props.critical || shouldLoad.value))
 const bindings = computed(() => {
   const source = shouldLoad.value ? props.src : undefined
   if (props.as === 'image') return { href: source, 'data-src': props.src }
   if (props.as === 'div') return {
-    style: { backgroundImage: shouldLoad.value ? props.background || (source ? `url(${JSON.stringify(source)})` : undefined) : undefined },
-    'data-src': props.src,
+    style: { backgroundImage: shouldLoad.value ? [
+      props.background || (source ? `url(${JSON.stringify(source)})` : undefined),
+      getImageBackground(source, props.background),
+    ] : undefined },
+    'data-src': avifSource.value || props.src,
   }
   return {
     src: source,
@@ -39,22 +48,41 @@ const bindings = computed(() => {
     sizes: props.sizes,
     loading: props.critical ? 'eager' : undefined,
     decoding: attrs.decoding || 'async',
-    'data-src': props.src,
+    'data-src': avifSource.value || props.src,
     'data-srcset': props.srcset,
   }
 })
 
 function elementAttributes(pictureSource = false) {
-  return mergeProps(attrs, bindings.value, pictureSource ? { src: placeholder.value, srcset: undefined } : {})
+  // Новая обёртка не должна забирать scoped-стили, назначенные родителем изображению.
+  const scopeAttributes = {}
+  if (usesPicture.value && !props.picture) {
+    let current = instance
+    while (current) {
+      for (const scope of [current.vnode.scopeId, ...(current.vnode.slotScopeIds || [])]) {
+        if (scope) scopeAttributes[scope] = ''
+      }
+      const parent = current.parent
+      current = parent?.subTree === current.vnode ? parent : undefined
+    }
+  }
+  return mergeProps(attrs, scopeAttributes, bindings.value, pictureSource ? { src: placeholder.value, srcset: undefined } : {})
 }
 </script>
 
 <template>
-  <picture v-if="picture" :class="pictureClass" :style="pictureStyle">
+  <picture v-if="usesPicture" :class="pictureClass" :style="pictureStyle">
+    <source
+      v-if="avifSrcset"
+      type="image/avif"
+      :media="media || undefined"
+      :srcset="sourceEnabled ? avifSrcset : undefined"
+      :sizes="sizes"
+    >
     <source
       v-if="media"
       :media="media"
-      :srcset="enabled && (critical || shouldLoad) ? srcset || src : undefined"
+      :srcset="sourceEnabled ? srcset || src : undefined"
       :sizes="sizes"
     >
     <img

@@ -1,10 +1,12 @@
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { createHash, randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 
 const rasterExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp'])
 const assetsRoot = fileURLToPath(new URL('../../src/assets/', import.meta.url))
+const formatsModule = fileURLToPath(new URL('../../src/utils/image-formats.js', import.meta.url))
 
 function responsiveModule(resourcePath, originalWidth, explicitOptimization) {
   const widths = [...[320, 480, 640, 960, 1440].filter((width) => width < originalWidth), originalWidth]
@@ -24,11 +26,35 @@ export default {
 
 export function optimizeImagesPlugin() {
   let isBuild = false
+  let cacheRoot
+  const pendingAvif = new Map()
+
+  function encodeAvif(original, width) {
+    const options = { quality: 55, effort: 4 }
+    const key = createHash('sha256').update(original)
+      .update(JSON.stringify({ width, options, versions: sharp.versions })).digest('hex')
+    if (!pendingAvif.has(key)) pendingAvif.set(key, (async () => {
+      const cached = path.join(cacheRoot, `${key}.avif`)
+      try { return await readFile(cached) } catch (error) {
+        if (error.code !== 'ENOENT') throw error
+      }
+      const image = sharp(original)
+      if (width !== null) image.resize({ width, withoutEnlargement: true })
+      const result = await image.avif(options).toBuffer()
+      await mkdir(cacheRoot, { recursive: true })
+      const temporary = `${cached}.${randomUUID()}.tmp`
+      await writeFile(temporary, result)
+      await rename(temporary, cached)
+      return result
+    })())
+    return pendingAvif.get(key)
+  }
   return {
     name: 'optimize-images',
     enforce: 'pre',
     configResolved(config) {
       isBuild = config.command === 'build'
+      cacheRoot = path.join(config.cacheDir, 'optimized-images')
     },
     async load(id) {
       const [resourcePath, query = ''] = id.split('?', 2)
@@ -39,11 +65,6 @@ export function optimizeImagesPlugin() {
       if ((!resourcePath.startsWith(assetsRoot) && !lossless && !params.has('optimize')) || !rasterExtensions.has(extension)) {
         return null
       }
-      // Existing WebP assets stay untouched unless a conversion is requested.
-      if (extension === '.webp' && !['responsive', 'width', 'lossless', 'optimize'].some(param => params.has(param))) {
-        return null
-      }
-
       if (lossless && (params.has('responsive') || params.has('width'))) {
         this.error('Lossless textures cannot be resized or converted to a lossy format')
       }
@@ -74,8 +95,16 @@ export function optimizeImagesPlugin() {
         name: `${path.basename(resourcePath, extension)}${width === null ? '' : `-${width}w`}.webp`,
         source: optimized,
       })
-
-      return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`
+      if (lossless) return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`
+      const avifId = this.emitFile({
+        type: 'asset',
+        name: `${path.basename(resourcePath, extension)}${width === null ? '' : `-${width}w`}.avif`,
+        source: await encodeAvif(original, width),
+      })
+      return `import { registerImageFormats } from ${JSON.stringify(formatsModule)};
+const source = import.meta.ROLLUP_FILE_URL_${referenceId};
+registerImageFormats(source, import.meta.ROLLUP_FILE_URL_${avifId});
+export default source;`
     },
   }
 }

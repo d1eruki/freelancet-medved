@@ -124,9 +124,9 @@ function finishTouch(event) {
     @touchend.passive="finishTouch"
     @touchcancel="touchStart = null"
   >
-    <picture class="cocktail-binding pointer-events-none absolute overflow-hidden" aria-hidden="true">
+    <div class="cocktail-binding pointer-events-none absolute overflow-hidden" aria-hidden="true">
       <SiteImage width="1671" height="941" class="h-full w-[200%] max-w-none nav:w-full" :src="bookCover.src" :srcset="bookCover.srcset" sizes="(min-width: 54rem) 100vw, 200vw" alt="" decoding="async"/>
-    </picture>
+    </div>
 
       <div
         id="horeca-cocktail-slides"

@@ -1,5 +1,42 @@
 import { test, expect } from './fixtures.mjs'
 
+test('Браузер выбирает AVIF без параллельной загрузки WebP', async ({ page, openPage }) => {
+  const requests = new Set()
+  page.on('request', request => { if (request.resourceType() === 'image') requests.add(request.url()) })
+  await openPage()
+  const layers = page.locator('.hero-composition-plane img')
+  await expect.poll(() => layers.evaluateAll(images => {
+    const visible = images.filter(image => image.checkVisibility())
+    return visible.length > 0 && visible.every(image => image.complete && image.naturalWidth > 0 && /\.avif$/.test(image.currentSrc))
+  })).toBe(true)
+  const fallbacks = await layers.evaluateAll(images => images.flatMap(image => [
+    image.getAttribute('src'), ...(image.getAttribute('srcset') || '').split(',').map(candidate => candidate.trim().split(/\s+/)[0]),
+  ]).filter(Boolean))
+  for (const fallback of fallbacks) expect(requests.has(new URL(fallback, page.url()).href)).toBe(false)
+  await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
+  // Обёртка выбора формата сохраняет позиционирование слоёв через scoped-стили родителя.
+  const productImages = page.locator('.product-composition img.product-layer')
+  expect(await productImages.count()).toBeGreaterThan(0)
+  expect(await productImages.evaluateAll(images => images.every(image =>
+    globalThis.getComputedStyle(image).position === 'absolute'))).toBe(true)
+})
+
+test('WebP остаётся рабочим запасным форматом без поддержки AVIF и JavaScript', async ({ page, baseURL }) => {
+  await page.route(baseURL, async route => {
+    const response = await route.fetch()
+    const html = (await response.text()).replaceAll('type="image/avif"', 'type="image/x-unsupported"')
+      .replace(/<script\b[^>]*\bsrc="[^"]+"[^>]*>[\s\S]*?<\/script>/g, '')
+    await route.fulfill({ response, body: html })
+  })
+  await page.goto(baseURL)
+  const images = page.locator('.hero-composition-plane img')
+  await expect.poll(() => images.evaluateAll(nodes => {
+    const visible = nodes.filter(image => image.checkVisibility())
+    return visible.length > 0 && visible.every(image => image.complete && image.naturalWidth > 0 && /\.webp$/.test(image.currentSrc))
+  })).toBe(true)
+  expect(await page.locator('#app').evaluate(root => Boolean(root.__vue_app__))).toBe(false)
+})
+
 test('Параллакс применяет последнее движение за кадр и отменяет движение после ухода мыши', async ({ page, openPage, isMobile }) => {
   test.skip(isMobile, 'Параллакс предназначен для точного указателя')
   await page.emulateMedia({ reducedMotion: 'no-preference' })
