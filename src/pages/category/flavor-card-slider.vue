@@ -26,51 +26,12 @@ const trackStyle = computed(() => deckHeight.value && props.items.length > 1
 let resizeObserver
 let frame
 let motionQuery
-let snapTarget
-let positionInitialized = false
-
-function releaseSnap() {
-  snapTarget = undefined
-}
-
-function startSnap(index) {
-  if (index === undefined || index <= activeIndex.value || !track.value?.getClientRects().length
-    || !props.lenis || props.lenis.isStopped) return
-  snapTarget = window.scrollY + track.value.getBoundingClientRect().top - stickyTop.value
-    + index * stepDistance.value + 1
-  props.lenis.scrollTo(snapTarget, {
-    duration: 0.45,
-    immediate: reducedMotion.value,
-    lock: true,
-    onComplete: () => {
-      releaseSnap()
-      schedulePosition()
-    },
-  })
-}
 
 function updatePosition() {
   frame = undefined
   if (!track.value?.getClientRects().length) return
-  const previousPosition = scrollPosition.value
   const distance = stickyTop.value - track.value.getBoundingClientRect().top
   scrollPosition.value = Math.max(0, Math.min(props.items.length - 1, distance / stepDistance.value))
-  if (!positionInitialized) {
-    positionInitialized = true
-    return
-  }
-  if (snapTarget !== undefined) {
-    return
-  }
-  if (scrollPosition.value <= previousPosition || activeIndex.value >= props.items.length - 1) return
-
-  const nextTop = Math.min(32, (activeIndex.value + 1) * 16)
-  const shownHeight = transitionProgress.value * (deckHeight.value - nextTop)
-  const cardHeight = deckHeight.value - 32
-  if (shownHeight < cardHeight * 0.25) return
-
-  // Порог считается по видимой части входящей карточки, а не длине жеста.
-  startSnap(activeIndex.value + 1)
 }
 
 function schedulePosition() {
@@ -142,7 +103,6 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect()
   motionQuery?.removeEventListener('change', updateMotionPreference)
   window.removeEventListener('resize', measure)
-  releaseSnap()
   if (frame !== undefined) window.cancelAnimationFrame(frame)
 })
 </script>
