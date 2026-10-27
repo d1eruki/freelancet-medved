@@ -2,7 +2,7 @@
 <script setup>
 import { contacts } from '../data/contacts.js'
 import { sitePath } from '../utils/site-path'
-import logoUrl from '../assets/branding/brand-logo.svg'
+import logoUrl from '../assets/branding/brand-logo-wordmark.svg'
 import ContactForm from './ContactForm.vue'
 
 const showSocialLinks = false
@@ -34,7 +34,7 @@ const socialLinks = [
         <div class="min-w-0">
           <a class="block w-80 max-w-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-surface" :href="sitePath('/')" aria-label="МЁДВЕДЬ — на главную">
             <span
-              class="block aspect-511/133 w-full bg-surface"
+              class="block aspect-321/133 w-full bg-surface"
               :style="{ mask: `url('${logoUrl}') center / contain no-repeat` }"
               aria-hidden="true"
             />

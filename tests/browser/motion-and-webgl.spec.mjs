@@ -2,8 +2,6 @@ import { test, expect } from './fixtures.mjs'
 import { readFile } from 'node:fs/promises'
 
 const buildInfo = JSON.parse(await readFile(new URL('../../dist/site-variant.json', import.meta.url), 'utf8'))
-const client = buildInfo.variant === 'client'
-const kinds = client ? ['pair'] : ['can', 'glass']
 
 test.use({ reducedMotion: 'no-preference' })
 
@@ -25,107 +23,32 @@ async function switchDrink(page, isMobile, direction, slug) {
 }
 
 async function expectComposition(panel) {
-  const layers = panel.locator('.product-composition img')
-  if (client) await expect(layers).not.toHaveCount(0)
-  else await expect(layers).toHaveCount(4)
-  await expect.poll(() => layers.evaluateAll(images => {
-    const visible = images.filter(image => image.checkVisibility())
-    return visible.length > 0 && visible.every(image => image.complete && image.naturalWidth > 0)
-  })).toBe(true)
+  const image = panel.locator('img.product-glass')
+  await expect(image).toHaveCount(1)
+  await expect.poll(() => image.evaluate(node => node.complete && node.naturalWidth > 0)).toBe(true)
+  await expect(panel.getByRole('heading')).toBeVisible()
 }
 
-function modelIsMoving(model, isClient) {
-  // Клиентский бокал и кисть получают общий угол из расчёта инерции.
-  if (isClient) return Math.abs(Number.parseFloat(globalThis.getComputedStyle(model).rotate) || 0) > 0.1
-  return model.getAnimations().some(animation => animation.playState === 'running')
+async function expectTracksAligned(page) {
+  const tracks = page.locator('section[aria-labelledby="products-title"] .product-track')
+  await expect(tracks).toHaveCount(2)
+  const offsets = await tracks.evaluateAll(nodes => nodes.map(node =>
+    new globalThis.DOMMatrix(globalThis.getComputedStyle(node).transform).m41))
+  expect(Math.abs(offsets[0] - offsets[1])).toBeLessThan(1)
 }
 
-test('Статичные слои загружаются, а анимация не блокирует переключение и переход в каталог', async ({ page, openPage, isMobile }) => {
+test('Изображения и тексты переключаются вместе с паттерном, ссылки ведут в каталог', async ({ page, openPage, isMobile }) => {
   await openPage()
   await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
   await expect(page.locator('html')).toHaveAttribute('data-site-variant', buildInfo.variant)
   await expect(page.getByRole('link', { name: 'Перейти на сайт', exact: true })).toHaveAttribute('href', 'https://marionciders.com/')
   await expectComposition(page.getByRole('tabpanel'))
-  // Обрезанные модели и полноразмерные тени имеют разные прямоугольники,
-  // но их обёртки должны двигаться одинаково, а наклон — оставаться синхронным.
-  const current = page.getByRole('tabpanel')
-  const visibleHands = client && await current.locator('.paw-hand').evaluateAll(hands =>
-    hands.some(hand => hand.checkVisibility()))
-  // Записываем кадры до действия: короткая фаза ловли не должна зависеть
-  // от скорости команд Playwright и интервалов expect.poll.
-  const catchSamples = visibleHands ? await page.evaluateHandle(() => {
-    const recording = { samples: [], frame: 0 }
-    const sample = () => {
-      const panel = globalThis.document.querySelector('[role="tabpanel"][aria-hidden="false"]')
-      const model = panel?.querySelector('.product-model.product-pair')
-      if (panel?.getAttribute('aria-labelledby') === 'home-product-tab-sidr' && model) {
-        const style = element => globalThis.getComputedStyle(element)
-        const matrix = element => new globalThis.DOMMatrix(style(element).transform)
-        const angle = Number.parseFloat(style(model).rotate) || 0
-        if (angle < -0.1) {
-          const fingers = [...panel.querySelectorAll('.paw-fingers .product-grip')].find(image =>
-            Math.abs(matrix(image.closest('.product-layer-content')).m42) < 0.1)
-          recording.samples.push(fingers ? {
-            positionDifference: matrix(model.closest('.product-motion-layer')).m41
-              - matrix(fingers.closest('.paw-hand')).m41
-              - matrix(fingers.closest('.product-layer-content')).m41,
-            angleDifference: angle - (Number.parseFloat(style(fingers).rotate) || 0),
-          } : null)
-        }
-      }
-      recording.frame = globalThis.requestAnimationFrame(sample)
-    }
-    recording.frame = globalThis.requestAnimationFrame(sample)
-    return recording
-  }) : null
-  if (isMobile) await current.getByRole('button', { name: 'Следующий напиток' }).click()
-  else { await page.getByRole('tab', { selected: true }).focus(); await page.keyboard.press('ArrowRight') }
-  await expect(current).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
-  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(modelIsMoving, client)).toBe(true)
-  const motion = await current.evaluate((panel, kinds) => Object.fromEntries(kinds.map(kind => {
-    const model = panel.querySelector(`.product-model.product-${kind}`)
-    const wrapper = model.closest('.product-motion-layer')
-    return [kind, { delay: globalThis.getComputedStyle(wrapper).transitionDelay, tiltDelay: globalThis.getComputedStyle(model).animationDelay }]
-  })), kinds)
-  if (client) expect(motion.pair).toEqual({ delay: '0s', tiltDelay: '0s' })
-  else {
-    expect(motion.can).toEqual({ delay: '0s', tiltDelay: '0s' })
-    expect(motion.glass).toEqual({ delay: '0.1s', tiltDelay: '0.1s' })
+  for (const slug of ['sidr', 'puare']) {
+    await expectComposition(await switchDrink(page, isMobile, 'next', slug))
+    await expectTracksAligned(page)
   }
-  for (let sample = 0; sample < 6; sample++) {
-    const layers = await current.evaluate((panel, kinds) => kinds.map(kind => {
-      const model = panel.querySelector(`.product-model.product-${kind}`)
-      const shadow = panel.querySelector(`.product-shadow.product-${kind}`)
-      return {
-        modelMotion: globalThis.getComputedStyle(model.closest('.product-motion-layer')).transform,
-        shadowMotion: globalThis.getComputedStyle(shadow.closest('.product-motion-layer')).transform,
-        modelTilt: Number.parseFloat(globalThis.getComputedStyle(model).rotate) || 0,
-        shadowTilt: Number.parseFloat(globalThis.getComputedStyle(shadow).rotate) || 0,
-      }
-    }), kinds)
-    for (const layer of layers) {
-      expect(layer.modelMotion).toBe(layer.shadowMotion)
-      expect(Math.abs(layer.modelTilt - layer.shadowTilt)).toBeLessThan(0.1)
-    }
-    await page.waitForTimeout(50)
-  }
-  await expect(current).not.toHaveClass(/is-text-hidden/)
-  if (catchSamples) {
-    const contacts = await catchSamples.evaluate(recording => {
-      globalThis.cancelAnimationFrame(recording.frame)
-      return recording.samples
-    })
-    await catchSamples.dispose()
-    expect(contacts.length, 'Должна наблюдаться фаза ловли движущегося бокала').toBeGreaterThan(0)
-    for (const contact of contacts) {
-      expect(contact).not.toBeNull()
-      expect(Math.abs(contact.positionDifference)).toBeLessThan(0.1)
-      expect(Math.abs(contact.angleDifference)).toBeLessThan(0.1)
-    }
-  }
-  await expect.poll(() => current.locator(client ? '.product-model.product-pair' : '.product-model.product-can').evaluate(modelIsMoving, client)).toBe(false)
-  await expectComposition(await switchDrink(page, isMobile, 'next', 'puare'))
   const panel = await switchDrink(page, isMobile, 'previous', 'sidr')
+  await expectTracksAligned(page)
   await panel.getByRole('link', { name: 'Подробнее', exact: true }).click()
   await expect(page).toHaveURL(/\/katalog\/sidr\/$/)
 })
@@ -171,6 +94,7 @@ test('Перетаскивание переключает композицию �
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
   await page.mouse.move(start.x - viewport.width * 0.35, start.y, { steps: 8 })
+  await expectTracksAligned(page)
   await page.mouse.up()
   await expect(panel).toHaveAttribute('aria-labelledby', 'home-product-tab-sidr')
   await expectComposition(panel)

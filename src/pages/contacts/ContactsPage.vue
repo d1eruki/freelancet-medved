@@ -1,44 +1,13 @@
 <!-- Страница контактов с данными отделов и картой проезда. -->
 <script setup>
 import contactsHeroImageUrl from '../../assets/heroes/contacts/hero.png'
-import contactsHeroMiddleUrl from '../../assets/heroes/contacts/middle.png'
-import contactsDividerUrl from '../../assets/heroes/contacts/divider.png'
 import BaseButton from '../../components/BaseButton.vue'
 import BrandedMap from '../../components/branded-map.vue'
 import ContactInfoCard from './ContactInfoCard.vue'
 import PageHero from '../../components/PageHero.vue'
-import HeroDivider from '../../components/HeroDivider.vue'
 import ActionTile from '../../components/ActionTile.vue'
 import { contacts } from '../../data/contacts.js'
 import { sitePath } from '../../utils/site-path'
-
-const contactsHeroLayers = {
-  background: {
-    src: contactsHeroImageUrl,
-    className: 'absolute inset-0 size-full object-cover object-center',
-    alt: 'Иллюстрация кирпичного промышленного здания у воды',
-  },
-  middle: {
-    src: contactsHeroMiddleUrl,
-    className: 'absolute left-0 h-auto w-[82vw] sm:w-[55vw] wide:w-[44vw]',
-    alt: 'Рабочие загружают бочки в деревянную повозку у завода',
-  },
-}
-
-const contactsHeroLayout = {
-  mobile: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, scale: 3, x: -500, y: -200, constraints: { horizontal: 'left', vertical: 'bottom' } },
-  },
-  tablet: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, scale: 3, x: -600, y: -300, constraints: { horizontal: 'left', vertical: 'bottom' } },
-  },
-  desktop: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, scale: 1.5, x: -100, y: -200, constraints: { horizontal: 'left', vertical: 'bottom' } },
-  },
-}
 
 </script>
 
@@ -47,8 +16,8 @@ const contactsHeroLayout = {
     <PageHero
       class="contacts-hero"
       title-id="contacts-title"
-      :layers="contactsHeroLayers"
-      :layer-layout="contactsHeroLayout"
+      :image-url="contactsHeroImageUrl"
+      image-alt="Кирпичное промышленное здание у воды"
       layer-entrance="split-slide"
       animate-copy
     >
@@ -58,9 +27,8 @@ const contactsHeroLayout = {
       <span class="wide:block wide:whitespace-nowrap">медовуху, сидр и пуаре из Санкт-Петербурга.</span>
     </PageHero>
 
-    <HeroDivider :image-url="contactsDividerUrl" />
 
-    <section class="section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="contacts-details-title">
+    <section class="section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-28 wide:pb-28" aria-labelledby="contacts-details-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="contacts-details-title" class="font-display text-h2 wrap-break-word hyphens-auto uppercase nav:col-span-8">Связаться</h2>

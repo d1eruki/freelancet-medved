@@ -14,11 +14,10 @@ test('Браузер выбирает AVIF без параллельной за�
   ]).filter(Boolean))
   for (const fallback of fallbacks) expect(requests.has(new URL(fallback, page.url()).href)).toBe(false)
   await page.getByRole('heading', { name: 'Продукция', exact: true }).scrollIntoViewIfNeeded()
-  // Обёртка выбора формата сохраняет позиционирование слоёв через scoped-стили родителя.
-  const productImages = page.locator('.product-composition img.product-layer')
-  expect(await productImages.count()).toBeGreaterThan(0)
-  expect(await productImages.evaluateAll(images => images.every(image =>
-    globalThis.getComputedStyle(image).position === 'absolute'))).toBe(true)
+  const productImages = page.getByRole('tabpanel').locator('img.product-glass')
+  await expect(productImages).toHaveCount(1)
+  await expect.poll(() => productImages.evaluate(image =>
+    image.complete && image.naturalWidth > 0 && /\.avif$/.test(image.currentSrc))).toBe(true)
 })
 
 test('WebP остаётся рабочим запасным форматом без поддержки AVIF и JavaScript', async ({ page, baseURL }) => {
@@ -40,7 +39,7 @@ test('WebP остаётся рабочим запасным форматом б�
 test('Параллакс применяет последнее движение за кадр и отменяет движение после ухода мыши', async ({ page, openPage, isMobile }) => {
   test.skip(isMobile, 'Параллакс предназначен для точного указателя')
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await openPage('katalog/')
+  await openPage()
   const result = await page.locator('.layered-hero-composition').evaluate(async composition => {
     const section = composition.parentElement
     const original = section.getBoundingClientRect.bind(section)
@@ -79,7 +78,7 @@ test('Параллакс применяет последнее движение 
 
 test('Hero останавливает расчёты вне экрана и в скрытой вкладке, затем возобновляет', async ({ page, openPage }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await openPage('katalog/')
+  await openPage()
   const composition = page.locator('.layered-hero-composition')
   const layer = composition.locator('.hero-composition-layer-float').first()
   await expect.poll(() => layer.evaluate(image => image.style.animationPlayState)).toBe('running')
@@ -138,7 +137,7 @@ test('Hero получает стартовую геометрию без син�
       return original.call(this)
     }
   })
-  for (const path of ['', 'katalog/']) {
+  for (const path of ['']) {
     await openPage(path)
     const layer = page.locator('.hero-composition-layer-float').first()
     await expect.poll(() => layer.evaluate(image => image.style.animationPlayState)).toBe('running')
@@ -203,7 +202,7 @@ test('Типографика сохраняет динамический тек�
   await expect.poll(() => host.locator('p').textContent()).toBe('На\u00a0Санкт‑Петербург и\u00a0в\u00a0город')
 })
 
-test('Gabin загружается через WOFF2 без второй загрузки TTF', async ({ page, openPage }) => {
+test('Шрифты раннего оформления загружаются через WOFF2 без повторных запросов', async ({ page, openPage }) => {
   const fonts = []
   page.on('request', request => {
     if (request.resourceType() === 'font') fonts.push(request.url())
@@ -211,9 +210,14 @@ test('Gabin загружается через WOFF2 без второй загр
   await openPage()
   const loaded = await page.evaluate(async () => {
     await globalThis.document.fonts.ready
-    return [...globalThis.document.fonts].filter(font => font.family === 'Gabin').map(font => font.status)
+    return ['Involve', 'Climate Crisis', 'Tsvik SP'].map(family => ({
+      family,
+      statuses: [...globalThis.document.fonts].filter(font => font.family.replaceAll(/['"]/g, '') === family).map(font => font.status),
+    }))
   })
-  expect(loaded).toEqual(['loaded'])
-  expect(fonts.filter(url => /gabin-.*\.woff2$/.test(url))).toHaveLength(1)
+  for (const font of loaded) expect(font.statuses, font.family).toEqual(['loaded'])
+  for (const prefix of ['involve-variable', 'climate-crisis-site', 'tsvik-sp-demo-site']) {
+    expect(fonts.filter(url => url.includes(`/${prefix}-`) && url.endsWith('.woff2')), prefix).toHaveLength(1)
+  }
   expect(fonts.some(url => /\.ttf(?:\?|$)/.test(url))).toBe(false)
 })

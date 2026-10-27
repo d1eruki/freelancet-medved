@@ -1,10 +1,9 @@
 <!-- Слайд категории продукции с описанием, композицией и навигацией. -->
 <script setup>
 import { computed } from 'vue'
-import ProductComposition from '#product-composition'
+import SiteImage from '../../components/site-image.vue'
 import CircleArrow from '../../components/CircleArrow.vue'
 import BaseButton from '../../components/BaseButton.vue'
-import { siteVariant } from '../../data/site-variants.js'
 
 const props = defineProps({
   product: {
@@ -31,14 +30,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-  pawMotion: { type: Object, default: undefined },
 })
 const emit = defineEmits(['previous', 'next'])
 
 const dragAngleCss = computed(() => `${props.dragAngle}deg`)
-const compositionMotion = computed(() => siteVariant.name === 'client' ? {
-  pawMotion: props.pawMotion,
-} : {})
 </script>
 
 <template>
@@ -46,25 +41,25 @@ const compositionMotion = computed(() => siteVariant.name === 'client' ? {
     class="product-card relative isolate block bg-transparent"
     :class="{
       'is-text-hidden': textHidden,
-      'is-moving-forward': siteVariant.name !== 'client' && motionDirection === 'forward',
-      'is-moving-backward': siteVariant.name !== 'client' && motionDirection === 'backward',
+      'is-moving-forward': motionDirection === 'forward',
+      'is-moving-backward': motionDirection === 'backward',
       'is-dragging': dragging,
     }"
     :aria-label="product.name"
   >
     <div class="site-container relative flex flex-col items-center py-6 text-center sm:py-8 nav:grid nav:h-full nav:min-h-0 site-grid nav:grid-rows-2 nav:text-left">
       <div class="product-copy relative z-0 w-full max-w-md nav:col-span-4 nav:row-span-2 nav:max-w-none nav:self-center">
-        <h3 class="font-display text-product-title text-surface uppercase">
+        <h3 class="font-display text-h3 text-brand uppercase">
           {{ product.name }}
         </h3>
 
-        <p class="mx-auto mt-6 max-w-sm text-body font-medium text-surface nav:mx-0">
+        <p class="mx-auto mt-6 max-w-sm text-body font-medium text-foreground nav:mx-0">
           {{ product.description }}
         </p>
       </div>
 
       <div class="contents nav:relative nav:z-2 nav:col-span-4 nav:col-start-9 nav:row-span-2 nav:block nav:w-full nav:self-center">
-        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium text-surface nav:mx-0 nav:mt-0">
+        <p class="product-copy relative z-2 order-1 mx-auto mt-8 w-full max-w-md text-body font-medium text-foreground nav:mx-0 nav:mt-0">
           {{ product.varieties }}
         </p>
 
@@ -97,7 +92,16 @@ const compositionMotion = computed(() => siteVariant.name === 'client' ? {
           :tabindex="active ? 0 : -1"
           :aria-label="`Подробнее о напитке «${product.name}»`"
         >
-          <ProductComposition :renders="product.renders" v-bind="compositionMotion" />
+          <SiteImage
+            class="product-glass size-full object-contain"
+            :src="product.image.src"
+            :srcset="product.image.srcset"
+            sizes="(min-width: 54rem) min(48vw, 576px), (min-width: 40rem) 448px, min(100vw - 144px, 384px)"
+            width="1254"
+            height="1254"
+            alt=""
+            draggable="false"
+          />
         </a>
 
         <button
@@ -123,18 +127,13 @@ const compositionMotion = computed(() => siteVariant.name === 'client' ? {
   opacity: 0;
 }
 
-.is-moving-forward :deep(.product-layer:not(.product-grip)) {
+.is-moving-forward :deep(.product-glass) {
   animation: product-inertia-forward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.is-moving-backward :deep(.product-layer:not(.product-grip)) {
+.is-moving-backward :deep(.product-glass) {
   animation: product-inertia-backward 820ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.is-moving-forward :deep(.product-layer.product-glass), .is-moving-backward :deep(.product-layer.product-glass) {
-  animation-delay: 100ms;
-  animation-fill-mode: backwards;
-}
-.is-dragging :deep(.product-composition), .is-dragging :deep(.product-motion-layer), .is-dragging :deep(.product-layer) { transition: none; }
-.is-dragging :deep(.product-layer:not(.product-grip)) { rotate: v-bind(dragAngleCss); }
+.is-dragging :deep(.product-glass) { transition: none; rotate: v-bind(dragAngleCss); }
 
 @keyframes product-inertia-forward {
   0% {
@@ -180,7 +179,7 @@ const compositionMotion = computed(() => siteVariant.name === 'client' ? {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  :deep(.product-layer) {
+  :deep(.product-glass) {
     animation: none;
     rotate: none;
     transition: none;

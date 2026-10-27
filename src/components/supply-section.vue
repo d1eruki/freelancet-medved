@@ -1,9 +1,7 @@
 <!-- Секция обращения в отдел оптовых поставок. -->
 <script setup>
-import SiteImage from './site-image.vue'
 import SectionLink from './SectionLink.vue'
 import { sitePath } from '../utils/site-path'
-import deliveryHorseCartUrl from '../assets/horeca/delivery-horse-cart-catalog.png'
 
 defineProps({
   headingId: { type: String, required: true },
@@ -14,7 +12,6 @@ defineProps({
   },
   href: { type: String, default: () => sitePath('/kontakty/') },
   label: { type: String, default: 'Контакты' },
-  imageUrl: { type: String, default: deliveryHorseCartUrl },
 })
 </script>
 
@@ -35,12 +32,9 @@ defineProps({
       <span v-for="(line, index) in description.split('\n')" :key="index" class="nav:block">{{ `${line} ` }}</span>
     </template>
     <template #illustration>
-      <SiteImage
-        :src="imageUrl"
-        alt=""
-        decoding="async"
-        class="block h-auto w-full"
-      />
+      <div class="grid aspect-square w-full place-items-center bg-gray-300 text-body-large font-semibold text-gray-700">
+        Заглушка
+      </div>
     </template>
   </SectionLink>
 </template>

@@ -1,21 +1,38 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Gabin";
+  font-family: "Involve";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/involve-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Climate Crisis";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../assets/fonts/gabin.woff2") format("woff2");
+  src: url("../assets/fonts/climate-crisis-site.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Tsvik SP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/tsvik-sp-demo-site.woff2") format("woff2");
 }
 
 @theme {
   --color-brand: var(--site-brand); /* Vite подставляет цвет из site-variants.js. */
   --color-foreground: #101010;
-  --color-surface: #fff4df;
-  --color-panel: #f0e2c9;
+  --color-surface: #ffffff;
+  --color-panel: #efefef;
   --color-subtle: #686868;
-  --font-body: Georgia, serif;
-  --font-display: "Gabin", Georgia, serif;
+  --font-body: "Involve", Arial, sans-serif;
+  --font-display: "Climate Crisis", "Arial Black", sans-serif;
+  --font-handwriting: "Tsvik SP", cursive;
   --leading-none: 1;
   --text-h1: clamp(2rem, 8vw, 7rem);
   --text-h1--line-height: var(--leading-none);

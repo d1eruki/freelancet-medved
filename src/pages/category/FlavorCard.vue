@@ -1,11 +1,9 @@
 <!-- Карточка напитка с характеристиками и переключением вариантов упаковки. -->
 <script setup>
 import SiteImage from '../../components/site-image.vue'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { IconBlur, IconCandy, IconCandyOff, IconCircles, IconDroplet, IconDropletHalf2, IconFilterOff, IconLeaf, IconPercentage, IconSparkles } from '@tabler/icons-vue'
 import ProductAttribute from '../../components/product-attribute.vue'
-import popularCardBackground from '../../assets/ui/popular-card-background.webp'
-import regularCardBackground from '../../assets/ui/regular-card-background.png'
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -43,34 +41,6 @@ const attributes = computed(() => (activeVariant.value.details ?? props.item.det
   .filter(Boolean)
   .map(label => ({ label: label.charAt(0).toUpperCase() + label.slice(1), icon: attributeIcons[label] ?? IconLeaf })))
 const displayName = computed(() => props.item.name.replace(/^(?:Сидр|Медовуха|Пуаре)\s+/u, ''))
-const card = ref(null)
-const background = ref(null)
-const productViewport = ref(null)
-const productClip = ref({ clipPath: 'circle(50% at 50% 50%)' })
-let resizeObserver
-
-function updateProductClip() {
-  const image = background.value
-  if (!props.item.popular || !image?.naturalWidth || !productViewport.value) return
-  const frame = card.value.getBoundingClientRect()
-  const viewport = productViewport.value.getBoundingClientRect()
-  // В исходном плакате центр отверстия — (525, 378), радиус — 269 px.
-  // Повторяем object-cover/object-top фона, включая боковую обрезку.
-  const scale = Math.max(frame.width / image.naturalWidth, frame.height / image.naturalHeight)
-  const x = frame.left - viewport.left + (frame.width - image.naturalWidth * scale) / 2 + 525 * scale
-  const y = frame.top - viewport.top + 378 * scale
-  productClip.value = { clipPath: `circle(${269 * scale}px at ${x}px ${y}px)` }
-}
-
-onMounted(() => {
-  if (!props.item.popular) return
-  resizeObserver = new ResizeObserver(updateProductClip)
-  resizeObserver.observe(card.value)
-  resizeObserver.observe(productViewport.value)
-  updateProductClip()
-})
-onBeforeUnmount(() => resizeObserver?.disconnect())
-
 function selectVariant(index) {
   if (index === activeVariantIndex.value) return
   transitionDirection.value = index > activeVariantIndex.value ? 'forward' : 'backward'
@@ -80,24 +50,15 @@ function selectVariant(index) {
 
 <template>
   <li
-    ref="card"
     class="relative isolate flex min-h-80 flex-col overflow-hidden rounded-3xl bg-surface p-6 sm:p-8"
   >
-    <SiteImage
-      :ref="node => background = node?.element"
-      class="pointer-events-none absolute inset-0 -z-1 h-full w-full object-cover object-top"
-      :src="item.popular ? popularCardBackground : regularCardBackground"
-      alt=""
-      aria-hidden="true"
-      @load="updateProductClip"
-    />
     <span
       v-if="item.popular"
       class="absolute top-6 right-6 z-10 rounded-full bg-brand px-3 py-2 text-caption font-extrabold tracking-wide text-surface uppercase sm:top-8 sm:right-8"
     >
       Популярное
     </span>
-    <div ref="productViewport" class="relative h-64 w-full" :style="item.popular ? productClip : undefined">
+    <div class="relative h-64 w-full">
       <Transition
         enter-active-class="transition-[translate] duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
         leave-active-class="transition-[translate] duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"

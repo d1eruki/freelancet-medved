@@ -1,4 +1,4 @@
-import logoUrl from '../assets/branding/brand-logo.svg'
+import logoUrl from '../assets/branding/brand-logo-wordmark.svg'
 import { contacts } from '../data/contacts.js'
 
 export function createStructuredData(page, assetUrl) {

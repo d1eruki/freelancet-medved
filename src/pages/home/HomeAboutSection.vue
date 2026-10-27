@@ -1,7 +1,7 @@
 <!-- Секция главной страницы о компании и её направлениях. -->
 <script setup>
 import SiteImage from '../../components/site-image.vue'
-import productionImage from '../../assets/production-real.png?responsive'
+import productionImage from '../../assets/home/production-photo.png?responsive'
 import marionLogoUrl from '../../assets/home/marion-logo.png'
 import marionWoman from '../../assets/home/marion-woman.png?responsive'
 import { catalogCategories } from '../../data/catalog'
@@ -111,7 +111,7 @@ import { siteVariant } from '../../data/site-variants.js'
 
         <figure class="relative z-10 flex items-end pt-8 nav:pt-10">
           <SiteImage
-            class="block h-auto w-full origin-bottom translate-x-10 scale-125 nav:-translate-x-28"
+            class="block h-auto w-full object-contain"
             :src="marionWoman.src"
             :srcset="marionWoman.srcset"
             sizes="(min-width: 54rem) calc((min(100vw, 1480px) - 72px) / 2), calc(100vw - 32px)"

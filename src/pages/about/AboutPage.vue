@@ -1,16 +1,12 @@
 <!-- Страница компании с историей, напитками и наградами. -->
 <script setup>
 import SiteImage from '../../components/site-image.vue'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import aboutHeroForeground from '../../assets/heroes/about/foreground.png?responsive'
-import aboutHeroMiddle from '../../assets/heroes/about/middle.png?responsive'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import aboutHeroBackground from '../../assets/heroes/about/background.png?responsive'
 import SectionWatermark from '../../components/SectionWatermark.vue'
 import { sitePath } from '../../utils/site-path'
 import aboutCompanyImageUrl from '../../assets/about/about-company-enhanced.png'
-import threeCategoryGlassesUrl from '../../assets/about/three-category-glasses.png'
-import aboutDividerUrl from '../../assets/heroes/about/divider.png'
-import durdinPortraitUrl from '../../assets/about/durdin-portrait.png'
+import breweryBuildingUrl from '../../assets/about/brewery-building.jpg'
 import awardInterfood2007Url from '../../assets/awards/award-interfood-2007.jpg'
 import awardMedovukhaFest2016Url from '../../assets/awards/award-medovukha-fest-2016.jpg'
 import awardNewProduct2007Url from '../../assets/awards/award-new-product-2007.jpg'
@@ -21,42 +17,8 @@ import BaseButton from '../../components/BaseButton.vue'
 import ContactActionSection from '../../components/contact-action-section.vue'
 import AwardCard from './AwardCard.vue'
 import PageHero from '../../components/PageHero.vue'
-import HeroDivider from '../../components/HeroDivider.vue'
-import CategoryGlass from './CategoryGlass.vue'
-
-const categoriesSection = ref(null)
-const categoriesSize = ref({ width: 1536, height: 1024 })
-let categoriesResizeObserver
-const categoriesStageStyle = computed(() => {
-  const scale = Math.max(categoriesSize.value.width / 1536, categoriesSize.value.height / 1024)
-  return { width: `${1536 * scale}px`, height: `${1024 * scale}px` }
-})
-const categoryGlasses = [
-  {
-    label: 'Медовуха', href: sitePath('/katalog/medovuha/'), image: threeCategoryGlassesUrl,
-    bounds: { x: 394, y: 327, width: 232, height: 422 },
-    contour: 'M 403 350 C 400 339 445 327 507 328 C 566 328 618 338 618 350 L 617 388 C 617 411 626 431 624 453 C 624 471 614 486 613 504 L 601 727 C 602 741 572 750 511 750 C 461 750 423 741 420 727 L 407 510 C 406 489 395 470 395 450 C 393 430 404 408 405 389 Z',
-  },
-  {
-    label: 'Сидр', href: sitePath('/katalog/sidr/'), image: threeCategoryGlassesUrl,
-    bounds: { x: 654, y: 335, width: 225, height: 419 },
-    contour: 'M 661 350 C 661 339 706 335 766 336 C 825 336 873 340 874 350 L 872 389 C 872 413 880 433 880 451 C 880 470 869 485 869 505 L 858 731 C 858 746 819 754 769 754 C 718 754 679 745 678 731 L 666 509 C 665 488 654 471 654 453 C 653 434 662 412 663 391 Z',
-  },
-  {
-    label: 'Пуаре', href: sitePath('/katalog/puare/'), image: threeCategoryGlassesUrl,
-    bounds: { x: 909, y: 335, width: 227, height: 419 },
-    contour: 'M 915 350 C 914 339 958 334 1019 335 C 1081 335 1128 340 1128 350 L 1126 389 C 1127 412 1135 433 1134 451 C 1134 472 1122 487 1121 507 L 1107 731 C 1106 746 1066 754 1019 754 C 974 754 934 745 932 731 L 918 510 C 917 489 907 472 907 453 C 906 434 915 412 916 391 Z',
-  },
-]
-
-onMounted(() => {
-  categoriesResizeObserver = new ResizeObserver(([entry]) => {
-    categoriesSize.value = { width: entry.contentRect.width, height: categoriesSection.value.offsetHeight }
-  })
-  categoriesResizeObserver.observe(categoriesSection.value)
-})
-
-onBeforeUnmount(() => categoriesResizeObserver?.disconnect())
+import CatalogCategoryCard from '../catalog/CatalogCategoryCard.vue'
+import { catalogCategories } from '../../data/catalog.js'
 
 const awardsTrack = ref(null)
 const canScrollAwardsBack = ref(false)
@@ -98,42 +60,6 @@ onBeforeUnmount(() => {
   awardsResizeObserver?.disconnect()
 })
 
-const aboutHeroLayout = {
-  mobile: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: false, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1, x: 40, y: -100 },
-    foreground: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 3, x: 350, y: 0 },
-  },
-  tablet: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2.3, x: -200, y: -50 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.7, x: -50, y: -50 },
-  },
-  desktop: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
-    foreground: { enabled: true, constraints: { horizontal: 'right', vertical: 'bottom' }, scale: 0.9, x: 0, y: -50 },
-  },
-}
-
-const aboutHeroLayers = {
-  background: {
-    ...aboutHeroBackground,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
-    alt: 'Старинная иллюстрация: мастер работает с медовыми сотами у окна с видом на Петербург',
-  },
-  middle: {
-    ...aboutHeroMiddle,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
-  },
-  foreground: {
-    ...aboutHeroForeground,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
-  },
-}
 
 const awards = [
   {
@@ -175,8 +101,8 @@ const awards = [
     <PageHero
       title-id="about-page-title"
       :title-z-index="0"
-      :layers="aboutHeroLayers"
-      :layer-layout="aboutHeroLayout"
+      :image-url="aboutHeroBackground.src"
+      image-alt="Мастер с медовыми сотами в петербургской мастерской"
       layer-entrance="foreground-first"
     >
       <template #title>Традиция<br>живёт здесь</template>
@@ -185,9 +111,8 @@ const awards = [
       <span class="wide:block wide:whitespace-nowrap">характером и узнаваемыми рецептами.</span>
     </PageHero>
 
-    <HeroDivider :image-url="aboutDividerUrl" />
 
-    <section class="bg-surface pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="tradition-title">
+    <section class="bg-surface pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-28 wide:pb-28" aria-labelledby="tradition-title">
       <div class="site-container grid gap-12 site-grid wide:gap-y-16">
         <div class="nav:col-span-12">
           <p class="font-display text-h1 text-brand uppercase">Медовуха</p>
@@ -220,10 +145,10 @@ const awards = [
               <p class="font-display text-h1 text-surface">1874</p>
               <p class="mt-3 text-label font-extrabold tracking-widest uppercase">Солодовня на Обводном канале</p>
             </div>
-            <SiteImage width="1024" height="1536"
-              class="order-last mx-auto -mb-10 block h-auto w-full max-w-64 -scale-x-100 nav:absolute nav:order-none nav:mt-75 nav:mb-0 nav:ml-35 nav:max-w-sm nav:-scale-x-250 nav:scale-250"
-              :src="durdinPortraitUrl"
-              alt="Стилизованный портрет Ивана Алексеевича Дурдина с подмигиванием"
+            <SiteImage
+              class="mt-10 block aspect-square w-full rounded-3xl object-cover"
+              :src="breweryBuildingUrl"
+              alt="Историческое кирпичное здание петербургского завода"
               decoding="async"
             />
           </div>
@@ -281,20 +206,14 @@ const awards = [
       </div>
     </section>
 
-    <section ref="categoriesSection" class="relative isolate flex min-h-svh flex-col overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="products-title" aria-describedby="products-description">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" :style="categoriesStageStyle">
-        <SiteImage width="1536" height="1024" :src="threeCategoryGlassesUrl" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full"/>
-        <CategoryGlass v-for="glass in categoryGlasses" :key="glass.label" v-bind="glass" />
-      </div>
-      <span class="pointer-events-none absolute inset-0 bg-linear-to-b from-foreground/75 via-transparent to-transparent" aria-hidden="true" />
-      <div class="site-container pointer-events-none relative z-10 flex flex-1 flex-col items-center text-center">
+    <section class="bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="products-title" aria-describedby="products-description">
+      <div class="site-container">
         <h2 id="products-title" class="font-display text-h2 uppercase">Три категории</h2>
         <p id="products-description" class="mt-6 max-w-3xl text-body-large font-medium">Медовуха, сидр и пуаре — три характера напитков «МЁДВЕДЬ».</p>
-
-        <BaseButton class="pointer-events-auto mt-auto gap-4" variant="surface" :href="sitePath('/katalog/')">
-          <span>Перейти в каталог</span>
-          <span class="text-body-large" aria-hidden="true">→</span>
-        </BaseButton>
+        <ul class="mt-12 grid gap-4 text-foreground sm:mt-16 nav:grid-cols-3">
+          <CatalogCategoryCard v-for="category in catalogCategories" :key="category.slug" :category="category" />
+        </ul>
+        <BaseButton class="mt-10" variant="surface" :href="sitePath('/katalog/')">Перейти в каталог</BaseButton>
       </div>
     </section>
 

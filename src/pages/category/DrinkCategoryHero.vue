@@ -11,8 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <section class="relative isolate min-h-svh overflow-hidden bg-foreground text-surface" :aria-labelledby="`${category.slug}-title`">
-    <SiteImage critical v-if="category.heroBackground" :src="category.heroBackground" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full object-cover object-center"/>
+  <section class="relative isolate min-h-svh overflow-hidden bg-brand text-surface" :aria-labelledby="`${category.slug}-title`">
 
     <div class="site-container absolute inset-x-0 top-28 z-2 sm:top-40">
       <nav class="mx-auto mt-6 flex w-max max-w-full gap-3 overflow-x-auto nav:absolute nav:top-0 nav:left-1/2 nav:mt-0 nav:-translate-x-1/2" aria-label="Виды напитков">
@@ -34,6 +33,6 @@ defineProps({
         <span v-for="line in category.heroDescription" :key="line" class="wide:block wide:whitespace-nowrap">{{ line }}</span>
       </p>
     </div>
-    <SiteImage critical class="absolute top-[66%] left-1/2 w-[125vw] max-w-none -translate-x-1/2 sm:top-[62%] sm:w-[90vw] nav:top-[60%] nav:w-[75vw]" :src="category.image" :alt="category.imageAlt"/>
+    <SiteImage critical class="absolute top-[66%] left-1/2 w-[85vw] max-w-none -translate-x-1/2 sm:top-[62%] sm:w-[65vw] nav:top-[60%] nav:w-[45vw]" :src="category.image" :alt="category.imageAlt"/>
   </section>
 </template>

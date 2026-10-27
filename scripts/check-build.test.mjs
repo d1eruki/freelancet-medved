@@ -37,7 +37,7 @@ test('hero image media queries follow the existing visibility settings', () => {
 
 test('server HTML keeps critical sources and defers lower production images', async () => {
   const html = await readFile(path.join(output, 'proizvodstvo/index.html'), 'utf8')
-  assert.match(html, /<source[^>]+media="\(40rem &lt;= width &lt; 80rem\), \(width &gt;= 80rem\)"[^>]+srcset=/)
+  assert.match(html, /<img\b[^>]*src="[^"]*production-photo[^"]*"[^>]*loading="eager"/)
   const stepImages = [...html.matchAll(/<img\b[^>]*data-src="([^"]*production-brewing[^"]*)"[^>]*>/g)]
   assert.equal(stepImages.length, 1)
   assert.doesNotMatch(stepImages[0][0], /(?:\s)src=/)
@@ -430,28 +430,34 @@ test('image and script URLs resolve, raster output uses WebP/AVIF and srcset wid
   }
 })
 
-test('responsive images include small candidates and Gabin uses one preloaded WOFF2', async () => {
+test('responsive images include small candidates and typography uses preloaded WOFF2', async () => {
   const files = await readdir(path.join(output, 'assets'))
   assert.ok(files.some(file => /-320w-[^.]+\.webp$/.test(file)), 'missing 320 px images')
   assert.ok(files.some(file => /-480w-[^.]+\.webp$/.test(file)), 'missing 480 px images')
   assert.ok(files.some(file => /-320w-[^.]+\.avif$/.test(file)), 'missing 320 px AVIF images')
   assert.ok(files.some(file => /-480w-[^.]+\.avif$/.test(file)), 'missing 480 px AVIF images')
   assert.ok(!files.some(file => /\.ttf$/i.test(file)), 'TTF must not be published')
-  const fontFiles = files.filter(file => /^gabin-.*\.woff2$/.test(file))
-  assert.equal(fontFiles.length, 1)
-  const font = await readFile(path.join(output, 'assets', fontFiles[0]))
-  assert.equal(font.toString('ascii', 0, 4), 'wOF2')
-  assert.ok(font.length < (await stat('src/assets/fonts/gabin.ttf')).size)
+  const fontPrefixes = ['climate-crisis-site', 'involve-variable', 'tsvik-sp-demo-site']
   const css = (await Promise.all(files.filter(file => file.endsWith('.css')).map(file =>
     readFile(path.join(output, 'assets', file), 'utf8')))).join('\n')
-  assert.ok(css.includes(fontFiles[0]), 'CSS and preload must use the same font')
+  const fontFiles = []
+  for (const prefix of fontPrefixes) {
+    const matches = files.filter(file => file.startsWith(`${prefix}-`) && file.endsWith('.woff2'))
+    assert.equal(matches.length, 1, prefix)
+    const font = await readFile(path.join(output, 'assets', matches[0]))
+    assert.equal(font.toString('ascii', 0, 4), 'wOF2', prefix)
+    assert.ok(css.includes(matches[0]), `CSS must reference ${prefix}`)
+    fontFiles.push(matches[0])
+  }
   for (const url of [...urls, `${origin}/404.html`]) {
     const route = new URL(url).pathname.slice(1)
     const html = await readFile(path.join(output, route, route.endsWith('.html') ? '' : 'index.html'), 'utf8')
     const preloads = [...html.matchAll(/<link\b[^>]*rel="preload"[^>]*as="font"[^>]*>/g)]
-    assert.equal(preloads.length, 1, url)
-    assert.ok(preloads[0][0].includes(fontFiles[0]), url)
-    assert.match(preloads[0][0], /type="font\/woff2"/)
+    assert.equal(preloads.length, 2, url)
+    for (const file of fontFiles.slice(0, 2)) {
+      assert.equal(preloads.filter(([tag]) => tag.includes(file)).length, 1, `${url}: ${file}`)
+    }
+    for (const [tag] of preloads) assert.match(tag, /type="font\/woff2"/)
   }
 })
 
@@ -523,20 +529,7 @@ async function builtAsset(source, extension) {
   return readFile(path.join(output, asset.file))
 }
 
-async function assertTexturePreserved(original, optimized) {
-  const decode = input => sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
-  const [before, after] = await Promise.all([decode(original), decode(optimized)])
-  for (const field of ['width', 'height', 'channels']) assert.equal(after.info[field], before.info[field], field)
-  // WebP не сохраняет невидимый RGB при нулевой альфе; цвет видимых пикселей и альфа должны совпасть.
-  for (const { data } of [before, after]) {
-    for (let index = 0; index < data.length; index += 4) {
-      if (data[index + 3] === 0) data.fill(0, index, index + 3)
-    }
-  }
-  assert.ok(before.data.equals(after.data), 'texture pixels or transparency changed')
-}
-
-test('selected variant is present in prerendered HTML and excludes the other slider', async () => {
+test('selected variant and shared photographic slider are present in prerendered HTML', async () => {
   assert.equal(buildInfo.version, 1)
   for (const url of [...urls, `${origin}/404.html`]) {
     const pathname = new URL(url).pathname
@@ -552,42 +545,21 @@ test('selected variant is present in prerendered HTML and excludes the other sli
   const motionScope = css.match(/\.is-moving-forward\[data-v-([0-9a-f]+)\]/)?.[1]
   const firstPanel = homeHtml.match(/<article\b[^>]*id="home-product-panel-medovuha"[^>]*>/)?.[0]
   assert.ok(motionScope && firstPanel?.includes(`data-v-${motionScope}`), 'Prerendered slider must match its scoped animation rules')
-  assert.equal((homeHtml.match(/class="product-layer-clip"/g) || []).length, variant.name === 'client' ? 6 : 12)
-  const sources = Object.keys(manifest).join('\n')
-  if (variant.name === 'client') {
-    assert.doesNotMatch(sources, /product-renders\/[^/]+-can(?:-shadow)?\.webp/)
-    assert.ok(!manifest['src/components/ProductComposition.vue'])
-  } else {
-    assert.doesNotMatch(sources, /product-renders\/[^/]+-pair(?:-shadow)?\.webp/)
-    assert.ok(!manifest['src/components/product-composition-client.vue'])
-  }
+  assert.equal((homeHtml.match(/<img\b[^>]*class="[^"]*\bproduct-glass\b/g) || []).length, 3)
+  assert.doesNotMatch(homeHtml, /class="product-layer-clip"/)
 })
 
-test('active slider images retain dimensions and transparent shadows', async () => {
-  for (const slug of ['medovuha', 'sidr', 'puare']) {
-    const glassSource = `src/assets/home/product-renders/${slug}-glass-clean.png`
-    const glass = await sharp(await builtAsset(glassSource, '.webp')).metadata()
-    const originalGlass = await sharp(glassSource).metadata()
-    assert.deepEqual([glass.width, glass.height], [originalGlass.width, originalGlass.height])
-    assert.ok(glass.hasAlpha, glassSource)
-    const layers = variant.name === 'client' ? ['pair-shadow'] : ['can', 'glass-shadow', 'can-shadow']
-    for (const layer of layers) {
-      const source = `src/assets/home/product-renders/${slug}-${layer}.webp`
-      const original = await readFile(source)
-      const built = await builtAsset(source, '.webp')
-      await assertTexturePreserved(original, built)
+test('slider images retain source dimensions and transparency in both modern formats', async () => {
+  for (const slug of ['mead', 'cider', 'perry']) {
+    const source = `src/assets/home/neuro-${slug}-glass.png`
+    const original = await sharp(source).metadata()
+    for (const extension of ['.webp', '.avif']) {
+      const built = await builtAsset(source, extension)
+      const metadata = await sharp(built).metadata()
+      assert.deepEqual([metadata.width, metadata.height], [original.width, original.height], source)
+      assert.ok(metadata.hasAlpha, source)
       const stats = await sharp(built).stats()
-      assert.ok(stats.channels[3]?.max > 0 && !stats.isOpaque, source)
-      if (!layer.endsWith('shadow')) continue
-      const { data, info } = await sharp(built).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
-      for (let x = 0; x < info.width; x++) {
-        assert.equal(data[x * info.channels + 3], 0, source)
-        assert.equal(data[((info.height - 1) * info.width + x) * info.channels + 3], 0, source)
-      }
-      for (let y = 0; y < info.height; y++) {
-        assert.equal(data[(y * info.width) * info.channels + 3], 0, source)
-        assert.equal(data[(y * info.width + info.width - 1) * info.channels + 3], 0, source)
-      }
+      assert.ok(!stats.isOpaque && stats.channels[3]?.max > 0, source)
     }
   }
 })

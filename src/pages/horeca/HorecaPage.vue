@@ -2,11 +2,8 @@
 <script setup>
 import SiteImage from '../../components/site-image.vue'
 import { ref } from 'vue'
-import horecaHeroForeground from '../../assets/heroes/horeca/foreground.png?responsive'
-import horecaHeroMiddle from '../../assets/heroes/horeca/middle.png?responsive'
-import horecaHeroBackground from '../../assets/heroes/horeca/background.png?responsive'
+import horecaHeroBackground from '../../assets/about/about-company-enhanced.png?responsive'
 import PageHero from '../../components/PageHero.vue'
-import HeroDivider from '../../components/HeroDivider.vue'
 import ContactActionSection from '../../components/contact-action-section.vue'
 import InfoCard from '../../components/InfoCard.vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -15,47 +12,10 @@ import CatalogCategoryCard from '../catalog/CatalogCategoryCard.vue'
 import HorecaCocktailsSection from './HorecaCocktailsSection.vue'
 import { catalogCategories } from '../../data/catalog'
 import { sitePath } from '../../utils/site-path'
-import horecaDividerUrl from '../../assets/heroes/horeca/divider.png'
-import deliveryHorseCartUrl from '../../assets/horeca/delivery-horse-cart.png'
+import deliveryPhotoUrl from '../../assets/horeca/delivery-photo.jpg'
 
 const isTastingFormOpen = ref(false)
 
-const horecaHeroLayout = {
-  mobile: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: false, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2.5, x: 100, y: -100 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 2, x: 0, y: -50 },
-  },
-  tablet: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.65, x: 100, y: 0 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.65, x: 300, y: -50 },
-  },
-  desktop: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.9, x: 100, y: 0 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.9, x: 200, y: -100 },
-  },
-}
-
-const horecaHeroLayers = {
-  background: {
-    ...horecaHeroBackground,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
-    alt: 'Старинный бар с деревянными полками, бутылками и хмелем',
-  },
-  middle: {
-    ...horecaHeroMiddle,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
-  },
-  foreground: {
-    ...horecaHeroForeground,
-    sizes: '100vw',
-    className: 'absolute inset-0 size-full object-cover object-center',
-  },
-}
 </script>
 
 <template>
@@ -64,8 +24,8 @@ const horecaHeroLayers = {
       title-id="horeca-page-title"
       mobile-actions-bottom
       :title-z-index="0"
-      :layers="horecaHeroLayers"
-      :layer-layout="horecaHeroLayout"
+      :image-url="horecaHeroBackground.src"
+      image-alt="Фирменные бокалы с напитками на стойке бара"
     >
       <template #title>Для ваших<br>гостей</template>
       <span class="wide:block wide:whitespace-nowrap">Медовуха, сидр и пуаре «МЁДВЕДЬ» </span>
@@ -86,10 +46,9 @@ const horecaHeroLayers = {
       @close="isTastingFormOpen = false"
     />
 
-    <HeroDivider :image-url="horecaDividerUrl" />
 
     <div class="relative isolate bg-panel">
-    <section class="horeca-assortment section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-40 wide:pb-28" aria-labelledby="horeca-assortment-title">
+    <section class="horeca-assortment section-decorated bg-panel pt-20 pb-20 text-foreground sm:pt-24 sm:pb-24 wide:pt-28 wide:pb-28" aria-labelledby="horeca-assortment-title">
       <div class="site-container">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="horeca-assortment-title" class="font-display text-h2 break-words hyphens-auto uppercase nav:col-span-8">Три характера<br>для вашей карты</h2>
@@ -135,12 +94,12 @@ const horecaHeroLayers = {
 
     <section class="relative isolate overflow-hidden bg-panel py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="horeca-delivery-title">
       <SiteImage
-        :src="deliveryHorseCartUrl"
+        :src="deliveryPhotoUrl"
         alt=""
         aria-hidden="true"
         decoding="async"
-        width="1776"
-        height="888"
+        width="1195"
+        height="768"
         class="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-right nav:object-center"
       />
       <div

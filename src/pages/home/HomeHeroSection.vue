@@ -11,25 +11,25 @@ import heroLayerMiddleBlink from '../../assets/heroes/home/middle-blink.png?resp
 import heroLayerMiddle from '../../assets/heroes/home/middle-layer.png?responsive'
 import heroLayerBackground from '../../assets/heroes/home/background-layer.png?responsive'
 
-const heroLayerSizes = 'max(100vw, calc((100svh + 8svh) * 1.3042))'
-const heroFigureSizes = '(min-width: 80rem) min(75vw, 105.48svh), (min-width: 40rem) min(120vw, 168.76svh), min(150vw, 210.95svh)'
+const heroLayerSizes = 'max(100vw, 100svh)'
+const heroFigureSizes = '(min-width: 40rem) 120svh, 85svh'
 const heroLayerClassName = 'home-hero-layer absolute inset-x-0 top-0 w-full object-contain object-top'
 
 const heroLayerLayout = {
   mobile: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: 0, y: -50 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.5, x: -50, y: -50 },
+    middle: { enabled: true, scale: 1, x: '22vw', y: '-20svh' },
+    foreground: { enabled: true, scale: 1, x: '-18vw', y: '-5svh' },
   },
   tablet: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.2, x: 0, y: -50 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.2, x: -100, y: -50 },
+    middle: { enabled: true, scale: 1, x: '18vw', y: '-35svh' },
+    foreground: { enabled: true, scale: 1, x: '-18vw', y: '-30svh' },
   },
   desktop: {
     background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: 0, y: -175 },
-    foreground: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 0.75, x: -100, y: -125 },
+    middle: { enabled: true, scale: 1, x: '18vw', y: '-35svh' },
+    foreground: { enabled: true, scale: 1, x: '-18vw', y: '-30svh' },
   },
 }
 
@@ -47,13 +47,13 @@ const heroLayers = computed(() => ({
   middle: {
     ...(isBlinking.value ? heroLayerMiddleBlink : heroLayerMiddle),
     sizes: heroFigureSizes,
-    className: heroLayerClassName,
+    className: `${heroLayerClassName} home-hero-bear`,
     alt: '',
   },
   foreground: {
     ...heroLayerForeground,
     sizes: heroFigureSizes,
-    className: heroLayerClassName,
+    className: `${heroLayerClassName} home-hero-bottle`,
     alt: 'Медведь с бутылкой напитка «Медведь»',
     fetchpriority: 'high',
   },
@@ -140,8 +140,8 @@ onBeforeUnmount(() => {
   >
     <div class="site-container flex h-full flex-col gap-10 pt-24 pb-4 sm:pt-32 sm:pb-8 wide:pt-36">
       <h1 id="hero-title" class="home-hero-title absolute top-62 left-0 z-20 w-full -translate-y-full px-4 text-center font-display text-h1 uppercase sm:top-1/2 sm:-translate-y-1/2 sm:px-6" :style="layerEntranceTimings.rise">
-        <span class="font-normal">Лапу приложили</span><br>
-        к напиткам
+        <span class="font-handwriting font-normal">Лапу приложили</span><br>
+        к хорошим<br>напиткам
       </h1>
 
       <div class="home-hero-details relative z-20 grid flex-1 grid-rows-[auto_minmax(0,1fr)] items-start gap-8 pt-44 sm:grid-cols-[1fr_1.4fr_1fr] sm:grid-rows-none sm:items-end sm:gap-6 sm:pt-0" :style="layerEntranceTimings.rise">
@@ -212,9 +212,42 @@ onBeforeUnmount(() => {
 }
 
 :deep(.home-hero-layer) {
-  height: calc(100% + 8svh);
+  height: 100%;
 }
 :deep(.home-hero-background) {
   object-fit: cover;
+  object-position: center bottom;
+  filter: grayscale(1);
+  mix-blend-mode: luminosity;
+  opacity: 0.6;
+}
+:deep(.home-hero-bear),
+:deep(.home-hero-bottle) {
+  right: auto;
+  left: 50%;
+  max-width: none;
+  margin-left: -50%;
+}
+:deep(.home-hero-bear) {
+  width: 80svh;
+  height: 80svh;
+  margin-left: -40svh;
+}
+:deep(.home-hero-bottle) {
+  width: 56.7svh;
+  height: 85svh;
+  margin-left: -28.3svh;
+}
+@media (min-width: 40rem) {
+  :deep(.home-hero-bear) {
+    width: 100svh;
+    height: 100svh;
+    margin-left: -50svh;
+  }
+  :deep(.home-hero-bottle) {
+    width: 80svh;
+    height: 120svh;
+    margin-left: -40svh;
+  }
 }
 </style>

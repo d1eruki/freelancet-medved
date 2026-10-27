@@ -15,14 +15,11 @@ defineProps({
 
 <template>
   <section
-    class="relative isolate py-20 text-surface sm:py-24 wide:py-28"
-    :class="[
-      background === 'brand' ? 'bg-brand' : 'bg-foreground',
-      $slots.illustration ? 'z-10 overflow-visible' : 'overflow-hidden',
-    ]"
+    class="relative isolate overflow-hidden py-20 text-surface sm:py-24 wide:py-28"
+    :class="background === 'brand' ? 'bg-brand' : 'bg-foreground'"
     :aria-labelledby="headingId"
   >
-    <div class="site-container relative z-10 grid items-end gap-10 site-grid">
+    <div class="site-container relative z-10 grid items-center gap-10 site-grid">
       <div class="nav:col-span-8">
         <h2 :id="headingId" class="font-display text-h2 break-words hyphens-auto uppercase"><slot name="title">{{ title }}</slot></h2>
         <p class="mt-6 max-w-2xl text-body-large font-medium text-surface/85"><slot name="description">{{ description }}</slot></p>
@@ -35,13 +32,13 @@ defineProps({
       >
         {{ label }}
       </BaseButton>
-    </div>
-    <div
-      v-if="$slots.illustration"
-      class="pointer-events-none relative z-0 -mb-24 mt-10 w-full sm:-mb-28 nav:absolute nav:-bottom-8 nav:-right-[8vw] nav:m-0 nav:w-[60vw]"
-      aria-hidden="true"
-    >
-      <slot name="illustration" />
+      <div
+        v-if="$slots.illustration"
+        class="pointer-events-none w-full max-w-80 justify-self-center nav:col-span-4 nav:col-start-9 nav:row-start-1 nav:row-span-2 nav:justify-self-end"
+        aria-hidden="true"
+      >
+        <slot name="illustration" />
+      </div>
     </div>
   </section>
 </template>

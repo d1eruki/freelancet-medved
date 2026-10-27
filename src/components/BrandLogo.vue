@@ -1,25 +1,14 @@
-<!-- Логотип бренда для выбранной версии сайта. -->
+<!-- Горизонтальный логотип бренда в раннем оформлении сайта. -->
 <script setup>
 import SiteImage from './site-image.vue'
-import sealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=320'
-import smallSealUrl from '../assets/branding/brand-logo-seal-lithograph.png?width=160'
-import barrelUrl from '../assets/branding/brand-logo-barrel.png?width=320'
-import smallBarrelUrl from '../assets/branding/brand-logo-barrel.png?width=160'
-import { siteVariant } from '../data/site-variants.js'
-
-const logoUrl = siteVariant.headerLogo === 'barrel' ? barrelUrl : sealUrl
-const smallLogoUrl = siteVariant.headerLogo === 'barrel' ? smallBarrelUrl : smallSealUrl
+import logoUrl from '../assets/branding/brand-logo-wordmark.svg'
 </script>
 
 <template>
   <SiteImage
     critical
-    class="block aspect-1224/1285 h-33 w-auto shrink-0 object-cover sm:h-40"
+    class="block h-12 w-30 shrink-0 object-contain brightness-0 invert sm:h-14 sm:w-40"
     :src="logoUrl"
-    :srcset="`${smallLogoUrl} 160w, ${logoUrl} 320w`"
-    sizes="(min-width: 40rem) 153px, 126px"
-    width="1224"
-    height="1285"
     alt=""
     aria-hidden="true"
   />

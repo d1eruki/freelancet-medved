@@ -9,56 +9,11 @@ import brewingImageUrl from '../../assets/production/production-brewing.png'
 import fermentationImageUrl from '../../assets/production/production-fermentation.png'
 import conditioningImageUrl from '../../assets/production/production-conditioning.png'
 import bottlingImageUrl from '../../assets/production/production-bottling.png'
-import ingredientsBackgroundUrl from '../../assets/production/ingredients-background.png'
-import productionHeroBackgroundUrl from '../../assets/heroes/production/background.png'
-import productionHeroMiddleUrl from '../../assets/heroes/production/middle.png'
-import productionHeroMiddle2Url from '../../assets/heroes/production/middle-2.png'
-import productionDividerUrl from '../../assets/heroes/production/divider.png'
+import productionHeroBackgroundUrl from '../../assets/home/production-photo.png'
 import ActionTile from '../../components/ActionTile.vue'
 import InfoCard from '../../components/InfoCard.vue'
 import PageHero from '../../components/PageHero.vue'
-import HeroDivider from '../../components/HeroDivider.vue'
 import ProductionProcessStep from './ProductionProcessStep.vue'
-
-const middleTankLayout = {
-  mobile: { enabled: false, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1, x: 0, y: 0 },
-  tablet: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.75, x: -150, y: 0 },
-  desktop: { enabled: true, constraints: { horizontal: 'center', vertical: 'bottom' }, scale: 1.05, x: -300, y: -100 },
-}
-
-const productionHeroLayout = {
-  mobile: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: middleTankLayout.mobile,
-    middle2: { ...middleTankLayout.mobile, x: -middleTankLayout.mobile.x },
-  },
-  tablet: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: middleTankLayout.tablet,
-    middle2: { ...middleTankLayout.tablet, x: -middleTankLayout.tablet.x },
-  },
-  desktop: {
-    background: { enabled: true, scale: 1, x: 0, y: 0 },
-    middle: middleTankLayout.desktop,
-    middle2: { ...middleTankLayout.desktop, x: -middleTankLayout.desktop.x },
-  },
-}
-
-const productionHeroLayers = {
-  background: {
-    src: productionHeroBackgroundUrl,
-    className: 'absolute inset-0 size-full object-cover object-center',
-    alt: 'Иллюстрация исторического кирпичного цеха с рядами баков из нержавеющей стали',
-  },
-  middle: {
-    src: productionHeroMiddleUrl,
-    className: 'absolute inset-0 size-full object-cover object-center',
-  },
-  middle2: {
-    src: productionHeroMiddle2Url,
-    className: 'absolute inset-0 size-full object-cover object-center',
-  },
-}
 
 const ingredients = [
   {
@@ -237,8 +192,7 @@ const qualityPoints = [
     <PageHero
       title-id="production-page-title"
       content-align="center"
-      :layers="productionHeroLayers"
-      :layer-layout="productionHeroLayout"
+      :image-url="productionHeroBackgroundUrl"
       layer-entrance="split-slide"
     >
       <template #title>Варим<br>с душой</template>
@@ -247,9 +201,8 @@ const qualityPoints = [
       <span class="wide:block wide:whitespace-nowrap">натуральное сырьё и современное оборудование.</span>
     </PageHero>
 
-    <HeroDivider :image-url="productionDividerUrl" />
 
-    <section class="bg-surface pt-20 pb-28 text-foreground sm:pt-24 sm:pb-32 wide:pt-40 wide:pb-40" aria-labelledby="production-history-title">
+    <section class="bg-surface pt-20 pb-28 text-foreground sm:pt-24 sm:pb-32 wide:pt-28 wide:pb-40" aria-labelledby="production-history-title">
       <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="order-2 nav:order-1 nav:col-span-4">
           <p class="font-display text-h1 text-brand">1874</p>
@@ -269,16 +222,8 @@ const qualityPoints = [
     </section>
 
     <section class="relative flex min-h-svh items-center overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="production-ingredients-title">
-      <SiteImage width="1903" height="826"
-        :src="ingredientsBackgroundUrl"
-        alt=""
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 size-full object-cover object-center"
-      />
-      <div class="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent from-15% via-black/60 via-45% to-black/60" aria-hidden="true" />
-
       <div class="site-container relative z-10 grid site-grid">
-        <div class="nav:col-span-8 nav:col-start-5">
+        <div class="nav:col-span-12">
         <div class="grid items-end gap-6 site-grid nav:gap-8">
           <h2 id="production-ingredients-title" class="font-display text-h2 uppercase nav:col-span-8">
             Честный состав
