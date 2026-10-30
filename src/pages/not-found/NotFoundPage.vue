@@ -10,7 +10,7 @@ import { sitePath } from '../../utils/site-path'
     aria-labelledby="not-found-title"
   >
     <div class="site-container flex h-full flex-col items-center justify-center text-center">
-      <h1 id="not-found-title" class="font-display text-404 uppercase">404</h1>
+      <h1 id="not-found-title" class="max-w-full font-display text-404 break-all uppercase">404</h1>
       <p class="mt-6 max-w-xl text-body-large font-medium text-surface/80">Страница не найдена.</p>
       <BaseButton
         variant="surface"

@@ -67,17 +67,17 @@ const isTastingFormOpen = ref(false)
     </div>
 
     <section class="bg-panel py-20 text-foreground sm:py-24 wide:py-28" aria-labelledby="horeca-formats-title">
-      <div class="site-container grid items-start gap-12 site-grid sm:gap-16 nav:gap-8">
-        <div class="nav:col-span-5">
-          <h2 id="horeca-formats-title" class="font-display text-h2 break-words hyphens-auto uppercase">Напитки<br>в нужном<br>формате</h2>
-          <p class="mt-6 max-w-md text-body-large font-medium text-subtle">
+      <div class="site-container">
+        <div>
+          <h2 id="horeca-formats-title" class="font-display text-h2 uppercase">Напитки в нужном формате</h2>
+          <p class="mt-6 max-w-2xl text-body-large font-medium text-subtle">
             Поставляем оптом. Формат тары и ассортимент согласуем при обсуждении заказа.
           </p>
         </div>
 
-        <dl class="grid gap-12 sm:gap-16 nav:col-span-7">
+        <dl class="mt-12 grid min-w-0 gap-12 sm:mt-16 sm:gap-16">
           <div>
-            <dt class="font-display text-h3 text-brand uppercase">Многооборотные кеги</dt>
+            <dt class="font-display text-h3 hyphens-manual text-brand uppercase">Много&shy;оборотные кеги</dt>
             <dd class="mt-6 max-w-xl text-body-large font-medium text-subtle">
               Медовуха, сидр и пуаре для подачи в розлив. Доступные сорта и условия работы с многооборотной тарой уточните в отделе продаж.
             </dd>
@@ -119,7 +119,9 @@ const isTastingFormOpen = ref(false)
             text="Доставляем напитки собственным транспортом. Адрес заведения и детали поставки обсудите с отделом продаж."
             variant="distribution"
             compact
-          />
+          >
+            <template #title>Санкт-<wbr>Петербург<br>и область</template>
+          </InfoCard>
           <InfoCard
             class="shadow-2xl/10 nav:col-span-4"
             title="Другие регионы"

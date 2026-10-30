@@ -2,7 +2,8 @@
 <script setup>
 import SiteImage from '../../components/site-image.vue'
 import { ref, watch } from 'vue'
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons-vue'
+import CircleArrow from '../../components/CircleArrow.vue'
+import { vFitty } from '../../directives/fitty.js'
 import Snap from 'lenis/snap'
 import { sitePath } from '../../utils/site-path'
 import brewingImageUrl from '../../assets/production/production-brewing.png'
@@ -62,8 +63,8 @@ const processSteps = [
 
 const activeStepIndex = ref(0)
 const processNavigation = [
-  { direction: -1, label: 'Предыдущий этап', icon: IconArrowLeft },
-  { direction: 1, label: 'Следующий этап', icon: IconArrowRight },
+  { direction: -1, label: 'Предыдущий этап' },
+  { direction: 1, label: 'Следующий этап' },
 ]
 const processScrollSection = ref(null)
 const processStepList = ref(null)
@@ -205,8 +206,13 @@ const qualityPoints = [
     <section class="bg-surface pt-20 pb-28 text-foreground sm:pt-24 sm:pb-32 wide:pt-28 wide:pb-40" aria-labelledby="production-history-title">
       <div class="site-container grid gap-12 site-grid nav:gap-6">
         <div class="order-2 nav:order-1 nav:col-span-4">
-          <p class="font-display text-h1 text-brand">1874</p>
-          <p class="mt-3 font-display text-h4 text-brand">1880</p>
+          <div class="nav:hidden">
+            <p v-fitty class="font-display text-h1 whitespace-nowrap text-brand">1874 — 1880</p>
+          </div>
+          <div class="hidden nav:block">
+            <p class="font-display text-h1 text-brand">1874</p>
+            <p class="mt-3 font-display text-h4 text-brand">1880</p>
+          </div>
           <p class="mt-4 text-label font-extrabold tracking-widest uppercase">Годы строительства</p>
         </div>
 
@@ -309,14 +315,14 @@ const qualityPoints = [
                 v-for="control in processNavigation"
                 :key="control.direction"
                 type="button"
-                class="row-start-1 flex size-12 items-center justify-center rounded-full border border-brand text-brand transition-colors hover:bg-brand hover:text-surface disabled:cursor-default disabled:border-subtle/30 disabled:text-subtle/30 disabled:hover:bg-transparent disabled:hover:text-subtle/30 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                class="row-start-1 rounded-full transition-opacity disabled:cursor-default disabled:opacity-30 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand"
                 :class="control.direction === -1 ? 'col-start-1' : 'col-start-3'"
                 :aria-label="control.label"
                 aria-controls="production-step-description production-step-images"
                 :disabled="activeStepIndex + control.direction < 0 || activeStepIndex + control.direction >= processSteps.length"
                 @click="selectStep(activeStepIndex + control.direction)"
               >
-                <component :is="control.icon" class="size-6" aria-hidden="true" />
+                <CircleArrow :direction="control.direction === -1 ? 'left' : 'right'" />
               </button>
             </div>
           </div>

@@ -1,8 +1,8 @@
 <!-- Карточка коктейля с ингредиентами, приготовлением и подачей. -->
 <script setup>
 import SiteImage from '../../components/site-image.vue'
-import { computed, ref } from 'vue'
 import CircleArrow from '../../components/CircleArrow.vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   recipe: { type: Object, required: true },
@@ -20,11 +20,6 @@ const tabs = computed(() => [
   ...(props.recipe.barBenefit ? [{ id: 'benefit', label: 'Для бара', text: props.recipe.barBenefit }] : []),
 ])
 const selectedTab = computed(() => tabs.value.find(tab => tab.id === activeTab.value) ?? tabs.value[0])
-const mobileForegroundTransform = computed(() => {
-  const [, , width, height] = props.recipe.imageFrame.bounds
-  const scale = Math.min(630 / width, 620 / height)
-  return `translate(${375 - width * scale / 2} ${640 - height * scale}) scale(${scale})`
-})
 
 function selectTab(id, button) {
   activeTab.value = id
@@ -78,12 +73,39 @@ function preventTabDragClick(event) {
 </script>
 
 <template>
-  <article class="cocktail-recipe-card grid h-full min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)_var(--mobile-art-height)] gap-4 nav:grid-cols-2 nav:grid-rows-none nav:content-start nav:gap-6 nav:gap-x-0" :aria-labelledby="`${recipe.id}-title`">
-    <div class="min-w-0 nav:col-start-2 nav:pl-10 wide:pl-16">
+  <article class="grid min-w-0 gap-10 nav:grid-cols-2 nav:grid-rows-[auto_1fr] nav:content-start nav:gap-y-6 nav:gap-x-10 wide:gap-x-16" :aria-labelledby="`${recipe.id}-title`">
+    <SiteImage
+      class="hidden h-full min-h-160 w-full rounded-3xl object-cover nav:col-start-1 nav:row-start-1 nav:row-span-2 nav:block"
+      media="(width >= 54rem)"
+      :src="recipe.image.src"
+      :srcset="recipe.image.srcset"
+      sizes="calc((min(100vw, 1480px) - 112px) / 2)"
+      :alt="recipe.imageAlt"
+      width="2400" height="1792"
+    />
+    <div class="min-w-0 nav:col-start-2 nav:row-start-1">
       <h3 :id="`${recipe.id}-title`" class="font-display text-h3 break-words uppercase">{{ recipe.name }}</h3>
     </div>
 
-    <div class="flex min-h-0 min-w-0 flex-col nav:hidden">
+    <div class="relative nav:hidden">
+      <SiteImage
+        class="block h-auto w-full"
+        media="(width < 54rem)"
+        :src="recipe.image.src"
+        :srcset="recipe.image.srcset"
+        sizes="(min-width: 40rem) calc(100vw - 48px), calc(100vw - 32px)"
+        :alt="recipe.imageAlt"
+        width="2400" height="1792"
+      />
+      <button class="absolute top-1/2 left-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" type="button" aria-label="Предыдущий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('previous')">
+        <CircleArrow direction="left" />
+      </button>
+      <button class="absolute top-1/2 right-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" type="button" aria-label="Следующий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('next')">
+        <CircleArrow />
+      </button>
+    </div>
+
+    <div class="flex min-w-0 flex-col nav:hidden">
       <div
         class="-mx-6 flex shrink-0 gap-3 overflow-x-auto overscroll-x-contain px-6 py-1 select-none"
         role="tablist"
@@ -115,7 +137,7 @@ function preventTabDragClick(event) {
       </div>
       <div
         :id="`${recipe.id}-mobile-panel`"
-        class="mt-4 min-h-0 overflow-y-auto overscroll-contain text-body font-medium"
+        class="mt-4 text-body font-medium"
         role="tabpanel"
         :aria-labelledby="`${recipe.id}-tab-${selectedTab.id}`"
         tabindex="0"
@@ -124,10 +146,10 @@ function preventTabDragClick(event) {
       </div>
     </div>
 
-    <div class="hidden min-w-0 nav:col-start-2 nav:block nav:pl-10 wide:pl-16">
+    <div class="hidden min-w-0 nav:col-start-2 nav:row-start-2 nav:block">
       <p class="text-body font-medium">{{ recipe.description }}</p>
 
-      <div class="mt-10 grid gap-10 text-body font-medium sm:grid-cols-2 sm:gap-x-6">
+      <div class="mt-10 grid gap-10 text-body font-medium">
         <div class="grid content-start gap-10">
           <section>
             <h4 class="font-display text-h4 uppercase">Ингредиенты</h4>
@@ -152,34 +174,5 @@ function preventTabDragClick(event) {
         </div>
       </div>
     </div>
-
-    <div class="relative flex min-h-0 items-end nav:hidden">
-      <div class="relative h-full w-full">
-      <svg class="pointer-events-none size-full" viewBox="0 0 750 660" preserveAspectRatio="xMidYMax meet" role="img" :aria-label="recipe.imageAlt">
-        <g :transform="mobileForegroundTransform">
-          <SiteImage as="image" media="(width < 54rem)"
-            :src="recipe.image.src"
-            :x="-recipe.imageFrame.bounds[0]"
-            :y="-recipe.imageFrame.bounds[1]"
-            :width="recipe.imageFrame.width"
-            :height="recipe.imageFrame.height"
-          />
-        </g>
-      </svg>
-      <button class="group absolute top-1/2 left-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" type="button" aria-label="Предыдущий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('previous')">
-        <CircleArrow direction="left" tone="brand" />
-      </button>
-      <button class="group absolute top-1/2 right-0 -translate-y-1/2 rounded-full focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand" type="button" aria-label="Следующий рецепт" aria-controls="horeca-cocktail-slides" @click="emit('next')">
-        <CircleArrow tone="brand" />
-      </button>
-      </div>
-    </div>
   </article>
 </template>
-
-<style scoped>
-.cocktail-recipe-card {
-  /* Нижняя область не зависит от длины названия или выбранного текста. */
-  --mobile-art-height: min(35svh, calc((94vw - 48px) * 0.88));
-}
-</style>

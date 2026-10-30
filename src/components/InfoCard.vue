@@ -21,7 +21,7 @@ defineProps({
 <template>
   <component
     :is="variant === 'group' ? 'article' : 'li'"
-    class="flex flex-col rounded-3xl p-6"
+    class="flex min-w-0 flex-col rounded-3xl p-6"
     :class="{
       'min-h-80 bg-panel sm:p-8 wide:min-h-96 wide:p-10': variant === 'group',
       'min-h-80 bg-surface text-foreground sm:p-8 wide:min-h-96 wide:p-10': variant === 'ingredient',
@@ -39,8 +39,8 @@ defineProps({
       />
     </div>
     <h3
-      class="mt-auto font-display text-h4 text-brand uppercase"
-    >{{ title }}</h3>
+      class="mt-auto font-display text-h4 break-words text-brand uppercase"
+    ><slot name="title">{{ title }}</slot></h3>
     <p
       class="mt-6 text-body font-medium text-subtle"
       :class="{

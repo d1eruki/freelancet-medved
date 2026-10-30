@@ -1,7 +1,7 @@
-import orchardSpritz from '../assets/horeca/cocktails/orchard-spritz-foreground.png?responsive'
-import wildHoneySour from '../assets/horeca/cocktails/wild-honey-sour-foreground.png?responsive'
-import poireBlanc from '../assets/horeca/cocktails/poire-blanc-foreground.png?responsive'
-import spicedSpb from '../assets/horeca/cocktails/spiced-spb-foreground.png?responsive'
+import orchardSpritz from '../assets/horeca/cocktails/orchard-spritz.jpg?responsive'
+import wildHoneySour from '../assets/horeca/cocktails/wild-honey-sour.jpg?responsive'
+import poireBlanc from '../assets/horeca/cocktails/poire-blanc.jpg?responsive'
+import spicedSpb from '../assets/horeca/cocktails/spiced-spb.jpg?responsive'
 
 export const cocktailRecipes = [
   {
@@ -10,7 +10,6 @@ export const cocktailRecipes = [
     englishName: 'Orchard Spritz',
     base: 'На основе сухого сидра',
     image: orchardSpritz,
-    imageFrame: { width: 1448, height: 1086, bounds: [397, 22, 593, 1038] },
     imageAlt: 'Орчард Спритц в винном бокале со льдом, зелёным яблоком и мятой',
     description: 'Элегантный твист на классические спритцы. Идеальный летний аперитив, который легко готовится «из-под ножа» при полной посадке.',
     ingredients: [
@@ -28,7 +27,6 @@ export const cocktailRecipes = [
     englishName: 'Wild Honey Sour',
     base: 'На основе медовухи',
     image: wildHoneySour,
-    imageFrame: { width: 1448, height: 1086, bounds: [315, 0, 801, 1042] },
     imageAlt: 'Дикий Сауэр в бокале рокс со льдом, розмарином и сотами',
     description: 'Плотный, кисло-сладкий и гастрономичный коктейль. Обожженный розмарин отлично подчеркивает концепцию «дико и натурально».',
     ingredients: [
@@ -46,7 +44,6 @@ export const cocktailRecipes = [
     englishName: 'Poiré Blanc',
     base: 'На основе пуаре',
     image: poireBlanc,
-    imageFrame: { width: 1448, height: 1086, bounds: [321, 20, 658, 1052] },
     imageAlt: 'Грушевый Френч в бокале флюте с грушей и тимьяном',
     description: 'Тонкий, изящный и сухой коктейль с низким содержанием алкоголя (Low-ABV). Отличный выбор для бранчей и светских вечеров.',
     ingredients: [
@@ -64,7 +61,6 @@ export const cocktailRecipes = [
     englishName: 'Spiced SPb',
     base: 'Согревающий спешл',
     image: spicedSpb,
-    imageFrame: { width: 1448, height: 1086, bounds: [189, 4, 1056, 1060] },
     imageAlt: 'Пряный Петербург в керамической кружке с апельсином, корицей, бадьяном и паром',
     description: 'Зимний хит, который бары могут готовить в больших объемах (в термопоте) или порционно.',
     ingredients: [

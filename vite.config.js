@@ -8,7 +8,6 @@ import { optimizeModelsPlugin } from './scripts/vite/optimize-models-plugin.mjs'
 
 export default defineConfig(() => {
   const variant = getSiteVariant(process.env.SITE_VARIANT)
-  const client = variant.name === 'client'
   const sourcePath = relative => fileURLToPath(new URL(relative, import.meta.url))
   return {
     cacheDir: `node_modules/.vite-${variant.name}`,
@@ -17,10 +16,6 @@ export default defineConfig(() => {
       'import.meta.env.VITE_SITE_ENV': JSON.stringify(process.env.SITE_ENV || 'production'),
       'import.meta.env.VITE_SITE_VARIANT': JSON.stringify(variant.name),
     },
-    resolve: { alias: {
-      '#product-composition': sourcePath(client ? './src/components/product-composition-client.vue' : './src/components/ProductComposition.vue'),
-      '#product-slider-renders': sourcePath(client ? './src/data/product-slider-renders-client.js' : './src/data/product-slider-renders.js'),
-    } },
     plugins: [{
       name: 'site-variant',
       enforce: 'pre',

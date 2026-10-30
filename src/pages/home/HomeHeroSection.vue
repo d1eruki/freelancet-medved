@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
 <template>
   <section
     ref="hero"
-    class="relative isolate h-svh overflow-hidden bg-brand text-surface"
+    class="relative isolate h-svh overflow-hidden bg-surface text-surface"
     aria-labelledby="hero-title"
   >
     <div class="site-container flex h-full flex-col gap-10 pt-24 pb-4 sm:pt-32 sm:pb-8 wide:pt-36">

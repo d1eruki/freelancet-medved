@@ -135,7 +135,7 @@ const awards = [
       </div>
     </section>
 
-    <section class="relative min-h-svh overflow-hidden bg-brand pt-20 text-surface sm:pt-24 nav:pb-24 wide:py-28" aria-labelledby="durdin-title">
+    <section class="relative min-h-svh overflow-hidden bg-brand py-20 text-surface sm:py-24 wide:py-28" aria-labelledby="durdin-title">
       <SectionWatermark text="Дурдин" />
 
       <div class="site-container relative z-10">
@@ -219,14 +219,14 @@ const awards = [
 
     <section class="overflow-hidden bg-surface py-20 text-brand sm:py-24 wide:py-28" aria-labelledby="awards-title">
       <div class="site-container">
-        <div class="flex flex-wrap items-end justify-between gap-10">
-          <div class="flex max-w-4xl flex-col gap-6">
+        <div class="grid grid-cols-1 gap-x-10 nav:grid-cols-[minmax(0,1fr)_auto] nav:items-end">
+          <div class="row-start-1 flex max-w-4xl flex-col gap-6 nav:col-start-1">
             <h2 id="awards-title" class="font-display text-h2 uppercase">Дело говорит<br>за себя</h2>
             <p class="max-w-xl text-body-large font-medium text-subtle">
               Качество продукции отмечено дипломами выставок и фестивалей напитков.
             </p>
           </div>
-          <div class="flex gap-4" aria-label="Управление галереей дипломов">
+          <div class="row-start-3 mt-10 flex justify-between gap-4 nav:col-start-2 nav:row-start-1 nav:mt-0" aria-label="Управление галереей дипломов">
             <button
               type="button"
               class="rounded-full transition-opacity focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-brand disabled:cursor-default disabled:opacity-30"
@@ -248,24 +248,24 @@ const awards = [
               <CircleArrow />
             </button>
           </div>
-        </div>
 
-        <ul
-          id="awards-track"
-          ref="awardsTrack"
-          class="mt-12 ml-[calc(50%-50vw)] flex w-screen snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto overscroll-x-contain px-4 py-3 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-brand sm:mt-16 sm:scroll-px-[max(24px,calc((100vw-1480px)/2+24px))] sm:gap-8 sm:px-[max(24px,calc((100vw-1480px)/2+24px))] [&::-webkit-scrollbar]:hidden"
-          tabindex="0"
-          aria-label="Дипломы и награды"
-          data-lenis-prevent-touch
-          @scroll.passive="updateAwardsNavigation"
-          @keydown="handleAwardsKeydown"
-        >
-          <AwardCard
-            v-for="award in awards"
-            :key="`${award.year}-${award.title}`"
-            :award="award"
-          />
-        </ul>
+          <ul
+            id="awards-track"
+            ref="awardsTrack"
+            class="row-start-2 mt-12 ml-[calc(50%-50vw)] flex w-screen nav:col-span-2 snap-x snap-mandatory scroll-px-4 gap-6 overflow-x-auto overscroll-x-contain px-4 py-3 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-brand sm:mt-16 sm:scroll-px-[max(24px,calc((100vw-1480px)/2+24px))] sm:gap-8 sm:px-[max(24px,calc((100vw-1480px)/2+24px))] [&::-webkit-scrollbar]:hidden"
+            tabindex="0"
+            aria-label="Дипломы и награды"
+            data-lenis-prevent-touch
+            @scroll.passive="updateAwardsNavigation"
+            @keydown="handleAwardsKeydown"
+          >
+            <AwardCard
+              v-for="award in awards"
+              :key="`${award.year}-${award.title}`"
+              :award="award"
+            />
+          </ul>
+        </div>
       </div>
     </section>
 

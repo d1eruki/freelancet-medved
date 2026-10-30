@@ -85,7 +85,7 @@ const socialLinks = [
       </div>
 
       <div class="mt-12 flex flex-col items-start gap-6 border-t border-surface/30 pt-6 text-label sm:mt-16 wide:flex-row wide:items-center wide:justify-between">
-        <p class="shrink-0 text-surface/65">© 2017 ООО «ФАРТ СПБ».</p>
+        <p class="shrink-0 text-surface/75">© 2017 ООО «ФАРТ СПБ».</p>
         <nav aria-label="Юридическая информация">
           <ul class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-x-8">
             <li><a class="footer-link" :href="sitePath('/disclaimer/')">Ограничение ответственности</a></li>

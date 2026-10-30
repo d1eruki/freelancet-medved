@@ -94,13 +94,13 @@ onBeforeUnmount(() => {
     aria-labelledby="assortment-title"
   >
     <div class="site-container">
-      <div class="flex flex-wrap items-end gap-10">
-        <div class="min-w-0 flex-1 basis-128">
-          <h2 id="assortment-title" class="font-display text-h2 whitespace-nowrap uppercase">Ассортимент</h2>
+      <div class="grid gap-10">
+        <div class="min-w-0">
+          <h2 id="assortment-title" class="font-display text-h2 break-words uppercase">Ассортимент</h2>
           <p class="mt-6 max-w-2xl text-body-large font-medium text-subtle">От мягких медовых нот до свежих фруктовых и насыщенных ягодных оттенков. Выберите свой вкус и удобный формат упаковки.</p>
         </div>
 
-        <div class="grid min-w-0 flex-1 basis-128 gap-4">
+        <div class="grid min-w-0 gap-4">
           <fieldset class="min-w-0">
             <legend class="sr-only">Вид напитка</legend>
             <div class="flex flex-wrap gap-3">
